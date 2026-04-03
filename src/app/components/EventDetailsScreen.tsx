@@ -131,7 +131,7 @@ export function EventDetailsScreen({
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     setEventData(event || defaultEvent);
   }, [event]);
 
@@ -145,7 +145,7 @@ export function EventDetailsScreen({
 
     if (!eventData.id) return;
 
-    const channel = supabase
+    const participantsChannel = supabase
       .channel(`participants-${eventData.id}`)
       .on(
         'postgres_changes',
@@ -161,8 +161,25 @@ export function EventDetailsScreen({
       )
       .subscribe();
 
+    const eventsChannel = supabase
+      .channel(`event-details-${eventData.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events',
+          filter: `id=eq.${eventData.id}`,
+        },
+        async () => {
+          await loadEvent();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(participantsChannel);
+      supabase.removeChannel(eventsChannel);
     };
   }, [eventData.id, eventData.creator_id]);
 

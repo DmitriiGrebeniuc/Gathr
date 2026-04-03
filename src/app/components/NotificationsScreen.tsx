@@ -142,7 +142,7 @@ export function NotificationsScreen({
         if (eventsError) {
           console.error('Ошибка загрузки upcoming events:', eventsError);
         } else {
-                    upcomingNotifications = (events || []).map((event: EventItem) => ({
+          upcomingNotifications = (events || []).map((event: EventItem) => ({
             id: `upcoming-${event.id}`,
             type: 'upcoming',
             message: buildUpcomingMessage(event),
@@ -179,7 +179,7 @@ export function NotificationsScreen({
           .in('event_id', myEventIds)
           .neq('user_id', user.id);
 
-                if (joinsError) {
+        if (joinsError) {
           console.error('Ошибка загрузки join notifications:', joinsError);
         } else {
           const groupedJoins = new Map<string, any[]>();
@@ -194,56 +194,71 @@ export function NotificationsScreen({
             groupedJoins.get(eventId)?.push(joinRow);
           });
 
-          joinNotifications = Array.from(groupedJoins.entries()).map(([eventId, eventJoins]) => {
-            const sortedJoins = [...eventJoins].sort((a, b) => {
-              const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-              const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
-              return bTime - aTime;
-            });
+          joinNotifications = Array.from(groupedJoins.entries())
+            .map(([eventId, eventJoins]) => {
+              const relatedEvent = (myEvents || []).find((e: any) => e.id === eventId);
 
-            const latestJoin = sortedJoins[0];
+              const eventDate = relatedEvent?.date_time
+                ? new Date(relatedEvent.date_time)
+                : null;
 
-            const names = sortedJoins.map((joinRow: any) => {
-              const profileData = Array.isArray(joinRow.profiles)
-                ? joinRow.profiles[0]
-                : joinRow.profiles;
+              const isFutureEvent =
+                eventDate !== null &&
+                !Number.isNaN(eventDate.getTime()) &&
+                eventDate.getTime() > now.getTime();
 
-              return profileData?.name || 'Someone';
-            });
+              if (!isFutureEvent) {
+                return null;
+              }
 
-            const relatedEvent = (myEvents || []).find((e: any) => e.id === eventId);
+              const sortedJoins = [...eventJoins].sort((a, b) => {
+                const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return bTime - aTime;
+              });
 
-            let message = '';
+              const latestJoin = sortedJoins[0];
 
-            if (names.length === 1) {
-              message = `${names[0]} joined your event ${relatedEvent?.title || ''}`.trim();
-            } else if (names.length === 2) {
-              message = `${names[0]} and ${names[1]} joined your event ${relatedEvent?.title || ''}`.trim();
-            } else {
-              message = `${names[0]}, ${names[1]} and ${names.length - 2} others joined your event ${relatedEvent?.title || ''}`.trim();
-            }
+              const names = sortedJoins.map((joinRow: any) => {
+                const profileData = Array.isArray(joinRow.profiles)
+                  ? joinRow.profiles[0]
+                  : joinRow.profiles;
 
-            return {
-              id: `join-${eventId}`,
-              type: 'join',
-              message,
-              time: formatPastTime(latestJoin.created_at),
-              event: relatedEvent || {
-                id: eventId,
-                title: 'Event',
-                description: null,
-                date_time: null,
-                location: null,
-                creator_id: user.id,
-              },
-              sortDate: latestJoin.created_at || null,
-              sortPriority: 1,
-            };
-          });
+                return profileData?.name || 'Someone';
+              });
+
+              let message = '';
+
+              if (names.length === 1) {
+                message = `${names[0]} joined your event ${relatedEvent?.title || ''}`.trim();
+              } else if (names.length === 2) {
+                message = `${names[0]} and ${names[1]} joined your event ${relatedEvent?.title || ''}`.trim();
+              } else {
+                message = `${names[0]}, ${names[1]} and ${names.length - 2} others joined your event ${relatedEvent?.title || ''}`.trim();
+              }
+
+              return {
+                id: `join-${eventId}`,
+                type: 'join',
+                message,
+                time: formatPastTime(latestJoin.created_at),
+                event: relatedEvent || {
+                  id: eventId,
+                  title: 'Event',
+                  description: null,
+                  date_time: null,
+                  location: null,
+                  creator_id: user.id,
+                },
+                sortDate: latestJoin.created_at || null,
+                sortPriority: 1,
+              };
+            })
+            .filter(Boolean) as NotificationItem[];
         }
       }
 
-            const mergedNotifications = [...joinNotifications, ...upcomingNotifications];
+      const mergedNotifications = [...joinNotifications, ...upcomingNotifications];
 
       const uniqueNotifications = Array.from(
         new Map(mergedNotifications.map((notification) => [notification.id, notification])).values()

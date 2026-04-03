@@ -7,6 +7,7 @@ import { HomeScreen } from './components/HomeScreen';
 import { CreateEventScreen } from './components/CreateEventScreen';
 import { EditEventScreen } from './components/EditEventScreen';
 import { EventDetailsScreen } from './components/EventDetailsScreen';
+import { ParticipantsScreen } from './components/ParticipantsScreen';
 import { NotificationsScreen } from './components/NotificationsScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { EditProfileScreen } from './components/EditProfileScreen';
@@ -91,6 +92,7 @@ export default function App() {
       'security',
       'support',
       'event-details',
+      'participants',
     ];
     const modalScreens = ['create-event'];
 
@@ -166,6 +168,9 @@ export default function App() {
               )}
               {currentScreen === 'event-details' && (
                 <EventDetailsScreen onNavigate={handleNavigate} event={selectedEvent} />
+              )}
+              {currentScreen === 'participants' && (
+                <ParticipantsScreen onNavigate={handleNavigate} event={selectedEvent} />
               )}
               {currentScreen === 'notifications' && (
                 <NotificationsScreen onNavigate={handleNavigate} />

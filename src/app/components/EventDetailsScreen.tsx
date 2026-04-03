@@ -389,9 +389,17 @@ export function EventDetailsScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-              <p className="text-sm text-muted-foreground mb-3">
+                            <button
+                onClick={() =>
+                  onNavigate('participants', {
+                    ...eventData,
+                    backTarget: 'event-details',
+                  })
+                }
+                className="text-sm text-muted-foreground mb-3 hover:opacity-80 active:opacity-60 transition-opacity"
+              >
                 Participants ({participants.length})
-              </p>
+              </button>
 
               {participants.length > 0 ? (
                 <div className="flex flex-wrap gap-2">

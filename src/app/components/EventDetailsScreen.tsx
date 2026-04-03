@@ -20,7 +20,7 @@ export function EventDetailsScreen({
     creator_id: null,
   };
 
-  const eventData = event || defaultEvent;
+  const [eventData, setEventData] = useState(event || defaultEvent);
 
   const [hasJoined, setHasJoined] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
@@ -39,6 +39,32 @@ export function EventDetailsScreen({
     }
 
     return date.toLocaleString();
+  };
+
+  const loadEvent = async () => {
+    if (!event?.id) {
+      setEventData(event || defaultEvent);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', event.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Ошибка загрузки события:', error);
+      setEventData(event || defaultEvent);
+      return;
+    }
+
+    if (!data) {
+      setEventData(event || defaultEvent);
+      return;
+    }
+
+    setEventData(data);
   };
 
   const loadParticipants = async () => {
@@ -106,6 +132,11 @@ export function EventDetailsScreen({
   };
 
   useEffect(() => {
+    setEventData(event || defaultEvent);
+  }, [event]);
+
+    useEffect(() => {
+    loadEvent();
     loadEventState();
     loadParticipants();
 
@@ -130,7 +161,7 @@ export function EventDetailsScreen({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [eventData.id, eventData.creator_id]);
+  }, [eventData.id, event]);
 
   const handleJoin = async () => {
     if (!currentUserId) {

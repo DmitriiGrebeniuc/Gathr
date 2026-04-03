@@ -16,6 +16,8 @@ type NotificationItem = {
   message: string;
   time: string;
   event: EventItem;
+  sortDate?: string | null;
+  sortPriority: number;
 };
 
 export function NotificationsScreen({
@@ -45,6 +47,29 @@ export function NotificationsScreen({
     if (diffHours < 24) return `In ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
 
     return eventDate.toLocaleString();
+  };
+
+  const formatPastTime = (dateString?: string | null) => {
+    if (!dateString) return 'Just now';
+
+    const now = new Date();
+    const createdDate = new Date(dateString);
+
+    if (Number.isNaN(createdDate.getTime())) {
+      return 'Just now';
+    }
+
+    const diffMs = now.getTime() - createdDate.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+
+    return createdDate.toLocaleString();
   };
 
   const buildUpcomingMessage = (event: EventItem) => {
@@ -117,12 +142,14 @@ export function NotificationsScreen({
         if (eventsError) {
           console.error('Ошибка загрузки upcoming events:', eventsError);
         } else {
-          upcomingNotifications = (events || []).map((event: EventItem) => ({
+                    upcomingNotifications = (events || []).map((event: EventItem) => ({
             id: `upcoming-${event.id}`,
             type: 'upcoming',
             message: buildUpcomingMessage(event),
             time: formatRelativeTime(event.date_time),
             event,
+            sortDate: event.date_time || null,
+            sortPriority: 2,
           }));
         }
       }
@@ -163,11 +190,11 @@ export function NotificationsScreen({
             const participantName = profileData?.name || 'Someone';
             const relatedEvent = (myEvents || []).find((e: any) => e.id === joinRow.event_id);
 
-            return {
+                        return {
               id: `join-${joinRow.event_id}-${joinRow.user_id}`,
               type: 'join',
               message: `${participantName} joined your event ${relatedEvent?.title || ''}`.trim(),
-              time: formatRelativeTime(joinRow.created_at),
+              time: formatPastTime(joinRow.created_at),
               event: relatedEvent || {
                 id: joinRow.event_id,
                 title: 'Event',
@@ -176,12 +203,35 @@ export function NotificationsScreen({
                 location: null,
                 creator_id: user.id,
               },
+              sortDate: joinRow.created_at || null,
+              sortPriority: 1,
             };
           });
         }
       }
 
-      setNotifications([...joinNotifications, ...upcomingNotifications]);
+            const mergedNotifications = [...joinNotifications, ...upcomingNotifications];
+
+      const uniqueNotifications = Array.from(
+        new Map(mergedNotifications.map((notification) => [notification.id, notification])).values()
+      );
+
+      uniqueNotifications.sort((a, b) => {
+        if (a.sortPriority !== b.sortPriority) {
+          return a.sortPriority - b.sortPriority;
+        }
+
+        const aTime = a.sortDate ? new Date(a.sortDate).getTime() : 0;
+        const bTime = b.sortDate ? new Date(b.sortDate).getTime() : 0;
+
+        if (a.type === 'join') {
+          return bTime - aTime;
+        }
+
+        return aTime - bTime;
+      });
+
+      setNotifications(uniqueNotifications);
     } catch (error) {
       console.error('Notifications error:', error);
       setNotifications([]);

@@ -131,12 +131,15 @@ export function EventDetailsScreen({
     }
   };
 
-  useEffect(() => {
+    useEffect(() => {
     setEventData(event || defaultEvent);
   }, [event]);
 
-    useEffect(() => {
+  useEffect(() => {
     loadEvent();
+  }, [event?.id]);
+
+  useEffect(() => {
     loadEventState();
     loadParticipants();
 
@@ -161,7 +164,7 @@ export function EventDetailsScreen({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [eventData.id, event]);
+  }, [eventData.id, eventData.creator_id]);
 
   const handleJoin = async () => {
     if (!currentUserId) {

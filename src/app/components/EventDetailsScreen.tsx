@@ -29,6 +29,8 @@ export function EventDetailsScreen({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
 
+  const backTarget = event?.backTarget || 'home';
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Date not specified';
 
@@ -318,12 +320,12 @@ export function EventDetailsScreen({
   };
 
   return (
-    <SwipeableScreen onSwipeBack={() => onNavigate('home')}>
+    <SwipeableScreen onSwipeBack={() => onNavigate(backTarget)}>
       <div className="h-full flex flex-col bg-background">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate('home')}
+            onClick={() => onNavigate(backTarget)}
             className="text-muted-foreground"
           >
             ← Back

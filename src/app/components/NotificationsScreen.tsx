@@ -263,7 +263,11 @@ export function NotificationsScreen({
             <div
               key={notification.id}
               onClick={() =>
-                onNavigate && onNavigate('event-details', notification.event)
+                onNavigate &&
+                onNavigate('event-details', {
+                  ...notification.event,
+                  backTarget: 'notifications',
+                })
               }
               className="px-6 py-4 border-b border-border flex items-start gap-3 hover:bg-card/50 transition-colors cursor-pointer active:opacity-70"
             >

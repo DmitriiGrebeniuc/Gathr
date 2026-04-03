@@ -5,6 +5,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { SignUpScreen } from './components/SignUpScreen';
 import { HomeScreen } from './components/HomeScreen';
 import { CreateEventScreen } from './components/CreateEventScreen';
+import { EditEventScreen } from './components/EditEventScreen';
 import { EventDetailsScreen } from './components/EventDetailsScreen';
 import { NotificationsScreen } from './components/NotificationsScreen';
 import { ProfileScreen } from './components/ProfileScreen';
@@ -160,6 +161,9 @@ export default function App() {
               {currentScreen === 'signup' && <SignUpScreen onNavigate={handleNavigate} />}
               {currentScreen === 'home' && <HomeScreen onNavigate={handleNavigate} />}
               {currentScreen === 'create-event' && <CreateEventScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'edit-event' && (
+                <EditEventScreen onNavigate={handleNavigate} event={selectedEvent} />
+              )}
               {currentScreen === 'event-details' && (
                 <EventDetailsScreen onNavigate={handleNavigate} event={selectedEvent} />
               )}

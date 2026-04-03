@@ -146,6 +146,7 @@ export function NotificationsScreen({
           .select(`
             event_id,
             user_id,
+            created_at,
             profiles(name)
           `)
           .in('event_id', myEventIds)
@@ -166,7 +167,7 @@ export function NotificationsScreen({
               id: `join-${joinRow.event_id}-${joinRow.user_id}`,
               type: 'join',
               message: `${participantName} joined your event ${relatedEvent?.title || ''}`.trim(),
-              time: 'Recently',
+              time: formatRelativeTime(joinRow.created_at),
               event: relatedEvent || {
                 id: joinRow.event_id,
                 title: 'Event',

@@ -35,7 +35,7 @@ export function ProfileScreen({
           .from('profiles')
           .select('name')
           .eq('id', authUser.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error('Ошибка получения профиля:', profileError);

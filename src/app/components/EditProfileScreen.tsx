@@ -36,7 +36,7 @@ export function EditProfileScreen({
           .from('profiles')
           .select('name')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error('Ошибка загрузки профиля:', profileError);
@@ -104,10 +104,10 @@ export function EditProfileScreen({
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: userId,
           name: trimmedName,
-        })
-        .eq('id', userId);
+        });
 
       if (error) {
         console.error('Ошибка обновления профиля:', error);

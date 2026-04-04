@@ -478,6 +478,36 @@ export function HomeScreen({
                 </motion.div>
               );
             })}
+
+          {!loading && visibleEvents.length < sortedEvents.length && (
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setVisibleCount((prev) => prev + 10)}
+              className="w-full rounded-xl p-4 border border-border text-sm transition-all"
+              style={{
+                backgroundColor: '#1A1A1A',
+                color: '#D4AF37',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              Load more
+            </motion.button>
+          )}
+
+          {!loading && visibleEvents.length < sortedEvents.length && (
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setVisibleCount((prev) => prev + 10)}
+              className="w-full rounded-xl p-4 border border-border text-sm transition-all"
+              style={{
+                backgroundColor: '#1A1A1A',
+                color: '#D4AF37',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              Load more
+            </motion.button>
+          )}
         </div>
       </PullToRefresh>
 

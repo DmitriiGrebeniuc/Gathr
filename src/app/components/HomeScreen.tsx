@@ -18,11 +18,12 @@ export function HomeScreen({
 }: {
   onNavigate: (screen: string, data?: any) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<'my' | 'discover'>('my');
+  const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined'>('discover');
   const [refreshKey, setRefreshKey] = useState(0);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
 
   const formatEventDate = (dateString?: string | null) => {
     if (!dateString) return 'Date not specified';
@@ -40,7 +41,7 @@ export function HomeScreen({
     try {
       const { data: participantsData, error } = await supabase
         .from('participants')
-        .select('event_id');
+        .select('event_id, user_id');
 
       if (error) {
         console.error('Ошибка загрузки участников для счетчика:', error);
@@ -48,6 +49,7 @@ export function HomeScreen({
       }
 
       const countsMap: Record<string, number> = {};
+      const joinedIds = new Set<string>();
 
       (participantsData || []).forEach((participant: any) => {
         const eventId = participant.event_id;
@@ -55,7 +57,13 @@ export function HomeScreen({
         if (!eventId) return;
 
         countsMap[eventId] = (countsMap[eventId] || 0) + 1;
+
+        if (participant.user_id === currentUserId) {
+          joinedIds.add(eventId);
+        }
       });
+
+      setJoinedEventIds(Array.from(joinedIds));
 
       setEvents((prevEvents) =>
         prevEvents.map((event) => ({
@@ -99,7 +107,7 @@ export function HomeScreen({
 
       const { data: participantsData, error: participantsError } = await supabase
         .from('participants')
-        .select('event_id');
+        .select('event_id, user_id');
 
       if (participantsError) {
         console.error('Ошибка загрузки участников для счетчика:', participantsError);
@@ -118,6 +126,7 @@ export function HomeScreen({
       }
 
       const countsMap: Record<string, number> = {};
+      const joinedIds = new Set<string>();
 
       (participantsData || []).forEach((participant: any) => {
         const eventId = participant.event_id;
@@ -125,7 +134,13 @@ export function HomeScreen({
         if (!eventId) return;
 
         countsMap[eventId] = (countsMap[eventId] || 0) + 1;
+
+        if (participant.user_id === userId) {
+          joinedIds.add(eventId);
+        }
       });
+
+      setJoinedEventIds(Array.from(joinedIds));
 
       const mappedEvents: EventItem[] = (eventsData || []).map((event: any) => ({
         id: event.id,
@@ -197,11 +212,18 @@ export function HomeScreen({
       return activeTab === 'discover';
     }
 
+    const isMyEvent = event.creator_id === currentUserId;
+    const isJoined = joinedEventIds.includes(event.id);
+
     if (activeTab === 'my') {
-      return event.creator_id === currentUserId;
+      return isMyEvent;
     }
 
-    return event.creator_id !== currentUserId;
+    if (activeTab === 'joined') {
+      return !isMyEvent && isJoined;
+    }
+
+    return !isMyEvent && !isJoined;
   });
 
   return (
@@ -224,20 +246,6 @@ export function HomeScreen({
       <div className="flex border-b border-border">
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => setActiveTab('my')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'my' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
-          style={
-            activeTab === 'my'
-              ? { borderColor: '#D4AF37', color: '#D4AF37' }
-              : {}
-          }
-        >
-          My Events
-        </motion.button>
-
-        <motion.button
-          whileTap={{ scale: 0.97 }}
           onClick={() => setActiveTab('discover')}
           className={`flex-1 py-3 transition-colors ${activeTab === 'discover' ? 'border-b-2' : 'text-muted-foreground'
             }`}
@@ -248,6 +256,34 @@ export function HomeScreen({
           }
         >
           Discover
+        </motion.button>
+
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => setActiveTab('joined')}
+          className={`flex-1 py-3 transition-colors ${activeTab === 'joined' ? 'border-b-2' : 'text-muted-foreground'
+            }`}
+          style={
+            activeTab === 'joined'
+              ? { borderColor: '#D4AF37', color: '#D4AF37' }
+              : {}
+          }
+        >
+          Joined
+        </motion.button>
+
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => setActiveTab('my')}
+          className={`flex-1 py-3 transition-colors ${activeTab === 'my' ? 'border-b-2' : 'text-muted-foreground'
+            }`}
+          style={
+            activeTab === 'my'
+              ? { borderColor: '#D4AF37', color: '#D4AF37' }
+              : {}
+          }
+        >
+          My Events
         </motion.button>
       </div>
 
@@ -268,12 +304,18 @@ export function HomeScreen({
               }}
             >
               <h3 className="mb-2">
-                {activeTab === 'my' ? 'No my events yet' : 'No discover events yet'}
+                {activeTab === 'my'
+                  ? 'No my events yet'
+                  : activeTab === 'joined'
+                    ? 'No joined events yet'
+                    : 'No discover events yet'}
               </h3>
               <p className="text-sm text-muted-foreground">
                 {activeTab === 'my'
                   ? 'Create your first event by tapping the + button.'
-                  : 'There are no events from other users yet.'}
+                  : activeTab === 'joined'
+                    ? 'Events you join will appear here.'
+                    : 'There are no events from other users yet.'}
               </p>
             </div>
           )}

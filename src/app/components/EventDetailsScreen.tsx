@@ -29,7 +29,7 @@ export function EventDetailsScreen({
   const [isCreator, setIsCreator] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
 
   const backTarget = event?.backTarget || 'home';
@@ -393,11 +393,12 @@ export function EventDetailsScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-                            <button
+              <button
                 onClick={() =>
                   onNavigate('participants', {
                     ...eventData,
                     backTarget,
+                    currentUserId,
                   })
                 }
                 className="text-sm text-muted-foreground mb-3 hover:opacity-80 active:opacity-60 transition-opacity"
@@ -405,12 +406,13 @@ export function EventDetailsScreen({
                 Participants ({participants.length})
               </button>
 
-                             {participants.length > 0 ? (
+              {participants.length > 0 ? (
                 <button
                   onClick={() =>
                     onNavigate('participants', {
                       ...eventData,
                       backTarget,
+                      currentUserId,
                     })
                   }
                   className="flex items-center -space-x-2 hover:opacity-90 active:opacity-70 transition-opacity"
@@ -421,18 +423,49 @@ export function EventDetailsScreen({
                       : participant.profiles;
 
                     const name = profileData?.name || 'User';
+                    const isCurrentUser = currentUserId === participant.user_id;
+                    const isEventCreator = eventData.creator_id === participant.user_id;
 
                     return (
                       <motion.div
-                        key={idx}
+                        key={participant.user_id || idx}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.3 + idx * 0.05 }}
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2 border-background"
-                        style={{ backgroundColor: '#3A3A3A' }}
-                        title={name}
+                        className="relative"
+                        title={
+                          isEventCreator && isCurrentUser
+                            ? `${name} • Creator • You`
+                            : isEventCreator
+                              ? `${name} • Creator`
+                              : isCurrentUser
+                                ? `${name} • You`
+                                : name
+                        }
                       >
-                        {name.slice(0, 2).toUpperCase()}
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2"
+                          style={{
+                            backgroundColor: '#3A3A3A',
+                            borderColor: isEventCreator ? '#D4AF37' : 'var(--background)',
+                            boxShadow: isEventCreator ? '0 0 0 1px rgba(212, 175, 55, 0.18)' : 'none',
+                          }}
+                        >
+                          {name.slice(0, 2).toUpperCase()}
+                        </div>
+
+                        {isCurrentUser && (
+                          <div
+                            className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] leading-none border"
+                            style={{
+                              backgroundColor: '#0F0F0F',
+                              borderColor: 'rgba(212, 175, 55, 0.28)',
+                              color: '#D4AF37',
+                            }}
+                          >
+                            You
+                          </div>
+                        )}
                       </motion.div>
                     );
                   })}

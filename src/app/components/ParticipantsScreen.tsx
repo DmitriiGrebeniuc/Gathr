@@ -12,6 +12,7 @@ export function ParticipantsScreen({
 }) {
     const [participants, setParticipants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const parentBackTarget = event?.backTarget || 'home';
 
@@ -23,13 +24,25 @@ export function ParticipantsScreen({
         }
 
         try {
+            const {
+                data: { user },
+                error: userError,
+            } = await supabase.auth.getUser();
+
+            if (userError) {
+                console.error('Ошибка получения текущего пользователя:', userError);
+                setCurrentUserId(null);
+            } else {
+                setCurrentUserId(user?.id ?? null);
+            }
+
             const { data, error } = await supabase
                 .from('participants')
                 .select(`
-          user_id,
-          event_id,
-          profiles(name)
-        `)
+  user_id,
+  event_id,
+  profiles(name)
+`)
                 .eq('event_id', event.id);
 
             if (error) {
@@ -43,6 +56,7 @@ export function ParticipantsScreen({
         } catch (error) {
             console.error('Unexpected participants load error:', error);
             setParticipants([]);
+            setCurrentUserId(null);
         } finally {
             setLoading(false);
         }
@@ -74,7 +88,7 @@ export function ParticipantsScreen({
     }, [event?.id]);
 
     return (
-                <SwipeableScreen
+        <SwipeableScreen
             onSwipeBack={() =>
                 onNavigate(
                     'event-details',
@@ -141,6 +155,8 @@ export function ParticipantsScreen({
                                     : participant.profiles;
 
                                 const name = profileData?.name || 'User';
+                                const isCurrentUser = currentUserId === participant.user_id;
+                                const isEventCreator = event?.creator_id === participant.user_id;
 
                                 return (
                                     <motion.div
@@ -151,11 +167,39 @@ export function ParticipantsScreen({
                                         className="px-4 py-4 rounded-xl flex items-center gap-3 border border-border"
                                         style={{ backgroundColor: '#1A1A1A' }}
                                     >
-                                        <div
-                                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm"
-                                            style={{ backgroundColor: '#2A2A2A' }}
-                                        >
-                                            {name.slice(0, 2).toUpperCase()}
+                                        <div className="relative">
+                                            <div
+                                                className="w-10 h-10 rounded-full flex items-center justify-center text-sm border-2"
+                                                style={{
+                                                    backgroundColor: '#2A2A2A',
+                                                    borderColor: isEventCreator ? '#D4AF37' : 'transparent',
+                                                    boxShadow: isEventCreator ? '0 0 0 1px rgba(212, 175, 55, 0.18)' : 'none',
+                                                }}
+                                                title={
+                                                    isEventCreator && isCurrentUser
+                                                        ? `${name} • Creator • You`
+                                                        : isEventCreator
+                                                            ? `${name} • Creator`
+                                                            : isCurrentUser
+                                                                ? `${name} • You`
+                                                                : name
+                                                }
+                                            >
+                                                {name.slice(0, 2).toUpperCase()}
+                                            </div>
+
+                                            {isCurrentUser && (
+                                                <div
+                                                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] leading-none border"
+                                                    style={{
+                                                        backgroundColor: '#0F0F0F',
+                                                        borderColor: 'rgba(212, 175, 55, 0.28)',
+                                                        color: '#D4AF37',
+                                                    }}
+                                                >
+                                                    You
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="flex-1">

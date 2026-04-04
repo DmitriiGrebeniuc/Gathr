@@ -269,8 +269,14 @@ export function HomeScreen({
   };
 
   const filteredEvents = events.filter((event) => {
+    const eventDate = event.date_time ? new Date(event.date_time) : null;
+    const isPastEvent =
+      eventDate !== null &&
+      !Number.isNaN(eventDate.getTime()) &&
+      eventDate.getTime() < Date.now();
+
     if (!currentUserId) {
-      return activeTab === 'discover';
+      return activeTab === 'discover' && !isPastEvent;
     }
 
     const isMyEvent = event.creator_id === currentUserId;
@@ -281,10 +287,10 @@ export function HomeScreen({
     }
 
     if (activeTab === 'joined') {
-      return !isMyEvent && isJoined;
+      return !isMyEvent && isJoined && !isPastEvent;
     }
 
-    return !isMyEvent && !isJoined;
+    return !isMyEvent && !isJoined && !isPastEvent;
   });
 
   return (
@@ -388,51 +394,75 @@ export function HomeScreen({
           )}
 
           {!loading &&
-            filteredEvents.map((event, index) => (
-              <motion.div
-                key={`${event.id}-${refreshKey}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: index * 0.05,
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 25,
-                }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() =>
-                  onNavigate('event-details', {
-                    ...event,
-                    backTarget: 'home',
-                  })
-                }
-                className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
-                style={{
-                  backgroundColor: '#1A1A1A',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                }}
-              >
-                <h3 className="mb-1">{event.title}</h3>
+            filteredEvents.map((event, index) => {
+              const eventDate = event.date_time ? new Date(event.date_time) : null;
+              const isPastEvent =
+                eventDate !== null &&
+                !Number.isNaN(eventDate.getTime()) &&
+                eventDate.getTime() < Date.now();
 
-                <p className="text-sm text-muted-foreground mb-2">
-                  {formatEventDate(event.date_time)}
-                </p>
+              return (
+                <motion.div
+                  key={`${event.id}-${refreshKey}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: index * 0.05,
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 25,
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() =>
+                    onNavigate('event-details', {
+                      ...event,
+                      backTarget: 'home',
+                    })
+                  }
+                  className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
+                  style={{
+                    backgroundColor: '#1A1A1A',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    opacity: isPastEvent ? 0.72 : 1,
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-1">
+                    <h3>{event.title}</h3>
 
-                <p className="text-sm text-muted-foreground mb-3">
-                  {event.location || 'Location not specified'}
-                </p>
+                    {isPastEvent && (
+                      <span
+                        className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                        style={{
+                          borderColor: 'rgba(212, 175, 55, 0.28)',
+                          color: '#D4AF37',
+                          backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                        }}
+                      >
+                        Past
+                      </span>
+                    )}
+                  </div>
 
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs text-muted-foreground">
-                    Created by {event.creator_id === currentUserId ? 'You' : event.creatorName || 'Unknown'}
-                  </span>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {formatEventDate(event.date_time)}
+                  </p>
 
-                  <span className="text-xs text-muted-foreground">
-                    {event.participantCount} participant{event.participantCount === 1 ? '' : 's'}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {event.location || 'Location not specified'}
+                  </p>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      Created by {event.creator_id === currentUserId ? 'You' : event.creatorName || 'Unknown'}
+                    </span>
+
+                    <span className="text-xs text-muted-foreground">
+                      {event.participantCount} participant{event.participantCount === 1 ? '' : 's'}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
         </div>
       </PullToRefresh>
 

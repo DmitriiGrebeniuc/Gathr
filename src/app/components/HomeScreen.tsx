@@ -25,6 +25,7 @@ export function HomeScreen({
   const [refreshKey, setRefreshKey] = useState(0);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
@@ -101,6 +102,10 @@ export function HomeScreen({
   };
 
   const fetchEvents = async (showLoader = true) => {
+    if (showLoader && events.length === 0) {
+      setInitialLoading(true);
+    }
+
     if (showLoader) {
       setLoading(true);
     }
@@ -231,6 +236,8 @@ export function HomeScreen({
       if (showLoader) {
         setLoading(false);
       }
+
+      setInitialLoading(false);
     }
   };
 
@@ -496,13 +503,19 @@ export function HomeScreen({
 
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="h-full overflow-y-auto px-6 py-4 space-y-3">
-          {loading && (
-            <div className="text-sm text-muted-foreground">
-              Loading events...
+          {initialLoading && events.length === 0 && (
+            <div className="flex justify-center py-6">
+              <div
+                className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
+                style={{
+                  borderColor: 'rgba(212, 175, 55, 0.35)',
+                  borderTopColor: 'transparent',
+                }}
+              />
             </div>
           )}
 
-          {!loading && sortedEvents.length === 0 && (
+          {!initialLoading && sortedEvents.length === 0 && (
             <div
               className="rounded-xl p-4 border border-border"
               style={{

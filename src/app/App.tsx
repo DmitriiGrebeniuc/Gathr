@@ -134,15 +134,17 @@ export default function App() {
 
   if (!authChecked) {
     return (
-      <div className="size-full flex items-center justify-center bg-secondary">
+      <div className="min-h-screen w-full flex items-center justify-center bg-secondary">
         <div
-          className="relative overflow-hidden flex flex-col items-center justify-center"
+          className="relative overflow-hidden flex flex-col items-center justify-center w-full min-h-screen md:min-h-0 md:w-auto"
           style={{
-            width: '390px',
-            height: '844px',
+            width: '100%',
+            height: '100dvh',
+            maxWidth: '390px',
+            maxHeight: '844px',
             backgroundColor: '#0F0F0F',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-            borderRadius: '2.5rem',
+            borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
           }}
         >
           <p style={{ color: '#D4AF37' }}>Loading...</p>
@@ -152,15 +154,17 @@ export default function App() {
   }
 
   return (
-    <div className="size-full flex items-center justify-center bg-secondary">
+    <div className="min-h-screen w-full flex items-center justify-center bg-secondary">
       <div
-        className="relative overflow-hidden flex flex-col"
+        className="relative overflow-hidden flex flex-col w-full min-h-screen md:min-h-0 md:w-auto"
         style={{
-          width: '390px',
-          height: '844px',
+          width: '100%',
+          height: '100dvh',
+          maxWidth: '390px',
+          maxHeight: '844px',
           backgroundColor: '#0F0F0F',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-          borderRadius: '2.5rem',
+          borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
         }}
       >
         <div className="flex-1 overflow-hidden relative">

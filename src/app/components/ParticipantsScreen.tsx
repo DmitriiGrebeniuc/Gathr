@@ -7,7 +7,7 @@ export function ParticipantsScreen({
     onNavigate,
     event,
 }: {
-    onNavigate: (screen: string, data?: any) => void;
+    onNavigate: (screen: string, data?: any, customDirection?: 'forward' | 'back' | 'up' | 'down') => void;
     event?: any;
 }) {
     const [participants, setParticipants] = useState<any[]>([]);
@@ -87,10 +87,14 @@ export function ParticipantsScreen({
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={() =>
-                            onNavigate('event-details', {
-                                ...event,
-                                backTarget: parentBackTarget,
-                            })
+                            onNavigate(
+                                'event-details',
+                                {
+                                    ...event,
+                                    backTarget: parentBackTarget,
+                                },
+                                'back'
+                            )
                         }
                         className="text-muted-foreground"
                     >

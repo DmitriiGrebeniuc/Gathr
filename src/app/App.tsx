@@ -116,7 +116,15 @@ export default function App() {
     setCurrentScreen(screen);
 
     if (navDirection === 'back') {
-      setHistory((prev) => prev.slice(0, prev.indexOf(screen) + 1));
+      setHistory((prev) => {
+        const lastIndex = prev.lastIndexOf(screen);
+
+        if (lastIndex === -1) {
+          return prev;
+        }
+
+        return prev.slice(0, lastIndex + 1);
+      });
     } else {
       setHistory((prev) => [...prev, screen]);
     }

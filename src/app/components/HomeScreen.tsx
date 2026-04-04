@@ -293,6 +293,17 @@ export function HomeScreen({
     return !isMyEvent && !isJoined && !isPastEvent;
   });
 
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
+    if (activeTab !== 'my') {
+      return 0;
+    }
+
+    const aTime = a.date_time ? new Date(a.date_time).getTime() : 0;
+    const bTime = b.date_time ? new Date(b.date_time).getTime() : 0;
+
+    return bTime - aTime;
+  });
+
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="flex items-center justify-between px-6 py-4 border-b border-border">
@@ -368,7 +379,7 @@ export function HomeScreen({
             </div>
           )}
 
-          {!loading && filteredEvents.length === 0 && (
+          {!loading && sortedEvents.length === 0 && (
             <div
               className="rounded-xl p-4 border border-border"
               style={{
@@ -394,7 +405,7 @@ export function HomeScreen({
           )}
 
           {!loading &&
-            filteredEvents.map((event, index) => {
+            sortedEvents.map((event, index) => {
               const eventDate = event.date_time ? new Date(event.date_time) : null;
               const isPastEvent =
                 eventDate !== null &&

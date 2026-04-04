@@ -405,9 +405,17 @@ export function EventDetailsScreen({
                 Participants ({participants.length})
               </button>
 
-              {participants.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {participants.map((participant: any, idx: number) => {
+                             {participants.length > 0 ? (
+                <button
+                  onClick={() =>
+                    onNavigate('participants', {
+                      ...eventData,
+                      backTarget,
+                    })
+                  }
+                  className="flex items-center -space-x-2 hover:opacity-90 active:opacity-70 transition-opacity"
+                >
+                  {participants.slice(0, 4).map((participant: any, idx: number) => {
                     const profileData = Array.isArray(participant.profiles)
                       ? participant.profiles[0]
                       : participant.profiles;
@@ -420,21 +428,27 @@ export function EventDetailsScreen({
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.3 + idx * 0.05 }}
-                        className="px-4 py-2 rounded-full flex items-center gap-2"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2 border-background"
                         style={{ backgroundColor: '#3A3A3A' }}
+                        title={name}
                       >
-                        <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-xs"
-                          style={{ backgroundColor: '#2A2A2A' }}
-                        >
-                          {name.slice(0, 2).toUpperCase()}
-                        </div>
-
-                        <span className="text-sm">{name}</span>
+                        {name.slice(0, 2).toUpperCase()}
                       </motion.div>
                     );
                   })}
-                </div>
+
+                  {participants.length > 4 && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2 border-background"
+                      style={{ backgroundColor: '#2A2A2A' }}
+                    >
+                      +{participants.length - 4}
+                    </motion.div>
+                  )}
+                </button>
               ) : (
                 <div
                   className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"

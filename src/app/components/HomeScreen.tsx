@@ -340,8 +340,6 @@ export function HomeScreen({
   };
 
   useEffect(() => {
-    fetchEvents();
-
     const eventsChannel = supabase
       .channel('home-events')
       .on(

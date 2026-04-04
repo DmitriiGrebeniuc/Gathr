@@ -21,6 +21,9 @@ export function EventDetailsScreen({
   };
 
   const [eventData, setEventData] = useState(event || defaultEvent);
+  const [resolvedBackTarget, setResolvedBackTarget] = useState(
+    event?.backTarget || 'home'
+  );
 
   const [hasJoined, setHasJoined] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
@@ -28,8 +31,6 @@ export function EventDetailsScreen({
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
-
-  const backTarget = event?.backTarget || 'home';
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Date not specified';
@@ -135,6 +136,7 @@ export function EventDetailsScreen({
 
   useEffect(() => {
     setEventData(event || defaultEvent);
+    setResolvedBackTarget(event?.backTarget || 'home');
   }, [event]);
 
   useEffect(() => {
@@ -320,12 +322,12 @@ export function EventDetailsScreen({
   };
 
   return (
-    <SwipeableScreen onSwipeBack={() => onNavigate(backTarget)}>
+    <SwipeableScreen onSwipeBack={() => onNavigate(resolvedBackTarget)}>
       <div className="h-full flex flex-col bg-background">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate(backTarget)}
+            onClick={() => onNavigate(resolvedBackTarget)}
             className="text-muted-foreground"
           >
             ← Back
@@ -389,11 +391,11 @@ export function EventDetailsScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-                            <button
+              <button
                 onClick={() =>
                   onNavigate('participants', {
                     ...eventData,
-                    backTarget: 'event-details',
+                    backTarget,
                   })
                 }
                 className="text-sm text-muted-foreground mb-3 hover:opacity-80 active:opacity-60 transition-opacity"

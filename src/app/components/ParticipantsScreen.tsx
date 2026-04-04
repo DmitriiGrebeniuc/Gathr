@@ -74,12 +74,16 @@ export function ParticipantsScreen({
     }, [event?.id]);
 
     return (
-        <SwipeableScreen
+                <SwipeableScreen
             onSwipeBack={() =>
-                onNavigate('event-details', {
-                    ...event,
-                    backTarget: parentBackTarget,
-                })
+                onNavigate(
+                    'event-details',
+                    {
+                        ...event,
+                        backTarget: parentBackTarget,
+                    },
+                    'back'
+                )
             }
         >
             <div className="h-full flex flex-col bg-background">

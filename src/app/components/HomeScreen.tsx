@@ -10,6 +10,7 @@ type EventItem = {
   date_time?: string | null;
   location?: string | null;
   creator_id?: string | null;
+  creatorName?: string | null;
   participantCount: number;
 };
 
@@ -23,6 +24,7 @@ export function HomeScreen({
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
 
   const formatEventDate = (dateString?: string | null) => {
@@ -105,6 +107,30 @@ export function HomeScreen({
         return;
       }
 
+      const creatorIds = Array.from(
+        new Set(
+          (eventsData || [])
+            .map((event: any) => event.creator_id)
+            .filter(Boolean)
+        )
+      );
+
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .in('id', creatorIds);
+
+      if (profilesError) {
+        console.error('Ошибка загрузки профилей создателей:', profilesError);
+      }
+
+      const creatorNameMap: Record<string, string> = {};
+
+      (profilesData || []).forEach((profile: any) => {
+        if (!profile?.id) return;
+        creatorNameMap[profile.id] = profile.name || 'Unknown';
+      });
+
       const { data: participantsData, error: participantsError } = await supabase
         .from('participants')
         .select('event_id, user_id');
@@ -119,6 +145,7 @@ export function HomeScreen({
             date_time: event.date_time,
             location: event.location,
             creator_id: event.creator_id,
+            creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
             participantCount: 0,
           }))
         );
@@ -149,6 +176,7 @@ export function HomeScreen({
         date_time: event.date_time,
         location: event.location,
         creator_id: event.creator_id,
+        creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
         participantCount: countsMap[event.id] || 0,
       }));
 
@@ -357,7 +385,7 @@ export function HomeScreen({
 
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs text-muted-foreground">
-                    {event.creator_id === currentUserId ? 'Created by you' : 'Created by another user'}
+                    Created by {event.creator_id === currentUserId ? 'You' : event.creatorName || 'Unknown'}
                   </span>
 
                   <span className="text-xs text-muted-foreground">

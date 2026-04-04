@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
@@ -15,6 +15,7 @@ type EventItem = {
 };
 
 const SERVER_BATCH_SIZE = 100;
+const LOCAL_BATCH_SIZE = 10;
 
 export function HomeScreen({
   onNavigate,
@@ -22,14 +23,12 @@ export function HomeScreen({
   onNavigate: (screen: string, data?: any) => void;
 }) {
   const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined'>('discover');
-  const [refreshKey, setRefreshKey] = useState(0);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
-  const [visibleCount, setVisibleCount] = useState(10);
+  const [visibleCount, setVisibleCount] = useState(LOCAL_BATCH_SIZE);
   const [serverOffset, setServerOffset] = useState(0);
   const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -60,6 +59,18 @@ export function HomeScreen({
     }
 
     return date.toLocaleString();
+  };
+
+  const isPastEvent = (dateString?: string | null) => {
+    if (!dateString) return false;
+
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+      return false;
+    }
+
+    return date.getTime() < Date.now();
   };
 
   const refreshParticipantCounts = async () => {
@@ -102,10 +113,6 @@ export function HomeScreen({
   };
 
   const fetchEvents = async (showLoader = true) => {
-    if (showLoader && events.length === 0) {
-      setInitialLoading(true);
-    }
-
     if (showLoader) {
       setLoading(true);
     }
@@ -149,6 +156,8 @@ export function HomeScreen({
       if (eventsError) {
         console.error('Ошибка загрузки событий:', eventsError);
         setEvents([]);
+        setServerOffset(0);
+        setHasMoreServerEvents(false);
         return;
       }
 
@@ -163,21 +172,23 @@ export function HomeScreen({
         )
       );
 
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .in('id', creatorIds);
+      let creatorNameMap: Record<string, string> = {};
 
-      if (profilesError) {
-        console.error('Ошибка загрузки профилей создателей:', profilesError);
+      if (creatorIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', creatorIds);
+
+        if (profilesError) {
+          console.error('Ошибка загрузки профилей создателей:', profilesError);
+        } else {
+          (profilesData || []).forEach((profile: any) => {
+            if (!profile?.id) return;
+            creatorNameMap[profile.id] = profile.name || 'Unknown';
+          });
+        }
       }
-
-      const creatorNameMap: Record<string, string> = {};
-
-      (profilesData || []).forEach((profile: any) => {
-        if (!profile?.id) return;
-        creatorNameMap[profile.id] = profile.name || 'Unknown';
-      });
 
       const { data: participantsData, error: participantsError } = await supabase
         .from('participants')
@@ -185,18 +196,19 @@ export function HomeScreen({
 
       if (participantsError) {
         console.error('Ошибка загрузки участников для счетчика:', participantsError);
-        setEvents(
-          (eventsData || []).map((event: any) => ({
-            id: event.id,
-            title: event.title,
-            description: event.description,
-            date_time: event.date_time,
-            location: event.location,
-            creator_id: event.creator_id,
-            creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
-            participantCount: 0,
-          }))
-        );
+
+        const fallbackEvents: EventItem[] = (eventsData || []).map((event: any) => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          date_time: event.date_time,
+          location: event.location,
+          creator_id: event.creator_id,
+          creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+          participantCount: 0,
+        }));
+
+        setEvents(fallbackEvents);
         return;
       }
 
@@ -232,12 +244,12 @@ export function HomeScreen({
     } catch (error) {
       console.error('Unexpected error while fetching events:', error);
       setEvents([]);
+      setServerOffset(0);
+      setHasMoreServerEvents(false);
     } finally {
       if (showLoader) {
         setLoading(false);
       }
-
-      setInitialLoading(false);
     }
   };
 
@@ -260,7 +272,6 @@ export function HomeScreen({
 
       if (moreEventsError) {
         console.error('Ошибка догрузки событий:', moreEventsError);
-        setLoadingMore(false);
         return;
       }
 
@@ -272,21 +283,23 @@ export function HomeScreen({
         )
       );
 
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, name')
-        .in('id', creatorIds);
+      let creatorNameMap: Record<string, string> = {};
 
-      if (profilesError) {
-        console.error('Ошибка загрузки профилей создателей при догрузке:', profilesError);
+      if (creatorIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', creatorIds);
+
+        if (profilesError) {
+          console.error('Ошибка загрузки профилей создателей при догрузке:', profilesError);
+        } else {
+          (profilesData || []).forEach((profile: any) => {
+            if (!profile?.id) return;
+            creatorNameMap[profile.id] = profile.name || 'Unknown';
+          });
+        }
       }
-
-      const creatorNameMap: Record<string, string> = {};
-
-      (profilesData || []).forEach((profile: any) => {
-        if (!profile?.id) return;
-        creatorNameMap[profile.id] = profile.name || 'Unknown';
-      });
 
       const { data: participantsData, error: participantsError } = await supabase
         .from('participants')
@@ -294,7 +307,6 @@ export function HomeScreen({
 
       if (participantsError) {
         console.error('Ошибка загрузки участников при догрузке:', participantsError);
-        setLoadingMore(false);
         return;
       }
 
@@ -334,16 +346,74 @@ export function HomeScreen({
     }
   };
 
+  const filteredEvents = useMemo(() => {
+    return events.filter((event) => {
+      const past = isPastEvent(event.date_time);
+
+      if (!currentUserId) {
+        return activeTab === 'discover' && !past;
+      }
+
+      const isMyEvent = event.creator_id === currentUserId;
+      const isJoined = joinedEventIds.includes(event.id);
+
+      if (activeTab === 'my') {
+        return isMyEvent;
+      }
+
+      if (activeTab === 'joined') {
+        return !isMyEvent && isJoined && !past;
+      }
+
+      return !isMyEvent && !isJoined && !past;
+    });
+  }, [events, currentUserId, joinedEventIds, activeTab]);
+
+  const sortedEvents = useMemo(() => {
+    const result = [...filteredEvents];
+
+    if (activeTab === 'my') {
+      result.sort((a, b) => {
+        const aTime = a.date_time ? new Date(a.date_time).getTime() : 0;
+        const bTime = b.date_time ? new Date(b.date_time).getTime() : 0;
+        return bTime - aTime;
+      });
+    }
+
+    return result;
+  }, [filteredEvents, activeTab]);
+
+  const visibleEvents = useMemo(() => {
+    return sortedEvents.slice(0, visibleCount);
+  }, [sortedEvents, visibleCount]);
+
+  const shouldShowInitialLoader = loading && events.length === 0;
+  const shouldShowEmptyState = !loading && sortedEvents.length === 0;
+  const canShowLoadMore = !loading && visibleEvents.length < sortedEvents.length;
+  const canLoadMoreFromServer =
+    !loading &&
+    !loadingMore &&
+    hasMoreServerEvents &&
+    sortedEvents.length >= visibleCount;
+  const shouldShowLoadMore = canShowLoadMore || canLoadMoreFromServer;
+
   const handleLoadMore = async () => {
     if (visibleCount < sortedEvents.length) {
-      setVisibleCount((prev) => prev + 10);
+      setVisibleCount((prev) => prev + LOCAL_BATCH_SIZE);
       return;
     }
 
     if (hasMoreServerEvents) {
       await loadMoreEventsFromServer();
-      setVisibleCount((prev) => prev + 10);
+      setVisibleCount((prev) => prev + LOCAL_BATCH_SIZE);
     }
+  };
+
+  const handleRefresh = async () => {
+    setVisibleCount(LOCAL_BATCH_SIZE);
+    setServerOffset(0);
+    setHasMoreServerEvents(true);
+    await fetchEvents(true);
   };
 
   useEffect(() => {
@@ -381,58 +451,15 @@ export function HomeScreen({
       supabase.removeChannel(eventsChannel);
       supabase.removeChannel(participantsChannel);
     };
-  }, []);
-
-  const handleRefresh = async () => {
-    await fetchEvents();
-    setVisibleCount(10);
-    setRefreshKey((prev) => prev + 1);
-  };
+  }, [currentUserId]);
 
   useEffect(() => {
-    setVisibleCount(10);
-    setServerOffset(0);
-    setHasMoreServerEvents(true);
-    fetchEvents();
+    setVisibleCount(LOCAL_BATCH_SIZE);
   }, [activeTab]);
 
-  const filteredEvents = events.filter((event) => {
-    const eventDate = event.date_time ? new Date(event.date_time) : null;
-    const isPastEvent =
-      eventDate !== null &&
-      !Number.isNaN(eventDate.getTime()) &&
-      eventDate.getTime() < Date.now();
-
-    if (!currentUserId) {
-      return activeTab === 'discover' && !isPastEvent;
-    }
-
-    const isMyEvent = event.creator_id === currentUserId;
-    const isJoined = joinedEventIds.includes(event.id);
-
-    if (activeTab === 'my') {
-      return isMyEvent;
-    }
-
-    if (activeTab === 'joined') {
-      return !isMyEvent && isJoined && !isPastEvent;
-    }
-
-    return !isMyEvent && !isJoined && !isPastEvent;
-  });
-
-  const sortedEvents = [...filteredEvents].sort((a, b) => {
-    if (activeTab !== 'my') {
-      return 0;
-    }
-
-    const aTime = a.date_time ? new Date(a.date_time).getTime() : 0;
-    const bTime = b.date_time ? new Date(b.date_time).getTime() : 0;
-
-    return bTime - aTime;
-  });
-
-  const visibleEvents = sortedEvents.slice(0, visibleCount);
+  useEffect(() => {
+    fetchEvents(true);
+  }, []);
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -461,8 +488,9 @@ export function HomeScreen({
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setActiveTab('discover')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'discover' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
+          className={`flex-1 py-3 transition-colors ${
+            activeTab === 'discover' ? 'border-b-2' : 'text-muted-foreground'
+          }`}
           style={
             activeTab === 'discover'
               ? { borderColor: '#D4AF37', color: '#D4AF37' }
@@ -475,8 +503,9 @@ export function HomeScreen({
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setActiveTab('joined')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'joined' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
+          className={`flex-1 py-3 transition-colors ${
+            activeTab === 'joined' ? 'border-b-2' : 'text-muted-foreground'
+          }`}
           style={
             activeTab === 'joined'
               ? { borderColor: '#D4AF37', color: '#D4AF37' }
@@ -489,8 +518,9 @@ export function HomeScreen({
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setActiveTab('my')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'my' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
+          className={`flex-1 py-3 transition-colors ${
+            activeTab === 'my' ? 'border-b-2' : 'text-muted-foreground'
+          }`}
           style={
             activeTab === 'my'
               ? { borderColor: '#D4AF37', color: '#D4AF37' }
@@ -503,7 +533,7 @@ export function HomeScreen({
 
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="h-full overflow-y-auto px-6 py-4 space-y-3">
-          {initialLoading && events.length === 0 && (
+          {shouldShowInitialLoader && (
             <div className="flex justify-center py-6">
               <div
                 className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
@@ -515,7 +545,7 @@ export function HomeScreen({
             </div>
           )}
 
-          {!initialLoading && sortedEvents.length === 0 && (
+          {shouldShowEmptyState && (
             <div
               className="rounded-xl p-4 border border-border"
               style={{
@@ -540,78 +570,71 @@ export function HomeScreen({
             </div>
           )}
 
-          {!loading &&
-            visibleEvents.map((event, index) => {
-              const eventDate = event.date_time ? new Date(event.date_time) : null;
-              const isPastEvent =
-                eventDate !== null &&
-                !Number.isNaN(eventDate.getTime()) &&
-                eventDate.getTime() < Date.now();
+          {visibleEvents.map((event, index) => {
+            const past = isPastEvent(event.date_time);
 
-              return (
-                <motion.div
-                  key={`${event.id}-${refreshKey}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: index * 0.05,
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 25,
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() =>
-                    onNavigate('event-details', {
-                      ...event,
-                      backTarget: 'home',
-                    })
-                  }
-                  className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
-                  style={{
-                    backgroundColor: '#1A1A1A',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                    opacity: isPastEvent ? 0.72 : 1,
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-1">
-                    <h3>{event.title}</h3>
+            return (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: index * 0.03,
+                  duration: 0.18,
+                }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() =>
+                  onNavigate('event-details', {
+                    ...event,
+                    backTarget: 'home',
+                  })
+                }
+                className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
+                style={{
+                  backgroundColor: '#1A1A1A',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  opacity: past ? 0.72 : 1,
+                }}
+              >
+                <div className="flex items-start justify-between gap-3 mb-1">
+                  <h3>{event.title}</h3>
 
-                    {isPastEvent && (
-                      <span
-                        className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
-                        style={{
-                          borderColor: 'rgba(212, 175, 55, 0.28)',
-                          color: '#D4AF37',
-                          backgroundColor: 'rgba(212, 175, 55, 0.08)',
-                        }}
-                      >
-                        Past
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {formatEventDate(event.date_time)}
-                  </p>
-
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {event.location || 'Location not specified'}
-                  </p>
-
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground">
-                      Created by {event.creator_id === currentUserId ? 'You' : event.creatorName || 'Unknown'}
+                  {past && (
+                    <span
+                      className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                      style={{
+                        borderColor: 'rgba(212, 175, 55, 0.28)',
+                        color: '#D4AF37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                      }}
+                    >
+                      Past
                     </span>
+                  )}
+                </div>
 
-                    <span className="text-xs text-muted-foreground">
-                      {event.participantCount} participant{event.participantCount === 1 ? '' : 's'}
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
+                <p className="text-sm text-muted-foreground mb-2">
+                  {formatEventDate(event.date_time)}
+                </p>
 
-          {!loading && (visibleEvents.length < sortedEvents.length || hasMoreServerEvents) && (
+                <p className="text-sm text-muted-foreground mb-3">
+                  {event.location || 'Location not specified'}
+                </p>
+
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    Created by {event.creator_id === currentUserId ? 'You' : event.creatorName || 'Unknown'}
+                  </span>
+
+                  <span className="text-xs text-muted-foreground">
+                    {event.participantCount} participant{event.participantCount === 1 ? '' : 's'}
+                  </span>
+                </div>
+              </motion.div>
+            );
+          })}
+
+          {shouldShowLoadMore && (
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleLoadMore}

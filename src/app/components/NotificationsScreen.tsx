@@ -111,6 +111,19 @@ export function NotificationsScreen({
         return;
       }
 
+      const { data: notificationSettings, error: notificationSettingsError } = await supabase
+        .from('notification_settings')
+        .select('notify_upcoming_events, notify_new_participants')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (notificationSettingsError) {
+        console.error('Ошибка загрузки notification settings:', notificationSettingsError);
+      }
+
+      const notifyUpcomingEvents = notificationSettings?.notify_upcoming_events ?? true;
+      const notifyNewParticipants = notificationSettings?.notify_new_participants ?? true;
+
       const now = new Date();
       const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
@@ -130,7 +143,7 @@ export function NotificationsScreen({
 
       let upcomingNotifications: NotificationItem[] = [];
 
-      if (eventIds.length > 0) {
+      if (notifyUpcomingEvents && eventIds.length > 0) {
         const { data: events, error: eventsError } = await supabase
           .from('events')
           .select('*')
@@ -167,15 +180,15 @@ export function NotificationsScreen({
 
       let joinNotifications: NotificationItem[] = [];
 
-      if (myEventIds.length > 0) {
+      if (notifyNewParticipants && myEventIds.length > 0) {
         const { data: joins, error: joinsError } = await supabase
           .from('participants')
           .select(`
-            event_id,
-            user_id,
-            created_at,
-            profiles(name)
-          `)
+      event_id,
+      user_id,
+      created_at,
+      profiles(name)
+    `)
           .in('event_id', myEventIds)
           .neq('user_id', user.id);
 

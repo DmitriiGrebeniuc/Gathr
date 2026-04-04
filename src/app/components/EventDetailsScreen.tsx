@@ -29,8 +29,10 @@ export function EventDetailsScreen({
   const [isCreator, setIsCreator] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
+
+  const backTarget = event?.backTarget || 'home';
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Date not specified';
@@ -391,7 +393,7 @@ export function EventDetailsScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-              <button
+                            <button
                 onClick={() =>
                   onNavigate('participants', {
                     ...eventData,

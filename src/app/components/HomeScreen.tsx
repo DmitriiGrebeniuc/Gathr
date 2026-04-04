@@ -27,6 +27,22 @@ export function HomeScreen({
   const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
 
+  const getInitials = (name?: string | null) => {
+    if (!name) return 'U';
+
+    const parts = name
+      .trim()
+      .split(' ')
+      .filter(Boolean);
+
+    if (parts.length === 0) return 'U';
+
+    return parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || '')
+      .join('');
+  };
+
   const formatEventDate = (dateString?: string | null) => {
     if (!dateString) return 'Date not specified';
 
@@ -95,6 +111,23 @@ export function HomeScreen({
 
       const userId = user?.id ?? null;
       setCurrentUserId(userId);
+
+      if (userId) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error('Ошибка загрузки профиля пользователя:', profileError);
+          setCurrentUserName('User');
+        } else {
+          setCurrentUserName(profileData?.name || 'User');
+        }
+      } else {
+        setCurrentUserName('User');
+      }
 
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
@@ -264,10 +297,16 @@ export function HomeScreen({
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => onNavigate('profile')}
-          className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: '#3A3A3A' }}
+          className="w-10 h-10 rounded-full flex items-center justify-center border"
+          style={{
+            backgroundColor: '#3A3A3A',
+            borderColor: 'rgba(212, 175, 55, 0.45)',
+            boxShadow: '0 0 0 1px rgba(212, 175, 55, 0.12)',
+            color: '#F5F5F5',
+          }}
+          title={currentUserName}
         >
-          <span className="text-sm">JD</span>
+          <span className="text-sm">{getInitials(currentUserName)}</span>
         </motion.button>
       </div>
 

@@ -14,6 +14,8 @@ type EventItem = {
   participantCount: number;
 };
 
+const SERVER_BATCH_SIZE = 100;
+
 export function HomeScreen({
   onNavigate,
 }: {
@@ -27,6 +29,9 @@ export function HomeScreen({
   const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(10);
+  const [serverOffset, setServerOffset] = useState(0);
+  const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -133,13 +138,17 @@ export function HomeScreen({
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
-        .order('date_time', { ascending: true });
+        .order('date_time', { ascending: true })
+        .range(0, SERVER_BATCH_SIZE - 1);
 
       if (eventsError) {
         console.error('Ошибка загрузки событий:', eventsError);
         setEvents([]);
         return;
       }
+
+      setServerOffset(eventsData?.length || 0);
+      setHasMoreServerEvents((eventsData?.length || 0) === SERVER_BATCH_SIZE);
 
       const creatorIds = Array.from(
         new Set(
@@ -225,6 +234,111 @@ export function HomeScreen({
     }
   };
 
+  const loadMoreEventsFromServer = async () => {
+    if (loadingMore || !hasMoreServerEvents) {
+      return;
+    }
+
+    setLoadingMore(true);
+
+    try {
+      const from = serverOffset;
+      const to = serverOffset + SERVER_BATCH_SIZE - 1;
+
+      const { data: moreEventsData, error: moreEventsError } = await supabase
+        .from('events')
+        .select('*')
+        .order('date_time', { ascending: true })
+        .range(from, to);
+
+      if (moreEventsError) {
+        console.error('Ошибка догрузки событий:', moreEventsError);
+        setLoadingMore(false);
+        return;
+      }
+
+      const creatorIds = Array.from(
+        new Set(
+          (moreEventsData || [])
+            .map((event: any) => event.creator_id)
+            .filter(Boolean)
+        )
+      );
+
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .in('id', creatorIds);
+
+      if (profilesError) {
+        console.error('Ошибка загрузки профилей создателей при догрузке:', profilesError);
+      }
+
+      const creatorNameMap: Record<string, string> = {};
+
+      (profilesData || []).forEach((profile: any) => {
+        if (!profile?.id) return;
+        creatorNameMap[profile.id] = profile.name || 'Unknown';
+      });
+
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('participants')
+        .select('event_id, user_id');
+
+      if (participantsError) {
+        console.error('Ошибка загрузки участников при догрузке:', participantsError);
+        setLoadingMore(false);
+        return;
+      }
+
+      const countsMap: Record<string, number> = {};
+
+      (participantsData || []).forEach((participant: any) => {
+        const eventId = participant.event_id;
+
+        if (!eventId) return;
+
+        countsMap[eventId] = (countsMap[eventId] || 0) + 1;
+      });
+
+      const mappedMoreEvents: EventItem[] = (moreEventsData || []).map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        date_time: event.date_time,
+        location: event.location,
+        creator_id: event.creator_id,
+        creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+        participantCount: countsMap[event.id] || 0,
+      }));
+
+      setEvents((prevEvents) => {
+        const existingIds = new Set(prevEvents.map((event) => event.id));
+        const uniqueNewEvents = mappedMoreEvents.filter((event) => !existingIds.has(event.id));
+        return [...prevEvents, ...uniqueNewEvents];
+      });
+
+      setServerOffset((prev) => prev + (moreEventsData?.length || 0));
+      setHasMoreServerEvents((moreEventsData?.length || 0) === SERVER_BATCH_SIZE);
+    } catch (error) {
+      console.error('Unexpected error while loading more events from server:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleLoadMore = async () => {
+    if (visibleCount < sortedEvents.length) {
+      setVisibleCount((prev) => prev + 10);
+      return;
+    }
+
+    if (hasMoreServerEvents) {
+      await loadMoreEventsFromServer();
+      setVisibleCount((prev) => prev + 10);
+    }
+  };
+
   useEffect(() => {
     fetchEvents();
 
@@ -269,6 +383,13 @@ export function HomeScreen({
     setVisibleCount(10);
     setRefreshKey((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    setVisibleCount(10);
+    setServerOffset(0);
+    setHasMoreServerEvents(true);
+    fetchEvents();
+  }, [activeTab]);
 
   const filteredEvents = events.filter((event) => {
     const eventDate = event.date_time ? new Date(event.date_time) : null;
@@ -479,18 +600,19 @@ export function HomeScreen({
               );
             })}
 
-                    {!loading && visibleEvents.length < sortedEvents.length && (
+          {!loading && (visibleEvents.length < sortedEvents.length || hasMoreServerEvents) && (
             <motion.button
               whileTap={{ scale: 0.98 }}
-              onClick={() => setVisibleCount((prev) => prev + 10)}
-              className="w-full rounded-xl p-4 border border-border text-sm transition-all"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="w-full rounded-xl p-4 border border-border text-sm transition-all disabled:opacity-60"
               style={{
                 backgroundColor: '#1A1A1A',
                 color: '#D4AF37',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
-              Load more
+              {loadingMore ? 'Loading...' : 'Load more'}
             </motion.button>
           )}
         </div>

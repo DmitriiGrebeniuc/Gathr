@@ -26,6 +26,7 @@ export function HomeScreen({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -265,6 +266,7 @@ export function HomeScreen({
 
   const handleRefresh = async () => {
     await fetchEvents();
+    setVisibleCount(10);
     setRefreshKey((prev) => prev + 1);
   };
 
@@ -303,6 +305,8 @@ export function HomeScreen({
 
     return bTime - aTime;
   });
+
+  const visibleEvents = sortedEvents.slice(0, visibleCount);
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -405,7 +409,7 @@ export function HomeScreen({
           )}
 
           {!loading &&
-            sortedEvents.map((event, index) => {
+            visibleEvents.map((event, index) => {
               const eventDate = event.date_time ? new Date(event.date_time) : null;
               const isPastEvent =
                 eventDate !== null &&

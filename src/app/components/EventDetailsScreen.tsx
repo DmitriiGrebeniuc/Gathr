@@ -34,6 +34,12 @@ export function EventDetailsScreen({
 
   const backTarget = event?.backTarget || 'home';
 
+  const eventDate = eventData.date_time ? new Date(eventData.date_time) : null;
+  const isPastEvent =
+    eventDate !== null &&
+    !Number.isNaN(eventDate.getTime()) &&
+    eventDate.getTime() < Date.now();
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Date not specified';
 
@@ -344,7 +350,22 @@ export function EventDetailsScreen({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h1 className="mb-3">{eventData.title}</h1>
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <h1>{eventData.title}</h1>
+
+                {isPastEvent && (
+                  <span
+                    className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                    style={{
+                      borderColor: 'rgba(212, 175, 55, 0.28)',
+                      color: '#D4AF37',
+                      backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                    }}
+                  >
+                    Past event
+                  </span>
+                )}
+              </div>
               <p className="text-muted-foreground leading-relaxed">
                 {eventData.description || 'No description provided'}
               </p>
@@ -510,7 +531,7 @@ export function EventDetailsScreen({
                 >
                   {loadingAction ? 'Leaving...' : 'Leave Event'}
                 </TouchButton>
-              ) : (
+              ) : !isPastEvent ? (
                 <TouchButton
                   variant="primary"
                   fullWidth
@@ -518,6 +539,13 @@ export function EventDetailsScreen({
                 >
                   {loadingAction ? 'Joining...' : 'Join Event'}
                 </TouchButton>
+              ) : (
+                <div
+                  className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border"
+                  style={{ backgroundColor: '#1A1A1A' }}
+                >
+                  This event has already ended
+                </div>
               )}
             </>
           )}

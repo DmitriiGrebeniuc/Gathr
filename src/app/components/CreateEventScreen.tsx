@@ -2,6 +2,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { ACTIVITY_TYPES, ActivityType } from '../constants/activityTypes';
 
 export function CreateEventScreen({
   onNavigate,
@@ -16,6 +17,7 @@ export function CreateEventScreen({
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [location, setLocation] = useState('');
+  const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
 
   const handleDragEnd = (
@@ -73,6 +75,7 @@ export function CreateEventScreen({
             description: description.trim() || null,
             date_time: dateTime.toISOString(),
             location: location.trim() || null,
+            activity_type: activityType,
             creator_id: user.id,
           },
         ])
@@ -158,6 +161,41 @@ export function CreateEventScreen({
                 borderColor: 'rgba(255, 255, 255, 0.1)',
               }}
             />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.13 }}
+          >
+            <label className="block mb-2 text-sm text-muted-foreground">
+              Activity Type
+            </label>
+
+            <div className="flex flex-wrap gap-2">
+              {ACTIVITY_TYPES.map((type) => {
+                const isActive = activityType === type.value;
+
+                return (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => setActivityType(type.value)}
+                    className="px-3 py-2 rounded-full text-sm border transition-all"
+                    style={{
+                      backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
+                      borderColor: isActive
+                        ? 'rgba(212, 175, 55, 0.5)'
+                        : 'rgba(255, 255, 255, 0.1)',
+                      color: isActive ? '#D4AF37' : '#F5F5F5',
+                    }}
+                  >
+                    <span className="mr-2">{type.emoji}</span>
+                    <span>{type.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </motion.div>
 
           <motion.div

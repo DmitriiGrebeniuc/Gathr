@@ -26,7 +26,56 @@ const EMPTY_LOCATION: LocationValue = {
   lng: null,
 };
 
-function LocationAutocompleteInput({
+const isCapacitorNativeApp = () => {
+  return typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.();
+};
+
+const getGoogleMapsApiKey = () => {
+  const isNativeApp = isCapacitorNativeApp();
+
+  return isNativeApp
+    ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY_ANDROID ?? ''
+    : import.meta.env.VITE_GOOGLE_MAPS_API_KEY_WEB ?? '';
+};
+
+function PlainLocationInput({
+  value,
+  onChange,
+  placeholder,
+  disabled = false,
+}: Omit<LocationAutocompleteProps, 'label'>) {
+  return (
+    <input
+      type="text"
+      placeholder={placeholder}
+      value={value.address}
+      onChange={(e) => {
+        const nextAddress = e.target.value;
+
+        if (!nextAddress.trim()) {
+          onChange(EMPTY_LOCATION);
+          return;
+        }
+
+        onChange({
+          address: nextAddress,
+          placeId: null,
+          lat: null,
+          lng: null,
+        });
+      }}
+      disabled={disabled}
+      autoComplete="off"
+      className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
+      style={{
+        backgroundColor: '#1A1A1A',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+      }}
+    />
+  );
+}
+
+function GoogleAutocompleteInput({
   value,
   onChange,
   placeholder,
@@ -129,31 +178,19 @@ export function LocationAutocomplete({
   disabled = false,
 }: LocationAutocompleteProps) {
   const { translate } = useLanguage();
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
+  const apiKey = getGoogleMapsApiKey();
+  const shouldUsePlainInput = isCapacitorNativeApp();
 
   if (!apiKey) {
     return (
       <div>
         <label className="block mb-2 text-sm text-muted-foreground">{label}</label>
 
-        <input
-          type="text"
+        <PlainLocationInput
+          value={value}
+          onChange={onChange}
           placeholder={placeholder}
-          value={value.address}
-          onChange={(e) =>
-            onChange({
-              address: e.target.value,
-              placeId: null,
-              lat: null,
-              lng: null,
-            })
-          }
           disabled={disabled}
-          className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-          style={{
-            backgroundColor: '#1A1A1A',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-          }}
         />
 
         <p className="mt-2 text-xs text-muted-foreground">
@@ -163,12 +200,27 @@ export function LocationAutocomplete({
     );
   }
 
+  if (shouldUsePlainInput) {
+    return (
+      <div>
+        <label className="block mb-2 text-sm text-muted-foreground">{label}</label>
+
+        <PlainLocationInput
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          disabled={disabled}
+        />
+      </div>
+    );
+  }
+
   return (
     <div>
       <label className="block mb-2 text-sm text-muted-foreground">{label}</label>
 
       <LoadScriptNext googleMapsApiKey={apiKey} libraries={GOOGLE_LIBRARIES}>
-        <LocationAutocompleteInput
+        <GoogleAutocompleteInput
           value={value}
           onChange={onChange}
           placeholder={placeholder}

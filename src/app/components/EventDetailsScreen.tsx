@@ -60,6 +60,15 @@ export function EventDetailsScreen({
     typeof eventData.location_lat === 'number' &&
     typeof eventData.location_lng === 'number';
 
+  const isNativeApp =
+    typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.();
+
+  const googleMapsUrl = hasLocationCoordinates
+    ? `https://www.google.com/maps?q=${eventData.location_lat},${eventData.location_lng}`
+    : eventData.location
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventData.location)}`
+      : null;
+
   const loadEvent = async () => {
     if (!event?.id) {
       setEventData(event || defaultEvent);
@@ -414,6 +423,18 @@ export function EventDetailsScreen({
                   <div>
                     <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
                     <p>{eventData.location || translate('details.locationNotSpecified')}</p>
+
+                    {googleMapsUrl && isNativeApp && (
+                      <a
+                        href={googleMapsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-block mt-2 text-sm"
+                        style={{ color: '#D4AF37' }}
+                      >
+                        Открыть в Google Maps
+                      </a>
+                    )}
                   </div>
                 </div>
 

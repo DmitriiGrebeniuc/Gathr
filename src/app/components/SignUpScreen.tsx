@@ -39,6 +39,11 @@ export function SignUpScreen({
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
+        options: {
+          data: {
+            name: name.trim(),
+          },
+        },
       });
 
       if (error) {
@@ -48,30 +53,10 @@ export function SignUpScreen({
         return;
       }
 
-      const userId = data.user?.id;
-
-      if (!userId) {
-        alert(translate('signup.userIdMissing'));
-        setLoading(false);
-        return;
-      }
-
-      const { error: profileError } = await supabase.from('profiles').insert([
-        {
-          id: userId,
-          name: name.trim(),
-        },
-      ]);
-
-      if (profileError) {
-        console.error('Ошибка создания профиля:', profileError);
-        alert(translate('signup.profileNotSaved'));
-        setLoading(false);
-        return;
-      }
-
-      alert(translate('signup.success'));
-      onNavigate('home');
+      alert(
+        `${translate('signup.confirmEmailTitle')}\n\n${translate('signup.confirmEmailMessage')}`
+      );
+      onNavigate('login');
     } catch (error) {
       console.error('Unexpected signup error:', error);
       alert(translate('signup.unexpectedError'));

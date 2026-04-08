@@ -209,7 +209,9 @@ type TranslationKey =
     | 'edit.invalidDateTime'
     | 'edit.userNotAuthenticated'
     | 'edit.failed'
-    | 'edit.unexpectedError';
+    | 'edit.unexpectedError'
+    | 'signup.confirmEmailTitle'
+    | 'signup.confirmEmailMessage';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     en: {
@@ -439,6 +441,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'User is not authenticated',
         'edit.failed': 'Failed to update event',
         'edit.unexpectedError': 'An error occurred while updating the event',
+        'signup.confirmEmailTitle': 'Check your email',
+        'signup.confirmEmailMessage': 'We sent you a confirmation link. Please confirm your email before logging in.',
     },
 
     ru: {
@@ -668,6 +672,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Пользователь не авторизован',
         'edit.failed': 'Не удалось обновить событие',
         'edit.unexpectedError': 'Произошла ошибка при обновлении события',
+        'signup.confirmEmailTitle': 'Проверь почту',
+        'signup.confirmEmailMessage': 'Мы отправили ссылку для подтверждения. Подтверди email перед входом.',
     },
 
     ro: {
@@ -898,6 +904,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Utilizatorul nu este autentificat',
         'edit.failed': 'Evenimentul nu a putut fi actualizat',
         'edit.unexpectedError': 'A apărut o eroare la actualizarea evenimentului',
+        'signup.confirmEmailTitle': 'Verifică emailul',
+        'signup.confirmEmailMessage': 'Ți-am trimis un link de confirmare. Confirmă emailul înainte de autentificare.',
     },
 
     uk: {
@@ -1127,6 +1135,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Користувач не авторизований',
         'edit.failed': 'Не вдалося оновити подію',
         'edit.unexpectedError': 'Сталася помилка під час оновлення події',
+        'signup.confirmEmailTitle': 'Перевір пошту',
+        'signup.confirmEmailMessage': 'Ми надіслали посилання для підтвердження. Підтверди email перед входом.',
     },
 
     de: {
@@ -1348,7 +1358,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'participants.participants': 'Teilnehmer',
         'participants.you': 'Du',
         'participants.creator': 'Ersteller',
-        
+
         'edit.eventNotFound': 'Event konnte nicht bestimmt werden',
         'edit.enterTitle': 'Gib einen Eventtitel ein',
         'edit.selectDate': 'Wähle ein Datum',
@@ -1357,6 +1367,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Benutzer ist nicht angemeldet',
         'edit.failed': 'Event konnte nicht aktualisiert werden',
         'edit.unexpectedError': 'Beim Aktualisieren des Events ist ein Fehler aufgetreten',
+        'signup.confirmEmailTitle': 'Prüfe deine E-Mails',
+        'signup.confirmEmailMessage': 'Wir haben dir einen Bestätigungslink gesendet. Bitte bestätige deine E-Mail vor dem Anmelden.',
     },
 };
 

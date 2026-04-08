@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 type NotificationSettings = {
   notify_upcoming_events: boolean;
@@ -14,6 +15,8 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
   });
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<'notify_upcoming_events' | 'notify_new_participants' | null>(null);
+
+  const { translate } = useLanguage();
 
   const loadSettings = async () => {
     setLoading(true);
@@ -142,17 +145,19 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
         >
           <ChevronLeft size={24} />
         </button>
-        <h1>Notification Settings</h1>
+        <h1>{translate('notificationSettings.title')}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-sm mx-auto space-y-6">
           <div>
-            <h3 className="mb-4 text-sm text-muted-foreground">NOTIFICATIONS</h3>
+            <h3 className="mb-4 text-sm text-muted-foreground">
+              {translate('notificationSettings.sectionTitle')}
+            </h3>
 
             {loading && (
               <div className="text-sm text-muted-foreground">
-                Loading settings...
+                {translate('common.loadingSettings')}
               </div>
             )}
 
@@ -160,9 +165,9 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3">
                   <div>
-                    <p className="mb-1">Upcoming Events</p>
+                    <p className="mb-1">{translate('notificationSettings.upcomingEvents')}</p>
                     <p className="text-sm text-muted-foreground">
-                      Get notified before events start
+                      {translate('notificationSettings.upcomingEventsDescription')}
                     </p>
                   </div>
                   <ToggleSwitch
@@ -174,9 +179,9 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
 
                 <div className="flex items-center justify-between py-3">
                   <div>
-                    <p className="mb-1">New Participants</p>
+                    <p className="mb-1">{translate('notificationSettings.newParticipants')}</p>
                     <p className="text-sm text-muted-foreground">
-                      When someone joins your event
+                      {translate('notificationSettings.newParticipantsDescription')}
                     </p>
                   </div>
                   <ToggleSwitch

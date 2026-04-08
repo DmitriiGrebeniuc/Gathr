@@ -1,6 +1,9 @@
 import { ChevronLeft } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
+  const { translate } = useLanguage();
+
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="px-6 py-4 border-b border-border flex items-center gap-3">
@@ -10,7 +13,7 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
         >
           <ChevronLeft size={24} />
         </button>
-        <h1>Help & Support</h1>
+        <h1>{translate('support.title')}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-8">
@@ -22,9 +25,9 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
               backgroundColor: '#1A1A1A',
             }}
           >
-            <h3 className="mb-2">Support center</h3>
+            <h3 className="mb-2">{translate('support.cardTitle')}</h3>
             <p className="text-sm text-muted-foreground">
-              Help articles and support options will be available soon.
+              {translate('support.cardDescription')}
             </p>
           </div>
         </div>

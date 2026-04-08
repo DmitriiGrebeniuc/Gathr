@@ -1,19 +1,29 @@
+import type { LanguageCode } from './languages';
+import { t } from './translations';
+
 export const ACTIVITY_TYPES = [
-  { value: 'sports', label: 'Sports', emoji: '⚽' },
-  { value: 'networking', label: 'Networking', emoji: '🤝' },
-  { value: 'study', label: 'Study', emoji: '📚' },
-  { value: 'entertainment', label: 'Entertainment', emoji: '🎮' },
-  { value: 'food_drinks', label: 'Food & Drinks', emoji: '☕' },
-  { value: 'outdoors', label: 'Outdoors', emoji: '🌿' },
-  { value: 'tech', label: 'Tech', emoji: '💻' },
-  { value: 'other', label: 'Other', emoji: '✨' },
+  { value: 'sports', translationKey: 'activity.sports', emoji: '⚽' },
+  { value: 'networking', translationKey: 'activity.networking', emoji: '🤝' },
+  { value: 'study', translationKey: 'activity.study', emoji: '📚' },
+  { value: 'entertainment', translationKey: 'activity.entertainment', emoji: '🎮' },
+  { value: 'food_drinks', translationKey: 'activity.foodDrinks', emoji: '☕' },
+  { value: 'outdoors', translationKey: 'activity.outdoors', emoji: '🌿' },
+  { value: 'tech', translationKey: 'activity.tech', emoji: '💻' },
+  { value: 'other', translationKey: 'activity.other', emoji: '✨' },
 ] as const;
 
 export type ActivityType = (typeof ACTIVITY_TYPES)[number]['value'];
 
-export const getActivityTypeMeta = (value?: string | null) => {
-  return (
-    ACTIVITY_TYPES.find((type) => type.value === value) ||
-    ACTIVITY_TYPES.find((type) => type.value === 'other')!
-  );
+export const getActivityTypeMeta = (
+  value?: string | null,
+  language: LanguageCode = 'en'
+) => {
+  const type =
+    ACTIVITY_TYPES.find((item) => item.value === value) ||
+    ACTIVITY_TYPES.find((item) => item.value === 'other')!;
+
+  return {
+    ...type,
+    label: t(language, type.translationKey),
+  };
 };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 type EventItem = {
   id: string;
@@ -28,35 +29,51 @@ export function NotificationsScreen({
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { translate } = useLanguage();
+
+  const pluralize = (template: string, count: number) => {
+    const parts = template.split('|');
+    if (parts.length === 1) {
+      return template.replaceAll('{count}', String(count));
+    }
+
+    const selected = count === 1 ? parts[0] : parts[1];
+    return selected.replaceAll('{count}', String(count));
+  };
+
   const formatRelativeTime = (dateString?: string | null) => {
-    if (!dateString) return 'Time not specified';
+    if (!dateString) return translate('common.timeNotSpecified');
 
     const now = new Date();
     const eventDate = new Date(dateString);
 
     if (Number.isNaN(eventDate.getTime())) {
-      return 'Invalid time';
+      return translate('common.invalidTime');
     }
 
     const diffMs = eventDate.getTime() - now.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
-    if (diffMinutes < 0) return 'Started already';
-    if (diffMinutes < 60) return `In ${diffMinutes} min`;
-    if (diffHours < 24) return `In ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
+    if (diffMinutes < 0) return translate('notifications.startedAlready');
+    if (diffMinutes < 60) {
+      return translate('notifications.inMinutes').replaceAll('{count}', String(diffMinutes));
+    }
+    if (diffHours < 24) {
+      return pluralize(translate('notifications.inHours'), diffHours);
+    }
 
     return eventDate.toLocaleString();
   };
 
   const formatPastTime = (dateString?: string | null) => {
-    if (!dateString) return 'Just now';
+    if (!dateString) return translate('notifications.justNow');
 
     const now = new Date();
     const createdDate = new Date(dateString);
 
     if (Number.isNaN(createdDate.getTime())) {
-      return 'Just now';
+      return translate('notifications.justNow');
     }
 
     const diffMs = now.getTime() - createdDate.getTime();
@@ -64,10 +81,16 @@ export function NotificationsScreen({
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffMinutes < 1) return 'Just now';
-    if (diffMinutes < 60) return `${diffMinutes} min ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
-    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    if (diffMinutes < 1) return translate('notifications.justNow');
+    if (diffMinutes < 60) {
+      return translate('notifications.minutesAgo').replaceAll('{count}', String(diffMinutes));
+    }
+    if (diffHours < 24) {
+      return pluralize(translate('notifications.hoursAgo'), diffHours);
+    }
+    if (diffDays < 7) {
+      return pluralize(translate('notifications.daysAgo'), diffDays);
+    }
 
     return createdDate.toLocaleString();
   };
@@ -77,7 +100,7 @@ export function NotificationsScreen({
     const eventDate = new Date(event.date_time || '');
 
     if (Number.isNaN(eventDate.getTime())) {
-      return `${event.title} is coming up`;
+      return translate('notifications.upcomingDefault').replaceAll('{title}', event.title);
     }
 
     const diffMs = eventDate.getTime() - now.getTime();
@@ -85,14 +108,19 @@ export function NotificationsScreen({
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
     if (diffMinutes < 60) {
-      return `${event.title} starts in ${diffMinutes} min`;
+      return translate('notifications.startsInMinutes')
+        .replaceAll('{title}', event.title)
+        .replaceAll('{count}', String(diffMinutes));
     }
 
     if (diffHours < 24) {
-      return `${event.title} starts in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
+      return pluralize(
+        translate('notifications.startsInHours').replaceAll('{title}', event.title),
+        diffHours
+      );
     }
 
-    return `${event.title} is coming up`;
+    return translate('notifications.upcomingDefault').replaceAll('{title}', event.title);
   };
 
   const fetchNotifications = async () => {
@@ -184,11 +212,11 @@ export function NotificationsScreen({
         const { data: joins, error: joinsError } = await supabase
           .from('participants')
           .select(`
-      event_id,
-      user_id,
-      created_at,
-      profiles(name)
-    `)
+            event_id,
+            user_id,
+            created_at,
+            profiles(name)
+          `)
           .in('event_id', myEventIds)
           .neq('user_id', user.id);
 
@@ -237,17 +265,29 @@ export function NotificationsScreen({
                   ? joinRow.profiles[0]
                   : joinRow.profiles;
 
-                return profileData?.name || 'Someone';
+                return profileData?.name || translate('notifications.someone');
               });
 
               let message = '';
 
               if (names.length === 1) {
-                message = `${names[0]} joined your event ${relatedEvent?.title || ''}`.trim();
+                message = translate('notifications.joinedYourEvent')
+                  .split('|')[0]
+                  .replaceAll('{names}', names[0])
+                  .replaceAll('{title}', relatedEvent?.title || '');
               } else if (names.length === 2) {
-                message = `${names[0]} and ${names[1]} joined your event ${relatedEvent?.title || ''}`.trim();
+                message = translate('notifications.joinedYourEvent')
+                  .split('|')[1]
+                  .replaceAll('{names}', `${names[0]} ${translate('notifications.and')} ${names[1]}`)
+                  .replaceAll('{title}', relatedEvent?.title || '');
               } else {
-                message = `${names[0]}, ${names[1]} and ${names.length - 2} others joined your event ${relatedEvent?.title || ''}`.trim();
+                message = translate('notifications.joinedYourEvent')
+                  .split('|')[1]
+                  .replaceAll(
+                    '{names}',
+                    `${names[0]}, ${names[1]} ${translate('notifications.and')} ${names.length - 2} ${translate('notifications.others')}`
+                  )
+                  .replaceAll('{title}', relatedEvent?.title || '');
               }
 
               return {
@@ -257,7 +297,7 @@ export function NotificationsScreen({
                 time: formatPastTime(latestJoin.created_at),
                 event: relatedEvent || {
                   id: eventId,
-                  title: 'Event',
+                  title: translate('common.event'),
                   description: null,
                   date_time: null,
                   location: null,
@@ -343,13 +383,13 @@ export function NotificationsScreen({
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="px-6 py-4 border-b border-border">
-        <h1>Notifications</h1>
+        <h1>{translate('notifications.title')}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {loading && (
           <div className="px-6 py-4 text-sm text-muted-foreground">
-            Loading notifications...
+            {translate('common.loadingNotifications')}
           </div>
         )}
 
@@ -362,9 +402,9 @@ export function NotificationsScreen({
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
-              <h3 className="mb-2">No notifications yet</h3>
+              <h3 className="mb-2">{translate('notifications.emptyTitle')}</h3>
               <p className="text-sm text-muted-foreground">
-                Upcoming events and participant updates will appear here.
+                {translate('notifications.emptyDescription')}
               </p>
             </div>
           </div>
@@ -386,6 +426,11 @@ export function NotificationsScreen({
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
                 style={{ backgroundColor: '#3A3A3A' }}
+                title={
+                  notification.type === 'upcoming'
+                    ? translate('notifications.upcomingIconLabel')
+                    : translate('notifications.joinIconLabel')
+                }
               >
                 <span className="text-sm">
                   {notification.type === 'upcoming' ? '⏰' : '👋'}

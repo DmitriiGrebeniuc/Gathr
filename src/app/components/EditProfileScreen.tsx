@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 export function EditProfileScreen({
   onNavigate,
@@ -12,6 +13,8 @@ export function EditProfileScreen({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+
+  const { translate } = useLanguage();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -90,12 +93,12 @@ export function EditProfileScreen({
     const trimmedName = name.trim();
 
     if (!userId) {
-      alert('Пользователь не найден');
+      alert(translate('editProfile.userNotFound'));
       return;
     }
 
     if (!trimmedName) {
-      alert('Введите имя');
+      alert(translate('editProfile.enterName'));
       return;
     }
 
@@ -111,7 +114,7 @@ export function EditProfileScreen({
 
       if (error) {
         console.error('Ошибка обновления профиля:', error);
-        alert('Не удалось сохранить профиль');
+        alert(translate('editProfile.saveFailed'));
         setSaving(false);
         return;
       }
@@ -119,7 +122,7 @@ export function EditProfileScreen({
       onNavigate('profile');
     } catch (error) {
       console.error('Unexpected save profile error:', error);
-      alert('Произошла ошибка при сохранении профиля');
+      alert(translate('editProfile.unexpectedError'));
     } finally {
       setSaving(false);
     }
@@ -135,7 +138,7 @@ export function EditProfileScreen({
         >
           <ChevronLeft size={24} />
         </button>
-        <h1>Edit Profile</h1>
+        <h1>{translate('editProfile.title')}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-8">
@@ -153,7 +156,9 @@ export function EditProfileScreen({
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-muted-foreground mb-2">Name</label>
+              <label className="block text-sm text-muted-foreground mb-2">
+                {translate('editProfile.name')}
+              </label>
               <input
                 type="text"
                 value={name}
@@ -169,7 +174,9 @@ export function EditProfileScreen({
             </div>
 
             <div>
-              <label className="block text-sm text-muted-foreground mb-2">Email</label>
+              <label className="block text-sm text-muted-foreground mb-2">
+                {translate('editProfile.email')}
+              </label>
               <input
                 type="email"
                 value={email}
@@ -190,7 +197,11 @@ export function EditProfileScreen({
             className="w-full py-4 rounded-xl transition-all mt-8"
             style={{ backgroundColor: '#D4AF37', color: '#0F0F0F' }}
           >
-            {loading ? 'Loading...' : saving ? 'Saving...' : 'Save Changes'}
+            {loading
+              ? translate('editProfile.loading')
+              : saving
+                ? translate('editProfile.saving')
+                : translate('editProfile.saveButton')}
           </button>
         </div>
       </div>

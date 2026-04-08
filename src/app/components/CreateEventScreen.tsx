@@ -2,7 +2,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ACTIVITY_TYPES, type ActivityType } from '../constants/activityTypes';
+import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
 
 export function CreateEventScreen({
@@ -21,7 +21,7 @@ export function CreateEventScreen({
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
 
-  const { translate } = useLanguage();
+  const { language, translate } = useLanguage();
 
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -34,17 +34,17 @@ export function CreateEventScreen({
 
   const handleCreateEvent = async () => {
     if (!title.trim()) {
-      alert('Введите название события');
+      alert(translate('create.enterTitle'));
       return;
     }
 
     if (!date) {
-      alert('Выберите дату');
+      alert(translate('create.selectDate'));
       return;
     }
 
     if (!time) {
-      alert('Выберите время');
+      alert(translate('create.selectTime'));
       return;
     }
 
@@ -57,7 +57,7 @@ export function CreateEventScreen({
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert('Пользователь не авторизован');
+        alert(translate('create.userNotAuthenticated'));
         setLoading(false);
         return;
       }
@@ -65,7 +65,7 @@ export function CreateEventScreen({
       const dateTime = new Date(`${date}T${time}`);
 
       if (Number.isNaN(dateTime.getTime())) {
-        alert('Некорректные дата или время');
+        alert(translate('create.invalidDateTime'));
         setLoading(false);
         return;
       }
@@ -87,7 +87,7 @@ export function CreateEventScreen({
 
       if (error) {
         console.error('Ошибка создания события:', error);
-        alert('Не удалось создать событие');
+        alert(translate('create.failed'));
         setLoading(false);
         return;
       }
@@ -101,7 +101,7 @@ export function CreateEventScreen({
 
       if (participantError) {
         console.error('Ошибка добавления создателя в participants:', participantError);
-        alert('Событие создано, но автор не был добавлен в участники');
+        alert(translate('create.creatorParticipantFailed'));
         setLoading(false);
         return;
       }
@@ -109,7 +109,7 @@ export function CreateEventScreen({
       onNavigate('event-details', createdEvent);
     } catch (error) {
       console.error('Unexpected error:', error);
-      alert('Произошла ошибка при создании события');
+      alert(translate('create.unexpectedError'));
     } finally {
       setLoading(false);
     }
@@ -176,6 +176,7 @@ export function CreateEventScreen({
             <div className="flex flex-wrap gap-2">
               {ACTIVITY_TYPES.map((type) => {
                 const isActive = activityType === type.value;
+                const activityMeta = getActivityTypeMeta(type.value, language);
 
                 return (
                   <button
@@ -191,8 +192,8 @@ export function CreateEventScreen({
                       color: isActive ? '#D4AF37' : '#F5F5F5',
                     }}
                   >
-                    <span className="mr-2">{type.emoji}</span>
-                    <span>{type.label}</span>
+                    <span className="mr-2">{activityMeta.emoji}</span>
+                    <span>{activityMeta.label}</span>
                   </button>
                 );
               })}

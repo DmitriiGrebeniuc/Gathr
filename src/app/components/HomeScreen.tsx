@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
-import { t } from '../constants/translations';
 import {
   ACTIVITY_TYPES,
   type ActivityType,
@@ -42,7 +41,7 @@ export function HomeScreen({
   const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
- const { language, translate } = useLanguage();
+  const { language, translate } = useLanguage();
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -61,12 +60,12 @@ export function HomeScreen({
   };
 
   const formatEventDate = (dateString?: string | null) => {
-    if (!dateString) return 'Date not specified';
+    if (!dateString) return translate('common.dateNotSpecified');
 
     const date = new Date(dateString);
 
     if (Number.isNaN(date.getTime())) {
-      return 'Invalid date';
+      return translate('common.invalidDate');
     }
 
     return date.toLocaleString();
@@ -150,12 +149,12 @@ export function HomeScreen({
 
         if (profileError) {
           console.error('Ошибка загрузки профиля пользователя:', profileError);
-          setCurrentUserName('User');
+          setCurrentUserName(translate('common.user'));
         } else {
-          setCurrentUserName(profileData?.name || 'User');
+          setCurrentUserName(profileData?.name || translate('common.user'));
         }
       } else {
-        setCurrentUserName('User');
+        setCurrentUserName(translate('common.user'));
       }
 
       const { data: eventsData, error: eventsError } = await supabase
@@ -196,7 +195,7 @@ export function HomeScreen({
         } else {
           (profilesData || []).forEach((profile: any) => {
             if (!profile?.id) return;
-            creatorNameMap[profile.id] = profile.name || 'Unknown';
+            creatorNameMap[profile.id] = profile.name || translate('common.unknown');
           });
         }
       }
@@ -215,7 +214,9 @@ export function HomeScreen({
           date_time: event.date_time,
           location: event.location,
           creator_id: event.creator_id,
-          creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+          creatorName: event.creator_id
+            ? creatorNameMap[event.creator_id] || translate('common.unknown')
+            : translate('common.unknown'),
           activity_type: (event.activity_type || 'other') as ActivityType,
           participantCount: 0,
         }));
@@ -248,7 +249,9 @@ export function HomeScreen({
         date_time: event.date_time,
         location: event.location,
         creator_id: event.creator_id,
-        creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+        creatorName: event.creator_id
+          ? creatorNameMap[event.creator_id] || translate('common.unknown')
+          : translate('common.unknown'),
         activity_type: (event.activity_type || 'other') as ActivityType,
         participantCount: countsMap[event.id] || 0,
       }));
@@ -309,7 +312,7 @@ export function HomeScreen({
         } else {
           (profilesData || []).forEach((profile: any) => {
             if (!profile?.id) return;
-            creatorNameMap[profile.id] = profile.name || 'Unknown';
+            creatorNameMap[profile.id] = profile.name || translate('common.unknown');
           });
         }
       }
@@ -340,7 +343,9 @@ export function HomeScreen({
         date_time: event.date_time,
         location: event.location,
         creator_id: event.creator_id,
-        creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+        creatorName: event.creator_id
+          ? creatorNameMap[event.creator_id] || translate('common.unknown')
+          : translate('common.unknown'),
         activity_type: (event.activity_type || 'other') as ActivityType,
         participantCount: countsMap[event.id] || 0,
       }));
@@ -475,7 +480,7 @@ export function HomeScreen({
       supabase.removeChannel(eventsChannel);
       supabase.removeChannel(participantsChannel);
     };
-  }, [currentUserId]);
+  }, [currentUserId, language]);
 
   useEffect(() => {
     setVisibleCount(LOCAL_BATCH_SIZE);
@@ -483,7 +488,7 @@ export function HomeScreen({
 
   useEffect(() => {
     fetchEvents(true);
-  }, []);
+  }, [language]);
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -521,7 +526,7 @@ export function HomeScreen({
               : {}
           }
         >
-          {t(language, 'home.discover')}
+          {translate('home.discover')}
         </motion.button>
 
         <motion.button
@@ -536,7 +541,7 @@ export function HomeScreen({
               : {}
           }
         >
-          {t(language, 'home.joined')}
+          {translate('home.joined')}
         </motion.button>
 
         <motion.button
@@ -551,7 +556,7 @@ export function HomeScreen({
               : {}
           }
         >
-          {t(language, 'home.myEvents')}
+          {translate('home.myEvents')}
         </motion.button>
       </div>
 
@@ -571,11 +576,12 @@ export function HomeScreen({
               color: selectedActivityType === 'all' ? '#D4AF37' : '#F5F5F5',
             }}
           >
-            {t(language, 'home.all')}
+            {translate('home.all')}
           </button>
 
           {ACTIVITY_TYPES.map((type) => {
             const isActive = selectedActivityType === type.value;
+            const activityMeta = getActivityTypeMeta(type.value, language);
 
             return (
               <button
@@ -591,8 +597,8 @@ export function HomeScreen({
                   color: isActive ? '#D4AF37' : '#F5F5F5',
                 }}
               >
-                <span className="mr-2">{type.emoji}</span>
-                <span>{type.label}</span>
+                <span className="mr-2">{activityMeta.emoji}</span>
+                <span>{activityMeta.label}</span>
               </button>
             );
           })}
@@ -623,27 +629,27 @@ export function HomeScreen({
             >
               <h3 className="mb-2">
                 {activeTab === 'my'
-                  ? t(language, 'home.noMyEvents')
+                  ? translate('home.noMyEvents')
                   : activeTab === 'joined'
-                    ? t(language, 'home.noJoinedEvents')
-                    : t(language, 'home.noDiscoverEvents')}
+                    ? translate('home.noJoinedEvents')
+                    : translate('home.noDiscoverEvents')}
               </h3>
 
               <p className="text-sm text-muted-foreground">
                 {selectedActivityType !== 'all'
-                  ? t(language, 'home.noEventsForFilter')
+                  ? translate('home.noEventsForFilter')
                   : activeTab === 'my'
-                    ? t(language, 'home.createFirstEvent')
+                    ? translate('home.createFirstEvent')
                     : activeTab === 'joined'
-                      ? t(language, 'home.joinedWillAppear')
-                      : t(language, 'home.noEventsFromOthers')}
+                      ? translate('home.joinedWillAppear')
+                      : translate('home.noEventsFromOthers')}
               </p>
             </div>
           )}
 
           {visibleEvents.map((event, index) => {
             const past = isPastEvent(event.date_time);
-            const activityMeta = getActivityTypeMeta(event.activity_type);
+            const activityMeta = getActivityTypeMeta(event.activity_type, language);
 
             return (
               <motion.div
@@ -680,7 +686,7 @@ export function HomeScreen({
                         backgroundColor: 'rgba(212, 175, 55, 0.08)',
                       }}
                     >
-                      {t(language, 'home.past')}
+                      {translate('home.past')}
                     </span>
                   )}
                 </div>
@@ -704,19 +710,22 @@ export function HomeScreen({
                 </p>
 
                 <p className="text-sm text-muted-foreground mb-3">
-                  {event.location || 'Location not specified'}
+                  {event.location || translate('details.locationNotSpecified')}
                 </p>
 
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs text-muted-foreground">
-                    {t(language, 'home.createdBy')} {event.creator_id === currentUserId ? t(language, 'home.you') : event.creatorName || 'Unknown'}
+                    {translate('home.createdBy')}{' '}
+                    {event.creator_id === currentUserId
+                      ? translate('home.you')
+                      : event.creatorName || translate('common.unknown')}
                   </span>
 
                   <span className="text-xs text-muted-foreground">
                     {event.participantCount}{' '}
                     {event.participantCount === 1
-                      ? t(language, 'home.participant')
-                      : t(language, 'home.participants')}
+                      ? translate('home.participant')
+                      : translate('home.participants')}
                   </span>
                 </div>
               </motion.div>
@@ -735,7 +744,7 @@ export function HomeScreen({
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
-              {loadingMore ? t(language, 'home.loading') : t(language, 'home.loadMore')}
+              {loadingMore ? translate('home.loading') : translate('home.loadMore')}
             </motion.button>
           )}
         </div>

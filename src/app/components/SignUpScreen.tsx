@@ -3,6 +3,7 @@ import { TouchButton } from './TouchButton';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 export function SignUpScreen({
   onNavigate,
@@ -14,19 +15,21 @@ export function SignUpScreen({
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const { translate } = useLanguage();
+
   const handleSignUp = async () => {
     if (!name.trim()) {
-      alert('Введите имя');
+      alert(translate('signup.enterName'));
       return;
     }
 
     if (!email.trim()) {
-      alert('Введите email');
+      alert(translate('signup.enterEmail'));
       return;
     }
 
     if (!password.trim()) {
-      alert('Введите пароль');
+      alert(translate('signup.enterPassword'));
       return;
     }
 
@@ -40,7 +43,7 @@ export function SignUpScreen({
 
       if (error) {
         console.error('Ошибка регистрации:', error);
-        alert(error.message || 'Не удалось зарегистрироваться');
+        alert(error.message || translate('signup.failed'));
         setLoading(false);
         return;
       }
@@ -48,7 +51,7 @@ export function SignUpScreen({
       const userId = data.user?.id;
 
       if (!userId) {
-        alert('Пользователь создан, но не удалось получить его ID');
+        alert(translate('signup.userIdMissing'));
         setLoading(false);
         return;
       }
@@ -62,16 +65,16 @@ export function SignUpScreen({
 
       if (profileError) {
         console.error('Ошибка создания профиля:', profileError);
-        alert('Аккаунт создан, но профиль не сохранился');
+        alert(translate('signup.profileNotSaved'));
         setLoading(false);
         return;
       }
 
-      alert('Регистрация успешна');
+      alert(translate('signup.success'));
       onNavigate('home');
     } catch (error) {
       console.error('Unexpected signup error:', error);
-      alert('Произошла ошибка при регистрации');
+      alert(translate('signup.unexpectedError'));
     } finally {
       setLoading(false);
     }
@@ -86,7 +89,7 @@ export function SignUpScreen({
           className="self-start text-muted-foreground mb-8"
           disabled={loading}
         >
-          ← Back
+          ← {translate('signup.back')}
         </motion.button>
 
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
@@ -96,7 +99,7 @@ export function SignUpScreen({
             transition={{ delay: 0.1 }}
             className="mb-8"
           >
-            Create account
+            {translate('signup.title')}
           </motion.h2>
 
           <div className="space-y-4">
@@ -106,11 +109,11 @@ export function SignUpScreen({
               transition={{ delay: 0.15 }}
             >
               <label className="block mb-2 text-sm text-muted-foreground">
-                Name
+                {translate('signup.name')}
               </label>
               <input
                 type="text"
-                placeholder="Your name"
+                placeholder={translate('signup.namePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -124,11 +127,11 @@ export function SignUpScreen({
               transition={{ delay: 0.2 }}
             >
               <label className="block mb-2 text-sm text-muted-foreground">
-                Email
+                {translate('signup.email')}
               </label>
               <input
                 type="email"
-                placeholder="your@email.com"
+                placeholder={translate('signup.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -142,11 +145,11 @@ export function SignUpScreen({
               transition={{ delay: 0.25 }}
             >
               <label className="block mb-2 text-sm text-muted-foreground">
-                Password
+                {translate('signup.password')}
               </label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder={translate('signup.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -165,7 +168,7 @@ export function SignUpScreen({
                 fullWidth
                 className="mt-6"
               >
-                {loading ? 'Signing Up...' : 'Sign Up'}
+                {loading ? translate('signup.submitting') : translate('signup.submit')}
               </TouchButton>
             </motion.div>
 
@@ -175,14 +178,14 @@ export function SignUpScreen({
               transition={{ delay: 0.4 }}
               className="text-center text-sm text-muted-foreground mt-4"
             >
-              Already have an account?{' '}
+              {translate('signup.haveAccount')}{' '}
               <button
                 onClick={() => onNavigate('login')}
                 className="text-accent"
                 style={{ color: '#D4AF37' }}
                 disabled={loading}
               >
-                Log in
+                {translate('signup.loginLink')}
               </button>
             </motion.p>
           </div>

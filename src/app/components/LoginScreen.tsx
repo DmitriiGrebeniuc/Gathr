@@ -3,6 +3,7 @@ import { TouchButton } from './TouchButton';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 export function LoginScreen({
   onNavigate,
@@ -13,14 +14,16 @@ export function LoginScreen({
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const { translate } = useLanguage();
+
   const handleLogin = async () => {
     if (!email.trim()) {
-      alert('Введите email');
+      alert(translate('login.enterEmail'));
       return;
     }
 
     if (!password.trim()) {
-      alert('Введите пароль');
+      alert(translate('login.enterPassword'));
       return;
     }
 
@@ -34,7 +37,7 @@ export function LoginScreen({
 
       if (error) {
         console.error('Ошибка входа:', error);
-        alert(error.message || 'Не удалось войти');
+        alert(error.message || translate('login.failed'));
         setLoading(false);
         return;
       }
@@ -42,7 +45,7 @@ export function LoginScreen({
       onNavigate('home');
     } catch (error) {
       console.error('Unexpected login error:', error);
-      alert('Произошла ошибка при входе');
+      alert(translate('login.unexpectedError'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +60,7 @@ export function LoginScreen({
           className="self-start text-muted-foreground mb-8"
           disabled={loading}
         >
-          ← Back
+          ← {translate('login.back')}
         </motion.button>
 
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
@@ -67,7 +70,7 @@ export function LoginScreen({
             transition={{ delay: 0.1 }}
             className="mb-8"
           >
-            Welcome back
+            {translate('login.title')}
           </motion.h2>
 
           <div className="space-y-4">
@@ -77,11 +80,11 @@ export function LoginScreen({
               transition={{ delay: 0.2 }}
             >
               <label className="block mb-2 text-sm text-muted-foreground">
-                Email
+                {translate('login.email')}
               </label>
               <input
                 type="email"
-                placeholder="your@email.com"
+                placeholder={translate('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -95,11 +98,11 @@ export function LoginScreen({
               transition={{ delay: 0.3 }}
             >
               <label className="block mb-2 text-sm text-muted-foreground">
-                Password
+                {translate('login.password')}
               </label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder={translate('login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -118,7 +121,7 @@ export function LoginScreen({
                 fullWidth
                 className="mt-6"
               >
-                {loading ? 'Logging in...' : 'Log In'}
+                {loading ? translate('login.submitting') : translate('login.submit')}
               </TouchButton>
             </motion.div>
 
@@ -128,14 +131,14 @@ export function LoginScreen({
               transition={{ delay: 0.5 }}
               className="text-center text-sm text-muted-foreground mt-4"
             >
-              Don&apos;t have an account?{' '}
+              {translate('login.noAccount')}{' '}
               <button
                 onClick={() => onNavigate('signup')}
                 className="text-accent"
                 style={{ color: '#D4AF37' }}
                 disabled={loading}
               >
-                Sign up
+                {translate('login.signupLink')}
               </button>
             </motion.p>
           </div>

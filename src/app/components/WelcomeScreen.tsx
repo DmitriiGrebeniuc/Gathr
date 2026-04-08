@@ -1,7 +1,10 @@
 import { motion } from 'motion/react';
 import { TouchButton } from './TouchButton';
+import { useLanguage } from '../context/LanguageContext';
 
 export function WelcomeScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
+  const { translate } = useLanguage();
+
   return (
     <div className="h-full flex flex-col items-center justify-center px-6 bg-background">
       <div className="flex-1 flex items-center justify-center">
@@ -26,7 +29,7 @@ export function WelcomeScreen({ onNavigate }: { onNavigate: (screen: string) => 
             transition={{ delay: 0.4 }}
             className="text-muted-foreground"
           >
-            Fast. Simple. Together.
+            {translate('welcome.tagline')}
           </motion.p>
         </motion.div>
       </div>
@@ -42,15 +45,16 @@ export function WelcomeScreen({ onNavigate }: { onNavigate: (screen: string) => 
           variant="primary"
           fullWidth
         >
-          Log In
+          {translate('welcome.login')}
         </TouchButton>
+
         <TouchButton
           onClick={() => onNavigate('signup')}
           variant="ghost"
           fullWidth
           style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
         >
-          Sign Up
+          {translate('welcome.signup')}
         </TouchButton>
       </motion.div>
     </div>

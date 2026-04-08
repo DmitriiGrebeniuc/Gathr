@@ -17,6 +17,7 @@ import { SupportScreen } from './components/SupportScreen';
 import { BottomNav } from './components/BottomNav';
 import { ScreenTransition } from './components/ScreenTransition';
 import { supabase } from '../lib/supabase';
+import { LanguageScreen } from './components/LanguageScreen';
 
 type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
 
@@ -91,6 +92,7 @@ export default function App() {
       'notification-settings',
       'security',
       'support',
+      'language',
       'event-details',
       'participants',
     ];
@@ -196,6 +198,9 @@ export default function App() {
               )}
               {currentScreen === 'security' && <SecurityScreen onNavigate={handleNavigate} />}
               {currentScreen === 'support' && <SupportScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'language' && (
+                <LanguageScreen onNavigate={handleNavigate} />
+              )}
             </ScreenTransition>
           </AnimatePresence>
         </div>

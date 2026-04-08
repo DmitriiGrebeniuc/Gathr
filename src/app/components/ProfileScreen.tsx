@@ -174,6 +174,20 @@ export function ProfileScreen({
             </button>
 
             <button
+              onClick={() => onNavigate('language')}
+              className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
+              style={{
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: '#1A1A1A',
+              }}
+            >
+              <div className="flex justify-between items-center">
+                <span>Language</span>
+                <span className="text-muted-foreground">→</span>
+              </div>
+            </button>
+
+            <button
               onClick={() => onNavigate('security')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
               style={{

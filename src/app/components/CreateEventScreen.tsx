@@ -3,6 +3,7 @@ import { TouchButton } from './TouchButton';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, ActivityType } from '../constants/activityTypes';
+import { useLanguage } from '../context/LanguageContext';
 
 export function CreateEventScreen({
   onNavigate,
@@ -19,6 +20,8 @@ export function CreateEventScreen({
   const [location, setLocation] = useState('');
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
+
+  const { translate } = useLanguage();
 
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -130,9 +133,9 @@ export function CreateEventScreen({
           className="text-muted-foreground"
           disabled={loading}
         >
-          Cancel
+          {translate('create.cancel')}
         </motion.button>
-        <h2>Create Event</h2>
+        <h2>{translate('create.title')}</h2>
         <div className="w-14"></div>
       </div>
 
@@ -148,11 +151,11 @@ export function CreateEventScreen({
             transition={{ delay: 0.1 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Event Title
+              {translate('create.eventTitle')}
             </label>
             <input
               type="text"
-              placeholder="What are you planning?"
+              placeholder={translate('create.eventTitlePlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -169,7 +172,7 @@ export function CreateEventScreen({
             transition={{ delay: 0.13 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Activity Type
+              {translate('create.activityType')}
             </label>
 
             <div className="flex flex-wrap gap-2">
@@ -204,10 +207,10 @@ export function CreateEventScreen({
             transition={{ delay: 0.15 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Description
+              {translate('create.description')}
             </label>
             <textarea
-              placeholder="Add details about your event..."
+              placeholder={translate('create.descriptionPlaceholder')}
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -227,7 +230,7 @@ export function CreateEventScreen({
           >
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
-                Date
+                {translate('create.date')}
               </label>
               <input
                 type="date"
@@ -242,7 +245,7 @@ export function CreateEventScreen({
             </div>
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
-                Time
+                {translate('create.time')}
               </label>
               <input
                 type="time"
@@ -263,11 +266,11 @@ export function CreateEventScreen({
             transition={{ delay: 0.25 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Location
+              {translate('create.location')}
             </label>
             <input
               type="text"
-              placeholder="Where will it happen?"
+              placeholder={translate('create.locationPlaceholder')}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -291,7 +294,7 @@ export function CreateEventScreen({
           variant="primary"
           fullWidth
         >
-          {loading ? 'Creating...' : 'Create Event'}
+          {loading ? translate('create.creating') : translate('create.createButton')}
         </TouchButton>
       </motion.div>
     </motion.div>

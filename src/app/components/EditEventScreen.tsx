@@ -3,6 +3,7 @@ import { TouchButton } from './TouchButton';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, ActivityType } from '../constants/activityTypes';
+import { useLanguage } from '../context/LanguageContext';
 
 export function EditEventScreen({
   onNavigate,
@@ -21,6 +22,8 @@ export function EditEventScreen({
   const [location, setLocation] = useState('');
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
+
+  const { translate } = useLanguage();
 
   useEffect(() => {
     if (!event) return;
@@ -144,9 +147,9 @@ export function EditEventScreen({
           className="text-muted-foreground"
           disabled={loading}
         >
-          Cancel
+          {translate('edit.cancel')}
         </motion.button>
-        <h2>Edit Event</h2>
+        <h2>{translate('edit.title')}</h2>
         <div className="w-14"></div>
       </div>
 
@@ -162,11 +165,11 @@ export function EditEventScreen({
             transition={{ delay: 0.1 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Event Title
+              {translate('edit.eventTitle')}
             </label>
             <input
               type="text"
-              placeholder="What are you planning?"
+              placeholder={translate('edit.eventTitlePlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -183,7 +186,7 @@ export function EditEventScreen({
             transition={{ delay: 0.13 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Activity Type
+              {translate('edit.activityType')}
             </label>
 
             <div className="flex flex-wrap gap-2">
@@ -218,10 +221,10 @@ export function EditEventScreen({
             transition={{ delay: 0.15 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Description
+              {translate('edit.description')}
             </label>
             <textarea
-              placeholder="Add details about your event..."
+              placeholder={translate('edit.descriptionPlaceholder')}
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -241,7 +244,7 @@ export function EditEventScreen({
           >
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
-                Date
+                {translate('edit.date')}
               </label>
               <input
                 type="date"
@@ -257,7 +260,7 @@ export function EditEventScreen({
 
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
-                Time
+                {translate('edit.time')}
               </label>
               <input
                 type="time"
@@ -278,11 +281,11 @@ export function EditEventScreen({
             transition={{ delay: 0.25 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
-              Location
+              {translate('edit.location')}
             </label>
             <input
               type="text"
-              placeholder="Where will it happen?"
+              placeholder={translate('edit.locationPlaceholder')}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
@@ -306,7 +309,7 @@ export function EditEventScreen({
           variant="primary"
           fullWidth
         >
-          {loading ? 'Saving...' : 'Save Changes'}
+          {loading ? translate('edit.saving') : translate('edit.saveButton')}
         </TouchButton>
       </motion.div>
     </motion.div>

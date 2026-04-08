@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { LoadingLogo } from './LoadingLogo';
 
 type EventItem = {
   id: string;
@@ -388,8 +389,8 @@ export function NotificationsScreen({
 
       <div className="flex-1 overflow-y-auto">
         {loading && (
-          <div className="px-6 py-4 text-sm text-muted-foreground">
-            {translate('common.loadingNotifications')}
+          <div className="px-6 py-10 flex items-center justify-center">
+            <LoadingLogo size={52} label={translate('common.loadingNotifications')} />
           </div>
         )}
 

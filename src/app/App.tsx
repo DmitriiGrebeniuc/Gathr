@@ -16,8 +16,10 @@ import { SecurityScreen } from './components/SecurityScreen';
 import { SupportScreen } from './components/SupportScreen';
 import { BottomNav } from './components/BottomNav';
 import { ScreenTransition } from './components/ScreenTransition';
+import { LoadingLogo } from './components/LoadingLogo';
 import { supabase } from '../lib/supabase';
 import { LanguageScreen } from './components/LanguageScreen';
+import { useLanguage } from './context/LanguageContext';
 
 type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
 
@@ -27,6 +29,8 @@ export default function App() {
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
+
+  const { translate } = useLanguage();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -149,7 +153,7 @@ export default function App() {
             borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
           }}
         >
-          <p style={{ color: '#D4AF37' }}>Loading...</p>
+          <LoadingLogo label={translate('common.loading')} />
         </div>
       </div>
     );

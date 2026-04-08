@@ -8,6 +8,7 @@ import {
   type ActivityType,
   getActivityTypeMeta,
 } from '../constants/activityTypes';
+import { LoadingLogo } from './LoadingLogo';
 
 type EventItem = {
   id: string;
@@ -517,9 +518,8 @@ export function HomeScreen({
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setActiveTab('discover')}
-          className={`flex-1 py-3 transition-colors ${
-            activeTab === 'discover' ? 'border-b-2' : 'text-muted-foreground'
-          }`}
+          className={`flex-1 py-3 transition-colors ${activeTab === 'discover' ? 'border-b-2' : 'text-muted-foreground'
+            }`}
           style={
             activeTab === 'discover'
               ? { borderColor: '#D4AF37', color: '#D4AF37' }
@@ -532,9 +532,8 @@ export function HomeScreen({
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setActiveTab('joined')}
-          className={`flex-1 py-3 transition-colors ${
-            activeTab === 'joined' ? 'border-b-2' : 'text-muted-foreground'
-          }`}
+          className={`flex-1 py-3 transition-colors ${activeTab === 'joined' ? 'border-b-2' : 'text-muted-foreground'
+            }`}
           style={
             activeTab === 'joined'
               ? { borderColor: '#D4AF37', color: '#D4AF37' }
@@ -547,9 +546,8 @@ export function HomeScreen({
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setActiveTab('my')}
-          className={`flex-1 py-3 transition-colors ${
-            activeTab === 'my' ? 'border-b-2' : 'text-muted-foreground'
-          }`}
+          className={`flex-1 py-3 transition-colors ${activeTab === 'my' ? 'border-b-2' : 'text-muted-foreground'
+            }`}
           style={
             activeTab === 'my'
               ? { borderColor: '#D4AF37', color: '#D4AF37' }
@@ -608,14 +606,8 @@ export function HomeScreen({
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="h-full overflow-y-auto px-6 py-4 space-y-3">
           {shouldShowInitialLoader && (
-            <div className="flex justify-center py-6">
-              <div
-                className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-                style={{
-                  borderColor: 'rgba(212, 175, 55, 0.35)',
-                  borderTopColor: 'transparent',
-                }}
-              />
+            <div className="flex justify-center py-8">
+              <LoadingLogo size={52} label={translate('common.loading')} />
             </div>
           )}
 

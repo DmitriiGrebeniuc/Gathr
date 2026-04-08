@@ -2,7 +2,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ACTIVITY_TYPES, ActivityType } from '../constants/activityTypes';
+import { ACTIVITY_TYPES, type ActivityType } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
 
 export function EditEventScreen({
@@ -304,11 +304,7 @@ export function EditEventScreen({
         transition={{ delay: 0.3 }}
         className="p-6 border-t border-border"
       >
-        <TouchButton
-          onClick={handleUpdateEvent}
-          variant="primary"
-          fullWidth
-        >
+        <TouchButton onClick={handleUpdateEvent} variant="primary" fullWidth>
           {loading ? translate('edit.saving') : translate('edit.saveButton')}
         </TouchButton>
       </motion.div>

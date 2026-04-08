@@ -2,7 +2,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ACTIVITY_TYPES, ActivityType } from '../constants/activityTypes';
+import { ACTIVITY_TYPES, type ActivityType } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
 
 export function CreateEventScreen({
@@ -91,8 +91,6 @@ export function CreateEventScreen({
         setLoading(false);
         return;
       }
-
-      onNavigate('event-details', createdEvent);
 
       const { error: participantError } = await supabase.from('participants').insert([
         {
@@ -289,11 +287,7 @@ export function CreateEventScreen({
         transition={{ delay: 0.3 }}
         className="p-6 border-t border-border"
       >
-        <TouchButton
-          onClick={handleCreateEvent}
-          variant="primary"
-          fullWidth
-        >
+        <TouchButton onClick={handleCreateEvent} variant="primary" fullWidth>
           {loading ? translate('create.creating') : translate('create.createButton')}
         </TouchButton>
       </motion.div>

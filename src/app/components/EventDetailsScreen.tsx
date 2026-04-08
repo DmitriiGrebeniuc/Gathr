@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { TouchButton } from './TouchButton';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -31,6 +32,8 @@ export function EventDetailsScreen({
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
+
+  const { translate } = useLanguage();
 
   const backTarget = event?.backTarget || 'home';
 
@@ -338,7 +341,7 @@ export function EventDetailsScreen({
             onClick={() => onNavigate(resolvedBackTarget)}
             className="text-muted-foreground"
           >
-            ← Back
+            ← {translate('details.back')}
           </motion.button>
           <div className="w-14"></div>
         </div>
@@ -362,12 +365,12 @@ export function EventDetailsScreen({
                       backgroundColor: 'rgba(212, 175, 55, 0.08)',
                     }}
                   >
-                    Past event
+                    {translate('details.pastEvent')}
                   </span>
                 )}
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                {eventData.description || 'No description provided'}
+                {eventData.description || translate('details.noDescription')}
               </p>
             </motion.div>
 
@@ -385,7 +388,7 @@ export function EventDetailsScreen({
                   <span className="text-sm">📅</span>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Date & Time</p>
+                  <p className="text-sm text-muted-foreground">{translate('details.dateTime')}</p>
                   <p>{formatDate(eventData.date_time)}</p>
                 </div>
               </motion.div>
@@ -403,8 +406,8 @@ export function EventDetailsScreen({
                   <span className="text-sm">📍</span>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p>{eventData.location || 'Location not specified'}</p>
+                  <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
+                  <p>{eventData.location || translate('details.locationNotSpecified')}</p>
                 </div>
               </motion.div>
             </div>
@@ -424,7 +427,7 @@ export function EventDetailsScreen({
                 }
                 className="text-sm text-muted-foreground mb-3 hover:opacity-80 active:opacity-60 transition-opacity"
               >
-                Participants ({participants.length})
+                {translate('details.participants')} ({participants.length})
               </button>
 
               {participants.length > 0 ? (
@@ -456,11 +459,11 @@ export function EventDetailsScreen({
                         className="relative"
                         title={
                           isEventCreator && isCurrentUser
-                            ? `${name} • Creator • You`
+                            ? `${name} • ${translate('details.creator')} • ${translate('details.you')}`
                             : isEventCreator
-                              ? `${name} • Creator`
+                              ? `${name} • ${translate('details.creator')}`
                               : isCurrentUser
-                                ? `${name} • You`
+                                ? `${name} • ${translate('details.you')}`
                                 : name
                         }
                       >
@@ -484,7 +487,7 @@ export function EventDetailsScreen({
                               color: '#D4AF37',
                             }}
                           >
-                            You
+                            {translate('details.you')}
                           </div>
                         )}
                       </motion.div>
@@ -508,7 +511,7 @@ export function EventDetailsScreen({
                   className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"
                   style={{ backgroundColor: '#1A1A1A' }}
                 >
-                  No participants yet
+                  {translate('details.noParticipants')}
                 </div>
               )}
             </motion.div>
@@ -529,7 +532,7 @@ export function EventDetailsScreen({
                   fullWidth
                   onClick={handleLeave}
                 >
-                  {loadingAction ? 'Leaving...' : 'Leave Event'}
+                  {loadingAction ? translate('details.leaving') : translate('details.leaveEvent')}
                 </TouchButton>
               ) : !isPastEvent ? (
                 <TouchButton
@@ -537,14 +540,14 @@ export function EventDetailsScreen({
                   fullWidth
                   onClick={handleJoin}
                 >
-                  {loadingAction ? 'Joining...' : 'Join Event'}
+                  {loadingAction ? translate('details.joining') : translate('details.joinEvent')}
                 </TouchButton>
               ) : (
                 <div
                   className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border"
                   style={{ backgroundColor: '#1A1A1A' }}
                 >
-                  This event has already ended
+                  {translate('details.eventEnded')}
                 </div>
               )}
             </>
@@ -558,7 +561,7 @@ export function EventDetailsScreen({
                 onClick={() => onNavigate('edit-event', eventData)}
                 style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
               >
-                Edit Event
+                {translate('details.editEvent')}
               </TouchButton>
 
               <TouchButton
@@ -566,7 +569,7 @@ export function EventDetailsScreen({
                 fullWidth
                 onClick={handleDeleteEvent}
               >
-                {loadingDelete ? 'Deleting...' : 'Delete Event'}
+                {loadingDelete ? translate('details.deleting') : translate('details.deleteEvent')}
               </TouchButton>
             </>
           )}

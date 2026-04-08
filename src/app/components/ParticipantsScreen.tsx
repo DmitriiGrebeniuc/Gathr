@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 export function ParticipantsScreen({
     onNavigate,
@@ -13,6 +14,8 @@ export function ParticipantsScreen({
     const [participants, setParticipants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+    const { translate } = useLanguage();
 
     const parentBackTarget = event?.backTarget || 'home';
 
@@ -116,9 +119,9 @@ export function ParticipantsScreen({
                         }
                         className="text-muted-foreground"
                     >
-                        ← Back
+                        ← {translate('participants.back')}
                     </motion.button>
-                    <h2>Participants</h2>
+                    <h2>{translate('participants.title')}</h2>
                     <div className="w-14"></div>
                 </div>
 
@@ -126,16 +129,19 @@ export function ParticipantsScreen({
                     <div className="max-w-sm mx-auto space-y-4">
                         <div>
                             <p className="text-sm text-muted-foreground">
-                                {event?.title || 'Event'}
+                                {event?.title || translate('participants.eventFallback')}
                             </p>
                             <h3 className="mt-1">
-                                {participants.length} participant{participants.length === 1 ? '' : 's'}
+                                {participants.length}{' '}
+                                {participants.length === 1
+                                    ? translate('participants.participant')
+                                    : translate('participants.participants')}
                             </h3>
                         </div>
 
                         {loading && (
                             <div className="text-sm text-muted-foreground">
-                                Loading participants...
+                                {translate('participants.loading')}
                             </div>
                         )}
 
@@ -144,7 +150,7 @@ export function ParticipantsScreen({
                                 className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"
                                 style={{ backgroundColor: '#1A1A1A' }}
                             >
-                                No participants yet
+                                {translate('participants.noParticipants')}
                             </div>
                         )}
 
@@ -177,11 +183,11 @@ export function ParticipantsScreen({
                                                 }}
                                                 title={
                                                     isEventCreator && isCurrentUser
-                                                        ? `${name} • Creator • You`
+                                                        ? `${name} • ${translate('participants.creator')} • ${translate('participants.you')}`
                                                         : isEventCreator
-                                                            ? `${name} • Creator`
+                                                            ? `${name} • ${translate('participants.creator')}`
                                                             : isCurrentUser
-                                                                ? `${name} • You`
+                                                                ? `${name} • ${translate('participants.you')}`
                                                                 : name
                                                 }
                                             >
@@ -197,7 +203,7 @@ export function ParticipantsScreen({
                                                         color: '#D4AF37',
                                                     }}
                                                 >
-                                                    You
+                                                    {translate('participants.you')}
                                                 </div>
                                             )}
                                         </div>

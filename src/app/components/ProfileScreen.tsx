@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
 
 type CurrentUser = {
   id: string;
@@ -15,6 +16,8 @@ export function ProfileScreen({
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const { translate } = useLanguage();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -122,7 +125,7 @@ export function ProfileScreen({
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="px-6 py-4 border-b border-border">
-        <h1>Profile</h1>
+        <h1>{translate('profile.title')}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-8">
@@ -136,11 +139,11 @@ export function ProfileScreen({
             </div>
 
             <h2 className="mb-1">
-              {loading ? 'Loading...' : getDisplayName()}
+              {loading ? translate('profile.loading') : getDisplayName()}
             </h2>
 
             <p className="text-muted-foreground">
-              {loading ? 'Loading email...' : user?.email || 'No email'}
+              {loading ? translate('profile.loadingEmail') : user?.email || translate('profile.noEmail')}
             </p>
           </div>
 
@@ -154,7 +157,7 @@ export function ProfileScreen({
               }}
             >
               <div className="flex justify-between items-center">
-                <span>Edit Profile</span>
+                <span>{translate('profile.editProfile')}</span>
                 <span className="text-muted-foreground">→</span>
               </div>
             </button>
@@ -168,7 +171,7 @@ export function ProfileScreen({
               }}
             >
               <div className="flex justify-between items-center">
-                <span>Notification Settings</span>
+                <span>{translate('profile.notificationSettings')}</span>
                 <span className="text-muted-foreground">→</span>
               </div>
             </button>
@@ -182,7 +185,7 @@ export function ProfileScreen({
               }}
             >
               <div className="flex justify-between items-center">
-                <span>Language</span>
+                <span>{translate('profile.language')}</span>
                 <span className="text-muted-foreground">→</span>
               </div>
             </button>
@@ -196,7 +199,7 @@ export function ProfileScreen({
               }}
             >
               <div className="flex justify-between items-center">
-                <span>Privacy & Security</span>
+                <span>{translate('profile.privacySecurity')}</span>
                 <span className="text-muted-foreground">→</span>
               </div>
             </button>
@@ -210,7 +213,7 @@ export function ProfileScreen({
               }}
             >
               <div className="flex justify-between items-center">
-                <span>Help & Support</span>
+                <span>{translate('profile.helpSupport')}</span>
                 <span className="text-muted-foreground">→</span>
               </div>
             </button>
@@ -225,7 +228,7 @@ export function ProfileScreen({
               color: '#d4183d',
             }}
           >
-            {logoutLoading ? 'Logging out...' : 'Log Out'}
+            {logoutLoading ? translate('profile.loggingOut') : translate('profile.logout')}
           </button>
         </div>
       </div>

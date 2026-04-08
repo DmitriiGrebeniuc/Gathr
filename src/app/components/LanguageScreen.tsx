@@ -1,23 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { LANGUAGES, getLanguageMeta, type LanguageCode } from '../constants/languages';
-import { getStoredLanguage, setStoredLanguage } from '../../lib/language';
+import { useLanguage } from '../context/LanguageContext';
 
 export function LanguageScreen({
   onNavigate,
 }: {
   onNavigate: (screen: string, data?: any) => void;
 }) {
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>(getStoredLanguage());
+  const { language, setLanguage, translate } = useLanguage();
 
   const currentLanguage = useMemo(() => {
-    return getLanguageMeta(selectedLanguage);
-  }, [selectedLanguage]);
+    return getLanguageMeta(language);
+  }, [language]);
 
-  const handleSelectLanguage = (language: LanguageCode) => {
-    setSelectedLanguage(language);
-    setStoredLanguage(language);
+  const handleSelectLanguage = (nextLanguage: LanguageCode) => {
+    setLanguage(nextLanguage);
   };
 
   return (
@@ -29,10 +28,10 @@ export function LanguageScreen({
             onClick={() => onNavigate('profile')}
             className="text-muted-foreground"
           >
-            ← Back
+            ← {translate('language.back')}
           </motion.button>
 
-          <h2>Language</h2>
+          <h2>{translate('language.title')}</h2>
 
           <div className="w-14"></div>
         </div>
@@ -46,7 +45,9 @@ export function LanguageScreen({
                 borderColor: 'rgba(255, 255, 255, 0.08)',
               }}
             >
-              <p className="text-sm text-muted-foreground mb-2">Selected language</p>
+              <p className="text-sm text-muted-foreground mb-2">
+                {translate('language.selectedLanguage')}
+              </p>
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{currentLanguage.emoji}</span>
                 <span>{currentLanguage.label}</span>
@@ -54,14 +55,14 @@ export function LanguageScreen({
             </div>
 
             <div className="space-y-3">
-              {LANGUAGES.map((language) => {
-                const isActive = selectedLanguage === language.value;
+              {LANGUAGES.map((item) => {
+                const isActive = language === item.value;
 
                 return (
                   <motion.button
-                    key={language.value}
+                    key={item.value}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => handleSelectLanguage(language.value)}
+                    onClick={() => handleSelectLanguage(item.value)}
                     className="w-full p-4 rounded-xl border text-left transition-all"
                     style={{
                       backgroundColor: '#1A1A1A',
@@ -75,8 +76,8 @@ export function LanguageScreen({
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{language.emoji}</span>
-                        <span>{language.label}</span>
+                        <span className="text-2xl">{item.emoji}</span>
+                        <span>{item.label}</span>
                       </div>
 
                       <span

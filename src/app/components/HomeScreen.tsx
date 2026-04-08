@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
+import { useLanguage } from '../context/LanguageContext';
+import { t } from '../constants/translations';
 import {
   ACTIVITY_TYPES,
   type ActivityType,
@@ -39,6 +41,8 @@ export function HomeScreen({
   const [serverOffset, setServerOffset] = useState(0);
   const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+
+ const { language, translate } = useLanguage();
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -517,7 +521,7 @@ export function HomeScreen({
               : {}
           }
         >
-          Discover
+          {t(language, 'home.discover')}
         </motion.button>
 
         <motion.button
@@ -532,7 +536,7 @@ export function HomeScreen({
               : {}
           }
         >
-          Joined
+          {t(language, 'home.joined')}
         </motion.button>
 
         <motion.button
@@ -547,7 +551,7 @@ export function HomeScreen({
               : {}
           }
         >
-          My Events
+          {t(language, 'home.myEvents')}
         </motion.button>
       </div>
 
@@ -567,7 +571,7 @@ export function HomeScreen({
               color: selectedActivityType === 'all' ? '#D4AF37' : '#F5F5F5',
             }}
           >
-            All
+            {t(language, 'home.all')}
           </button>
 
           {ACTIVITY_TYPES.map((type) => {
@@ -619,19 +623,20 @@ export function HomeScreen({
             >
               <h3 className="mb-2">
                 {activeTab === 'my'
-                  ? 'No my events yet'
+                  ? t(language, 'home.noMyEvents')
                   : activeTab === 'joined'
-                    ? 'No joined events yet'
-                    : 'No discover events yet'}
+                    ? t(language, 'home.noJoinedEvents')
+                    : t(language, 'home.noDiscoverEvents')}
               </h3>
+
               <p className="text-sm text-muted-foreground">
                 {selectedActivityType !== 'all'
-                  ? `No events found for this activity type in ${activeTab === 'my' ? 'your events' : activeTab === 'joined' ? 'joined events' : 'discover'}.`
+                  ? t(language, 'home.noEventsForFilter')
                   : activeTab === 'my'
-                    ? 'Create your first event by tapping the + button.'
+                    ? t(language, 'home.createFirstEvent')
                     : activeTab === 'joined'
-                      ? 'Events you join will appear here.'
-                      : 'There are no events from other users yet.'}
+                      ? t(language, 'home.joinedWillAppear')
+                      : t(language, 'home.noEventsFromOthers')}
               </p>
             </div>
           )}
@@ -675,7 +680,7 @@ export function HomeScreen({
                         backgroundColor: 'rgba(212, 175, 55, 0.08)',
                       }}
                     >
-                      Past
+                      {t(language, 'home.past')}
                     </span>
                   )}
                 </div>
@@ -704,11 +709,14 @@ export function HomeScreen({
 
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-xs text-muted-foreground">
-                    Created by {event.creator_id === currentUserId ? 'You' : event.creatorName || 'Unknown'}
+                    {t(language, 'home.createdBy')} {event.creator_id === currentUserId ? t(language, 'home.you') : event.creatorName || 'Unknown'}
                   </span>
 
                   <span className="text-xs text-muted-foreground">
-                    {event.participantCount} participant{event.participantCount === 1 ? '' : 's'}
+                    {event.participantCount}{' '}
+                    {event.participantCount === 1
+                      ? t(language, 'home.participant')
+                      : t(language, 'home.participants')}
                   </span>
                 </div>
               </motion.div>
@@ -727,7 +735,7 @@ export function HomeScreen({
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
-              {loadingMore ? 'Loading...' : 'Load more'}
+              {loadingMore ? t(language, 'home.loading') : t(language, 'home.loadMore')}
             </motion.button>
           )}
         </div>

@@ -4,6 +4,7 @@ import { SwipeableScreen } from './SwipeableScreen';
 import { TouchButton } from './TouchButton';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { EventLocationMap } from './EventLocationMap';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -54,6 +55,10 @@ export function EventDetailsScreen({
 
     return date.toLocaleString();
   };
+
+  const hasLocationCoordinates =
+    typeof eventData.location_lat === 'number' &&
+    typeof eventData.location_lng === 'number';
 
   const loadEvent = async () => {
     if (!event?.id) {
@@ -397,18 +402,30 @@ export function EventDetailsScreen({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="flex items-start gap-3"
+                className="space-y-3"
               >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: '#3A3A3A' }}
-                >
-                  <span className="text-sm">📍</span>
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: '#3A3A3A' }}
+                  >
+                    <span className="text-sm">📍</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
+                    <p>{eventData.location || translate('details.locationNotSpecified')}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
-                  <p>{eventData.location || translate('details.locationNotSpecified')}</p>
-                </div>
+
+                {hasLocationCoordinates && (
+                  <div className="pl-[52px]">
+                    <EventLocationMap
+                      lat={eventData.location_lat}
+                      lng={eventData.location_lng}
+                      height={240}
+                    />
+                  </div>
+                )}
               </motion.div>
             </div>
 

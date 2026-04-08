@@ -152,6 +152,9 @@ type TranslationKey =
     | 'create.time'
     | 'create.location'
     | 'create.locationPlaceholder'
+    | 'create.locationApiKeyMissing'
+    | 'create.createButton'
+    | 'create.creating'
     | 'create.createButton'
     | 'create.creating'
     | 'edit.title'
@@ -211,7 +214,8 @@ type TranslationKey =
     | 'edit.failed'
     | 'edit.unexpectedError'
     | 'signup.confirmEmailTitle'
-    | 'signup.confirmEmailMessage';
+    | 'signup.confirmEmailMessage'
+    | 'edit.locationApiKeyMissing';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     en: {
@@ -380,6 +384,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.time': 'Time',
         'create.location': 'Location',
         'create.locationPlaceholder': 'Where will it happen?',
+        'create.locationApiKeyMissing': 'Google Maps API key is missing. Address suggestions are unavailable.',
         'create.createButton': 'Create Event',
         'create.creating': 'Creating...',
 
@@ -441,6 +446,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'User is not authenticated',
         'edit.failed': 'Failed to update event',
         'edit.unexpectedError': 'An error occurred while updating the event',
+        'edit.locationApiKeyMissing': 'Google Maps API key is missing. Address suggestions are unavailable.',
         'signup.confirmEmailTitle': 'Check your email',
         'signup.confirmEmailMessage': 'We sent you a confirmation link. Please confirm your email before logging in.',
     },
@@ -611,6 +617,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.time': 'Время',
         'create.location': 'Локация',
         'create.locationPlaceholder': 'Где это произойдет?',
+        'create.locationApiKeyMissing': 'Отсутствует Google Maps API key. Подсказки адресов недоступны.',
         'create.createButton': 'Создать событие',
         'create.creating': 'Создание...',
 
@@ -672,6 +679,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Пользователь не авторизован',
         'edit.failed': 'Не удалось обновить событие',
         'edit.unexpectedError': 'Произошла ошибка при обновлении события',
+        'edit.locationApiKeyMissing': 'Отсутствует Google Maps API key. Подсказки адресов недоступны.',
         'signup.confirmEmailTitle': 'Проверь почту',
         'signup.confirmEmailMessage': 'Мы отправили ссылку для подтверждения. Подтверди email перед входом.',
     },
@@ -842,6 +850,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.time': 'Ora',
         'create.location': 'Locație',
         'create.locationPlaceholder': 'Unde va avea loc?',
+        'create.locationApiKeyMissing': 'Lipsește cheia Google Maps API. Sugestiile de adresă nu sunt disponibile.',
         'create.createButton': 'Creează eveniment',
         'create.creating': 'Se creează...',
 
@@ -904,6 +913,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Utilizatorul nu este autentificat',
         'edit.failed': 'Evenimentul nu a putut fi actualizat',
         'edit.unexpectedError': 'A apărut o eroare la actualizarea evenimentului',
+        'edit.locationApiKeyMissing': 'Lipsește cheia Google Maps API. Sugestiile de adresă nu sunt disponibile.',
         'signup.confirmEmailTitle': 'Verifică emailul',
         'signup.confirmEmailMessage': 'Ți-am trimis un link de confirmare. Confirmă emailul înainte de autentificare.',
     },
@@ -1074,6 +1084,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.time': 'Час',
         'create.location': 'Локація',
         'create.locationPlaceholder': 'Де це відбудеться?',
+        'create.locationApiKeyMissing': 'Відсутній Google Maps API key. Підказки адрес недоступні.',
         'create.createButton': 'Створити подію',
         'create.creating': 'Створення...',
 
@@ -1135,6 +1146,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Користувач не авторизований',
         'edit.failed': 'Не вдалося оновити подію',
         'edit.unexpectedError': 'Сталася помилка під час оновлення події',
+        'edit.locationApiKeyMissing': 'Відсутній Google Maps API key. Підказки адрес недоступні.',
         'signup.confirmEmailTitle': 'Перевір пошту',
         'signup.confirmEmailMessage': 'Ми надіслали посилання для підтвердження. Підтверди email перед входом.',
     },
@@ -1305,6 +1317,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.time': 'Uhrzeit',
         'create.location': 'Ort',
         'create.locationPlaceholder': 'Wo findet es statt?',
+        'create.locationApiKeyMissing': 'Der Google Maps API key fehlt. Adressvorschläge sind nicht verfügbar.',
         'create.createButton': 'Event erstellen',
         'create.creating': 'Wird erstellt...',
         'create.enterTitle': 'Gib einen Eventtitel ein',
@@ -1367,6 +1380,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.userNotAuthenticated': 'Benutzer ist nicht angemeldet',
         'edit.failed': 'Event konnte nicht aktualisiert werden',
         'edit.unexpectedError': 'Beim Aktualisieren des Events ist ein Fehler aufgetreten',
+        'edit.locationApiKeyMissing': 'Der Google Maps API key fehlt. Adressvorschläge sind nicht verfügbar.',
         'signup.confirmEmailTitle': 'Prüfe deine E-Mails',
         'signup.confirmEmailMessage': 'Wir haben dir einen Bestätigungslink gesendet. Bitte bestätige deine E-Mail vor dem Anmelden.',
     },

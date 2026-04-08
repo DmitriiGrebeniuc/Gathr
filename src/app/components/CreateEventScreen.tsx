@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
+import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
+import { EventLocationMap } from './EventLocationMap';
 
 export function CreateEventScreen({
   onNavigate,
@@ -17,7 +19,12 @@ export function CreateEventScreen({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState<LocationValue>({
+    address: '',
+    placeId: null,
+    lat: null,
+    lng: null,
+  });
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +37,25 @@ export function CreateEventScreen({
     if (info.offset.y > 150) {
       onNavigate('home');
     }
+  };
+
+  const handleMapPick = ({
+    lat,
+    lng,
+    address,
+    placeId,
+  }: {
+    lat: number;
+    lng: number;
+    address: string;
+    placeId: string | null;
+  }) => {
+    setLocation({
+      address: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+      placeId,
+      lat,
+      lng,
+    });
   };
 
   const handleCreateEvent = async () => {
@@ -77,7 +103,10 @@ export function CreateEventScreen({
             title: title.trim(),
             description: description.trim() || null,
             date_time: dateTime.toISOString(),
-            location: location.trim() || null,
+            location: location.address.trim() || null,
+            location_place_id: location.placeId,
+            location_lat: location.lat,
+            location_lng: location.lng,
             activity_type: activityType,
             creator_id: user.id,
           },
@@ -264,20 +293,22 @@ export function CreateEventScreen({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
           >
-            <label className="block mb-2 text-sm text-muted-foreground">
-              {translate('create.location')}
-            </label>
-            <input
-              type="text"
+            <LocationAutocomplete
+              label={translate('create.location')}
               placeholder={translate('create.locationPlaceholder')}
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-              style={{
-                backgroundColor: '#1A1A1A',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}
+              onChange={setLocation}
+              disabled={loading}
             />
+            <div className="mt-3">
+              <EventLocationMap
+                lat={location.lat}
+                lng={location.lng}
+                editable
+                onPick={handleMapPick}
+                height={220}
+              />
+            </div>
           </motion.div>
         </div>
       </div>

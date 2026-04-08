@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
+import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
+import { EventLocationMap } from './EventLocationMap';
 
 export function EditEventScreen({
   onNavigate,
@@ -19,7 +21,12 @@ export function EditEventScreen({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState<LocationValue>({
+    address: '',
+    placeId: null,
+    lat: null,
+    lng: null,
+  });
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +37,12 @@ export function EditEventScreen({
 
     setTitle(event.title || '');
     setDescription(event.description || '');
-    setLocation(event.location || '');
+    setLocation({
+      address: event.location || '',
+      placeId: event.location_place_id || null,
+      lat: typeof event.location_lat === 'number' ? event.location_lat : null,
+      lng: typeof event.location_lng === 'number' ? event.location_lng : null,
+    });
     setActivityType((event.activity_type || 'other') as ActivityType);
 
     if (event.date_time) {
@@ -56,6 +68,25 @@ export function EditEventScreen({
     if (info.offset.y > 150) {
       onNavigate('event-details', event);
     }
+  };
+
+  const handleMapPick = ({
+    lat,
+    lng,
+    address,
+    placeId,
+  }: {
+    lat: number;
+    lng: number;
+    address: string;
+    placeId: string | null;
+  }) => {
+    setLocation({
+      address: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+      placeId,
+      lat,
+      lng,
+    });
   };
 
   const handleUpdateEvent = async () => {
@@ -107,7 +138,10 @@ export function EditEventScreen({
           title: title.trim(),
           description: description.trim() || null,
           date_time: dateTime.toISOString(),
-          location: location.trim() || null,
+          location: location.address.trim() || null,
+          location_place_id: location.placeId,
+          location_lat: location.lat,
+          location_lng: location.lng,
           activity_type: activityType,
         })
         .eq('id', event.id)
@@ -281,20 +315,22 @@ export function EditEventScreen({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
           >
-            <label className="block mb-2 text-sm text-muted-foreground">
-              {translate('edit.location')}
-            </label>
-            <input
-              type="text"
+            <LocationAutocomplete
+              label={translate('edit.location')}
               placeholder={translate('edit.locationPlaceholder')}
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-              style={{
-                backgroundColor: '#1A1A1A',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}
+              onChange={setLocation}
+              disabled={loading}
             />
+            <div className="mt-3">
+              <EventLocationMap
+                lat={location.lat}
+                lng={location.lng}
+                editable
+                onPick={handleMapPick}
+                height={220}
+              />
+            </div>
           </motion.div>
         </div>
       </div>

@@ -201,7 +201,15 @@ type TranslationKey =
     | 'create.invalidDateTime'
     | 'create.failed'
     | 'create.creatorParticipantFailed'
-    | 'create.unexpectedError';
+    | 'create.unexpectedError'
+    | 'edit.eventNotFound'
+    | 'edit.enterTitle'
+    | 'edit.selectDate'
+    | 'edit.selectTime'
+    | 'edit.invalidDateTime'
+    | 'edit.userNotAuthenticated'
+    | 'edit.failed'
+    | 'edit.unexpectedError';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     en: {
@@ -423,6 +431,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.failed': 'Failed to create event',
         'create.creatorParticipantFailed': 'Event was created, but the creator was not added as a participant',
         'create.unexpectedError': 'An error occurred while creating the event',
+        'edit.eventNotFound': 'Could not determine the event',
+        'edit.enterTitle': 'Enter an event title',
+        'edit.selectDate': 'Select a date',
+        'edit.selectTime': 'Select a time',
+        'edit.invalidDateTime': 'Invalid date or time',
+        'edit.userNotAuthenticated': 'User is not authenticated',
+        'edit.failed': 'Failed to update event',
+        'edit.unexpectedError': 'An error occurred while updating the event',
     },
 
     ru: {
@@ -644,6 +660,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.failed': 'Не удалось создать событие',
         'create.creatorParticipantFailed': 'Событие создано, но автор не был добавлен в участники',
         'create.unexpectedError': 'Произошла ошибка при создании события',
+        'edit.eventNotFound': 'Не удалось определить событие',
+        'edit.enterTitle': 'Введите название события',
+        'edit.selectDate': 'Выберите дату',
+        'edit.selectTime': 'Выберите время',
+        'edit.invalidDateTime': 'Некорректные дата или время',
+        'edit.userNotAuthenticated': 'Пользователь не авторизован',
+        'edit.failed': 'Не удалось обновить событие',
+        'edit.unexpectedError': 'Произошла ошибка при обновлении события',
     },
 
     ro: {
@@ -865,6 +889,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.failed': 'Evenimentul nu a putut fi creat',
         'create.creatorParticipantFailed': 'Evenimentul a fost creat, dar autorul nu a fost adăugat ca participant',
         'create.unexpectedError': 'A apărut o eroare la crearea evenimentului',
+
+        'edit.eventNotFound': 'Evenimentul nu a putut fi identificat',
+        'edit.enterTitle': 'Introdu titlul evenimentului',
+        'edit.selectDate': 'Selectează data',
+        'edit.selectTime': 'Selectează ora',
+        'edit.invalidDateTime': 'Data sau ora este invalidă',
+        'edit.userNotAuthenticated': 'Utilizatorul nu este autentificat',
+        'edit.failed': 'Evenimentul nu a putut fi actualizat',
+        'edit.unexpectedError': 'A apărut o eroare la actualizarea evenimentului',
     },
 
     uk: {
@@ -1086,6 +1119,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.failed': 'Не вдалося створити подію',
         'create.creatorParticipantFailed': 'Подію створено, але автора не було додано до учасників',
         'create.unexpectedError': 'Сталася помилка під час створення події',
+        'edit.eventNotFound': 'Не вдалося визначити подію',
+        'edit.enterTitle': 'Введіть назву події',
+        'edit.selectDate': 'Оберіть дату',
+        'edit.selectTime': 'Оберіть час',
+        'edit.invalidDateTime': 'Некоректні дата або час',
+        'edit.userNotAuthenticated': 'Користувач не авторизований',
+        'edit.failed': 'Не вдалося оновити подію',
+        'edit.unexpectedError': 'Сталася помилка під час оновлення події',
     },
 
     de: {
@@ -1228,6 +1269,34 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.joined': 'Beigetreten',
         'home.myEvents': 'Meine Events',
         'home.all': 'Alle',
+        'home.loadMore': 'Mehr laden',
+        'home.loading': 'Wird geladen...',
+        'home.createdBy': 'Erstellt von',
+        'home.you': 'Du',
+        'home.participant': 'Teilnehmer',
+        'home.participants': 'Teilnehmer',
+        'home.past': 'Vergangen',
+        'home.noMyEvents': 'Du hast noch keine Events',
+        'home.noJoinedEvents': 'Du bist noch keinem Event beigetreten',
+        'home.noDiscoverEvents': 'Noch keine Events vorhanden',
+        'home.noEventsForFilter': 'Für diesen Aktivitätstyp wurden keine Events gefunden.',
+        'home.createFirstEvent': 'Erstelle dein erstes Event mit der + Taste.',
+        'home.joinedWillAppear': 'Events, denen du beitrittst, erscheinen hier.',
+        'home.noEventsFromOthers': 'Es gibt noch keine Events von anderen Nutzern.',
+
+        'create.title': 'Event erstellen',
+        'create.cancel': 'Abbrechen',
+        'create.eventTitle': 'Eventtitel',
+        'create.eventTitlePlaceholder': 'Was planst du?',
+        'create.activityType': 'Aktivitätstyp',
+        'create.description': 'Beschreibung',
+        'create.descriptionPlaceholder': 'Füge Details zu deinem Event hinzu...',
+        'create.date': 'Datum',
+        'create.time': 'Uhrzeit',
+        'create.location': 'Ort',
+        'create.locationPlaceholder': 'Wo findet es statt?',
+        'create.createButton': 'Event erstellen',
+        'create.creating': 'Wird erstellt...',
         'create.enterTitle': 'Gib einen Eventtitel ein',
         'create.selectDate': 'Wähle ein Datum',
         'create.selectTime': 'Wähle eine Uhrzeit',
@@ -1236,33 +1305,61 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.failed': 'Event konnte nicht erstellt werden',
         'create.creatorParticipantFailed': 'Das Event wurde erstellt, aber der Ersteller wurde nicht als Teilnehmer hinzugefügt',
         'create.unexpectedError': 'Beim Erstellen des Events ist ein Fehler aufgetreten',
+
+        'edit.title': 'Event bearbeiten',
+        'edit.cancel': 'Abbrechen',
+        'edit.eventTitle': 'Eventtitel',
+        'edit.eventTitlePlaceholder': 'Was planst du?',
+        'edit.activityType': 'Aktivitätstyp',
+        'edit.description': 'Beschreibung',
+        'edit.descriptionPlaceholder': 'Füge Details zu deinem Event hinzu...',
+        'edit.date': 'Datum',
+        'edit.time': 'Uhrzeit',
+        'edit.location': 'Ort',
+        'edit.locationPlaceholder': 'Wo findet es statt?',
+        'edit.saveButton': 'Änderungen speichern',
+        'edit.saving': 'Wird gespeichert...',
+
+        'details.back': 'Zurück',
+        'details.pastEvent': 'Vergangenes Event',
+        'details.noDescription': 'Keine Beschreibung vorhanden',
+        'details.dateTime': 'Datum & Uhrzeit',
+        'details.location': 'Ort',
+        'details.locationNotSpecified': 'Ort nicht angegeben',
+        'details.participants': 'Teilnehmer',
+        'details.noParticipants': 'Noch keine Teilnehmer',
+        'details.you': 'Du',
+        'details.creator': 'Ersteller',
+        'details.leaveEvent': 'Event verlassen',
+        'details.leaving': 'Wird verlassen...',
+        'details.joinEvent': 'Event beitreten',
+        'details.joining': 'Wird beigetreten...',
+        'details.eventEnded': 'Dieses Event ist bereits beendet',
+        'details.editEvent': 'Event bearbeiten',
+        'details.deleteEvent': 'Event löschen',
+        'details.deleting': 'Wird gelöscht...',
+
+        'participants.back': 'Zurück',
+        'participants.title': 'Teilnehmer',
+        'participants.loading': 'Teilnehmer werden geladen...',
+        'participants.noParticipants': 'Noch keine Teilnehmer',
+        'participants.eventFallback': 'Event',
+        'participants.participant': 'Teilnehmer',
+        'participants.participants': 'Teilnehmer',
+        'participants.you': 'Du',
+        'participants.creator': 'Ersteller',
+        
+        'edit.eventNotFound': 'Event konnte nicht bestimmt werden',
+        'edit.enterTitle': 'Gib einen Eventtitel ein',
+        'edit.selectDate': 'Wähle ein Datum',
+        'edit.selectTime': 'Wähle eine Uhrzeit',
+        'edit.invalidDateTime': 'Ungültiges Datum oder ungültige Uhrzeit',
+        'edit.userNotAuthenticated': 'Benutzer ist nicht angemeldet',
+        'edit.failed': 'Event konnte nicht aktualisiert werden',
+        'edit.unexpectedError': 'Beim Aktualisieren des Events ist ein Fehler aufgetreten',
     },
-        import type { LanguageCode } from './languages';
-import { t } from './translations';
+};
 
-export const ACTIVITY_TYPES = [
-    { value: 'sports', translationKey: 'activity.sports', emoji: '⚽' },
-    { value: 'networking', translationKey: 'activity.networking', emoji: '🤝' },
-    { value: 'study', translationKey: 'activity.study', emoji: '📚' },
-    { value: 'entertainment', translationKey: 'activity.entertainment', emoji: '🎮' },
-    { value: 'food_drinks', translationKey: 'activity.foodDrinks', emoji: '☕' },
-    { value: 'outdoors', translationKey: 'activity.outdoors', emoji: '🌿' },
-    { value: 'tech', translationKey: 'activity.tech', emoji: '💻' },
-    { value: 'other', translationKey: 'activity.other', emoji: '✨' },
-] as const;
-
-export type ActivityType = (typeof ACTIVITY_TYPES)[number]['value'];
-
-export const getActivityTypeMeta = (
-    value?: string | null,
-    language: LanguageCode = 'en'
-) => {
-    const type =
-        ACTIVITY_TYPES.find((item) => item.value === value) ||
-        ACTIVITY_TYPES.find((item) => item.value === 'other')!;
-
-    return {
-        ...type,
-        label: t(language, type.translationKey),
-    };
+export const t = (language: LanguageCode, key: TranslationKey) => {
+    return translations[language][key] || translations.en[key] || key;
 };

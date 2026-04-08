@@ -2,7 +2,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { ACTIVITY_TYPES, type ActivityType } from '../constants/activityTypes';
+import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
 
 export function EditEventScreen({
@@ -23,7 +23,7 @@ export function EditEventScreen({
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
 
-  const { translate } = useLanguage();
+  const { language, translate } = useLanguage();
 
   useEffect(() => {
     if (!event) return;
@@ -60,22 +60,22 @@ export function EditEventScreen({
 
   const handleUpdateEvent = async () => {
     if (!event?.id) {
-      alert('Не удалось определить событие');
+      alert(translate('edit.eventNotFound'));
       return;
     }
 
     if (!title.trim()) {
-      alert('Введите название события');
+      alert(translate('edit.enterTitle'));
       return;
     }
 
     if (!date) {
-      alert('Выберите дату');
+      alert(translate('edit.selectDate'));
       return;
     }
 
     if (!time) {
-      alert('Выберите время');
+      alert(translate('edit.selectTime'));
       return;
     }
 
@@ -85,7 +85,7 @@ export function EditEventScreen({
       const dateTime = new Date(`${date}T${time}`);
 
       if (Number.isNaN(dateTime.getTime())) {
-        alert('Некорректные дата или время');
+        alert(translate('edit.invalidDateTime'));
         setLoading(false);
         return;
       }
@@ -96,7 +96,7 @@ export function EditEventScreen({
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert('Пользователь не авторизован');
+        alert(translate('edit.userNotAuthenticated'));
         setLoading(false);
         return;
       }
@@ -117,7 +117,7 @@ export function EditEventScreen({
 
       if (error) {
         console.error('Ошибка обновления события:', error);
-        alert('Не удалось обновить событие');
+        alert(translate('edit.failed'));
         setLoading(false);
         return;
       }
@@ -125,7 +125,7 @@ export function EditEventScreen({
       onNavigate('event-details', updatedEvent);
     } catch (error) {
       console.error('Unexpected update error:', error);
-      alert('Произошла ошибка при обновлении события');
+      alert(translate('edit.unexpectedError'));
     } finally {
       setLoading(false);
     }
@@ -192,6 +192,7 @@ export function EditEventScreen({
             <div className="flex flex-wrap gap-2">
               {ACTIVITY_TYPES.map((type) => {
                 const isActive = activityType === type.value;
+                const activityMeta = getActivityTypeMeta(type.value, language);
 
                 return (
                   <button
@@ -207,8 +208,8 @@ export function EditEventScreen({
                       color: isActive ? '#D4AF37' : '#F5F5F5',
                     }}
                   >
-                    <span className="mr-2">{type.emoji}</span>
-                    <span>{type.label}</span>
+                    <span className="mr-2">{activityMeta.emoji}</span>
+                    <span>{activityMeta.label}</span>
                   </button>
                 );
               })}

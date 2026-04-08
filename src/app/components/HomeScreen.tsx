@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
+import {
+  ACTIVITY_TYPES,
+  type ActivityType,
+  getActivityTypeMeta,
+} from '../constants/activityTypes';
 
 type EventItem = {
   id: string;
@@ -11,6 +16,7 @@ type EventItem = {
   location?: string | null;
   creator_id?: string | null;
   creatorName?: string | null;
+  activity_type?: ActivityType | null;
   participantCount: number;
 };
 
@@ -23,6 +29,7 @@ export function HomeScreen({
   onNavigate: (screen: string, data?: any) => void;
 }) {
   const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined'>('discover');
+  const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -205,6 +212,7 @@ export function HomeScreen({
           location: event.location,
           creator_id: event.creator_id,
           creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+          activity_type: (event.activity_type || 'other') as ActivityType,
           participantCount: 0,
         }));
 
@@ -237,6 +245,7 @@ export function HomeScreen({
         location: event.location,
         creator_id: event.creator_id,
         creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+        activity_type: (event.activity_type || 'other') as ActivityType,
         participantCount: countsMap[event.id] || 0,
       }));
 
@@ -328,6 +337,7 @@ export function HomeScreen({
         location: event.location,
         creator_id: event.creator_id,
         creatorName: event.creator_id ? creatorNameMap[event.creator_id] || 'Unknown' : 'Unknown',
+        activity_type: (event.activity_type || 'other') as ActivityType,
         participantCount: countsMap[event.id] || 0,
       }));
 
@@ -351,23 +361,33 @@ export function HomeScreen({
       const past = isPastEvent(event.date_time);
 
       if (!currentUserId) {
-        return activeTab === 'discover' && !past;
+        if (activeTab !== 'discover' || past) {
+          return false;
+        }
+
+        return selectedActivityType === 'all' || (event.activity_type || 'other') === selectedActivityType;
       }
 
       const isMyEvent = event.creator_id === currentUserId;
       const isJoined = joinedEventIds.includes(event.id);
 
+      let matchesTab = false;
+
       if (activeTab === 'my') {
-        return isMyEvent;
+        matchesTab = isMyEvent;
+      } else if (activeTab === 'joined') {
+        matchesTab = !isMyEvent && isJoined && !past;
+      } else {
+        matchesTab = !isMyEvent && !isJoined && !past;
       }
 
-      if (activeTab === 'joined') {
-        return !isMyEvent && isJoined && !past;
+      if (!matchesTab) {
+        return false;
       }
 
-      return !isMyEvent && !isJoined && !past;
+      return selectedActivityType === 'all' || (event.activity_type || 'other') === selectedActivityType;
     });
-  }, [events, currentUserId, joinedEventIds, activeTab]);
+  }, [events, currentUserId, joinedEventIds, activeTab, selectedActivityType]);
 
   const sortedEvents = useMemo(() => {
     const result = [...filteredEvents];
@@ -455,7 +475,7 @@ export function HomeScreen({
 
   useEffect(() => {
     setVisibleCount(LOCAL_BATCH_SIZE);
-  }, [activeTab]);
+  }, [activeTab, selectedActivityType]);
 
   useEffect(() => {
     fetchEvents(true);
@@ -531,6 +551,50 @@ export function HomeScreen({
         </motion.button>
       </div>
 
+      <div className="border-b border-border px-4 py-3">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          <button
+            type="button"
+            onClick={() => setSelectedActivityType('all')}
+            className="shrink-0 px-3 py-2 rounded-full text-sm border transition-all"
+            style={{
+              backgroundColor:
+                selectedActivityType === 'all' ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
+              borderColor:
+                selectedActivityType === 'all'
+                  ? 'rgba(212, 175, 55, 0.5)'
+                  : 'rgba(255, 255, 255, 0.1)',
+              color: selectedActivityType === 'all' ? '#D4AF37' : '#F5F5F5',
+            }}
+          >
+            All
+          </button>
+
+          {ACTIVITY_TYPES.map((type) => {
+            const isActive = selectedActivityType === type.value;
+
+            return (
+              <button
+                key={type.value}
+                type="button"
+                onClick={() => setSelectedActivityType(type.value)}
+                className="shrink-0 px-3 py-2 rounded-full text-sm border transition-all"
+                style={{
+                  backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
+                  borderColor: isActive
+                    ? 'rgba(212, 175, 55, 0.5)'
+                    : 'rgba(255, 255, 255, 0.1)',
+                  color: isActive ? '#D4AF37' : '#F5F5F5',
+                }}
+              >
+                <span className="mr-2">{type.emoji}</span>
+                <span>{type.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="h-full overflow-y-auto px-6 py-4 space-y-3">
           {shouldShowInitialLoader && (
@@ -561,17 +625,20 @@ export function HomeScreen({
                     : 'No discover events yet'}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {activeTab === 'my'
-                  ? 'Create your first event by tapping the + button.'
-                  : activeTab === 'joined'
-                    ? 'Events you join will appear here.'
-                    : 'There are no events from other users yet.'}
+                {selectedActivityType !== 'all'
+                  ? `No events found for this activity type in ${activeTab === 'my' ? 'your events' : activeTab === 'joined' ? 'joined events' : 'discover'}.`
+                  : activeTab === 'my'
+                    ? 'Create your first event by tapping the + button.'
+                    : activeTab === 'joined'
+                      ? 'Events you join will appear here.'
+                      : 'There are no events from other users yet.'}
               </p>
             </div>
           )}
 
           {visibleEvents.map((event, index) => {
             const past = isPastEvent(event.date_time);
+            const activityMeta = getActivityTypeMeta(event.activity_type);
 
             return (
               <motion.div
@@ -596,7 +663,7 @@ export function HomeScreen({
                   opacity: past ? 0.72 : 1,
                 }}
               >
-                <div className="flex items-start justify-between gap-3 mb-1">
+                <div className="flex items-start justify-between gap-3 mb-2">
                   <h3>{event.title}</h3>
 
                   {past && (
@@ -611,6 +678,20 @@ export function HomeScreen({
                       Past
                     </span>
                   )}
+                </div>
+
+                <div className="mb-2">
+                  <span
+                    className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border"
+                    style={{
+                      borderColor: 'rgba(212, 175, 55, 0.22)',
+                      color: '#D4AF37',
+                      backgroundColor: 'rgba(212, 175, 55, 0.06)',
+                    }}
+                  >
+                    <span>{activityMeta.emoji}</span>
+                    <span>{activityMeta.label}</span>
+                  </span>
                 </div>
 
                 <p className="text-sm text-muted-foreground mb-2">

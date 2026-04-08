@@ -1,13 +1,15 @@
 import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { TouchButton } from './TouchButton';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, ActivityType } from '../constants/activityTypes';
 
-export function CreateEventScreen({
+export function EditEventScreen({
   onNavigate,
+  event,
 }: {
   onNavigate: (screen: string, data?: any) => void;
+  event?: any;
 }) {
   const y = useMotionValue(0);
   const opacity = useTransform(y, [0, 200], [1, 0.5]);
@@ -20,16 +22,45 @@ export function CreateEventScreen({
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!event) return;
+
+    setTitle(event.title || '');
+    setDescription(event.description || '');
+    setLocation(event.location || '');
+    setActivityType((event.activity_type || 'other') as ActivityType);
+
+    if (event.date_time) {
+      const eventDate = new Date(event.date_time);
+
+      if (!Number.isNaN(eventDate.getTime())) {
+        const year = eventDate.getFullYear();
+        const month = String(eventDate.getMonth() + 1).padStart(2, '0');
+        const day = String(eventDate.getDate()).padStart(2, '0');
+        const hours = String(eventDate.getHours()).padStart(2, '0');
+        const minutes = String(eventDate.getMinutes()).padStart(2, '0');
+
+        setDate(`${year}-${month}-${day}`);
+        setTime(`${hours}:${minutes}`);
+      }
+    }
+  }, [event]);
+
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo
   ) => {
     if (info.offset.y > 150) {
-      onNavigate('home');
+      onNavigate('event-details', event);
     }
   };
 
-  const handleCreateEvent = async () => {
+  const handleUpdateEvent = async () => {
+    if (!event?.id) {
+      alert('Не удалось определить событие');
+      return;
+    }
+
     if (!title.trim()) {
       alert('Введите название события');
       return;
@@ -48,6 +79,14 @@ export function CreateEventScreen({
     setLoading(true);
 
     try {
+      const dateTime = new Date(`${date}T${time}`);
+
+      if (Number.isNaN(dateTime.getTime())) {
+        alert('Некорректные дата или время');
+        setLoading(false);
+        return;
+      }
+
       const {
         data: { user },
         error: userError,
@@ -59,56 +98,31 @@ export function CreateEventScreen({
         return;
       }
 
-      const dateTime = new Date(`${date}T${time}`);
-
-      if (Number.isNaN(dateTime.getTime())) {
-        alert('Некорректные дата или время');
-        setLoading(false);
-        return;
-      }
-
-      const { data: createdEvent, error } = await supabase
+      const { data: updatedEvent, error } = await supabase
         .from('events')
-        .insert([
-          {
-            title: title.trim(),
-            description: description.trim() || null,
-            date_time: dateTime.toISOString(),
-            location: location.trim() || null,
-            activity_type: activityType,
-            creator_id: user.id,
-          },
-        ])
+        .update({
+          title: title.trim(),
+          description: description.trim() || null,
+          date_time: dateTime.toISOString(),
+          location: location.trim() || null,
+          activity_type: activityType,
+        })
+        .eq('id', event.id)
+        .eq('creator_id', user.id)
         .select()
         .single();
 
       if (error) {
-        console.error('Ошибка создания события:', error);
-        alert('Не удалось создать событие');
+        console.error('Ошибка обновления события:', error);
+        alert('Не удалось обновить событие');
         setLoading(false);
         return;
       }
 
-      onNavigate('event-details', createdEvent);
-
-      const { error: participantError } = await supabase.from('participants').insert([
-        {
-          user_id: user.id,
-          event_id: createdEvent.id,
-        },
-      ]);
-
-      if (participantError) {
-        console.error('Ошибка добавления создателя в participants:', participantError);
-        alert('Событие создано, но автор не был добавлен в участники');
-        setLoading(false);
-        return;
-      }
-
-      onNavigate('event-details', createdEvent);
+      onNavigate('event-details', updatedEvent);
     } catch (error) {
-      console.error('Unexpected error:', error);
-      alert('Произошла ошибка при создании события');
+      console.error('Unexpected update error:', error);
+      alert('Произошла ошибка при обновлении события');
     } finally {
       setLoading(false);
     }
@@ -126,13 +140,13 @@ export function CreateEventScreen({
       <div className="flex items-center justify-between px-6 py-4 border-b border-border">
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => onNavigate('home')}
+          onClick={() => onNavigate('event-details', event)}
           className="text-muted-foreground"
           disabled={loading}
         >
           Cancel
         </motion.button>
-        <h2>Create Event</h2>
+        <h2>Edit Event</h2>
         <div className="w-14"></div>
       </div>
 
@@ -240,6 +254,7 @@ export function CreateEventScreen({
                 }}
               />
             </div>
+
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
                 Time
@@ -287,11 +302,11 @@ export function CreateEventScreen({
         className="p-6 border-t border-border"
       >
         <TouchButton
-          onClick={handleCreateEvent}
+          onClick={handleUpdateEvent}
           variant="primary"
           fullWidth
         >
-          {loading ? 'Creating...' : 'Create Event'}
+          {loading ? 'Saving...' : 'Save Changes'}
         </TouchButton>
       </motion.div>
     </motion.div>

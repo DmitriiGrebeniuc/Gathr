@@ -1,8 +1,66 @@
+import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
 
 export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const { translate } = useLanguage();
+
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!subject.trim()) {
+      alert(translate('support.enterSubject'));
+      return;
+    }
+
+    if (!message.trim()) {
+      alert(translate('support.enterMessage'));
+      return;
+    }
+
+    setSending(true);
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        alert(translate('support.sendFailed'));
+        setSending(false);
+        return;
+      }
+
+      const { error } = await supabase.from('support_requests').insert([
+        {
+          user_id: user.id,
+          subject: subject.trim(),
+          message: message.trim(),
+        },
+      ]);
+
+      if (error) {
+        console.error('Failed to send support request:', error);
+        alert(translate('support.sendFailed'));
+        setSending(false);
+        return;
+      }
+
+      setSubject('');
+      setMessage('');
+      alert(translate('support.sentSuccess'));
+    } catch (error) {
+      console.error('Unexpected support request error:', error);
+      alert(translate('support.sendUnexpectedError'));
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -19,16 +77,58 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
       <div className="flex-1 overflow-y-auto px-6 py-8">
         <div className="max-w-sm mx-auto space-y-6">
           <div
-            className="rounded-xl border p-6 text-center"
+            className="rounded-xl border p-5"
             style={{
               borderColor: 'rgba(255, 255, 255, 0.1)',
               backgroundColor: '#1A1A1A',
             }}
           >
-            <h3 className="mb-2">{translate('support.cardTitle')}</h3>
-            <p className="text-sm text-muted-foreground">
-              {translate('support.cardDescription')}
+            <h3 className="mb-2">{translate('support.formTitle')}</h3>
+            <p className="text-sm text-muted-foreground mb-5">
+              {translate('support.formDescription')}
             </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-2 text-sm text-muted-foreground">
+                  {translate('support.subject')}
+                </label>
+                <input
+                  type="text"
+                  placeholder={translate('support.subjectPlaceholder')}
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
+                  style={{
+                    backgroundColor: '#111111',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}
+                  disabled={sending}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm text-muted-foreground">
+                  {translate('support.message')}
+                </label>
+                <textarea
+                  rows={6}
+                  placeholder={translate('support.messagePlaceholder')}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors resize-none"
+                  style={{
+                    backgroundColor: '#111111',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}
+                  disabled={sending}
+                />
+              </div>
+
+              <TouchButton onClick={handleSubmit} variant="primary" fullWidth>
+                {sending ? translate('support.sending') : translate('support.sendButton')}
+              </TouchButton>
+            </div>
           </div>
         </div>
       </div>

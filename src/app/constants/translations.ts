@@ -107,6 +107,19 @@ type TranslationKey =
     | 'support.title'
     | 'support.cardTitle'
     | 'support.cardDescription'
+    | 'support.formTitle'
+    | 'support.formDescription'
+    | 'support.subject'
+    | 'support.subjectPlaceholder'
+    | 'support.message'
+    | 'support.messagePlaceholder'
+    | 'support.sendButton'
+    | 'support.sending'
+    | 'support.enterSubject'
+    | 'support.enterMessage'
+    | 'support.sendFailed'
+    | 'support.sendUnexpectedError'
+    | 'support.sentSuccess'
     | 'notifications.title'
     | 'notifications.emptyTitle'
     | 'notifications.emptyDescription'
@@ -372,6 +385,19 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'support.title': 'Help & Support',
         'support.cardTitle': 'Support center',
         'support.cardDescription': 'Help articles and support options will be available soon.',
+        'support.formTitle': 'Contact support',
+        'support.formDescription': 'Send us your question, issue, or feedback.',
+        'support.subject': 'Subject',
+        'support.subjectPlaceholder': 'Briefly describe the issue',
+        'support.message': 'Message',
+        'support.messagePlaceholder': 'Tell us what happened or what you need help with...',
+        'support.sendButton': 'Send request',
+        'support.sending': 'Sending...',
+        'support.enterSubject': 'Enter a subject',
+        'support.enterMessage': 'Enter your message',
+        'support.sendFailed': 'Failed to send support request',
+        'support.sendUnexpectedError': 'An error occurred while sending the support request',
+        'support.sentSuccess': 'Your request has been sent',
 
         'notifications.title': 'Notifications',
         'notifications.emptyTitle': 'No notifications yet',
@@ -645,6 +671,19 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'support.title': 'Помощь и поддержка',
         'support.cardTitle': 'Центр поддержки',
         'support.cardDescription': 'Статьи помощи и варианты поддержки скоро будут доступны.',
+        'support.formTitle': 'Связаться с поддержкой',
+        'support.formDescription': 'Отправьте нам вопрос, проблему или отзыв.',
+        'support.subject': 'Тема',
+        'support.subjectPlaceholder': 'Кратко опишите вопрос',
+        'support.message': 'Сообщение',
+        'support.messagePlaceholder': 'Опишите, что произошло или с чем нужна помощь...',
+        'support.sendButton': 'Отправить обращение',
+        'support.sending': 'Отправка...',
+        'support.enterSubject': 'Введите тему',
+        'support.enterMessage': 'Введите сообщение',
+        'support.sendFailed': 'Не удалось отправить обращение',
+        'support.sendUnexpectedError': 'Произошла ошибка при отправке обращения',
+        'support.sentSuccess': 'Ваше обращение отправлено',
 
         'notifications.title': 'Уведомления',
         'notifications.emptyTitle': 'Пока нет уведомлений',
@@ -918,6 +957,19 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'support.title': 'Ajutor și suport',
         'support.cardTitle': 'Centrul de suport',
         'support.cardDescription': 'Articolele de ajutor și opțiunile de suport vor fi disponibile în curând.',
+        'support.formTitle': 'Contactează suportul',
+        'support.formDescription': 'Trimite-ne întrebarea, problema sau feedbackul tău.',
+        'support.subject': 'Subiect',
+        'support.subjectPlaceholder': 'Descrie pe scurt problema',
+        'support.message': 'Mesaj',
+        'support.messagePlaceholder': 'Spune-ne ce s-a întâmplat sau cu ce ai nevoie de ajutor...',
+        'support.sendButton': 'Trimite solicitarea',
+        'support.sending': 'Se trimite...',
+        'support.enterSubject': 'Introdu subiectul',
+        'support.enterMessage': 'Introdu mesajul',
+        'support.sendFailed': 'Solicitarea nu a putut fi trimisă',
+        'support.sendUnexpectedError': 'A apărut o eroare la trimiterea solicitării',
+        'support.sentSuccess': 'Solicitarea ta a fost trimisă',
 
         'notifications.title': 'Notificări',
         'notifications.emptyTitle': 'Încă nu există notificări',
@@ -1192,6 +1244,19 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'support.title': 'Допомога та підтримка',
         'support.cardTitle': 'Центр підтримки',
         'support.cardDescription': 'Довідкові статті та варіанти підтримки скоро будуть доступні.',
+        'support.formTitle': 'Зв’язатися з підтримкою',
+        'support.formDescription': 'Надішліть нам ваше запитання, проблему або відгук.',
+        'support.subject': 'Тема',
+        'support.subjectPlaceholder': 'Коротко опишіть проблему',
+        'support.message': 'Повідомлення',
+        'support.messagePlaceholder': 'Опишіть, що сталося або з чим потрібна допомога...',
+        'support.sendButton': 'Надіслати звернення',
+        'support.sending': 'Надсилання...',
+        'support.enterSubject': 'Введіть тему',
+        'support.enterMessage': 'Введіть повідомлення',
+        'support.sendFailed': 'Не вдалося надіслати звернення',
+        'support.sendUnexpectedError': 'Сталася помилка під час надсилання звернення',
+        'support.sentSuccess': 'Ваше звернення надіслано',
 
         'notifications.title': 'Сповіщення',
         'notifications.emptyTitle': 'Сповіщень поки немає',
@@ -1465,6 +1530,19 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'support.title': 'Hilfe und Support',
         'support.cardTitle': 'Support-Center',
         'support.cardDescription': 'Hilfsartikel und Supportoptionen werden bald verfügbar sein.',
+        'support.formTitle': 'Support kontaktieren',
+        'support.formDescription': 'Sende uns deine Frage, dein Problem oder dein Feedback.',
+        'support.subject': 'Betreff',
+        'support.subjectPlaceholder': 'Beschreibe das Problem kurz',
+        'support.message': 'Nachricht',
+        'support.messagePlaceholder': 'Erzähle uns, was passiert ist oder wobei du Hilfe brauchst...',
+        'support.sendButton': 'Anfrage senden',
+        'support.sending': 'Wird gesendet...',
+        'support.enterSubject': 'Gib einen Betreff ein',
+        'support.enterMessage': 'Gib eine Nachricht ein',
+        'support.sendFailed': 'Support-Anfrage konnte nicht gesendet werden',
+        'support.sendUnexpectedError': 'Beim Senden der Support-Anfrage ist ein Fehler aufgetreten',
+        'support.sentSuccess': 'Deine Anfrage wurde gesendet',
 
         'notifications.title': 'Benachrichtigungen',
         'notifications.emptyTitle': 'Noch keine Benachrichtigungen',

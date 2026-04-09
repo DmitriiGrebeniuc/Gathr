@@ -62,7 +62,7 @@ export function LoginScreen({
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: 'https://gathr-app.site/#/reset-password',
+        redirectTo: 'https://gathr-app.site',
       });
 
       if (error) {

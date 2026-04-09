@@ -30,6 +30,7 @@ export default function App() {
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   const { translate } = useLanguage();
 
@@ -37,12 +38,13 @@ export default function App() {
     const hash = window.location.hash;
 
     const isRecovery =
-      hash.includes('type=recovery') ||
+      hash.includes('type=recovery') &&
       hash.includes('access_token');
 
     const checkSession = async () => {
       try {
         if (isRecovery) {
+          setIsRecoveryMode(true);
           setCurrentScreen('reset-password');
           setHistory(['reset-password']);
           setAuthChecked(true);
@@ -80,9 +82,14 @@ export default function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
+        setIsRecoveryMode(true);
         setCurrentScreen('reset-password');
         setHistory(['reset-password']);
         setDirection('forward');
+        return;
+      }
+
+      if (isRecoveryMode) {
         return;
       }
 

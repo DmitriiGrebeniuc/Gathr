@@ -278,7 +278,17 @@ type TranslationKey =
     | 'resetPassword.passwordsDoNotMatch'
     | 'resetPassword.failed'
     | 'resetPassword.unexpectedError'
-    | 'resetPassword.success';
+    | 'resetPassword.success'
+    | 'inviteUsers.title'
+    | 'inviteUsers.back'
+    | 'inviteUsers.inviteButton'
+    | 'inviteUsers.inviting'
+    | 'inviteUsers.invite'
+    | 'inviteUsers.loading'
+    | 'inviteUsers.empty'
+    | 'inviteUsers.sent'
+    | 'inviteUsers.failed'
+    | 'inviteUsers.unexpectedError';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     en: {
@@ -577,6 +587,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Failed to reset password',
         'resetPassword.unexpectedError': 'An error occurred while resetting the password',
         'resetPassword.success': 'Password changed successfully. Please log in again.',
+        'inviteUsers.title': 'Invite Users',
+        'inviteUsers.back': 'Back',
+        'inviteUsers.inviteButton': 'Invite',
+        'inviteUsers.inviting': 'Inviting...',
+        'inviteUsers.invite': 'Invite',
+        'inviteUsers.loading': 'Loading users...',
+        'inviteUsers.empty': 'No users available to invite',
+        'inviteUsers.sent': 'Invitation sent',
+        'inviteUsers.failed': 'Failed to send invitation',
+        'inviteUsers.unexpectedError': 'An error occurred while sending the invitation',
     },
 
     ru: {
@@ -875,6 +895,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Не удалось сбросить пароль',
         'resetPassword.unexpectedError': 'Произошла ошибка при сбросе пароля',
         'resetPassword.success': 'Пароль успешно изменён. Войдите снова.',
+        'inviteUsers.title': 'Invite Users',
+        'inviteUsers.back': 'Back',
+        'inviteUsers.inviteButton': 'Invite',
+        'inviteUsers.inviting': 'Inviting...',
+        'inviteUsers.invite': 'Invite',
+        'inviteUsers.loading': 'Loading users...',
+        'inviteUsers.empty': 'No users available to invite',
+        'inviteUsers.sent': 'Invitation sent',
+        'inviteUsers.failed': 'Failed to send invitation',
+        'inviteUsers.unexpectedError': 'An error occurred while sending the invitation',
     },
 
     ro: {
@@ -1174,6 +1204,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Resetarea parolei a eșuat',
         'resetPassword.unexpectedError': 'A apărut o eroare la resetarea parolei',
         'resetPassword.success': 'Parola a fost schimbată cu succes. Autentifică-te din nou.',
+        'inviteUsers.title': 'Invită utilizatori',
+        'inviteUsers.back': 'Înapoi',
+        'inviteUsers.inviteButton': 'Invită',
+        'inviteUsers.inviting': 'Se trimite...',
+        'inviteUsers.invite': 'Invită',
+        'inviteUsers.loading': 'Se încarcă utilizatorii...',
+        'inviteUsers.empty': 'Nu există utilizatori disponibili pentru invitație',
+        'inviteUsers.sent': 'Invitația a fost trimisă',
+        'inviteUsers.failed': 'Invitația nu a putut fi trimisă',
+        'inviteUsers.unexpectedError': 'A apărut o eroare la trimiterea invitației',
     },
 
     uk: {
@@ -1472,6 +1512,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Не вдалося скинути пароль',
         'resetPassword.unexpectedError': 'Сталася помилка під час скидання пароля',
         'resetPassword.success': 'Пароль успішно змінено. Увійдіть ще раз.',
+        'inviteUsers.title': 'Запросити користувачів',
+        'inviteUsers.back': 'Назад',
+        'inviteUsers.inviteButton': 'Запросити',
+        'inviteUsers.inviting': 'Надсилання...',
+        'inviteUsers.invite': 'Запросити',
+        'inviteUsers.loading': 'Завантаження користувачів...',
+        'inviteUsers.empty': 'Немає користувачів для запрошення',
+        'inviteUsers.sent': 'Запрошення надіслано',
+        'inviteUsers.failed': 'Не вдалося надіслати запрошення',
+        'inviteUsers.unexpectedError': 'Сталася помилка під час надсилання запрошення',
     },
 
     de: {
@@ -1771,6 +1821,17 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Passwort konnte nicht zurückgesetzt werden',
         'resetPassword.unexpectedError': 'Beim Zurücksetzen des Passworts ist ein Fehler aufgetreten',
         'resetPassword.success': 'Passwort erfolgreich geändert. Bitte melde dich erneut an.',
+
+        'inviteUsers.title': 'Benutzer einladen',
+        'inviteUsers.back': 'Zurück',
+        'inviteUsers.inviteButton': 'Einladen',
+        'inviteUsers.inviting': 'Wird gesendet...',
+        'inviteUsers.invite': 'Einladen',
+        'inviteUsers.loading': 'Benutzer werden geladen...',
+        'inviteUsers.empty': 'Keine Benutzer zum Einladen verfügbar',
+        'inviteUsers.sent': 'Einladung gesendet',
+        'inviteUsers.failed': 'Einladung konnte nicht gesendet werden',
+        'inviteUsers.unexpectedError': 'Beim Senden der Einladung ist ein Fehler aufgetreten',
     },
 };
 

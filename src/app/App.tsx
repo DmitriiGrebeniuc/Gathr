@@ -21,6 +21,7 @@ import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { supabase } from '../lib/supabase';
 import { LanguageScreen } from './components/LanguageScreen';
 import { useLanguage } from './context/LanguageContext';
+import { InviteUsersScreen } from './components/InviteUsersScreen';
 
 type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
 
@@ -155,6 +156,7 @@ export default function App() {
       'event-details',
       'participants',
       'reset-password',
+      'invite-users',
     ];
     const modalScreens = ['create-event'];
 
@@ -248,6 +250,9 @@ export default function App() {
               )}
               {currentScreen === 'participants' && (
                 <ParticipantsScreen onNavigate={handleNavigate} event={selectedEvent} />
+              )}
+              {currentScreen === 'invite-users' && (
+                <InviteUsersScreen onNavigate={handleNavigate} event={selectedEvent} />
               )}
               {currentScreen === 'notifications' && (
                 <NotificationsScreen onNavigate={handleNavigate} />

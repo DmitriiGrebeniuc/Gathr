@@ -14,6 +14,7 @@ export function ParticipantsScreen({
     const [participants, setParticipants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [isCreator, setIsCreator] = useState(false);
 
     const { translate } = useLanguage();
 
@@ -35,8 +36,11 @@ export function ParticipantsScreen({
             if (userError) {
                 console.error('Ошибка получения текущего пользователя:', userError);
                 setCurrentUserId(null);
+                setIsCreator(false);
             } else {
-                setCurrentUserId(user?.id ?? null);
+                const resolvedUserId = user?.id ?? null;
+                setCurrentUserId(resolvedUserId);
+                setIsCreator(resolvedUserId === event?.creator_id);
             }
 
             const { data, error } = await supabase
@@ -127,16 +131,41 @@ export function ParticipantsScreen({
 
                 <div className="flex-1 overflow-y-auto px-6 py-6">
                     <div className="max-w-sm mx-auto space-y-4">
-                        <div>
-                            <p className="text-sm text-muted-foreground">
-                                {event?.title || translate('participants.eventFallback')}
-                            </p>
-                            <h3 className="mt-1">
-                                {participants.length}{' '}
-                                {participants.length === 1
-                                    ? translate('participants.participant')
-                                    : translate('participants.participants')}
-                            </h3>
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <p className="text-sm text-muted-foreground">
+                                    {event?.title || translate('participants.eventFallback')}
+                                </p>
+                                <h3 className="mt-1">
+                                    {participants.length}{' '}
+                                    {participants.length === 1
+                                        ? translate('participants.participant')
+                                        : translate('participants.participants')}
+                                </h3>
+                            </div>
+
+                            {isCreator && (
+                                <button
+                                    onClick={() =>
+                                        onNavigate(
+                                            'invite-users',
+                                            {
+                                                ...event,
+                                                backTarget: parentBackTarget,
+                                            },
+                                            'forward'
+                                        )
+                                    }
+                                    className="px-3 py-2 rounded-lg text-sm transition-opacity"
+                                    style={{
+                                        backgroundColor: 'rgba(212, 175, 55, 0.12)',
+                                        border: '1px solid rgba(212, 175, 55, 0.35)',
+                                        color: '#D4AF37',
+                                    }}
+                                >
+                                    {translate('inviteUsers.invite')}
+                                </button>
+                            )}
                         </div>
 
                         {loading && (

@@ -6,6 +6,7 @@ import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../const
 import { useLanguage } from '../context/LanguageContext';
 import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
 import { EventLocationMap } from './EventLocationMap';
+import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
 
 export function CreateEventScreen({
   onNavigate,
@@ -115,12 +116,10 @@ export function CreateEventScreen({
         return;
       }
 
-      const hasUnlimitedAccess = profileData?.has_unlimited_access ?? false;
-      const plan = profileData?.plan ?? 'free';
+      const isUnlimited = hasUnlimitedAccess(profileData?.has_unlimited_access);
+      const limits = getPlanLimits(profileData?.plan);
 
-      if (!hasUnlimitedAccess) {
-        const activeEventsLimit = plan === 'pro' ? 20 : 3;
-
+      if (!isUnlimited) {
         const { count: activeEventsCount, error: activeEventsError } = await supabase
           .from('events')
           .select('*', { count: 'exact', head: true })
@@ -134,7 +133,7 @@ export function CreateEventScreen({
           return;
         }
 
-        if ((activeEventsCount ?? 0) >= activeEventsLimit) {
+        if ((activeEventsCount ?? 0) >= limits.activeEvents) {
           alert(
             `${translate('create.activeEventsLimitReached')} ${translate('create.activeEventsLimitReachedPro')}`
           );

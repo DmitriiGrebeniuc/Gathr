@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
 
 type InviteUserItem = {
     id: string;
@@ -142,12 +143,10 @@ export function InviteUsersScreen({
                 return;
             }
 
-            const hasUnlimitedAccess = profileData?.has_unlimited_access ?? false;
-            const plan = profileData?.plan ?? 'free';
+            const isUnlimited = hasUnlimitedAccess(profileData?.has_unlimited_access);
+            const limits = getPlanLimits(profileData?.plan);
 
-            if (!hasUnlimitedAccess) {
-                const invitesPerEventLimit = plan === 'pro' ? 100 : 10;
-
+            if (!isUnlimited) {
                 const { count: invitationsCount, error: invitationsCountError } = await supabase
                     .from('event_invitations')
                     .select('*', { count: 'exact', head: true })
@@ -160,7 +159,7 @@ export function InviteUsersScreen({
                     return;
                 }
 
-                if ((invitationsCount ?? 0) >= invitesPerEventLimit) {
+                if ((invitationsCount ?? 0) >= limits.invitesPerEvent) {
                     alert(
                         `${translate('inviteUsers.invitesPerEventLimitReached')} ${translate('inviteUsers.invitesPerEventLimitReachedPro')}`
                     );

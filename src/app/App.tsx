@@ -60,7 +60,7 @@ export default function App() {
             return;
           }
 
-          setIsRecoveryMode(true);
+          isRecoveryModeRef.current = true;
           setCurrentScreen('reset-password');
           setHistory(['reset-password']);
           setAuthChecked(true);

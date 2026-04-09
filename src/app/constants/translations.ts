@@ -87,6 +87,23 @@ type TranslationKey =
     | 'security.title'
     | 'security.cardTitle'
     | 'security.cardDescription'
+    | 'security.changePasswordTitle'
+    | 'security.changePasswordDescription'
+    | 'security.newPassword'
+    | 'security.newPasswordPlaceholder'
+    | 'security.confirmPassword'
+    | 'security.confirmPasswordPlaceholder'
+    | 'security.savePassword'
+    | 'security.savingPassword'
+    | 'security.enterPassword'
+    | 'security.enterConfirmPassword'
+    | 'security.passwordTooShort'
+    | 'security.passwordsDoNotMatch'
+    | 'security.passwordChanged'
+    | 'security.passwordChangeFailed'
+    | 'security.passwordChangeUnexpectedError'
+    | 'security.comingSoonTitle'
+    | 'security.comingSoonDescription'
     | 'support.title'
     | 'support.cardTitle'
     | 'support.cardDescription'
@@ -334,6 +351,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'security.title': 'Privacy & Security',
         'security.cardTitle': 'Security settings',
         'security.cardDescription': 'Advanced security features will be available soon.',
+        'security.changePasswordTitle': 'Change password',
+        'security.changePasswordDescription': 'Set a new password for your account.',
+        'security.newPassword': 'New password',
+        'security.newPasswordPlaceholder': '••••••••',
+        'security.confirmPassword': 'Confirm password',
+        'security.confirmPasswordPlaceholder': '••••••••',
+        'security.savePassword': 'Save new password',
+        'security.savingPassword': 'Saving...',
+        'security.enterPassword': 'Enter a new password',
+        'security.enterConfirmPassword': 'Confirm your new password',
+        'security.passwordTooShort': 'Password must be at least 6 characters',
+        'security.passwordsDoNotMatch': 'Passwords do not match',
+        'security.passwordChanged': 'Password changed successfully',
+        'security.passwordChangeFailed': 'Failed to change password',
+        'security.passwordChangeUnexpectedError': 'An error occurred while changing the password',
+        'security.comingSoonTitle': 'Account deletion',
+        'security.comingSoonDescription': 'Account deletion will be available later.',
 
         'support.title': 'Help & Support',
         'support.cardTitle': 'Support center',
@@ -470,7 +504,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Google Maps API key is missing. Address suggestions are unavailable.',
         'signup.confirmEmailTitle': 'Check your email',
         'signup.confirmEmailMessage': 'We sent you a confirmation link. Please confirm your email before logging in.',
-                
+
         'login.forgotPassword': 'Forgot password?',
         'login.sendingReset': 'Sending...',
         'login.resetEmailSent': 'We sent a password reset link to your email',
@@ -590,6 +624,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'security.title': 'Конфиденциальность и безопасность',
         'security.cardTitle': 'Настройки безопасности',
         'security.cardDescription': 'Расширенные функции безопасности скоро будут доступны.',
+        'security.changePasswordTitle': 'Сменить пароль',
+        'security.changePasswordDescription': 'Установите новый пароль для вашего аккаунта.',
+        'security.newPassword': 'Новый пароль',
+        'security.newPasswordPlaceholder': '••••••••',
+        'security.confirmPassword': 'Подтвердите пароль',
+        'security.confirmPasswordPlaceholder': '••••••••',
+        'security.savePassword': 'Сохранить новый пароль',
+        'security.savingPassword': 'Сохранение...',
+        'security.enterPassword': 'Введите новый пароль',
+        'security.enterConfirmPassword': 'Подтвердите новый пароль',
+        'security.passwordTooShort': 'Пароль должен содержать минимум 6 символов',
+        'security.passwordsDoNotMatch': 'Пароли не совпадают',
+        'security.passwordChanged': 'Пароль успешно изменён',
+        'security.passwordChangeFailed': 'Не удалось изменить пароль',
+        'security.passwordChangeUnexpectedError': 'Произошла ошибка при смене пароля',
+        'security.comingSoonTitle': 'Удаление аккаунта',
+        'security.comingSoonDescription': 'Удаление аккаунта будет доступно позже.',
 
         'support.title': 'Помощь и поддержка',
         'support.cardTitle': 'Центр поддержки',
@@ -846,6 +897,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'security.title': 'Confidențialitate și securitate',
         'security.cardTitle': 'Setări de securitate',
         'security.cardDescription': 'Funcțiile avansate de securitate vor fi disponibile în curând.',
+        'security.changePasswordTitle': 'Schimbă parola',
+        'security.changePasswordDescription': 'Setează o parolă nouă pentru contul tău.',
+        'security.newPassword': 'Parolă nouă',
+        'security.newPasswordPlaceholder': '••••••••',
+        'security.confirmPassword': 'Confirmă parola',
+        'security.confirmPasswordPlaceholder': '••••••••',
+        'security.savePassword': 'Salvează parola nouă',
+        'security.savingPassword': 'Se salvează...',
+        'security.enterPassword': 'Introdu parola nouă',
+        'security.enterConfirmPassword': 'Confirmă parola nouă',
+        'security.passwordTooShort': 'Parola trebuie să aibă cel puțin 6 caractere',
+        'security.passwordsDoNotMatch': 'Parolele nu coincid',
+        'security.passwordChanged': 'Parola a fost schimbată cu succes',
+        'security.passwordChangeFailed': 'Parola nu a putut fi schimbată',
+        'security.passwordChangeUnexpectedError': 'A apărut o eroare la schimbarea parolei',
+        'security.comingSoonTitle': 'Ștergerea contului',
+        'security.comingSoonDescription': 'Ștergerea contului va fi disponibilă mai târziu.',
 
         'support.title': 'Ajutor și suport',
         'support.cardTitle': 'Centrul de suport',
@@ -983,7 +1051,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Lipsește cheia Google Maps API. Sugestiile de adresă nu sunt disponibile.',
         'signup.confirmEmailTitle': 'Verifică emailul',
         'signup.confirmEmailMessage': 'Ți-am trimis un link de confirmare. Confirmă emailul înainte de autentificare.',
-                
+
         'login.forgotPassword': 'Ai uitat parola?',
         'login.sendingReset': 'Se trimite...',
         'login.resetEmailSent': 'Am trimis linkul pentru resetarea parolei pe email',
@@ -1103,6 +1171,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'security.title': 'Конфіденційність і безпека',
         'security.cardTitle': 'Налаштування безпеки',
         'security.cardDescription': 'Розширені функції безпеки скоро будуть доступні.',
+        'security.changePasswordTitle': 'Змінити пароль',
+        'security.changePasswordDescription': 'Встановіть новий пароль для вашого акаунта.',
+        'security.newPassword': 'Новий пароль',
+        'security.newPasswordPlaceholder': '••••••••',
+        'security.confirmPassword': 'Підтвердьте пароль',
+        'security.confirmPasswordPlaceholder': '••••••••',
+        'security.savePassword': 'Зберегти новий пароль',
+        'security.savingPassword': 'Збереження...',
+        'security.enterPassword': 'Введіть новий пароль',
+        'security.enterConfirmPassword': 'Підтвердьте новий пароль',
+        'security.passwordTooShort': 'Пароль має містити щонайменше 6 символів',
+        'security.passwordsDoNotMatch': 'Паролі не збігаються',
+        'security.passwordChanged': 'Пароль успішно змінено',
+        'security.passwordChangeFailed': 'Не вдалося змінити пароль',
+        'security.passwordChangeUnexpectedError': 'Сталася помилка під час зміни пароля',
+        'security.comingSoonTitle': 'Видалення акаунта',
+        'security.comingSoonDescription': 'Видалення акаунта буде доступне пізніше.',
 
         'support.title': 'Допомога та підтримка',
         'support.cardTitle': 'Центр підтримки',
@@ -1239,7 +1324,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Відсутній Google Maps API key. Підказки адрес недоступні.',
         'signup.confirmEmailTitle': 'Перевір пошту',
         'signup.confirmEmailMessage': 'Ми надіслали посилання для підтвердження. Підтверди email перед входом.',
-                
+
         'login.forgotPassword': 'Забули пароль?',
         'login.sendingReset': 'Надсилання...',
         'login.resetEmailSent': 'Ми надіслали посилання для скидання пароля на ваш email',
@@ -1359,6 +1444,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'security.title': 'Datenschutz und Sicherheit',
         'security.cardTitle': 'Sicherheitseinstellungen',
         'security.cardDescription': 'Erweiterte Sicherheitsfunktionen werden bald verfügbar sein.',
+        'security.changePasswordTitle': 'Passwort ändern',
+        'security.changePasswordDescription': 'Lege ein neues Passwort für dein Konto fest.',
+        'security.newPassword': 'Neues Passwort',
+        'security.newPasswordPlaceholder': '••••••••',
+        'security.confirmPassword': 'Passwort bestätigen',
+        'security.confirmPasswordPlaceholder': '••••••••',
+        'security.savePassword': 'Neues Passwort speichern',
+        'security.savingPassword': 'Wird gespeichert...',
+        'security.enterPassword': 'Gib ein neues Passwort ein',
+        'security.enterConfirmPassword': 'Bestätige dein neues Passwort',
+        'security.passwordTooShort': 'Das Passwort muss mindestens 6 Zeichen lang sein',
+        'security.passwordsDoNotMatch': 'Die Passwörter stimmen nicht überein',
+        'security.passwordChanged': 'Passwort erfolgreich geändert',
+        'security.passwordChangeFailed': 'Passwort konnte nicht geändert werden',
+        'security.passwordChangeUnexpectedError': 'Beim Ändern des Passworts ist ein Fehler aufgetreten',
+        'security.comingSoonTitle': 'Konto löschen',
+        'security.comingSoonDescription': 'Das Löschen des Kontos wird später verfügbar sein.',
 
         'support.title': 'Hilfe und Support',
         'support.cardTitle': 'Support-Center',
@@ -1496,7 +1598,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Der Google Maps API key fehlt. Adressvorschläge sind nicht verfügbar.',
         'signup.confirmEmailTitle': 'Prüfe deine E-Mails',
         'signup.confirmEmailMessage': 'Wir haben dir einen Bestätigungslink gesendet. Bitte bestätige deine E-Mail vor dem Anmelden.',
-                
+
         'login.forgotPassword': 'Passwort vergessen?',
         'login.sendingReset': 'Wird gesendet...',
         'login.resetEmailSent': 'Wir haben dir einen Link zum Zurücksetzen des Passworts per E-Mail gesendet',

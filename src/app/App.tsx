@@ -38,7 +38,6 @@ export default function App() {
     const hash = window.location.hash;
 
     const isRecovery =
-      hash.includes('type=recovery') &&
       hash.includes('access_token');
 
     const checkSession = async () => {

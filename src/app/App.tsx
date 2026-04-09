@@ -35,12 +35,15 @@ export default function App() {
   const { translate } = useLanguage();
 
   useEffect(() => {
-    const hash = window.location.hash.replace(/^#/, '');
-    const hashParams = new URLSearchParams(hash);
+    const href = window.location.href;
 
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-    const type = hashParams.get('type');
+    const accessTokenMatch = href.match(/[?#&]access_token=([^&#]+)/);
+    const refreshTokenMatch = href.match(/[?#&]refresh_token=([^&#]+)/);
+    const typeMatch = href.match(/[?#&]type=([^&#]+)/);
+
+    const accessToken = accessTokenMatch ? decodeURIComponent(accessTokenMatch[1]) : null;
+    const refreshToken = refreshTokenMatch ? decodeURIComponent(refreshTokenMatch[1]) : null;
+    const type = typeMatch ? decodeURIComponent(typeMatch[1]) : null;
 
     const isRecovery = !!accessToken;
 
@@ -105,7 +108,7 @@ export default function App() {
         return;
       }
 
-      if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+      if (event === 'SIGNED_IN' && window.location.href.includes('access_token=')) {
         isRecoveryModeRef.current = true;
         setCurrentScreen('reset-password');
         setHistory(['reset-password']);

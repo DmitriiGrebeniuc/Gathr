@@ -40,6 +40,22 @@ export function ResetPasswordScreen({
         setLoading(true);
 
         try {
+            const {
+                data: { session },
+                error: sessionError,
+            } = await supabase.auth.getSession();
+
+            if (sessionError) {
+                console.error('Ошибка получения recovery session:', sessionError);
+                alert(sessionError.message || 'Failed to restore session');
+                return;
+            }
+
+            if (!session) {
+                alert('Recovery session is missing. Please open the password reset link again.');
+                return;
+            }
+
             const { error } = await supabase.auth.updateUser({
                 password: password.trim(),
             });

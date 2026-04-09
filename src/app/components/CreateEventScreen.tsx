@@ -88,6 +88,47 @@ export function CreateEventScreen({
         return;
       }
 
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('plan, has_unlimited_access')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Ошибка загрузки профиля для проверки лимитов:', profileError);
+        alert(translate('create.failed'));
+        setLoading(false);
+        return;
+      }
+
+      const hasUnlimitedAccess = profileData?.has_unlimited_access ?? false;
+      const plan = profileData?.plan ?? 'free';
+
+      if (!hasUnlimitedAccess) {
+        const activeEventsLimit = plan === 'pro' ? 20 : 3;
+
+        const { count: activeEventsCount, error: activeEventsError } = await supabase
+          .from('events')
+          .select('*', { count: 'exact', head: true })
+          .eq('creator_id', user.id)
+          .gte('date_time', new Date().toISOString());
+
+        if (activeEventsError) {
+          console.error('Ошибка проверки лимита активных событий:', activeEventsError);
+          alert(translate('create.failed'));
+          setLoading(false);
+          return;
+        }
+
+        if ((activeEventsCount ?? 0) >= activeEventsLimit) {
+          alert(
+            `${translate('create.activeEventsLimitReached')} ${translate('create.activeEventsLimitReachedPro')}`
+          );
+          setLoading(false);
+          return;
+        }
+      }
+
       const dateTime = new Date(`${date}T${time}`);
 
       if (Number.isNaN(dateTime.getTime())) {

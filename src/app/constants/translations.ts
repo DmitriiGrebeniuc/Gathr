@@ -199,6 +199,8 @@ type TranslationKey =
     | 'create.creating'
     | 'create.createButton'
     | 'create.creating'
+    | 'create.activeEventsLimitReached'
+    | 'create.activeEventsLimitReachedPro'
     | 'edit.title'
     | 'edit.cancel'
     | 'edit.eventTitle'
@@ -502,6 +504,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.locationApiKeyMissing': 'Google Maps API key is missing. Address suggestions are unavailable.',
         'create.createButton': 'Create Event',
         'create.creating': 'Creating...',
+        'create.activeEventsLimitReached': 'Free plan includes up to 3 active events at the same time.',
+        'create.activeEventsLimitReachedPro': 'Upgrade to Pro to create more active events.',
 
         'edit.title': 'Edit Event',
         'edit.cancel': 'Cancel',
@@ -810,6 +814,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.locationApiKeyMissing': 'Отсутствует Google Maps API key. Подсказки адресов недоступны.',
         'create.createButton': 'Создать событие',
         'create.creating': 'Создание...',
+        'create.activeEventsLimitReached': 'В бесплатном плане можно иметь до 3 активных событий одновременно.',
+        'create.activeEventsLimitReachedPro': 'Перейдите на Pro, чтобы создавать больше активных событий.',
 
         'edit.title': 'Редактировать событие',
         'edit.cancel': 'Отмена',
@@ -1118,6 +1124,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.locationApiKeyMissing': 'Lipsește cheia Google Maps API. Sugestiile de adresă nu sunt disponibile.',
         'create.createButton': 'Creează eveniment',
         'create.creating': 'Se creează...',
+        'create.activeEventsLimitReached': 'Planul gratuit include până la 3 evenimente active în același timp.',
+        'create.activeEventsLimitReachedPro': 'Treci la Pro pentru a crea mai multe evenimente active.',
 
         'edit.title': 'Editează evenimentul',
         'edit.cancel': 'Anulează',
@@ -1427,6 +1435,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.locationApiKeyMissing': 'Відсутній Google Maps API key. Підказки адрес недоступні.',
         'create.createButton': 'Створити подію',
         'create.creating': 'Створення...',
+        'create.activeEventsLimitReached': 'Безкоштовний план дозволяє мати до 3 активних подій одночасно.',
+        'create.activeEventsLimitReachedPro': 'Перейдіть на Pro, щоб створювати більше активних подій.',
 
         'edit.title': 'Редагувати подію',
         'edit.cancel': 'Скасувати',
@@ -1743,6 +1753,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.failed': 'Event konnte nicht erstellt werden',
         'create.creatorParticipantFailed': 'Das Event wurde erstellt, aber der Ersteller wurde nicht als Teilnehmer hinzugefügt',
         'create.unexpectedError': 'Beim Erstellen des Events ist ein Fehler aufgetreten',
+        'create.activeEventsLimitReached': 'Im kostenlosen Tarif sind bis zu 3 aktive Events gleichzeitig möglich.',
+        'create.activeEventsLimitReachedPro': 'Wechsle zu Pro, um mehr aktive Events zu erstellen.',
 
         'edit.title': 'Event bearbeiten',
         'edit.cancel': 'Abbrechen',

@@ -145,7 +145,7 @@ export function NotificationsScreen({
 
       const { data: notificationSettings, error: notificationSettingsError } = await supabase
         .from('notification_settings')
-        .select('notify_upcoming_events, notify_new_participants')
+        .select('notify_upcoming_events, notify_new_participants, notify_event_invitations')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -155,6 +155,7 @@ export function NotificationsScreen({
 
       const notifyUpcomingEvents = notificationSettings?.notify_upcoming_events ?? true;
       const notifyNewParticipants = notificationSettings?.notify_new_participants ?? true;
+      const notifyEventInvitations = notificationSettings?.notify_event_invitations ?? true;
 
       const now = new Date();
       const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -317,71 +318,73 @@ export function NotificationsScreen({
 
       let inviteNotifications: NotificationItem[] = [];
 
-      const { data: invitations, error: invitationsError } = await supabase
-        .from('event_invitations')
-        .select(`
-          id,
-          event_id,
-          inviter_id,
-          invitee_id,
-          status,
-          created_at,
-          events (
-            id,
-            title,
-            description,
-            date_time,
-            location,
-            creator_id
-          ),
-          inviter:profiles!event_invitations_inviter_id_fkey (
-            name
-          )
-        `)
-        .eq('invitee_id', user.id)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+      if (notifyEventInvitations) {
+        const { data: invitations, error: invitationsError } = await supabase
+          .from('event_invitations')
+          .select(`
+      id,
+      event_id,
+      inviter_id,
+      invitee_id,
+      status,
+      created_at,
+      events (
+        id,
+        title,
+        description,
+        date_time,
+        location,
+        creator_id
+      ),
+      inviter:profiles!event_invitations_inviter_id_fkey (
+        name
+      )
+    `)
+          .eq('invitee_id', user.id)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false });
 
-      if (invitationsError) {
-        console.error('Ошибка загрузки invitations:', invitationsError);
-      } else {
-        inviteNotifications = (invitations || [])
-          .map((invitation: any) => {
-            const eventData = Array.isArray(invitation.events)
-              ? invitation.events[0]
-              : invitation.events;
+        if (invitationsError) {
+          console.error('Ошибка загрузки invitations:', invitationsError);
+        } else {
+          inviteNotifications = (invitations || [])
+            .map((invitation: any) => {
+              const eventData = Array.isArray(invitation.events)
+                ? invitation.events[0]
+                : invitation.events;
 
-            const inviterData = Array.isArray(invitation.inviter)
-              ? invitation.inviter[0]
-              : invitation.inviter;
+              const inviterData = Array.isArray(invitation.inviter)
+                ? invitation.inviter[0]
+                : invitation.inviter;
 
-            if (!eventData?.id) {
-              return null;
-            }
+              if (!eventData?.id) {
+                return null;
+              }
 
-            const inviterName = inviterData?.name || translate('notifications.someone');
+              const inviterName = inviterData?.name || translate('notifications.someone');
 
-            return {
-              id: `invite-${invitation.id}`,
-              type: 'invite' as const,
-              message: translate('notifications.invitedYouToEvent')
-                .replaceAll('{name}', inviterName)
-                .replaceAll('{title}', eventData.title || translate('common.event')),
-              time: formatPastTime(invitation.created_at),
-              event: {
-                id: eventData.id,
-                title: eventData.title,
-                description: eventData.description,
-                date_time: eventData.date_time,
-                location: eventData.location,
-                creator_id: eventData.creator_id,
-              },
-              sortDate: invitation.created_at || null,
-              sortPriority: 0,
-              invitationId: invitation.id,
-            };
-          })
-          .filter(Boolean) as NotificationItem[];
+              return {
+                id: `invite-${invitation.id}`,
+                type: 'invite' as const,
+                message: translate('notifications.invitedYouToEvent')
+                  .replaceAll('{name}', inviterName)
+                  .replaceAll('{title}', eventData.title || translate('common.event')),
+                time: formatPastTime(invitation.created_at),
+                event: {
+                  id: eventData.id,
+                  title: eventData.title,
+                  description: eventData.description,
+                  date_time: eventData.date_time,
+                  location: eventData.location,
+                  creator_id: eventData.creator_id,
+                },
+                sortDate: invitation.created_at || null,
+                sortPriority: 0,
+                invitationId: invitation.id,
+              };
+            })
+            .filter(Boolean) as NotificationItem[];
+        }
       }
 
       const mergedNotifications = [

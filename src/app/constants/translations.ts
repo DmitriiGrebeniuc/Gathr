@@ -291,6 +291,8 @@ type TranslationKey =
     | 'inviteUsers.sent'
     | 'inviteUsers.failed'
     | 'inviteUsers.unexpectedError'
+    | 'inviteUsers.invitesPerEventLimitReached'
+    | 'inviteUsers.invitesPerEventLimitReachedPro'
     | 'create.pastDateTime';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
@@ -603,6 +605,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.sent': 'Invitation sent',
         'inviteUsers.failed': 'Failed to send invitation',
         'inviteUsers.unexpectedError': 'An error occurred while sending the invitation',
+        'inviteUsers.invitesPerEventLimitReached': 'Free plan includes up to 10 invitations per event.',
+        'inviteUsers.invitesPerEventLimitReachedPro': 'Upgrade to Pro to invite more people.',
     },
 
     ru: {
@@ -914,6 +918,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.sent': 'Приглашение отправлено',
         'inviteUsers.failed': 'Не удалось отправить приглашение',
         'inviteUsers.unexpectedError': 'Произошла ошибка при отправке приглашения',
+        'inviteUsers.invitesPerEventLimitReached': 'В бесплатном плане можно отправить до 10 приглашений на одно событие.',
+        'inviteUsers.invitesPerEventLimitReachedPro': 'Перейдите на Pro, чтобы приглашать больше людей.',
     },
 
     ro: {
@@ -1226,6 +1232,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.sent': 'Invitația a fost trimisă',
         'inviteUsers.failed': 'Invitația nu a putut fi trimisă',
         'inviteUsers.unexpectedError': 'A apărut o eroare la trimiterea invitației',
+        'inviteUsers.invitesPerEventLimitReached': 'Planul gratuit include până la 10 invitații pentru un eveniment.',
+        'inviteUsers.invitesPerEventLimitReachedPro': 'Treci la Pro pentru a invita mai multe persoane.',
     },
 
     uk: {
@@ -1537,6 +1545,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.sent': 'Запрошення надіслано',
         'inviteUsers.failed': 'Не вдалося надіслати запрошення',
         'inviteUsers.unexpectedError': 'Сталася помилка під час надсилання запрошення',
+        'inviteUsers.invitesPerEventLimitReached': 'Безкоштовний план дозволяє надіслати до 10 запрошень на одну подію.',
+        'inviteUsers.invitesPerEventLimitReachedPro': 'Перейдіть на Pro, щоб запрошувати більше людей.',
     },
 
     de: {
@@ -1850,6 +1860,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.sent': 'Einladung gesendet',
         'inviteUsers.failed': 'Einladung konnte nicht gesendet werden',
         'inviteUsers.unexpectedError': 'Beim Senden der Einladung ist ein Fehler aufgetreten',
+        'inviteUsers.invitesPerEventLimitReached': 'Im kostenlosen Tarif sind bis zu 10 Einladungen pro Event möglich.',
+        'inviteUsers.invitesPerEventLimitReachedPro': 'Wechsle zu Pro, um mehr Personen einzuladen.',
     },
 };
 

@@ -35,15 +35,32 @@ export default function App() {
   const { translate } = useLanguage();
 
   useEffect(() => {
-    const hash = window.location.hash;
+    const hash = window.location.hash.replace(/^#/, '');
+    const hashParams = new URLSearchParams(hash);
 
-    const isRecovery =
-      hash.includes('access_token');
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
+
+    const isRecovery = !!accessToken;
 
     const checkSession = async () => {
       try {
-        if (isRecovery) {
-          isRecoveryModeRef.current = true;
+        if (isRecovery && accessToken && refreshToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (sessionError) {
+            console.error('Ошибка установки recovery session:', sessionError);
+            setCurrentScreen('welcome');
+            setHistory(['welcome']);
+            setAuthChecked(true);
+            return;
+          }
+
+          setIsRecoveryMode(true);
           setCurrentScreen('reset-password');
           setHistory(['reset-password']);
           setAuthChecked(true);

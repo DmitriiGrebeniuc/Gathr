@@ -37,16 +37,35 @@ export default function App() {
 
   useEffect(() => {
     const href = window.location.href;
+    const pathname = window.location.pathname;
 
     const accessTokenMatch = href.match(/[?#&]access_token=([^&#]+)/);
     const refreshTokenMatch = href.match(/[?#&]refresh_token=([^&#]+)/);
-    const typeMatch = href.match(/[?#&]type=([^&#]+)/);
 
     const accessToken = accessTokenMatch ? decodeURIComponent(accessTokenMatch[1]) : null;
     const refreshToken = refreshTokenMatch ? decodeURIComponent(refreshTokenMatch[1]) : null;
-    const type = typeMatch ? decodeURIComponent(typeMatch[1]) : null;
 
     const isRecovery = !!accessToken;
+
+    const getSharedEventIdFromPath = () => {
+      const match = pathname.match(/^\/event\/([^/]+)$/);
+      return match ? decodeURIComponent(match[1]) : null;
+    };
+
+    const loadSharedEvent = async (eventId: string) => {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', eventId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Ошибка загрузки shared event:', error);
+        return null;
+      }
+
+      return data || null;
+    };
 
     const checkSession = async () => {
       try {
@@ -69,6 +88,23 @@ export default function App() {
           setHistory(['reset-password']);
           setAuthChecked(true);
           return;
+        }
+
+        const sharedEventId = getSharedEventIdFromPath();
+
+        if (sharedEventId) {
+          const sharedEvent = await loadSharedEvent(sharedEventId);
+
+          if (sharedEvent) {
+            setSelectedEvent({
+              ...sharedEvent,
+              backTarget: 'home',
+            });
+            setCurrentScreen('event-details');
+            setHistory(['event-details']);
+            setAuthChecked(true);
+            return;
+          }
         }
 
         const {
@@ -126,6 +162,12 @@ export default function App() {
         setHistory(['home']);
         setDirection('forward');
       } else {
+        const sharedEventId = getSharedEventIdFromPath();
+
+        if (sharedEventId && selectedEvent?.id === sharedEventId) {
+          return;
+        }
+
         setCurrentScreen('welcome');
         setHistory(['welcome']);
         setDirection('back');
@@ -135,7 +177,7 @@ export default function App() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [selectedEvent?.id]);
 
   const handleNavigate = (
     screen: string,

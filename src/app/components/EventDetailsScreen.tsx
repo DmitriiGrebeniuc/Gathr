@@ -31,6 +31,7 @@ export function EventDetailsScreen({
   const [isCreator, setIsCreator] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
 
@@ -68,6 +69,31 @@ export function EventDetailsScreen({
     : eventData.location
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventData.location)}`
       : null;
+
+  const eventShareUrl =
+    typeof window !== 'undefined' && eventData.id
+      ? `${window.location.origin}/event/${eventData.id}`
+      : '';
+
+  const buildShareText = () => {
+    const lines = [
+      'Join me on Gathr',
+      '',
+      `Event: ${eventData.title || translate('common.event')}`,
+      `Date: ${formatDate(eventData.date_time)}`,
+      `Location: ${eventData.location || translate('details.locationNotSpecified')}`,
+    ];
+
+    if (eventData.description) {
+      lines.push('', eventData.description);
+    }
+
+    if (eventShareUrl) {
+      lines.push('', 'Open event:', eventShareUrl);
+    }
+
+    return lines.join('\n');
+  };
 
   const loadEvent = async () => {
     if (!event?.id) {
@@ -211,6 +237,44 @@ export function EventDetailsScreen({
       supabase.removeChannel(eventsChannel);
     };
   }, [eventData.id, eventData.creator_id]);
+
+  const handleShare = async () => {
+    if (!eventData.id || !eventShareUrl) {
+      return;
+    }
+
+    setSharing(true);
+
+    try {
+      const shareText = buildShareText();
+
+      if (navigator.share) {
+        await navigator.share({
+          title: eventData.title || 'Gathr Event',
+          text: shareText,
+          url: eventShareUrl,
+        });
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareText);
+        alert('Event link copied');
+        return;
+      }
+
+      alert(shareText);
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        return;
+      }
+
+      console.error('Unexpected share error:', error);
+      alert('Failed to share event');
+    } finally {
+      setSharing(false);
+    }
+  };
 
   const handleJoin = async () => {
     if (!currentUserId) {
@@ -386,6 +450,22 @@ export function EventDetailsScreen({
               <p className="text-muted-foreground leading-relaxed">
                 {eventData.description || translate('details.noDescription')}
               </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 }}
+            >
+              <TouchButton
+                variant="ghost"
+                fullWidth
+                onClick={handleShare}
+                disabled={sharing || !eventData.id}
+                style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
+              >
+                {sharing ? 'Sharing...' : 'Share Event'}
+              </TouchButton>
             </motion.div>
 
             <div className="space-y-4">

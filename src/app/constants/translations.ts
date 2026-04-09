@@ -215,7 +215,28 @@ type TranslationKey =
     | 'edit.unexpectedError'
     | 'signup.confirmEmailTitle'
     | 'signup.confirmEmailMessage'
-    | 'edit.locationApiKeyMissing';
+    | 'edit.locationApiKeyMissing'
+    | 'login.forgotPassword'
+    | 'login.sendingReset'
+    | 'login.resetEmailSent'
+    | 'login.resetFailed'
+    | 'login.resetUnexpectedError'
+    | 'resetPassword.back'
+    | 'resetPassword.title'
+    | 'resetPassword.description'
+    | 'resetPassword.newPassword'
+    | 'resetPassword.newPasswordPlaceholder'
+    | 'resetPassword.confirmPassword'
+    | 'resetPassword.confirmPasswordPlaceholder'
+    | 'resetPassword.submit'
+    | 'resetPassword.submitting'
+    | 'resetPassword.enterPassword'
+    | 'resetPassword.enterConfirmPassword'
+    | 'resetPassword.passwordTooShort'
+    | 'resetPassword.passwordsDoNotMatch'
+    | 'resetPassword.failed'
+    | 'resetPassword.unexpectedError'
+    | 'resetPassword.success';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     en: {
@@ -449,6 +470,29 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Google Maps API key is missing. Address suggestions are unavailable.',
         'signup.confirmEmailTitle': 'Check your email',
         'signup.confirmEmailMessage': 'We sent you a confirmation link. Please confirm your email before logging in.',
+                
+        'login.forgotPassword': 'Forgot password?',
+        'login.sendingReset': 'Sending...',
+        'login.resetEmailSent': 'We sent a password reset link to your email',
+        'login.resetFailed': 'Failed to send password reset email',
+        'login.resetUnexpectedError': 'An error occurred while sending the reset email',
+
+        'resetPassword.back': 'Back',
+        'resetPassword.title': 'Set new password',
+        'resetPassword.description': 'Enter your new password below.',
+        'resetPassword.newPassword': 'New password',
+        'resetPassword.newPasswordPlaceholder': '••••••••',
+        'resetPassword.confirmPassword': 'Confirm password',
+        'resetPassword.confirmPasswordPlaceholder': '••••••••',
+        'resetPassword.submit': 'Save new password',
+        'resetPassword.submitting': 'Saving...',
+        'resetPassword.enterPassword': 'Enter a new password',
+        'resetPassword.enterConfirmPassword': 'Confirm your new password',
+        'resetPassword.passwordTooShort': 'Password must be at least 6 characters',
+        'resetPassword.passwordsDoNotMatch': 'Passwords do not match',
+        'resetPassword.failed': 'Failed to reset password',
+        'resetPassword.unexpectedError': 'An error occurred while resetting the password',
+        'resetPassword.success': 'Password changed successfully. Please log in again.',
     },
 
     ru: {
@@ -682,6 +726,29 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Отсутствует Google Maps API key. Подсказки адресов недоступны.',
         'signup.confirmEmailTitle': 'Проверь почту',
         'signup.confirmEmailMessage': 'Мы отправили ссылку для подтверждения. Подтверди email перед входом.',
+
+        'login.forgotPassword': 'Забыли пароль?',
+        'login.sendingReset': 'Отправка...',
+        'login.resetEmailSent': 'Мы отправили ссылку для сброса пароля на ваш email',
+        'login.resetFailed': 'Не удалось отправить письмо для сброса пароля',
+        'login.resetUnexpectedError': 'Произошла ошибка при отправке письма для сброса пароля',
+
+        'resetPassword.back': 'Назад',
+        'resetPassword.title': 'Новый пароль',
+        'resetPassword.description': 'Введите новый пароль ниже.',
+        'resetPassword.newPassword': 'Новый пароль',
+        'resetPassword.newPasswordPlaceholder': '••••••••',
+        'resetPassword.confirmPassword': 'Подтвердите пароль',
+        'resetPassword.confirmPasswordPlaceholder': '••••••••',
+        'resetPassword.submit': 'Сохранить новый пароль',
+        'resetPassword.submitting': 'Сохранение...',
+        'resetPassword.enterPassword': 'Введите новый пароль',
+        'resetPassword.enterConfirmPassword': 'Подтвердите новый пароль',
+        'resetPassword.passwordTooShort': 'Пароль должен содержать минимум 6 символов',
+        'resetPassword.passwordsDoNotMatch': 'Пароли не совпадают',
+        'resetPassword.failed': 'Не удалось сбросить пароль',
+        'resetPassword.unexpectedError': 'Произошла ошибка при сбросе пароля',
+        'resetPassword.success': 'Пароль успешно изменён. Войдите снова.',
     },
 
     ro: {
@@ -916,6 +983,29 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Lipsește cheia Google Maps API. Sugestiile de adresă nu sunt disponibile.',
         'signup.confirmEmailTitle': 'Verifică emailul',
         'signup.confirmEmailMessage': 'Ți-am trimis un link de confirmare. Confirmă emailul înainte de autentificare.',
+                
+        'login.forgotPassword': 'Ai uitat parola?',
+        'login.sendingReset': 'Se trimite...',
+        'login.resetEmailSent': 'Am trimis linkul pentru resetarea parolei pe email',
+        'login.resetFailed': 'Nu s-a putut trimite emailul pentru resetarea parolei',
+        'login.resetUnexpectedError': 'A apărut o eroare la trimiterea emailului pentru resetarea parolei',
+
+        'resetPassword.back': 'Înapoi',
+        'resetPassword.title': 'Parolă nouă',
+        'resetPassword.description': 'Introdu parola nouă mai jos.',
+        'resetPassword.newPassword': 'Parolă nouă',
+        'resetPassword.newPasswordPlaceholder': '••••••••',
+        'resetPassword.confirmPassword': 'Confirmă parola',
+        'resetPassword.confirmPasswordPlaceholder': '••••••••',
+        'resetPassword.submit': 'Salvează parola nouă',
+        'resetPassword.submitting': 'Se salvează...',
+        'resetPassword.enterPassword': 'Introdu parola nouă',
+        'resetPassword.enterConfirmPassword': 'Confirmă parola nouă',
+        'resetPassword.passwordTooShort': 'Parola trebuie să aibă cel puțin 6 caractere',
+        'resetPassword.passwordsDoNotMatch': 'Parolele nu coincid',
+        'resetPassword.failed': 'Resetarea parolei a eșuat',
+        'resetPassword.unexpectedError': 'A apărut o eroare la resetarea parolei',
+        'resetPassword.success': 'Parola a fost schimbată cu succes. Autentifică-te din nou.',
     },
 
     uk: {
@@ -1149,6 +1239,29 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Відсутній Google Maps API key. Підказки адрес недоступні.',
         'signup.confirmEmailTitle': 'Перевір пошту',
         'signup.confirmEmailMessage': 'Ми надіслали посилання для підтвердження. Підтверди email перед входом.',
+                
+        'login.forgotPassword': 'Забули пароль?',
+        'login.sendingReset': 'Надсилання...',
+        'login.resetEmailSent': 'Ми надіслали посилання для скидання пароля на ваш email',
+        'login.resetFailed': 'Не вдалося надіслати лист для скидання пароля',
+        'login.resetUnexpectedError': 'Сталася помилка під час надсилання листа для скидання пароля',
+
+        'resetPassword.back': 'Назад',
+        'resetPassword.title': 'Новий пароль',
+        'resetPassword.description': 'Введіть новий пароль нижче.',
+        'resetPassword.newPassword': 'Новий пароль',
+        'resetPassword.newPasswordPlaceholder': '••••••••',
+        'resetPassword.confirmPassword': 'Підтвердьте пароль',
+        'resetPassword.confirmPasswordPlaceholder': '••••••••',
+        'resetPassword.submit': 'Зберегти новий пароль',
+        'resetPassword.submitting': 'Збереження...',
+        'resetPassword.enterPassword': 'Введіть новий пароль',
+        'resetPassword.enterConfirmPassword': 'Підтвердьте новий пароль',
+        'resetPassword.passwordTooShort': 'Пароль має містити щонайменше 6 символів',
+        'resetPassword.passwordsDoNotMatch': 'Паролі не збігаються',
+        'resetPassword.failed': 'Не вдалося скинути пароль',
+        'resetPassword.unexpectedError': 'Сталася помилка під час скидання пароля',
+        'resetPassword.success': 'Пароль успішно змінено. Увійдіть ще раз.',
     },
 
     de: {
@@ -1383,6 +1496,29 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.locationApiKeyMissing': 'Der Google Maps API key fehlt. Adressvorschläge sind nicht verfügbar.',
         'signup.confirmEmailTitle': 'Prüfe deine E-Mails',
         'signup.confirmEmailMessage': 'Wir haben dir einen Bestätigungslink gesendet. Bitte bestätige deine E-Mail vor dem Anmelden.',
+                
+        'login.forgotPassword': 'Passwort vergessen?',
+        'login.sendingReset': 'Wird gesendet...',
+        'login.resetEmailSent': 'Wir haben dir einen Link zum Zurücksetzen des Passworts per E-Mail gesendet',
+        'login.resetFailed': 'E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden',
+        'login.resetUnexpectedError': 'Beim Senden der E-Mail zum Zurücksetzen des Passworts ist ein Fehler aufgetreten',
+
+        'resetPassword.back': 'Zurück',
+        'resetPassword.title': 'Neues Passwort',
+        'resetPassword.description': 'Gib unten dein neues Passwort ein.',
+        'resetPassword.newPassword': 'Neues Passwort',
+        'resetPassword.newPasswordPlaceholder': '••••••••',
+        'resetPassword.confirmPassword': 'Passwort bestätigen',
+        'resetPassword.confirmPasswordPlaceholder': '••••••••',
+        'resetPassword.submit': 'Neues Passwort speichern',
+        'resetPassword.submitting': 'Wird gespeichert...',
+        'resetPassword.enterPassword': 'Gib ein neues Passwort ein',
+        'resetPassword.enterConfirmPassword': 'Bestätige dein neues Passwort',
+        'resetPassword.passwordTooShort': 'Das Passwort muss mindestens 6 Zeichen lang sein',
+        'resetPassword.passwordsDoNotMatch': 'Die Passwörter stimmen nicht überein',
+        'resetPassword.failed': 'Passwort konnte nicht zurückgesetzt werden',
+        'resetPassword.unexpectedError': 'Beim Zurücksetzen des Passworts ist ein Fehler aufgetreten',
+        'resetPassword.success': 'Passwort erfolgreich geändert. Bitte melde dich erneut an.',
     },
 };
 

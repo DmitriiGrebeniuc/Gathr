@@ -13,6 +13,7 @@ export function LoginScreen({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const { translate } = useLanguage();
 
@@ -51,6 +52,34 @@ export function LoginScreen({
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      alert(translate('login.enterEmail'));
+      return;
+    }
+
+    setResetLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: 'https://gathr-app.site',
+      });
+
+      if (error) {
+        console.error('Ошибка отправки reset password email:', error);
+        alert(error.message || translate('login.resetFailed'));
+        return;
+      }
+
+      alert(translate('login.resetEmailSent'));
+    } catch (error) {
+      console.error('Unexpected reset password request error:', error);
+      alert(translate('login.resetUnexpectedError'));
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <SwipeableScreen onSwipeBack={() => onNavigate('welcome')}>
       <div className="h-full flex flex-col px-6 py-8 bg-background">
@@ -58,7 +87,7 @@ export function LoginScreen({
           whileTap={{ scale: 0.95 }}
           onClick={() => onNavigate('welcome')}
           className="self-start text-muted-foreground mb-8"
-          disabled={loading}
+          disabled={loading || resetLoading}
         >
           ← {translate('login.back')}
         </motion.button>
@@ -111,6 +140,24 @@ export function LoginScreen({
             </motion.div>
 
             <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.35 }}
+              className="text-right"
+            >
+              <button
+                onClick={handleForgotPassword}
+                className="text-sm text-accent"
+                style={{ color: '#D4AF37' }}
+                disabled={loading || resetLoading}
+              >
+                {resetLoading
+                  ? translate('login.sendingReset')
+                  : translate('login.forgotPassword')}
+              </button>
+            </motion.div>
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -119,7 +166,7 @@ export function LoginScreen({
                 onClick={handleLogin}
                 variant="primary"
                 fullWidth
-                className="mt-6"
+                className="mt-2"
               >
                 {loading ? translate('login.submitting') : translate('login.submit')}
               </TouchButton>
@@ -136,7 +183,7 @@ export function LoginScreen({
                 onClick={() => onNavigate('signup')}
                 className="text-accent"
                 style={{ color: '#D4AF37' }}
-                disabled={loading}
+                disabled={loading || resetLoading}
               >
                 {translate('login.signupLink')}
               </button>

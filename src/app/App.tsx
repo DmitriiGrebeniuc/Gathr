@@ -17,6 +17,7 @@ import { SupportScreen } from './components/SupportScreen';
 import { BottomNav } from './components/BottomNav';
 import { ScreenTransition } from './components/ScreenTransition';
 import { LoadingLogo } from './components/LoadingLogo';
+import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { supabase } from '../lib/supabase';
 import { LanguageScreen } from './components/LanguageScreen';
 import { useLanguage } from './context/LanguageContext';
@@ -33,8 +34,18 @@ export default function App() {
   const { translate } = useLanguage();
 
   useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const authType = hashParams.get('type');
+
     const checkSession = async () => {
       try {
+        if (authType === 'recovery') {
+          setCurrentScreen('reset-password');
+          setHistory(['reset-password']);
+          setAuthChecked(true);
+          return;
+        }
+
         const {
           data: { session },
           error,
@@ -64,7 +75,14 @@ export default function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setCurrentScreen('reset-password');
+        setHistory(['reset-password']);
+        setDirection('forward');
+        return;
+      }
+
       if (session?.user) {
         setCurrentScreen('home');
         setHistory(['home']);
@@ -99,6 +117,7 @@ export default function App() {
       'language',
       'event-details',
       'participants',
+      'reset-password',
     ];
     const modalScreens = ['create-event'];
 
@@ -179,6 +198,9 @@ export default function App() {
               {currentScreen === 'welcome' && <WelcomeScreen onNavigate={handleNavigate} />}
               {currentScreen === 'login' && <LoginScreen onNavigate={handleNavigate} />}
               {currentScreen === 'signup' && <SignUpScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'reset-password' && (
+                <ResetPasswordScreen onNavigate={handleNavigate} />
+              )}
               {currentScreen === 'home' && <HomeScreen onNavigate={handleNavigate} />}
               {currentScreen === 'create-event' && <CreateEventScreen onNavigate={handleNavigate} />}
               {currentScreen === 'edit-event' && (

@@ -34,12 +34,15 @@ export default function App() {
   const { translate } = useLanguage();
 
   useEffect(() => {
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    const authType = hashParams.get('type');
+    const hash = window.location.hash;
+
+    const isRecovery =
+      hash.includes('type=recovery') ||
+      hash.includes('access_token');
 
     const checkSession = async () => {
       try {
-        if (authType === 'recovery') {
+        if (isRecovery) {
           setCurrentScreen('reset-password');
           setHistory(['reset-password']);
           setAuthChecked(true);

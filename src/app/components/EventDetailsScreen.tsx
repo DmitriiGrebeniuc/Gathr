@@ -263,14 +263,22 @@ export function EventDetailsScreen({
         return;
       }
 
-      alert(shareText);
+      const telegramShareUrl =
+        `https://t.me/share/url?url=${encodeURIComponent(eventShareUrl)}&text=${encodeURIComponent(shareText)}`;
+
+      window.open(telegramShareUrl, '_blank', 'noopener,noreferrer');
     } catch (error: any) {
       if (error?.name === 'AbortError') {
         return;
       }
 
       console.error('Unexpected share error:', error);
-      alert('Failed to share event');
+
+      try {
+        window.prompt('Copy event link:', eventShareUrl);
+      } catch (promptError) {
+        console.error('Prompt fallback failed:', promptError);
+      }
     } finally {
       setSharing(false);
     }

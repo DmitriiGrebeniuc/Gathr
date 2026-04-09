@@ -31,7 +31,9 @@ export default function App() {
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
+
   const isRecoveryModeRef = useRef(false);
+  const handledSharedEventRef = useRef(false);
 
   const { translate } = useLanguage();
 
@@ -67,6 +69,35 @@ export default function App() {
       return data || null;
     };
 
+    const openSharedEventIfNeeded = async () => {
+      if (handledSharedEventRef.current) {
+        return false;
+      }
+
+      const sharedEventId = getSharedEventIdFromPath();
+
+      if (!sharedEventId) {
+        return false;
+      }
+
+      const sharedEvent = await loadSharedEvent(sharedEventId);
+
+      if (!sharedEvent) {
+        return false;
+      }
+
+      handledSharedEventRef.current = true;
+      setSelectedEvent({
+        ...sharedEvent,
+        backTarget: 'home',
+      });
+      setCurrentScreen('event-details');
+      setHistory(['event-details']);
+      setDirection('forward');
+
+      return true;
+    };
+
     const checkSession = async () => {
       try {
         if (isRecovery && accessToken && refreshToken) {
@@ -90,21 +121,11 @@ export default function App() {
           return;
         }
 
-        const sharedEventId = getSharedEventIdFromPath();
+        const openedSharedEvent = await openSharedEventIfNeeded();
 
-        if (sharedEventId) {
-          const sharedEvent = await loadSharedEvent(sharedEventId);
-
-          if (sharedEvent) {
-            setSelectedEvent({
-              ...sharedEvent,
-              backTarget: 'home',
-            });
-            setCurrentScreen('event-details');
-            setHistory(['event-details']);
-            setAuthChecked(true);
-            return;
-          }
+        if (openedSharedEvent) {
+          setAuthChecked(true);
+          return;
         }
 
         const {
@@ -136,7 +157,7 @@ export default function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         isRecoveryModeRef.current = true;
         setCurrentScreen('reset-password');
@@ -157,17 +178,17 @@ export default function App() {
         return;
       }
 
+      const sharedEventId = getSharedEventIdFromPath();
+
+      if (sharedEventId && handledSharedEventRef.current) {
+        return;
+      }
+
       if (session?.user) {
         setCurrentScreen('home');
         setHistory(['home']);
         setDirection('forward');
       } else {
-        const sharedEventId = getSharedEventIdFromPath();
-
-        if (sharedEventId && selectedEvent?.id === sharedEventId) {
-          return;
-        }
-
         setCurrentScreen('welcome');
         setHistory(['welcome']);
         setDirection('back');
@@ -177,7 +198,7 @@ export default function App() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [selectedEvent?.id]);
+  }, []);
 
   const handleNavigate = (
     screen: string,

@@ -290,7 +290,8 @@ type TranslationKey =
     | 'inviteUsers.empty'
     | 'inviteUsers.sent'
     | 'inviteUsers.failed'
-    | 'inviteUsers.unexpectedError';
+    | 'inviteUsers.unexpectedError'
+    | 'create.pastDateTime';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     en: {
@@ -506,6 +507,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.creating': 'Creating...',
         'create.activeEventsLimitReached': 'Free plan includes up to 3 active events at the same time.',
         'create.activeEventsLimitReachedPro': 'Upgrade to Pro to create more active events.',
+        'create.pastDateTime': 'You cannot create an event in the past',
 
         'edit.title': 'Edit Event',
         'edit.cancel': 'Cancel',
@@ -816,6 +818,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.creating': 'Создание...',
         'create.activeEventsLimitReached': 'В бесплатном плане можно иметь до 3 активных событий одновременно.',
         'create.activeEventsLimitReachedPro': 'Перейдите на Pro, чтобы создавать больше активных событий.',
+        'create.pastDateTime': 'Нельзя создать событие в прошлом',
 
         'edit.title': 'Редактировать событие',
         'edit.cancel': 'Отмена',
@@ -1126,6 +1129,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.creating': 'Se creează...',
         'create.activeEventsLimitReached': 'Planul gratuit include până la 3 evenimente active în același timp.',
         'create.activeEventsLimitReachedPro': 'Treci la Pro pentru a crea mai multe evenimente active.',
+        'create.pastDateTime': 'Nu poți crea un eveniment în trecut',
 
         'edit.title': 'Editează evenimentul',
         'edit.cancel': 'Anulează',
@@ -1437,6 +1441,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.creating': 'Створення...',
         'create.activeEventsLimitReached': 'Безкоштовний план дозволяє мати до 3 активних подій одночасно.',
         'create.activeEventsLimitReachedPro': 'Перейдіть на Pro, щоб створювати більше активних подій.',
+        'create.pastDateTime': 'Не можна створити подію в минулому',
 
         'edit.title': 'Редагувати подію',
         'edit.cancel': 'Скасувати',
@@ -1755,6 +1760,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.unexpectedError': 'Beim Erstellen des Events ist ein Fehler aufgetreten',
         'create.activeEventsLimitReached': 'Im kostenlosen Tarif sind bis zu 3 aktive Events gleichzeitig möglich.',
         'create.activeEventsLimitReachedPro': 'Wechsle zu Pro, um mehr aktive Events zu erstellen.',
+        'create.pastDateTime': 'Du kannst kein Event in der Vergangenheit erstellen',
 
         'edit.title': 'Event bearbeiten',
         'edit.cancel': 'Abbrechen',

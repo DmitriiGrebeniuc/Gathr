@@ -88,6 +88,20 @@ export function CreateEventScreen({
         return;
       }
 
+      const dateTime = new Date(`${date}T${time}`);
+
+      if (Number.isNaN(dateTime.getTime())) {
+        alert(translate('create.invalidDateTime'));
+        setLoading(false);
+        return;
+      }
+
+      if (dateTime.getTime() < Date.now()) {
+        alert(translate('create.pastDateTime'));
+        setLoading(false);
+        return;
+      }
+
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('plan, has_unlimited_access')
@@ -127,14 +141,6 @@ export function CreateEventScreen({
           setLoading(false);
           return;
         }
-      }
-
-      const dateTime = new Date(`${date}T${time}`);
-
-      if (Number.isNaN(dateTime.getTime())) {
-        alert(translate('create.invalidDateTime'));
-        setLoading(false);
-        return;
       }
 
       const { data: createdEvent, error } = await supabase

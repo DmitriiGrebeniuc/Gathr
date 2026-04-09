@@ -84,6 +84,8 @@ type TranslationKey =
     | 'notificationSettings.upcomingEventsDescription'
     | 'notificationSettings.newParticipants'
     | 'notificationSettings.newParticipantsDescription'
+    | 'notificationSettings.eventInvitations'
+    | 'notificationSettings.eventInvitationsDescription'
     | 'security.title'
     | 'security.cardTitle'
     | 'security.cardDescription'
@@ -139,6 +141,16 @@ type TranslationKey =
     | 'notifications.joinedYourEvent'
     | 'notifications.and'
     | 'notifications.others'
+    | 'notifications.inviteIconLabel'
+    | 'notifications.invitedYouToEvent'
+    | 'notifications.acceptInvite'
+    | 'notifications.acceptingInvite'
+    | 'notifications.declineInvite'
+    | 'notifications.decliningInvite'
+    | 'notifications.inviteAccepted'
+    | 'notifications.inviteDeclined'
+    | 'notifications.inviteActionFailed'
+    | 'notifications.inviteActionUnexpectedError'
     | 'profile.title'
     | 'profile.editProfile'
     | 'profile.notificationSettings'
@@ -360,6 +372,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notificationSettings.upcomingEventsDescription': 'Get notified before events start',
         'notificationSettings.newParticipants': 'New Participants',
         'notificationSettings.newParticipantsDescription': 'When someone joins your event',
+        'notificationSettings.eventInvitations': 'Event Invitations',
+        'notificationSettings.eventInvitationsDescription': 'When someone invites you to an event',
 
         'security.title': 'Privacy & Security',
         'security.cardTitle': 'Security settings',
@@ -418,6 +432,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notifications.joinedYourEvent': '{names} joined your event {title}',
         'notifications.and': 'and',
         'notifications.others': 'others',
+        'notifications.inviteIconLabel': 'Event invitation',
+        'notifications.invitedYouToEvent': '{name} invited you to {title}',
+        'notifications.acceptInvite': 'Accept',
+        'notifications.acceptingInvite': 'Accepting...',
+        'notifications.declineInvite': 'Decline',
+        'notifications.decliningInvite': 'Declining...',
+        'notifications.inviteAccepted': 'Invitation accepted',
+        'notifications.inviteDeclined': 'Invitation declined',
+        'notifications.inviteActionFailed': 'Failed to process invitation',
+        'notifications.inviteActionUnexpectedError': 'An error occurred while processing the invitation',
 
         'profile.title': 'Profile',
         'profile.editProfile': 'Edit Profile',
@@ -646,6 +670,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notificationSettings.upcomingEventsDescription': 'Получать уведомления перед началом событий',
         'notificationSettings.newParticipants': 'Новые участники',
         'notificationSettings.newParticipantsDescription': 'Когда кто-то присоединяется к вашему событию',
+        'notificationSettings.eventInvitations': 'Приглашения на события',
+        'notificationSettings.eventInvitationsDescription': 'Когда вас приглашают на событие',
 
         'security.title': 'Конфиденциальность и безопасность',
         'security.cardTitle': 'Настройки безопасности',
@@ -704,6 +730,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notifications.joinedYourEvent': '{names} присоединился к вашему событию {title}|{names} присоединились к вашему событию {title}',
         'notifications.and': 'и',
         'notifications.others': 'других',
+        'notifications.inviteIconLabel': 'Приглашение на событие',
+        'notifications.invitedYouToEvent': '{name} пригласил вас на событие {title}',
+        'notifications.acceptInvite': 'Принять',
+        'notifications.acceptingInvite': 'Принятие...',
+        'notifications.declineInvite': 'Отклонить',
+        'notifications.decliningInvite': 'Отклонение...',
+        'notifications.inviteAccepted': 'Приглашение принято',
+        'notifications.inviteDeclined': 'Приглашение отклонено',
+        'notifications.inviteActionFailed': 'Не удалось обработать приглашение',
+        'notifications.inviteActionUnexpectedError': 'Произошла ошибка при обработке приглашения',
 
         'profile.title': 'Профиль',
         'profile.editProfile': 'Редактировать профиль',
@@ -932,6 +968,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notificationSettings.upcomingEventsDescription': 'Primește notificări înainte de începerea evenimentelor',
         'notificationSettings.newParticipants': 'Participanți noi',
         'notificationSettings.newParticipantsDescription': 'Când cineva se alătură evenimentului tău',
+        'notificationSettings.eventInvitations': 'Invitații la evenimente',
+        'notificationSettings.eventInvitationsDescription': 'Când cineva te invită la un eveniment',
 
         'security.title': 'Confidențialitate și securitate',
         'security.cardTitle': 'Setări de securitate',
@@ -990,6 +1028,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notifications.joinedYourEvent': '{names} s-a alăturat evenimentului tău {title}|{names} s-au alăturat evenimentului tău {title}',
         'notifications.and': 'și',
         'notifications.others': 'alții',
+        'notifications.inviteIconLabel': 'Invitație la eveniment',
+        'notifications.invitedYouToEvent': '{name} te-a invitat la {title}',
+        'notifications.acceptInvite': 'Acceptă',
+        'notifications.acceptingInvite': 'Se acceptă...',
+        'notifications.declineInvite': 'Refuză',
+        'notifications.decliningInvite': 'Se refuză...',
+        'notifications.inviteAccepted': 'Invitația a fost acceptată',
+        'notifications.inviteDeclined': 'Invitația a fost refuzată',
+        'notifications.inviteActionFailed': 'Invitația nu a putut fi procesată',
+        'notifications.inviteActionUnexpectedError': 'A apărut o eroare la procesarea invitației',
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Editează profilul',
@@ -1219,6 +1267,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notificationSettings.upcomingEventsDescription': 'Отримуйте сповіщення перед початком подій',
         'notificationSettings.newParticipants': 'Нові учасники',
         'notificationSettings.newParticipantsDescription': 'Коли хтось приєднується до вашої події',
+        'notificationSettings.eventInvitations': 'Запрошення на події',
+        'notificationSettings.eventInvitationsDescription': 'Коли вас запрошують на подію',
 
         'security.title': 'Конфіденційність і безпека',
         'security.cardTitle': 'Налаштування безпеки',
@@ -1277,6 +1327,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notifications.joinedYourEvent': '{names} приєднався до вашої події {title}|{names} приєдналися до вашої події {title}',
         'notifications.and': 'і',
         'notifications.others': 'інші',
+        'notifications.inviteIconLabel': 'Запрошення на подію',
+        'notifications.invitedYouToEvent': '{name} запросив вас на подію {title}',
+        'notifications.acceptInvite': 'Прийняти',
+        'notifications.acceptingInvite': 'Прийняття...',
+        'notifications.declineInvite': 'Відхилити',
+        'notifications.decliningInvite': 'Відхилення...',
+        'notifications.inviteAccepted': 'Запрошення прийнято',
+        'notifications.inviteDeclined': 'Запрошення відхилено',
+        'notifications.inviteActionFailed': 'Не вдалося обробити запрошення',
+        'notifications.inviteActionUnexpectedError': 'Сталася помилка під час обробки запрошення',
 
         'profile.title': 'Профіль',
         'profile.editProfile': 'Редагувати профіль',
@@ -1505,6 +1565,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notificationSettings.upcomingEventsDescription': 'Erhalte Benachrichtigungen vor dem Start von Events',
         'notificationSettings.newParticipants': 'Neue Teilnehmer',
         'notificationSettings.newParticipantsDescription': 'Wenn jemand deinem Event beitritt',
+        'notificationSettings.eventInvitations': 'Event-Einladungen',
+        'notificationSettings.eventInvitationsDescription': 'Wenn dich jemand zu einem Event einlädt',
 
         'security.title': 'Datenschutz und Sicherheit',
         'security.cardTitle': 'Sicherheitseinstellungen',
@@ -1563,6 +1625,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'notifications.joinedYourEvent': '{names} ist deinem Event {title} beigetreten|{names} sind deinem Event {title} beigetreten',
         'notifications.and': 'und',
         'notifications.others': 'andere',
+        'notifications.inviteIconLabel': 'Event-Einladung',
+        'notifications.invitedYouToEvent': '{name} hat dich zu {title} eingeladen',
+        'notifications.acceptInvite': 'Annehmen',
+        'notifications.acceptingInvite': 'Wird angenommen...',
+        'notifications.declineInvite': 'Ablehnen',
+        'notifications.decliningInvite': 'Wird abgelehnt...',
+        'notifications.inviteAccepted': 'Einladung angenommen',
+        'notifications.inviteDeclined': 'Einladung abgelehnt',
+        'notifications.inviteActionFailed': 'Einladung konnte nicht verarbeitet werden',
+        'notifications.inviteActionUnexpectedError': 'Beim Verarbeiten der Einladung ist ein Fehler aufgetreten',
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Profil bearbeiten',

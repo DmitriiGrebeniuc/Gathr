@@ -14,12 +14,13 @@ type EventItem = {
 
 type NotificationItem = {
   id: string;
-  type: 'upcoming' | 'join';
+  type: 'upcoming' | 'join' | 'invite';
   message: string;
   time: string;
   event: EventItem;
   sortDate?: string | null;
   sortPriority: number;
+  invitationId?: string;
 };
 
 export function NotificationsScreen({
@@ -29,6 +30,8 @@ export function NotificationsScreen({
 }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingInvitationId, setProcessingInvitationId] = useState<string | null>(null);
+  const [processingAction, setProcessingAction] = useState<'accept' | 'decline' | null>(null);
 
   const { translate } = useLanguage();
 
@@ -312,7 +315,80 @@ export function NotificationsScreen({
         }
       }
 
-      const mergedNotifications = [...joinNotifications, ...upcomingNotifications];
+      let inviteNotifications: NotificationItem[] = [];
+
+      const { data: invitations, error: invitationsError } = await supabase
+        .from('event_invitations')
+        .select(`
+          id,
+          event_id,
+          inviter_id,
+          invitee_id,
+          status,
+          created_at,
+          events (
+            id,
+            title,
+            description,
+            date_time,
+            location,
+            creator_id
+          ),
+          inviter:profiles!event_invitations_inviter_id_fkey (
+            name
+          )
+        `)
+        .eq('invitee_id', user.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (invitationsError) {
+        console.error('Ошибка загрузки invitations:', invitationsError);
+      } else {
+        inviteNotifications = (invitations || [])
+          .map((invitation: any) => {
+            const eventData = Array.isArray(invitation.events)
+              ? invitation.events[0]
+              : invitation.events;
+
+            const inviterData = Array.isArray(invitation.inviter)
+              ? invitation.inviter[0]
+              : invitation.inviter;
+
+            if (!eventData?.id) {
+              return null;
+            }
+
+            const inviterName = inviterData?.name || translate('notifications.someone');
+
+            return {
+              id: `invite-${invitation.id}`,
+              type: 'invite' as const,
+              message: translate('notifications.invitedYouToEvent')
+                .replaceAll('{name}', inviterName)
+                .replaceAll('{title}', eventData.title || translate('common.event')),
+              time: formatPastTime(invitation.created_at),
+              event: {
+                id: eventData.id,
+                title: eventData.title,
+                description: eventData.description,
+                date_time: eventData.date_time,
+                location: eventData.location,
+                creator_id: eventData.creator_id,
+              },
+              sortDate: invitation.created_at || null,
+              sortPriority: 0,
+              invitationId: invitation.id,
+            };
+          })
+          .filter(Boolean) as NotificationItem[];
+      }
+
+      const mergedNotifications = [
+        ...inviteNotifications,
+        ...joinNotifications,
+        ...upcomingNotifications,
+      ];
 
       const uniqueNotifications = Array.from(
         new Map(mergedNotifications.map((notification) => [notification.id, notification])).values()
@@ -326,7 +402,7 @@ export function NotificationsScreen({
         const aTime = a.sortDate ? new Date(a.sortDate).getTime() : 0;
         const bTime = b.sortDate ? new Date(b.sortDate).getTime() : 0;
 
-        if (a.type === 'join') {
+        if (a.type === 'join' || a.type === 'invite') {
           return bTime - aTime;
         }
 
@@ -339,6 +415,107 @@ export function NotificationsScreen({
       setNotifications([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAcceptInvitation = async (notification: NotificationItem) => {
+    if (!notification.invitationId) return;
+
+    setProcessingInvitationId(notification.invitationId);
+    setProcessingAction('accept');
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        alert(translate('notifications.inviteActionFailed'));
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from('event_invitations')
+        .update({
+          status: 'accepted',
+          responded_at: new Date().toISOString(),
+        })
+        .eq('id', notification.invitationId)
+        .eq('invitee_id', user.id)
+        .eq('status', 'pending');
+
+      if (updateError) {
+        console.error('Ошибка принятия invitation:', updateError);
+        alert(translate('notifications.inviteActionFailed'));
+        return;
+      }
+
+      const { error: participantError } = await supabase.from('participants').insert([
+        {
+          event_id: notification.event.id,
+          user_id: user.id,
+        },
+      ]);
+
+      if (participantError) {
+        console.error('Ошибка добавления participant после invitation accept:', participantError);
+        alert(translate('notifications.inviteActionFailed'));
+        return;
+      }
+
+      alert(translate('notifications.inviteAccepted'));
+      await fetchNotifications();
+    } catch (error) {
+      console.error('Unexpected accept invitation error:', error);
+      alert(translate('notifications.inviteActionUnexpectedError'));
+    } finally {
+      setProcessingInvitationId(null);
+      setProcessingAction(null);
+    }
+  };
+
+  const handleDeclineInvitation = async (notification: NotificationItem) => {
+    if (!notification.invitationId) return;
+
+    setProcessingInvitationId(notification.invitationId);
+    setProcessingAction('decline');
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        alert(translate('notifications.inviteActionFailed'));
+        return;
+      }
+
+      const { error } = await supabase
+        .from('event_invitations')
+        .update({
+          status: 'declined',
+          responded_at: new Date().toISOString(),
+        })
+        .eq('id', notification.invitationId)
+        .eq('invitee_id', user.id)
+        .eq('status', 'pending');
+
+      if (error) {
+        console.error('Ошибка отклонения invitation:', error);
+        alert(translate('notifications.inviteActionFailed'));
+        return;
+      }
+
+      alert(translate('notifications.inviteDeclined'));
+      await fetchNotifications();
+    } catch (error) {
+      console.error('Unexpected decline invitation error:', error);
+      alert(translate('notifications.inviteActionUnexpectedError'));
+    } finally {
+      setProcessingInvitationId(null);
+      setProcessingAction(null);
     }
   };
 
@@ -375,9 +552,25 @@ export function NotificationsScreen({
       )
       .subscribe();
 
+    const invitationsChannel = supabase
+      .channel('notifications-invitations')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_invitations',
+        },
+        async () => {
+          await fetchNotifications();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(eventsChannel);
+      supabase.removeChannel(invitationsChannel);
     };
   }, []);
 
@@ -412,40 +605,93 @@ export function NotificationsScreen({
         )}
 
         {!loading &&
-          notifications.map((notification) => (
-            <div
-              key={notification.id}
-              onClick={() =>
-                onNavigate &&
-                onNavigate('event-details', {
-                  ...notification.event,
-                  backTarget: 'notifications',
-                })
-              }
-              className="px-6 py-4 border-b border-border flex items-start gap-3 hover:bg-card/50 transition-colors cursor-pointer active:opacity-70"
-            >
+          notifications.map((notification) => {
+            const isInvite = notification.type === 'invite';
+            const isProcessingCurrent =
+              processingInvitationId === notification.invitationId && !!processingAction;
+
+            return (
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
-                style={{ backgroundColor: '#3A3A3A' }}
-                title={
-                  notification.type === 'upcoming'
-                    ? translate('notifications.upcomingIconLabel')
-                    : translate('notifications.joinIconLabel')
+                key={notification.id}
+                onClick={() =>
+                  onNavigate &&
+                  onNavigate('event-details', {
+                    ...notification.event,
+                    backTarget: 'notifications',
+                  })
                 }
+                className="px-6 py-4 border-b border-border flex items-start gap-3 hover:bg-card/50 transition-colors cursor-pointer active:opacity-70"
               >
-                <span className="text-sm">
-                  {notification.type === 'upcoming' ? '⏰' : '👋'}
-                </span>
-              </div>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                  style={{ backgroundColor: '#3A3A3A' }}
+                  title={
+                    notification.type === 'upcoming'
+                      ? translate('notifications.upcomingIconLabel')
+                      : notification.type === 'join'
+                        ? translate('notifications.joinIconLabel')
+                        : translate('notifications.inviteIconLabel')
+                  }
+                >
+                  <span className="text-sm">
+                    {notification.type === 'upcoming'
+                      ? '⏰'
+                      : notification.type === 'join'
+                        ? '👋'
+                        : '✉️'}
+                  </span>
+                </div>
 
-              <div className="flex-1">
-                <p className="mb-1">{notification.message}</p>
-                <p className="text-sm text-muted-foreground">{notification.time}</p>
-              </div>
+                <div className="flex-1">
+                  <p className="mb-1">{notification.message}</p>
+                  <p className="text-sm text-muted-foreground">{notification.time}</p>
 
-              <span className="text-muted-foreground mt-1">→</span>
-            </div>
-          ))}
+                  {isInvite && (
+                    <div
+                      className="flex gap-2 mt-3"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <button
+                        onClick={() => handleAcceptInvitation(notification)}
+                        disabled={isProcessingCurrent}
+                        className="px-3 py-2 rounded-lg text-sm transition-opacity"
+                        style={{
+                          backgroundColor: 'rgba(212, 175, 55, 0.12)',
+                          border: '1px solid rgba(212, 175, 55, 0.35)',
+                          color: '#D4AF37',
+                          opacity: isProcessingCurrent ? 0.7 : 1,
+                        }}
+                      >
+                        {isProcessingCurrent && processingAction === 'accept'
+                          ? translate('notifications.acceptingInvite')
+                          : translate('notifications.acceptInvite')}
+                      </button>
+
+                      <button
+                        onClick={() => handleDeclineInvitation(notification)}
+                        disabled={isProcessingCurrent}
+                        className="px-3 py-2 rounded-lg text-sm transition-opacity"
+                        style={{
+                          backgroundColor: '#1A1A1A',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#F5F5F5',
+                          opacity: isProcessingCurrent ? 0.7 : 1,
+                        }}
+                      >
+                        {isProcessingCurrent && processingAction === 'decline'
+                          ? translate('notifications.decliningInvite')
+                          : translate('notifications.declineInvite')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <span className="text-muted-foreground mt-1">→</span>
+              </div>
+            );
+          })}
       </div>
     </div>
   );

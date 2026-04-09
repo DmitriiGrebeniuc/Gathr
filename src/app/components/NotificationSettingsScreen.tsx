@@ -6,15 +6,22 @@ import { useLanguage } from '../context/LanguageContext';
 type NotificationSettings = {
   notify_upcoming_events: boolean;
   notify_new_participants: boolean;
+  notify_event_invitations: boolean;
 };
+
+type NotificationSettingKey =
+  | 'notify_upcoming_events'
+  | 'notify_new_participants'
+  | 'notify_event_invitations';
 
 export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const [settings, setSettings] = useState<NotificationSettings>({
     notify_upcoming_events: true,
     notify_new_participants: true,
+    notify_event_invitations: true,
   });
   const [loading, setLoading] = useState(true);
-  const [savingKey, setSavingKey] = useState<'notify_upcoming_events' | 'notify_new_participants' | null>(null);
+  const [savingKey, setSavingKey] = useState<NotificationSettingKey | null>(null);
 
   const { translate } = useLanguage();
 
@@ -35,7 +42,9 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
 
       const { data, error } = await supabase
         .from('notification_settings')
-        .select('notify_upcoming_events, notify_new_participants')
+        .select(
+          'notify_upcoming_events, notify_new_participants, notify_event_invitations'
+        )
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -47,8 +56,9 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
 
       if (data) {
         setSettings({
-          notify_upcoming_events: data.notify_upcoming_events,
-          notify_new_participants: data.notify_new_participants,
+          notify_upcoming_events: data.notify_upcoming_events ?? true,
+          notify_new_participants: data.notify_new_participants ?? true,
+          notify_event_invitations: data.notify_event_invitations ?? true,
         });
       }
     } catch (error) {
@@ -62,10 +72,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
     loadSettings();
   }, []);
 
-  const updateSetting = async (
-    key: 'notify_upcoming_events' | 'notify_new_participants',
-    value: boolean
-  ) => {
+  const updateSetting = async (key: NotificationSettingKey, value: boolean) => {
     const previousSettings = settings;
     const nextSettings = {
       ...settings,
@@ -95,6 +102,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
             user_id: user.id,
             notify_upcoming_events: nextSettings.notify_upcoming_events,
             notify_new_participants: nextSettings.notify_new_participants,
+            notify_event_invitations: nextSettings.notify_event_invitations,
             updated_at: new Date().toISOString(),
           },
           {
@@ -188,6 +196,20 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
                     checked={settings.notify_new_participants}
                     disabled={savingKey === 'notify_new_participants'}
                     onChange={(value) => updateSetting('notify_new_participants', value)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="mb-1">{translate('notificationSettings.eventInvitations')}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {translate('notificationSettings.eventInvitationsDescription')}
+                    </p>
+                  </div>
+                  <ToggleSwitch
+                    checked={settings.notify_event_invitations}
+                    disabled={savingKey === 'notify_event_invitations'}
+                    onChange={(value) => updateSetting('notify_event_invitations', value)}
                   />
                 </div>
               </div>

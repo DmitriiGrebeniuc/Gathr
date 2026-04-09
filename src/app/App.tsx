@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { LoginScreen } from './components/LoginScreen';
@@ -30,7 +30,7 @@ export default function App() {
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const isRecoveryModeRef = useRef(false);
 
   const { translate } = useLanguage();
 
@@ -43,7 +43,7 @@ export default function App() {
     const checkSession = async () => {
       try {
         if (isRecovery) {
-          setIsRecoveryMode(true);
+          isRecoveryModeRef.current = true;
           setCurrentScreen('reset-password');
           setHistory(['reset-password']);
           setAuthChecked(true);
@@ -81,7 +81,7 @@ export default function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
-        setIsRecoveryMode(true);
+        isRecoveryModeRef.current = true;
         setCurrentScreen('reset-password');
         setHistory(['reset-password']);
         setDirection('forward');
@@ -89,10 +89,14 @@ export default function App() {
       }
 
       if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
-        setIsRecoveryMode(true);
+        isRecoveryModeRef.current = true;
         setCurrentScreen('reset-password');
         setHistory(['reset-password']);
         setDirection('forward');
+        return;
+      }
+
+      if (isRecoveryModeRef.current) {
         return;
       }
 

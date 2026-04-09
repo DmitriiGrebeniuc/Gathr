@@ -88,7 +88,11 @@ export default function App() {
         return;
       }
 
-      if (isRecoveryMode) {
+      if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+        setIsRecoveryMode(true);
+        setCurrentScreen('reset-password');
+        setHistory(['reset-password']);
+        setDirection('forward');
         return;
       }
 

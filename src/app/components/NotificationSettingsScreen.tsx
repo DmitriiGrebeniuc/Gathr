@@ -134,12 +134,12 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
     <button
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      className="relative w-12 h-6 rounded-full transition-all disabled:opacity-60"
+      className="relative w-14 h-8 rounded-full transition-all disabled:opacity-60"
       style={{ backgroundColor: checked ? '#D4AF37' : '#3A3A3A' }}
     >
       <div
-        className="absolute w-5 h-5 bg-white rounded-full top-0.5 transition-all"
-        style={{ left: checked ? '26px' : '2px' }}
+        className="absolute w-6 h-6 bg-white rounded-full top-1 transition-all"
+        style={{ left: checked ? '30px' : '4px' }}
       />
     </button>
   );
@@ -156,7 +156,10 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
         <h1>{translate('notificationSettings.title')}</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div
+        className="flex-1 overflow-y-auto px-6 py-6"
+        style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <div className="max-w-sm mx-auto space-y-6">
           <div>
             <h3 className="mb-4 text-sm text-muted-foreground">
@@ -171,7 +174,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
 
             {!loading && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3">
+                <div className="flex items-center justify-between py-3 gap-4">
                   <div>
                     <p className="mb-1">{translate('notificationSettings.upcomingEvents')}</p>
                     <p className="text-sm text-muted-foreground">
@@ -185,7 +188,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
                   />
                 </div>
 
-                <div className="flex items-center justify-between py-3">
+                <div className="flex items-center justify-between py-3 gap-4">
                   <div>
                     <p className="mb-1">{translate('notificationSettings.newParticipants')}</p>
                     <p className="text-sm text-muted-foreground">
@@ -199,7 +202,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
                   />
                 </div>
 
-                <div className="flex items-center justify-between py-3">
+                <div className="flex items-center justify-between py-3 gap-4">
                   <div>
                     <p className="mb-1">{translate('notificationSettings.eventInvitations')}</p>
                     <p className="text-sm text-muted-foreground">

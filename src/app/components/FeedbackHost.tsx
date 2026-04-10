@@ -41,6 +41,7 @@ export function FeedbackHost() {
     <>
       <Toaster
         position="top-center"
+        offset="calc(env(safe-area-inset-top, 0px) + 12px)"
         richColors
         closeButton
         visibleToasts={4}

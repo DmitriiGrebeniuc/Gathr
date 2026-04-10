@@ -143,23 +143,33 @@ export function ProfileScreen({
         <h1>{translate('profile.title')}</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <div
+        className="flex-1 overflow-y-auto px-6 py-8"
+        style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <div className="max-w-sm mx-auto space-y-6">
           <div className="flex flex-col items-center">
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
               style={{ backgroundColor: '#3A3A3A' }}
             >
-              <span className="text-3xl">{loading ? '...' : getInitials()}</span>
+              <span className="text-3xl">{loading ? '••' : getInitials()}</span>
             </div>
 
-            <h2 className="mb-1">
-              {loading ? translate('profile.loading') : getDisplayName()}
-            </h2>
+            {loading ? (
+              <div className="w-full flex flex-col items-center gap-2">
+                <div className="h-6 w-32 rounded-full" style={{ backgroundColor: '#1A1A1A' }} />
+                <div className="h-4 w-44 rounded-full" style={{ backgroundColor: '#1A1A1A' }} />
+              </div>
+            ) : (
+              <>
+                <h2 className="mb-1">{getDisplayName()}</h2>
 
-            <p className="text-muted-foreground">
-              {loading ? translate('profile.loadingEmail') : user?.email || translate('profile.noEmail')}
-            </p>
+                <p className="text-muted-foreground">
+                  {user?.email || translate('profile.noEmail')}
+                </p>
+              </>
+            )}
           </div>
 
           <div className="space-y-3 pt-4">

@@ -604,7 +604,10 @@ export function HomeScreen({
       </div>
 
       <PullToRefresh onRefresh={handleRefresh}>
-        <div className="h-full overflow-y-auto px-6 py-4 space-y-3">
+        <div
+          className="h-full overflow-y-auto px-6 py-4 space-y-3"
+          style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
+        >
           {shouldShowInitialLoader && (
             <div className="flex justify-center py-8">
               <LoadingLogo size={52} label={translate('common.loading')} />
@@ -649,7 +652,7 @@ export function HomeScreen({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: index * 0.03,
+                  delay: Math.min(index, 8) * 0.03,
                   duration: 0.18,
                 }}
                 whileTap={{ scale: 0.98 }}
@@ -748,6 +751,7 @@ export function HomeScreen({
         onClick={() => onNavigate('create-event')}
         className="absolute bottom-24 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
         style={{
+          bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
           backgroundColor: '#D4AF37',
           color: '#0F0F0F',
           boxShadow: '0 8px 24px rgba(212, 175, 55, 0.4)',

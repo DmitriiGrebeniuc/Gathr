@@ -532,7 +532,10 @@ export function AdminScreen({
         <h1>{translate('admin.title')}</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <div
+        className="flex-1 overflow-y-auto px-6 py-8"
+        style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <div className="max-w-sm mx-auto space-y-6">
           <div
             className="rounded-xl border p-5"
@@ -803,6 +806,7 @@ export function AdminScreen({
                             backgroundColor: 'rgba(255, 77, 109, 0.08)',
                             border: '1px solid rgba(255, 77, 109, 0.28)',
                             color: '#FF4D6D',
+                            marginLeft: 'auto',
                           }}
                         >
                           {deletingEventId === event.id

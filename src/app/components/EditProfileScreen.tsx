@@ -143,7 +143,10 @@ export function EditProfileScreen({
         <h1>{translate('editProfile.title')}</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <div
+        className="flex-1 overflow-y-auto px-6 py-8"
+        style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <div className="max-w-sm mx-auto space-y-6">
           <div className="flex flex-col items-center mb-8">
             <div
@@ -196,7 +199,7 @@ export function EditProfileScreen({
           <button
             onClick={handleSave}
             disabled={loading || saving}
-            className="w-full py-4 rounded-xl transition-all mt-8"
+            className="w-full py-4 rounded-xl transition-all mt-8 disabled:opacity-60"
             style={{ backgroundColor: '#D4AF37', color: '#0F0F0F' }}
           >
             {loading

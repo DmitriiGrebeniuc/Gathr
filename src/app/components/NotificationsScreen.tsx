@@ -31,6 +31,7 @@ export function NotificationsScreen({
 }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [processingInvitationId, setProcessingInvitationId] = useState<string | null>(null);
   const [processingAction, setProcessingAction] = useState<'accept' | 'decline' | null>(null);
 
@@ -128,8 +129,12 @@ export function NotificationsScreen({
     return translate('notifications.upcomingDefault').replaceAll('{title}', event.title);
   };
 
-  const fetchNotifications = async () => {
-    setLoading(true);
+  const fetchNotifications = async (showLoader = true) => {
+    if (showLoader) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
     try {
       const {
@@ -418,7 +423,11 @@ export function NotificationsScreen({
       console.error('Notifications error:', error);
       setNotifications([]);
     } finally {
-      setLoading(false);
+      if (showLoader) {
+        setLoading(false);
+      } else {
+        setRefreshing(false);
+      }
     }
   };
 
@@ -469,7 +478,7 @@ export function NotificationsScreen({
       }
 
       feedback.success(translate('notifications.inviteAccepted'));
-      await fetchNotifications();
+      await fetchNotifications(false);
     } catch (error) {
       console.error('Unexpected accept invitation error:', error);
       feedback.error(translate('notifications.inviteActionUnexpectedError'));
@@ -513,7 +522,7 @@ export function NotificationsScreen({
       }
 
       feedback.success(translate('notifications.inviteDeclined'));
-      await fetchNotifications();
+      await fetchNotifications(false);
     } catch (error) {
       console.error('Unexpected decline invitation error:', error);
       feedback.error(translate('notifications.inviteActionUnexpectedError'));
@@ -524,7 +533,7 @@ export function NotificationsScreen({
   };
 
   useEffect(() => {
-    fetchNotifications();
+    fetchNotifications(true);
 
     const participantsChannel = supabase
       .channel('notifications-participants')
@@ -536,7 +545,7 @@ export function NotificationsScreen({
           table: 'participants',
         },
         async () => {
-          await fetchNotifications();
+          await fetchNotifications(false);
         }
       )
       .subscribe();
@@ -551,7 +560,7 @@ export function NotificationsScreen({
           table: 'events',
         },
         async () => {
-          await fetchNotifications();
+          await fetchNotifications(false);
         }
       )
       .subscribe();
@@ -566,7 +575,7 @@ export function NotificationsScreen({
           table: 'event_invitations',
         },
         async () => {
-          await fetchNotifications();
+          await fetchNotifications(false);
         }
       )
       .subscribe();
@@ -584,10 +593,19 @@ export function NotificationsScreen({
         <h1>{translate('notifications.title')}</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div
+        className="flex-1 overflow-y-auto"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         {loading && (
           <div className="px-6 py-10 flex items-center justify-center">
             <LoadingLogo size={52} label={translate('common.loadingNotifications')} />
+          </div>
+        )}
+
+        {!loading && refreshing && (
+          <div className="px-6 pt-3">
+            <p className="text-xs text-muted-foreground">{translate('common.loading')}</p>
           </div>
         )}
 

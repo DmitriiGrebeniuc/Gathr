@@ -229,7 +229,10 @@ export function CreateEventScreen({
         <div className="w-10 h-1 rounded-full bg-border"></div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div
+        className="flex-1 overflow-y-auto px-6 py-6"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <div className="space-y-5 max-w-sm mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -378,7 +381,7 @@ export function CreateEventScreen({
         transition={{ delay: 0.3 }}
         className="p-6 border-t border-border"
       >
-        <TouchButton onClick={handleCreateEvent} variant="primary" fullWidth>
+        <TouchButton onClick={handleCreateEvent} variant="primary" fullWidth disabled={loading}>
           {loading ? translate('create.creating') : translate('create.createButton')}
         </TouchButton>
       </motion.div>

@@ -43,7 +43,7 @@ export function TouchButton({
     <motion.button
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={`py-4 px-6 rounded-xl transition-all active:opacity-80 ${
+      className={`py-4 px-6 rounded-xl transition-all active:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed ${
         fullWidth ? 'w-full' : ''
       } ${className}`}
       style={style}

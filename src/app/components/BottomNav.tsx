@@ -16,11 +16,13 @@ export function BottomNav({
       animate={{ y: 0 }}
       exit={{ y: 100 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="flex items-center justify-around py-4 border-t"
+      className="flex items-center justify-around border-t"
       style={{
         borderColor: 'rgba(255, 255, 255, 0.1)',
         backgroundColor: '#0F0F0F',
-        backdropFilter: 'blur(10px)'
+        backdropFilter: 'blur(10px)',
+        paddingTop: '0.75rem',
+        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
       }}
     >
       <motion.button

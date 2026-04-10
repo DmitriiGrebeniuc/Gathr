@@ -508,7 +508,10 @@ export function EventDetailsScreen({
           <div className="w-14"></div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div
+          className="flex-1 overflow-y-auto px-6 py-6"
+          style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+        >
           <div className="max-w-sm mx-auto space-y-6">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -545,7 +548,7 @@ export function EventDetailsScreen({
                 variant="ghost"
                 fullWidth
                 onClick={handleShare}
-                disabled={sharing || !eventData.id}
+                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
                 style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
               >
                 {sharing ? translate('details.sharing') : translate('details.shareEvent')}
@@ -733,6 +736,7 @@ export function EventDetailsScreen({
                   variant="danger"
                   fullWidth
                   onClick={handleLeave}
+                  disabled={loadingAction || loadingDelete}
                 >
                   {loadingAction ? translate('details.leaving') : translate('details.leaveEvent')}
                 </TouchButton>
@@ -741,6 +745,7 @@ export function EventDetailsScreen({
                   variant="primary"
                   fullWidth
                   onClick={handleJoin}
+                  disabled={loadingAction || loadingDelete}
                 >
                   {loadingAction ? translate('details.joining') : translate('details.joinEvent')}
                 </TouchButton>
@@ -761,6 +766,7 @@ export function EventDetailsScreen({
                 variant="ghost"
                 fullWidth
                 onClick={() => onNavigate('edit-event', eventData)}
+                disabled={loadingDelete || loadingAction}
                 style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
               >
                 {translate('details.editEvent')}
@@ -770,6 +776,7 @@ export function EventDetailsScreen({
                 variant="danger"
                 fullWidth
                 onClick={handleDeleteEvent}
+                disabled={loadingDelete || loadingAction}
               >
                 {loadingDelete ? translate('details.deleting') : translate('details.deleteEvent')}
               </TouchButton>

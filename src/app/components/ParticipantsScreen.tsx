@@ -129,7 +129,10 @@ export function ParticipantsScreen({
                     <div className="w-14"></div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-6 py-6">
+                <div
+                    className="flex-1 overflow-y-auto px-6 py-6"
+                    style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
+                >
                     <div className="max-w-sm mx-auto space-y-4">
                         <div className="flex items-start justify-between gap-3">
                             <div>

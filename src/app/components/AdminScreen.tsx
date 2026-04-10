@@ -1,8 +1,183 @@
 import { ChevronLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+
+type SummaryValue = number | null;
+
+type EventPreview = {
+  id: string;
+  title: string;
+  date_time: string | null;
+  location: string | null;
+};
+
+type AdminSummary = {
+  totalUsers: SummaryValue;
+  totalEvents: SummaryValue;
+  futureEvents: SummaryValue;
+  participants: SummaryValue;
+  pendingInvitations: SummaryValue;
+  supportRequests: SummaryValue;
+};
+
+const INITIAL_SUMMARY: AdminSummary = {
+  totalUsers: null,
+  totalEvents: null,
+  futureEvents: null,
+  participants: null,
+  pendingInvitations: null,
+  supportRequests: null,
+};
 
 export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const { translate } = useLanguage();
+  const [summary, setSummary] = useState<AdminSummary>(INITIAL_SUMMARY);
+  const [latestEvents, setLatestEvents] = useState<EventPreview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [eventsUnavailable, setEventsUnavailable] = useState(false);
+
+  useEffect(() => {
+    const loadAdminOverview = async () => {
+      setLoading(true);
+
+      try {
+        const nowIso = new Date().toISOString();
+
+        const [
+          usersResult,
+          totalEventsResult,
+          futureEventsResult,
+          participantsResult,
+          pendingInvitationsResult,
+          supportRequestsResult,
+          latestEventsResult,
+        ] = await Promise.allSettled([
+          supabase.from('profiles').select('*', { count: 'exact', head: true }),
+          supabase.from('events').select('*', { count: 'exact', head: true }),
+          supabase
+            .from('events')
+            .select('*', { count: 'exact', head: true })
+            .gte('date_time', nowIso),
+          supabase.from('participants').select('*', { count: 'exact', head: true }),
+          supabase
+            .from('event_invitations')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'pending'),
+          supabase.from('support_requests').select('*', { count: 'exact', head: true }),
+          supabase
+            .from('events')
+            .select('id, title, date_time, location')
+            .order('date_time', { ascending: false })
+            .limit(5),
+        ]);
+
+        setSummary({
+          totalUsers:
+            usersResult.status === 'fulfilled' && !usersResult.value.error
+              ? usersResult.value.count ?? 0
+              : null,
+          totalEvents:
+            totalEventsResult.status === 'fulfilled' && !totalEventsResult.value.error
+              ? totalEventsResult.value.count ?? 0
+              : null,
+          futureEvents:
+            futureEventsResult.status === 'fulfilled' && !futureEventsResult.value.error
+              ? futureEventsResult.value.count ?? 0
+              : null,
+          participants:
+            participantsResult.status === 'fulfilled' && !participantsResult.value.error
+              ? participantsResult.value.count ?? 0
+              : null,
+          pendingInvitations:
+            pendingInvitationsResult.status === 'fulfilled' &&
+            !pendingInvitationsResult.value.error
+              ? pendingInvitationsResult.value.count ?? 0
+              : null,
+          supportRequests:
+            supportRequestsResult.status === 'fulfilled' && !supportRequestsResult.value.error
+              ? supportRequestsResult.value.count ?? 0
+              : null,
+        });
+
+        if (latestEventsResult.status === 'fulfilled' && !latestEventsResult.value.error) {
+          setLatestEvents((latestEventsResult.value.data as EventPreview[] | null) || []);
+          setEventsUnavailable(false);
+        } else {
+          setLatestEvents([]);
+          setEventsUnavailable(true);
+        }
+      } catch (error) {
+        console.error('Unexpected admin overview load error:', error);
+        setSummary(INITIAL_SUMMARY);
+        setLatestEvents([]);
+        setEventsUnavailable(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAdminOverview();
+  }, []);
+
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) {
+      return translate('admin.notAvailable');
+    }
+
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+      return translate('admin.notAvailable');
+    }
+
+    return date.toLocaleString();
+  };
+
+  const getSummaryValue = (value: SummaryValue) => {
+    if (loading) {
+      return translate('common.loading');
+    }
+
+    if (value === null) {
+      return translate('admin.unavailable');
+    }
+
+    return String(value);
+  };
+
+  const summaryCards = [
+    {
+      key: 'users',
+      title: translate('admin.totalUsers'),
+      value: getSummaryValue(summary.totalUsers),
+    },
+    {
+      key: 'events',
+      title: translate('admin.totalEvents'),
+      value: getSummaryValue(summary.totalEvents),
+    },
+    {
+      key: 'future-events',
+      title: translate('admin.futureEvents'),
+      value: getSummaryValue(summary.futureEvents),
+    },
+    {
+      key: 'participants',
+      title: translate('admin.participantsCount'),
+      value: getSummaryValue(summary.participants),
+    },
+    {
+      key: 'pending-invitations',
+      title: translate('admin.pendingInvitations'),
+      value: getSummaryValue(summary.pendingInvitations),
+    },
+    {
+      key: 'support-requests',
+      title: translate('admin.supportRequests'),
+      value: getSummaryValue(summary.supportRequests),
+    },
+  ];
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -29,6 +204,74 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
             <p className="text-sm text-muted-foreground">
               {translate('admin.enabledDescription')}
             </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {summaryCards.map((card) => (
+              <div
+                key={card.key}
+                className="rounded-xl border p-4"
+                style={{
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: '#1A1A1A',
+                }}
+              >
+                <p className="text-xs text-muted-foreground mb-2">{card.title}</p>
+                <p className="text-xl" style={{ color: '#D4AF37' }}>
+                  {card.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="rounded-xl border p-5"
+            style={{
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: '#1A1A1A',
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3>{translate('admin.latestEvents')}</h3>
+              <span className="text-xs text-muted-foreground">
+                {translate('admin.readOnly')}
+              </span>
+            </div>
+
+            {loading && (
+              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
+            )}
+
+            {!loading && eventsUnavailable && (
+              <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
+            )}
+
+            {!loading && !eventsUnavailable && latestEvents.length === 0 && (
+              <p className="text-sm text-muted-foreground">{translate('admin.noEvents')}</p>
+            )}
+
+            {!loading && !eventsUnavailable && latestEvents.length > 0 && (
+              <div className="space-y-3">
+                {latestEvents.map((event) => (
+                  <div
+                    key={event.id}
+                    className="rounded-lg border p-3"
+                    style={{
+                      borderColor: 'rgba(255, 255, 255, 0.08)',
+                      backgroundColor: '#111111',
+                    }}
+                  >
+                    <p className="mb-1">{event.title || translate('common.event')}</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {formatDate(event.date_time)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {event.location || translate('admin.notAvailable')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div

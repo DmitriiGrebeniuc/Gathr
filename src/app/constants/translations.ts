@@ -173,6 +173,17 @@ type TranslationKey =
     | 'admin.enabledDescription'
     | 'admin.comingSoonTitle'
     | 'admin.comingSoonDescription'
+    | 'admin.totalUsers'
+    | 'admin.totalEvents'
+    | 'admin.futureEvents'
+    | 'admin.participantsCount'
+    | 'admin.pendingInvitations'
+    | 'admin.supportRequests'
+    | 'admin.latestEvents'
+    | 'admin.readOnly'
+    | 'admin.unavailable'
+    | 'admin.noEvents'
+    | 'admin.notAvailable'
     | 'home.discover'
     | 'home.joined'
     | 'home.myEvents'
@@ -514,6 +525,17 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.enabledDescription': 'This account has access to the first-stage admin area.',
         'admin.comingSoonTitle': 'Coming soon',
         'admin.comingSoonDescription': 'Admin tools and moderation surfaces will be added in the next stages.',
+        'admin.totalUsers': 'Total users',
+        'admin.totalEvents': 'Total events',
+        'admin.futureEvents': 'Future events',
+        'admin.participantsCount': 'Participants',
+        'admin.pendingInvitations': 'Pending invites',
+        'admin.supportRequests': 'Support requests',
+        'admin.latestEvents': 'Latest events',
+        'admin.readOnly': 'Read only',
+        'admin.unavailable': 'Unavailable',
+        'admin.noEvents': 'No events to show',
+        'admin.notAvailable': 'Not available',
 
         'home.discover': 'Discover',
         'home.joined': 'Joined',
@@ -862,6 +884,17 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.enabledDescription': 'Для этого аккаунта доступна базовая зона admin mode.',
         'admin.comingSoonTitle': 'Скоро',
         'admin.comingSoonDescription': 'Инструменты администрирования и модерации будут добавлены на следующих этапах.',
+        'admin.totalUsers': 'Всего пользователей',
+        'admin.totalEvents': 'Всего событий',
+        'admin.futureEvents': 'Будущие события',
+        'admin.participantsCount': 'Участники',
+        'admin.pendingInvitations': 'Ожидают приглашения',
+        'admin.supportRequests': 'Запросы в поддержку',
+        'admin.latestEvents': 'Последние события',
+        'admin.readOnly': 'Только чтение',
+        'admin.unavailable': 'Недоступно',
+        'admin.noEvents': 'Нет событий для отображения',
+        'admin.notAvailable': 'Нет данных',
 
         'home.discover': 'События',
         'home.joined': 'Участвую',
@@ -1210,6 +1243,17 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.enabledDescription': 'Acest cont are acces la zona inițială de admin mode.',
         'admin.comingSoonTitle': 'În curând',
         'admin.comingSoonDescription': 'Instrumentele de administrare și moderare vor fi adăugate în etapele următoare.',
+        'admin.totalUsers': 'Total utilizatori',
+        'admin.totalEvents': 'Total evenimente',
+        'admin.futureEvents': 'Evenimente viitoare',
+        'admin.participantsCount': 'Participanți',
+        'admin.pendingInvitations': 'Invitații în așteptare',
+        'admin.supportRequests': 'Cereri de suport',
+        'admin.latestEvents': 'Ultimele evenimente',
+        'admin.readOnly': 'Doar citire',
+        'admin.unavailable': 'Indisponibil',
+        'admin.noEvents': 'Nu există evenimente de afișat',
+        'admin.notAvailable': 'Nu este disponibil',
 
         'home.discover': 'Descoperă',
         'home.joined': 'Particip',
@@ -1559,6 +1603,17 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.enabledDescription': 'Для цього акаунта доступна базова зона admin mode.',
         'admin.comingSoonTitle': 'Незабаром',
         'admin.comingSoonDescription': 'Інструменти адміністрування та модерації будуть додані на наступних етапах.',
+        'admin.totalUsers': 'Усього користувачів',
+        'admin.totalEvents': 'Усього подій',
+        'admin.futureEvents': 'Майбутні події',
+        'admin.participantsCount': 'Учасники',
+        'admin.pendingInvitations': 'Запрошення в очікуванні',
+        'admin.supportRequests': 'Запити в підтримку',
+        'admin.latestEvents': 'Останні події',
+        'admin.readOnly': 'Лише читання',
+        'admin.unavailable': 'Недоступно',
+        'admin.noEvents': 'Немає подій для відображення',
+        'admin.notAvailable': 'Немає даних',
 
         'home.discover': 'Події',
         'home.joined': 'Беру участь',
@@ -1907,6 +1962,17 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.enabledDescription': 'Dieses Konto hat Zugriff auf den ersten Admin-Bereich.',
         'admin.comingSoonTitle': 'Kommt bald',
         'admin.comingSoonDescription': 'Admin- und Moderationswerkzeuge werden in den nächsten Phasen hinzugefügt.',
+        'admin.totalUsers': 'Benutzer gesamt',
+        'admin.totalEvents': 'Events gesamt',
+        'admin.futureEvents': 'Zukünftige Events',
+        'admin.participantsCount': 'Teilnehmer',
+        'admin.pendingInvitations': 'Offene Einladungen',
+        'admin.supportRequests': 'Supportanfragen',
+        'admin.latestEvents': 'Neueste Events',
+        'admin.readOnly': 'Nur lesen',
+        'admin.unavailable': 'Nicht verfügbar',
+        'admin.noEvents': 'Keine Events zum Anzeigen',
+        'admin.notAvailable': 'Nicht verfügbar',
 
         'home.discover': 'Entdecken',
         'home.joined': 'Beigetreten',

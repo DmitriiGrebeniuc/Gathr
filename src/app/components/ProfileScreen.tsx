@@ -9,6 +9,15 @@ type CurrentUser = {
   role: string | null;
 };
 
+type MyProfileAccess = {
+  id: string;
+  name: string | null;
+  role: string;
+  plan: string;
+  has_unlimited_access: boolean;
+};
+
+
 export function ProfileScreen({
   onNavigate,
 }: {
@@ -35,11 +44,12 @@ export function ProfileScreen({
           return;
         }
 
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('name, role')
-          .eq('id', authUser.id)
+        const { data: rawProfile, error: profileError } = await supabase
+          .rpc('get_my_profile_access')
           .maybeSingle();
+
+        const profile = rawProfile as MyProfileAccess | null;
+
 
         if (profileError) {
           console.error('Ошибка получения профиля:', profileError);

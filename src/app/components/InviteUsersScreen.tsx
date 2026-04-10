@@ -10,6 +10,15 @@ type InviteUserItem = {
     name: string | null;
 };
 
+type MyProfileAccess = {
+    id: string;
+    name: string | null;
+    role: string;
+    plan: string;
+    has_unlimited_access: boolean;
+};
+
+
 export function InviteUsersScreen({
     onNavigate,
     event,
@@ -130,11 +139,13 @@ export function InviteUsersScreen({
         setInvitingUserId(inviteeId);
 
         try {
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('plan, has_unlimited_access')
-                .eq('id', currentUserId)
+            const { data: rawProfileData, error: profileError } = await supabase
+                .rpc('get_my_profile_access')
                 .maybeSingle();
+
+            const profileData = rawProfileData as MyProfileAccess | null;
+
+
 
             if (profileError) {
                 console.error('Ошибка загрузки профиля для проверки лимитов приглашений:', profileError);

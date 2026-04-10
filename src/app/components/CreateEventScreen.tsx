@@ -8,6 +8,15 @@ import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete
 import { EventLocationMap } from './EventLocationMap';
 import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
 
+type MyProfileAccess = {
+  id: string;
+  name: string | null;
+  role: string;
+  plan: string;
+  has_unlimited_access: boolean;
+};
+
+
 export function CreateEventScreen({
   onNavigate,
 }: {
@@ -103,11 +112,13 @@ export function CreateEventScreen({
         return;
       }
 
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('plan, has_unlimited_access')
-        .eq('id', user.id)
+      const { data: rawProfileData, error: profileError } = await supabase
+        .rpc('get_my_profile_access')
         .maybeSingle();
+
+      const profileData = rawProfileData as MyProfileAccess | null;
+
+
 
       if (profileError) {
         console.error('Ошибка загрузки профиля для проверки лимитов:', profileError);

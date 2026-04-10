@@ -20,6 +20,15 @@ type AdminUser = {
   has_unlimited_access: boolean | null;
 };
 
+type AdminListProfilesRow = {
+  id: string;
+  name: string | null;
+  role: string | null;
+  plan: string | null;
+  has_unlimited_access: boolean | null;
+};
+
+
 
 type InvitationPreview = {
   id: string;
@@ -81,7 +90,8 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           latestPendingInvitationsResult,
           usersListResult,
         ] = await Promise.allSettled([
-          supabase.from('profiles').select('*', { count: 'exact', head: true }),
+          supabase.from('profiles').select('id', { count: 'exact', head: true }),
+
           supabase.from('events').select('*', { count: 'exact', head: true }),
           supabase
             .from('events')
@@ -113,10 +123,8 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
             .eq('status', 'pending')
             .order('created_at', { ascending: false })
             .limit(5),
-          supabase
-            .from('profiles')
-            .select('id, name, role, plan, has_unlimited_access')
-            .order('name', { ascending: true }),
+          supabase.rpc('admin_list_profiles'),
+
         ]);
 
 
@@ -186,9 +194,10 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           setLatestPendingInvitations([]);
           setInvitationsUnavailable(true);
         }
-
+        
         if (usersListResult.status === 'fulfilled' && !usersListResult.value.error) {
-          const nextUsers = (usersListResult.value.data as AdminUser[] | null) || [];
+          const nextUsers = (usersListResult.value.data as AdminListProfilesRow[] | null) || [];
+
 
           setUsers(nextUsers);
           setUsersUnavailable(false);
@@ -199,7 +208,9 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           setUsers([]);
           setUsersUnavailable(true);
           setSelectedUserId(null);
+          setUserSearch('');
         }
+
 
 
       } catch (error) {
@@ -208,10 +219,12 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
         setLatestEvents([]);
         setUsers([]);
         setSelectedUserId(null);
+        setUserSearch('');
         setLatestPendingInvitations([]);
         setEventsUnavailable(true);
         setInvitationsUnavailable(true);
         setUsersUnavailable(true);
+
       } finally {
         setLoading(false);
       }
@@ -293,7 +306,8 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
   });
 
   const selectedUser =
-    users.find((user) => user.id === selectedUserId) || filteredUsers[0] || null;
+    filteredUsers.find((user) => user.id === selectedUserId) || filteredUsers[0] || null;
+
 
 
   return (

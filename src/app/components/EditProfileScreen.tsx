@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 
 export function EditProfileScreen({
   onNavigate,
@@ -93,12 +94,12 @@ export function EditProfileScreen({
     const trimmedName = name.trim();
 
     if (!userId) {
-      alert(translate('editProfile.userNotFound'));
+      feedback.error(translate('editProfile.userNotFound'));
       return;
     }
 
     if (!trimmedName) {
-      alert(translate('editProfile.enterName'));
+      feedback.warning(translate('editProfile.enterName'));
       return;
     }
 
@@ -114,15 +115,16 @@ export function EditProfileScreen({
 
       if (error) {
         console.error('Ошибка обновления профиля:', error);
-        alert(translate('editProfile.saveFailed'));
+        feedback.error(translate('editProfile.saveFailed'));
         setSaving(false);
         return;
       }
 
+      feedback.success(translate('common.save'));
       onNavigate('profile');
     } catch (error) {
       console.error('Unexpected save profile error:', error);
-      alert(translate('editProfile.unexpectedError'));
+      feedback.error(translate('editProfile.unexpectedError'));
     } finally {
       setSaving(false);
     }

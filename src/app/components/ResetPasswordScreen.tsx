@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { TouchButton } from './TouchButton';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 
 export function ResetPasswordScreen({
     onNavigate,
@@ -18,22 +19,22 @@ export function ResetPasswordScreen({
 
     const handleResetPassword = async () => {
         if (!password.trim()) {
-            alert(translate('resetPassword.enterPassword'));
+            feedback.warning(translate('resetPassword.enterPassword'));
             return;
         }
 
         if (!confirmPassword.trim()) {
-            alert(translate('resetPassword.enterConfirmPassword'));
+            feedback.warning(translate('resetPassword.enterConfirmPassword'));
             return;
         }
 
         if (password.trim().length < 6) {
-            alert(translate('resetPassword.passwordTooShort'));
+            feedback.warning(translate('resetPassword.passwordTooShort'));
             return;
         }
 
         if (password !== confirmPassword) {
-            alert(translate('resetPassword.passwordsDoNotMatch'));
+            feedback.warning(translate('resetPassword.passwordsDoNotMatch'));
             return;
         }
 
@@ -47,12 +48,12 @@ export function ResetPasswordScreen({
 
             if (sessionError) {
                 console.error('Ошибка получения recovery session:', sessionError);
-                alert(sessionError.message || translate('resetPassword.restoreSessionFailed'));
+                feedback.error(sessionError.message || translate('resetPassword.restoreSessionFailed'));
                 return;
             }
 
             if (!session) {
-                alert(translate('resetPassword.recoverySessionMissing'));
+                feedback.error(translate('resetPassword.recoverySessionMissing'));
                 return;
             }
 
@@ -62,17 +63,17 @@ export function ResetPasswordScreen({
 
             if (error) {
                 console.error('Ошибка сброса пароля:', error);
-                alert(error.message || translate('resetPassword.failed'));
+                feedback.error(error.message || translate('resetPassword.failed'));
                 return;
             }
 
             await supabase.auth.signOut();
 
-            alert(translate('resetPassword.success'));
+            feedback.success(translate('resetPassword.success'));
             onNavigate('login', { clearPostLoginIntent: true });
         } catch (error) {
             console.error('Unexpected reset password error:', error);
-            alert(translate('resetPassword.unexpectedError'));
+            feedback.error(translate('resetPassword.unexpectedError'));
         } finally {
             setLoading(false);
         }

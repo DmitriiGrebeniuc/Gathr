@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 
 export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const { translate } = useLanguage();
@@ -13,12 +14,12 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
 
   const handleSubmit = async () => {
     if (!subject.trim()) {
-      alert(translate('support.enterSubject'));
+      feedback.warning(translate('support.enterSubject'));
       return;
     }
 
     if (!message.trim()) {
-      alert(translate('support.enterMessage'));
+      feedback.warning(translate('support.enterMessage'));
       return;
     }
 
@@ -31,7 +32,7 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert(translate('support.sendFailed'));
+        feedback.error(translate('support.sendFailed'));
         setSending(false);
         return;
       }
@@ -46,17 +47,17 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
 
       if (error) {
         console.error('Failed to send support request:', error);
-        alert(translate('support.sendFailed'));
+        feedback.error(translate('support.sendFailed'));
         setSending(false);
         return;
       }
 
       setSubject('');
       setMessage('');
-      alert(translate('support.sentSuccess'));
+      feedback.success(translate('support.sentSuccess'));
     } catch (error) {
       console.error('Unexpected support request error:', error);
-      alert(translate('support.sendUnexpectedError'));
+      feedback.error(translate('support.sendUnexpectedError'));
     } finally {
       setSending(false);
     }

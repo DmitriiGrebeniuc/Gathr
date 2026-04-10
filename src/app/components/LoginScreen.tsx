@@ -4,6 +4,7 @@ import { SwipeableScreen } from './SwipeableScreen';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 
 export function LoginScreen({
   onNavigate,
@@ -23,12 +24,12 @@ export function LoginScreen({
 
   const handleLogin = async () => {
     if (!email.trim()) {
-      alert(translate('login.enterEmail'));
+      feedback.warning(translate('login.enterEmail'));
       return;
     }
 
     if (!password.trim()) {
-      alert(translate('login.enterPassword'));
+      feedback.warning(translate('login.enterPassword'));
       return;
     }
 
@@ -42,7 +43,7 @@ export function LoginScreen({
 
       if (error) {
         console.error('Ошибка входа:', error);
-        alert(error.message || translate('login.failed'));
+        feedback.error(error.message || translate('login.failed'));
         setLoading(false);
         return;
       }
@@ -50,7 +51,7 @@ export function LoginScreen({
       return;
     } catch (error) {
       console.error('Unexpected login error:', error);
-      alert(translate('login.unexpectedError'));
+      feedback.error(translate('login.unexpectedError'));
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,7 @@ export function LoginScreen({
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
-      alert(translate('login.enterEmail'));
+      feedback.warning(translate('login.enterEmail'));
       return;
     }
 
@@ -71,14 +72,14 @@ export function LoginScreen({
 
       if (error) {
         console.error('Ошибка отправки reset password email:', error);
-        alert(error.message || translate('login.resetFailed'));
+        feedback.error(error.message || translate('login.resetFailed'));
         return;
       }
 
-      alert(translate('login.resetEmailSent'));
+      feedback.success(translate('login.resetEmailSent'));
     } catch (error) {
       console.error('Unexpected reset password request error:', error);
-      alert(translate('login.resetUnexpectedError'));
+      feedback.error(translate('login.resetUnexpectedError'));
     } finally {
       setResetLoading(false);
     }

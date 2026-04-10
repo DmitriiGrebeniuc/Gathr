@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { LoadingLogo } from './LoadingLogo';
+import { feedback } from '../lib/feedback';
 
 type EventItem = {
   id: string;
@@ -434,7 +435,7 @@ export function NotificationsScreen({
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert(translate('notifications.inviteActionFailed'));
+        feedback.error(translate('notifications.inviteActionFailed'));
         return;
       }
 
@@ -450,7 +451,7 @@ export function NotificationsScreen({
 
       if (updateError) {
         console.error('Ошибка принятия invitation:', updateError);
-        alert(translate('notifications.inviteActionFailed'));
+        feedback.error(translate('notifications.inviteActionFailed'));
         return;
       }
 
@@ -463,15 +464,15 @@ export function NotificationsScreen({
 
       if (participantError) {
         console.error('Ошибка добавления participant после invitation accept:', participantError);
-        alert(translate('notifications.inviteActionFailed'));
+        feedback.error(translate('notifications.inviteActionFailed'));
         return;
       }
 
-      alert(translate('notifications.inviteAccepted'));
+      feedback.success(translate('notifications.inviteAccepted'));
       await fetchNotifications();
     } catch (error) {
       console.error('Unexpected accept invitation error:', error);
-      alert(translate('notifications.inviteActionUnexpectedError'));
+      feedback.error(translate('notifications.inviteActionUnexpectedError'));
     } finally {
       setProcessingInvitationId(null);
       setProcessingAction(null);
@@ -491,7 +492,7 @@ export function NotificationsScreen({
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert(translate('notifications.inviteActionFailed'));
+        feedback.error(translate('notifications.inviteActionFailed'));
         return;
       }
 
@@ -507,15 +508,15 @@ export function NotificationsScreen({
 
       if (error) {
         console.error('Ошибка отклонения invitation:', error);
-        alert(translate('notifications.inviteActionFailed'));
+        feedback.error(translate('notifications.inviteActionFailed'));
         return;
       }
 
-      alert(translate('notifications.inviteDeclined'));
+      feedback.success(translate('notifications.inviteDeclined'));
       await fetchNotifications();
     } catch (error) {
       console.error('Unexpected decline invitation error:', error);
-      alert(translate('notifications.inviteActionUnexpectedError'));
+      feedback.error(translate('notifications.inviteActionUnexpectedError'));
     } finally {
       setProcessingInvitationId(null);
       setProcessingAction(null);

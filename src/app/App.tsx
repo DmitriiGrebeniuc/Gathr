@@ -21,6 +21,7 @@ import { LoadingLogo } from './components/LoadingLogo';
 import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { supabase } from '../lib/supabase';
 import { LanguageScreen } from './components/LanguageScreen';
+import { FeedbackHost } from './components/FeedbackHost';
 import { useLanguage } from './context/LanguageContext';
 import { InviteUsersScreen } from './components/InviteUsersScreen';
 import { getSharedEventIdFromPath } from './auth/sharedEventPath';
@@ -355,6 +356,8 @@ export default function App() {
           borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
         }}
       >
+        <FeedbackHost />
+
         <div className="flex-1 overflow-hidden relative">
           <AnimatePresence mode="wait" initial={false}>
             <ScreenTransition key={currentScreen} direction={direction}>

@@ -4,6 +4,7 @@ import { SwipeableScreen } from './SwipeableScreen';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
+import { feedback } from '../lib/feedback';
 
 type InviteUserItem = {
     id: string;
@@ -132,7 +133,7 @@ export function InviteUsersScreen({
 
     const handleInvite = async (inviteeId: string) => {
         if (!event?.id || !currentUserId) {
-            alert(translate('inviteUsers.failed'));
+            feedback.error(translate('inviteUsers.failed'));
             return;
         }
 
@@ -149,7 +150,7 @@ export function InviteUsersScreen({
 
             if (profileError) {
                 console.error('Ошибка загрузки профиля для проверки лимитов приглашений:', profileError);
-                alert(translate('inviteUsers.failed'));
+                feedback.error(translate('inviteUsers.failed'));
                 setInvitingUserId(null);
                 return;
             }
@@ -165,13 +166,13 @@ export function InviteUsersScreen({
 
                 if (invitationsCountError) {
                     console.error('Ошибка проверки лимита приглашений на событие:', invitationsCountError);
-                    alert(translate('inviteUsers.failed'));
+                    feedback.error(translate('inviteUsers.failed'));
                     setInvitingUserId(null);
                     return;
                 }
 
                 if ((invitationsCount ?? 0) >= limits.invitesPerEvent) {
-                    alert(
+                    feedback.warning(
                         `${translate('inviteUsers.invitesPerEventLimitReached')} ${translate('inviteUsers.invitesPerEventLimitReachedPro')}`
                     );
                     setInvitingUserId(null);
@@ -189,16 +190,16 @@ export function InviteUsersScreen({
 
             if (error) {
                 console.error('Ошибка отправки приглашения:', error);
-                alert(translate('inviteUsers.failed'));
+                feedback.error(translate('inviteUsers.failed'));
                 setInvitingUserId(null);
                 return;
             }
 
-            alert(translate('inviteUsers.sent'));
+            feedback.success(translate('inviteUsers.sent'));
             await loadInviteCandidates();
         } catch (error) {
             console.error('Unexpected invitation send error:', error);
-            alert(translate('inviteUsers.unexpectedError'));
+            feedback.error(translate('inviteUsers.unexpectedError'));
         } finally {
             setInvitingUserId(null);
         }

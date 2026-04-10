@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
+import { feedback } from '../lib/feedback';
 
 type SummaryValue = number | null;
 
@@ -463,7 +464,13 @@ export function AdminScreen({
   };
 
   const handleDeleteEvent = async (event: AdminModerationEvent) => {
-    const confirmed = window.confirm(translate('admin.deleteEventConfirm'));
+    const confirmed = await feedback.confirm({
+      title: translate('details.deleteEvent'),
+      description: translate('admin.deleteEventConfirm'),
+      confirmLabel: translate('details.deleteEvent'),
+      cancelLabel: translate('common.cancel'),
+      variant: 'destructive',
+    });
 
     if (!confirmed) {
       return;
@@ -479,7 +486,7 @@ export function AdminScreen({
 
       if (invitationsError) {
         console.error('Admin delete event invitations error:', invitationsError);
-        alert(translate('admin.deleteEventFailed'));
+        feedback.error(translate('admin.deleteEventFailed'));
         return;
       }
 
@@ -490,7 +497,7 @@ export function AdminScreen({
 
       if (participantsError) {
         console.error('Admin delete participants error:', participantsError);
-        alert(translate('admin.deleteEventFailed'));
+        feedback.error(translate('admin.deleteEventFailed'));
         return;
       }
 
@@ -498,14 +505,14 @@ export function AdminScreen({
 
       if (eventError) {
         console.error('Admin delete event error:', eventError);
-        alert(translate('admin.deleteEventFailed'));
+        feedback.error(translate('admin.deleteEventFailed'));
         return;
       }
 
       await loadAdminOverview();
     } catch (error) {
       console.error('Unexpected admin delete event error:', error);
-      alert(translate('admin.deleteEventUnexpectedError'));
+      feedback.error(translate('admin.deleteEventUnexpectedError'));
     } finally {
       setDeletingEventId(null);
     }

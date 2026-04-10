@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 
 export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const { translate } = useLanguage();
@@ -13,22 +14,22 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
 
   const handleChangePassword = async () => {
     if (!newPassword) {
-      alert(translate('security.enterPassword'));
+      feedback.warning(translate('security.enterPassword'));
       return;
     }
 
     if (!confirmPassword) {
-      alert(translate('security.enterConfirmPassword'));
+      feedback.warning(translate('security.enterConfirmPassword'));
       return;
     }
 
     if (newPassword.length < 6) {
-      alert(translate('security.passwordTooShort'));
+      feedback.warning(translate('security.passwordTooShort'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert(translate('security.passwordsDoNotMatch'));
+      feedback.warning(translate('security.passwordsDoNotMatch'));
       return;
     }
 
@@ -41,17 +42,17 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
 
       if (error) {
         console.error('Failed to change password:', error);
-        alert(translate('security.passwordChangeFailed'));
+        feedback.error(translate('security.passwordChangeFailed'));
         setSaving(false);
         return;
       }
 
       setNewPassword('');
       setConfirmPassword('');
-      alert(translate('security.passwordChanged'));
+      feedback.success(translate('security.passwordChanged'));
     } catch (error) {
       console.error('Unexpected password change error:', error);
-      alert(translate('security.passwordChangeUnexpectedError'));
+      feedback.error(translate('security.passwordChangeUnexpectedError'));
     } finally {
       setSaving(false);
     }

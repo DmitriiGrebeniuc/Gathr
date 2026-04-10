@@ -6,6 +6,7 @@ import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../const
 import { useLanguage } from '../context/LanguageContext';
 import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
 import { EventLocationMap } from './EventLocationMap';
+import { feedback } from '../lib/feedback';
 
 export function EditEventScreen({
   onNavigate,
@@ -91,22 +92,22 @@ export function EditEventScreen({
 
   const handleUpdateEvent = async () => {
     if (!event?.id) {
-      alert(translate('edit.eventNotFound'));
+      feedback.error(translate('edit.eventNotFound'));
       return;
     }
 
     if (!title.trim()) {
-      alert(translate('edit.enterTitle'));
+      feedback.warning(translate('edit.enterTitle'));
       return;
     }
 
     if (!date) {
-      alert(translate('edit.selectDate'));
+      feedback.warning(translate('edit.selectDate'));
       return;
     }
 
     if (!time) {
-      alert(translate('edit.selectTime'));
+      feedback.warning(translate('edit.selectTime'));
       return;
     }
 
@@ -116,7 +117,7 @@ export function EditEventScreen({
       const dateTime = new Date(`${date}T${time}`);
 
       if (Number.isNaN(dateTime.getTime())) {
-        alert(translate('edit.invalidDateTime'));
+        feedback.warning(translate('edit.invalidDateTime'));
         setLoading(false);
         return;
       }
@@ -127,7 +128,7 @@ export function EditEventScreen({
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert(translate('edit.userNotAuthenticated'));
+        feedback.error(translate('edit.userNotAuthenticated'));
         setLoading(false);
         return;
       }
@@ -151,7 +152,7 @@ export function EditEventScreen({
 
       if (error) {
         console.error('Ошибка обновления события:', error);
-        alert(translate('edit.failed'));
+        feedback.error(translate('edit.failed'));
         setLoading(false);
         return;
       }
@@ -159,7 +160,7 @@ export function EditEventScreen({
       onNavigate('event-details', updatedEvent);
     } catch (error) {
       console.error('Unexpected update error:', error);
-      alert(translate('edit.unexpectedError'));
+      feedback.error(translate('edit.unexpectedError'));
     } finally {
       setLoading(false);
     }

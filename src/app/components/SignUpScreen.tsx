@@ -4,6 +4,7 @@ import { SwipeableScreen } from './SwipeableScreen';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 
 export function SignUpScreen({
   onNavigate,
@@ -19,17 +20,17 @@ export function SignUpScreen({
 
   const handleSignUp = async () => {
     if (!name.trim()) {
-      alert(translate('signup.enterName'));
+      feedback.warning(translate('signup.enterName'));
       return;
     }
 
     if (!email.trim()) {
-      alert(translate('signup.enterEmail'));
+      feedback.warning(translate('signup.enterEmail'));
       return;
     }
 
     if (!password.trim()) {
-      alert(translate('signup.enterPassword'));
+      feedback.warning(translate('signup.enterPassword'));
       return;
     }
 
@@ -48,18 +49,18 @@ export function SignUpScreen({
 
       if (error) {
         console.error('Ошибка регистрации:', error);
-        alert(error.message || translate('signup.failed'));
+        feedback.error(error.message || translate('signup.failed'));
         setLoading(false);
         return;
       }
 
-      alert(
+      feedback.success(
         `${translate('signup.confirmEmailTitle')}\n\n${translate('signup.confirmEmailMessage')}`
       );
       onNavigate('login');
     } catch (error) {
       console.error('Unexpected signup error:', error);
-      alert(translate('signup.unexpectedError'));
+      feedback.error(translate('signup.unexpectedError'));
     } finally {
       setLoading(false);
     }

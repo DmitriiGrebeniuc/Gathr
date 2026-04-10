@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 
 type CurrentUser = {
   id: string;
@@ -120,7 +121,7 @@ export function ProfileScreen({
 
       if (error) {
         console.error('Ошибка выхода:', error);
-        alert(error.message || 'Не удалось выйти из аккаунта');
+        feedback.error(error.message || translate('profile.logoutFailed'));
         setLogoutLoading(false);
         return;
       }
@@ -128,7 +129,7 @@ export function ProfileScreen({
       onNavigate('welcome');
     } catch (error) {
       console.error('Unexpected logout error:', error);
-      alert('Произошла ошибка при выходе');
+      feedback.error(translate('profile.logoutUnexpectedError'));
     } finally {
       setLogoutLoading(false);
     }

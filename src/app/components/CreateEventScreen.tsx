@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
 import { EventLocationMap } from './EventLocationMap';
 import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
+import { feedback } from '../lib/feedback';
 
 type MyProfileAccess = {
   id: string;
@@ -70,17 +71,17 @@ export function CreateEventScreen({
 
   const handleCreateEvent = async () => {
     if (!title.trim()) {
-      alert(translate('create.enterTitle'));
+      feedback.warning(translate('create.enterTitle'));
       return;
     }
 
     if (!date) {
-      alert(translate('create.selectDate'));
+      feedback.warning(translate('create.selectDate'));
       return;
     }
 
     if (!time) {
-      alert(translate('create.selectTime'));
+      feedback.warning(translate('create.selectTime'));
       return;
     }
 
@@ -93,7 +94,7 @@ export function CreateEventScreen({
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert(translate('create.userNotAuthenticated'));
+        feedback.error(translate('create.userNotAuthenticated'));
         setLoading(false);
         return;
       }
@@ -101,13 +102,13 @@ export function CreateEventScreen({
       const dateTime = new Date(`${date}T${time}`);
 
       if (Number.isNaN(dateTime.getTime())) {
-        alert(translate('create.invalidDateTime'));
+        feedback.warning(translate('create.invalidDateTime'));
         setLoading(false);
         return;
       }
 
       if (dateTime.getTime() < Date.now()) {
-        alert(translate('create.pastDateTime'));
+        feedback.warning(translate('create.pastDateTime'));
         setLoading(false);
         return;
       }
@@ -122,7 +123,7 @@ export function CreateEventScreen({
 
       if (profileError) {
         console.error('Ошибка загрузки профиля для проверки лимитов:', profileError);
-        alert(translate('create.failed'));
+        feedback.error(translate('create.failed'));
         setLoading(false);
         return;
       }
@@ -139,13 +140,13 @@ export function CreateEventScreen({
 
         if (activeEventsError) {
           console.error('Ошибка проверки лимита активных событий:', activeEventsError);
-          alert(translate('create.failed'));
+          feedback.error(translate('create.failed'));
           setLoading(false);
           return;
         }
 
         if ((activeEventsCount ?? 0) >= limits.activeEvents) {
-          alert(
+          feedback.warning(
             `${translate('create.activeEventsLimitReached')} ${translate('create.activeEventsLimitReachedPro')}`
           );
           setLoading(false);
@@ -173,7 +174,7 @@ export function CreateEventScreen({
 
       if (error) {
         console.error('Ошибка создания события:', error);
-        alert(translate('create.failed'));
+        feedback.error(translate('create.failed'));
         setLoading(false);
         return;
       }
@@ -187,7 +188,7 @@ export function CreateEventScreen({
 
       if (participantError) {
         console.error('Ошибка добавления создателя в participants:', participantError);
-        alert(translate('create.creatorParticipantFailed'));
+        feedback.error(translate('create.creatorParticipantFailed'));
         setLoading(false);
         return;
       }
@@ -195,7 +196,7 @@ export function CreateEventScreen({
       onNavigate('event-details', createdEvent);
     } catch (error) {
       console.error('Unexpected error:', error);
-      alert(translate('create.unexpectedError'));
+      feedback.error(translate('create.unexpectedError'));
     } finally {
       setLoading(false);
     }

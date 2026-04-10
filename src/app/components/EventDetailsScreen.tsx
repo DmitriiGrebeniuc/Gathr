@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { EventLocationMap } from './EventLocationMap';
 import { buildJoinEventLoginPayload } from '../auth/postLoginIntent';
+import { feedback } from '../lib/feedback';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -270,7 +271,7 @@ export function EventDetailsScreen({
 
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareText);
-        alert(translate('details.linkCopied'));
+        feedback.success(translate('details.linkCopied'));
         return;
       }
 
@@ -286,9 +287,15 @@ export function EventDetailsScreen({
       console.error('Unexpected share error:', error);
 
       try {
-        window.prompt(translate('details.copyLinkPrompt'), eventShareUrl);
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(eventShareUrl);
+          feedback.success(translate('details.linkCopied'));
+        } else {
+          feedback.info(translate('details.copyLinkPrompt'));
+        }
       } catch (promptError) {
         console.error('Prompt fallback failed:', promptError);
+        feedback.info(translate('details.copyLinkPrompt'));
       }
     } finally {
       setSharing(false);
@@ -301,7 +308,7 @@ export function EventDetailsScreen({
     }
 
     if (!eventData.id) {
-      alert(translate('details.eventNotResolved'));
+      feedback.error(translate('details.eventNotResolved'));
       return false;
     }
 
@@ -314,7 +321,7 @@ export function EventDetailsScreen({
 
     if (error) {
       console.error('Ошибка присоединения:', error);
-      alert(translate('details.joinFailed'));
+      feedback.error(translate('details.joinFailed'));
       return false;
     }
 
@@ -369,7 +376,7 @@ export function EventDetailsScreen({
     }
 
     if (!eventData.id) {
-      alert(translate('details.eventNotResolved'));
+      feedback.error(translate('details.eventNotResolved'));
       return;
     }
 
@@ -379,7 +386,7 @@ export function EventDetailsScreen({
       await performJoin();
     } catch (error) {
       console.error('Unexpected join error:', error);
-      alert(translate('details.joinUnexpectedError'));
+      feedback.error(translate('details.joinUnexpectedError'));
     } finally {
       setLoadingAction(false);
     }
@@ -387,12 +394,12 @@ export function EventDetailsScreen({
 
   const handleLeave = async () => {
     if (!currentUserId) {
-      alert(translate('details.loginRequired'));
+      feedback.warning(translate('details.loginRequired'));
       return;
     }
 
     if (!eventData.id) {
-      alert(translate('details.eventNotResolved'));
+      feedback.error(translate('details.eventNotResolved'));
       return;
     }
 
@@ -407,7 +414,7 @@ export function EventDetailsScreen({
 
       if (error) {
         console.error('Ошибка выхода из события:', error);
-        alert(translate('details.leaveFailed'));
+        feedback.error(translate('details.leaveFailed'));
         setLoadingAction(false);
         return;
       }
@@ -416,7 +423,7 @@ export function EventDetailsScreen({
       await loadParticipants();
     } catch (error) {
       console.error('Unexpected leave error:', error);
-      alert(translate('details.leaveUnexpectedError'));
+      feedback.error(translate('details.leaveUnexpectedError'));
     } finally {
       setLoadingAction(false);
     }
@@ -424,21 +431,27 @@ export function EventDetailsScreen({
 
   const handleDeleteEvent = async () => {
     if (!currentUserId) {
-      alert(translate('details.loginRequired'));
+      feedback.warning(translate('details.loginRequired'));
       return;
     }
 
     if (!eventData.id) {
-      alert(translate('details.eventNotResolved'));
+      feedback.error(translate('details.eventNotResolved'));
       return;
     }
 
     if (!isCreator) {
-      alert(translate('details.deleteOnlyCreator'));
+      feedback.warning(translate('details.deleteOnlyCreator'));
       return;
     }
 
-    const confirmed = window.confirm(translate('details.deleteConfirm'));
+    const confirmed = await feedback.confirm({
+      title: translate('details.deleteEvent'),
+      description: translate('details.deleteConfirm'),
+      confirmLabel: translate('details.deleteEvent'),
+      cancelLabel: translate('common.cancel'),
+      variant: 'destructive',
+    });
 
     if (!confirmed) {
       return;
@@ -454,7 +467,7 @@ export function EventDetailsScreen({
 
       if (participantsError) {
         console.error('Ошибка удаления участников события:', participantsError);
-        alert(translate('details.deleteParticipantsFailed'));
+        feedback.error(translate('details.deleteParticipantsFailed'));
         setLoadingDelete(false);
         return;
       }
@@ -467,7 +480,7 @@ export function EventDetailsScreen({
 
       if (eventError) {
         console.error('Ошибка удаления события:', eventError);
-        alert(translate('details.deleteFailed'));
+        feedback.error(translate('details.deleteFailed'));
         setLoadingDelete(false);
         return;
       }
@@ -475,7 +488,7 @@ export function EventDetailsScreen({
       onNavigate('home');
     } catch (error) {
       console.error('Unexpected delete event error:', error);
-      alert(translate('details.deleteUnexpectedError'));
+      feedback.error(translate('details.deleteUnexpectedError'));
     } finally {
       setLoadingDelete(false);
     }

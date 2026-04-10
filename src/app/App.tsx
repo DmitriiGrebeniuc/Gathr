@@ -229,7 +229,7 @@ export default function App() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [pendingAuthRedirect]);
+  }, []);
 
   const handleNavigate = (
     screen: string,

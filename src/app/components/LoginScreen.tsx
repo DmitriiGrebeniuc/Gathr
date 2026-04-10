@@ -47,7 +47,7 @@ export function LoginScreen({
         return;
       }
 
-      onNavigate('home');
+      return;
     } catch (error) {
       console.error('Unexpected login error:', error);
       alert(translate('login.unexpectedError'));

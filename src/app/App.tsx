@@ -14,6 +14,7 @@ import { EditProfileScreen } from './components/EditProfileScreen';
 import { NotificationSettingsScreen } from './components/NotificationSettingsScreen';
 import { SecurityScreen } from './components/SecurityScreen';
 import { SupportScreen } from './components/SupportScreen';
+import { AdminScreen } from './components/AdminScreen';
 import { BottomNav } from './components/BottomNav';
 import { ScreenTransition } from './components/ScreenTransition';
 import { LoadingLogo } from './components/LoadingLogo';
@@ -274,6 +275,7 @@ export default function App() {
       'notification-settings',
       'security',
       'support',
+      'admin',
       'language',
       'event-details',
       'participants',
@@ -394,6 +396,7 @@ export default function App() {
               )}
               {currentScreen === 'security' && <SecurityScreen onNavigate={handleNavigate} />}
               {currentScreen === 'support' && <SupportScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'admin' && <AdminScreen onNavigate={handleNavigate} />}
               {currentScreen === 'language' && (
                 <LanguageScreen onNavigate={handleNavigate} />
               )}

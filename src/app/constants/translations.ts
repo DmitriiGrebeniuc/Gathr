@@ -157,6 +157,7 @@ type TranslationKey =
     | 'profile.language'
     | 'profile.privacySecurity'
     | 'profile.helpSupport'
+    | 'profile.adminMode'
     | 'profile.logout'
     | 'profile.loggingOut'
     | 'profile.loading'
@@ -167,6 +168,11 @@ type TranslationKey =
     | 'language.title'
     | 'language.selectedLanguage'
     | 'language.back'
+    | 'admin.title'
+    | 'admin.enabledTitle'
+    | 'admin.enabledDescription'
+    | 'admin.comingSoonTitle'
+    | 'admin.comingSoonDescription'
     | 'home.discover'
     | 'home.joined'
     | 'home.myEvents'
@@ -491,6 +497,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.language': 'Language',
         'profile.privacySecurity': 'Privacy & Security',
         'profile.helpSupport': 'Help & Support',
+        'profile.adminMode': 'Admin Mode',
         'profile.logout': 'Log Out',
         'profile.loggingOut': 'Logging out...',
         'profile.loading': 'Loading...',
@@ -502,6 +509,11 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'language.title': 'Language',
         'language.selectedLanguage': 'Selected language',
         'language.back': 'Back',
+        'admin.title': 'Admin',
+        'admin.enabledTitle': 'Admin mode is enabled',
+        'admin.enabledDescription': 'This account has access to the first-stage admin area.',
+        'admin.comingSoonTitle': 'Coming soon',
+        'admin.comingSoonDescription': 'Admin tools and moderation surfaces will be added in the next stages.',
 
         'home.discover': 'Discover',
         'home.joined': 'Joined',
@@ -833,6 +845,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.language': 'Язык',
         'profile.privacySecurity': 'Конфиденциальность и безопасность',
         'profile.helpSupport': 'Помощь и поддержка',
+        'profile.adminMode': 'Режим администратора',
         'profile.logout': 'Выйти',
         'profile.loggingOut': 'Выход...',
         'profile.loading': 'Загрузка...',
@@ -844,6 +857,11 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'language.title': 'Язык',
         'language.selectedLanguage': 'Выбранный язык',
         'language.back': 'Назад',
+        'admin.title': 'Админ',
+        'admin.enabledTitle': 'Режим администратора включен',
+        'admin.enabledDescription': 'Для этого аккаунта доступна базовая зона admin mode.',
+        'admin.comingSoonTitle': 'Скоро',
+        'admin.comingSoonDescription': 'Инструменты администрирования и модерации будут добавлены на следующих этапах.',
 
         'home.discover': 'События',
         'home.joined': 'Участвую',
@@ -1175,6 +1193,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.language': 'Limbă',
         'profile.privacySecurity': 'Confidențialitate și securitate',
         'profile.helpSupport': 'Ajutor și suport',
+        'profile.adminMode': 'Mod administrator',
         'profile.logout': 'Deconectare',
         'profile.loggingOut': 'Se închide sesiunea...',
         'profile.loading': 'Se încarcă...',
@@ -1186,6 +1205,11 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'language.title': 'Limbă',
         'language.selectedLanguage': 'Limba selectată',
         'language.back': 'Înapoi',
+        'admin.title': 'Admin',
+        'admin.enabledTitle': 'Modul administrator este activ',
+        'admin.enabledDescription': 'Acest cont are acces la zona inițială de admin mode.',
+        'admin.comingSoonTitle': 'În curând',
+        'admin.comingSoonDescription': 'Instrumentele de administrare și moderare vor fi adăugate în etapele următoare.',
 
         'home.discover': 'Descoperă',
         'home.joined': 'Particip',
@@ -1518,6 +1542,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.language': 'Мова',
         'profile.privacySecurity': 'Конфіденційність і безпека',
         'profile.helpSupport': 'Допомога та підтримка',
+        'profile.adminMode': 'Режим адміністратора',
         'profile.logout': 'Вийти',
         'profile.loggingOut': 'Вихід...',
         'profile.loading': 'Завантаження...',
@@ -1529,6 +1554,11 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'language.title': 'Мова',
         'language.selectedLanguage': 'Обрана мова',
         'language.back': 'Назад',
+        'admin.title': 'Адмін',
+        'admin.enabledTitle': 'Режим адміністратора увімкнено',
+        'admin.enabledDescription': 'Для цього акаунта доступна базова зона admin mode.',
+        'admin.comingSoonTitle': 'Незабаром',
+        'admin.comingSoonDescription': 'Інструменти адміністрування та модерації будуть додані на наступних етапах.',
 
         'home.discover': 'Події',
         'home.joined': 'Беру участь',
@@ -1860,6 +1890,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.language': 'Sprache',
         'profile.privacySecurity': 'Datenschutz und Sicherheit',
         'profile.helpSupport': 'Hilfe und Support',
+        'profile.adminMode': 'Admin-Modus',
         'profile.logout': 'Abmelden',
         'profile.loggingOut': 'Abmeldung...',
         'profile.loading': 'Wird geladen...',
@@ -1871,6 +1902,11 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'language.title': 'Sprache',
         'language.selectedLanguage': 'Ausgewählte Sprache',
         'language.back': 'Zurück',
+        'admin.title': 'Admin',
+        'admin.enabledTitle': 'Admin-Modus ist aktiviert',
+        'admin.enabledDescription': 'Dieses Konto hat Zugriff auf den ersten Admin-Bereich.',
+        'admin.comingSoonTitle': 'Kommt bald',
+        'admin.comingSoonDescription': 'Admin- und Moderationswerkzeuge werden in den nächsten Phasen hinzugefügt.',
 
         'home.discover': 'Entdecken',
         'home.joined': 'Beigetreten',

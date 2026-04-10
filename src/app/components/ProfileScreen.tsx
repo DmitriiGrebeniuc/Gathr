@@ -6,6 +6,7 @@ type CurrentUser = {
   id: string;
   email: string | null;
   name: string | null;
+  role: string | null;
 };
 
 export function ProfileScreen({
@@ -36,7 +37,7 @@ export function ProfileScreen({
 
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('name')
+          .select('name, role')
           .eq('id', authUser.id)
           .maybeSingle();
 
@@ -48,6 +49,7 @@ export function ProfileScreen({
           id: authUser.id,
           email: authUser.email ?? null,
           name: profile?.name ?? null,
+          role: profile?.role ?? null,
         });
       } catch (error) {
         console.error('Unexpected profile load error:', error);
@@ -121,6 +123,8 @@ export function ProfileScreen({
       setLogoutLoading(false);
     }
   };
+
+  const isAdmin = user?.role === 'admin';
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -217,6 +221,22 @@ export function ProfileScreen({
                 <span className="text-muted-foreground">→</span>
               </div>
             </button>
+
+            {isAdmin && (
+              <button
+                onClick={() => onNavigate('admin')}
+                className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
+                style={{
+                  borderColor: 'rgba(212, 175, 55, 0.35)',
+                  backgroundColor: '#1A1A1A',
+                }}
+              >
+                <div className="flex justify-between items-center">
+                  <span>{translate('profile.adminMode')}</span>
+                  <span className="text-muted-foreground">→</span>
+                </div>
+              </button>
+            )}
           </div>
 
           <button

@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 export function ResetPasswordScreen({
     onNavigate,
 }: {
-    onNavigate: (screen: string) => void;
+    onNavigate: (screen: string, data?: any) => void;
 }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,12 +47,12 @@ export function ResetPasswordScreen({
 
             if (sessionError) {
                 console.error('Ошибка получения recovery session:', sessionError);
-                alert(sessionError.message || 'Failed to restore session');
+                alert(sessionError.message || translate('resetPassword.restoreSessionFailed'));
                 return;
             }
 
             if (!session) {
-                alert('Recovery session is missing. Please open the password reset link again.');
+                alert(translate('resetPassword.recoverySessionMissing'));
                 return;
             }
 
@@ -69,7 +69,7 @@ export function ResetPasswordScreen({
             await supabase.auth.signOut();
 
             alert(translate('resetPassword.success'));
-            onNavigate('login');
+            onNavigate('login', { clearPostLoginIntent: true });
         } catch (error) {
             console.error('Unexpected reset password error:', error);
             alert(translate('resetPassword.unexpectedError'));
@@ -79,11 +79,11 @@ export function ResetPasswordScreen({
     };
 
     return (
-        <SwipeableScreen onSwipeBack={() => onNavigate('login')}>
+        <SwipeableScreen onSwipeBack={() => onNavigate('login', { clearPostLoginIntent: true })}>
             <div className="h-full flex flex-col px-6 py-8 bg-background">
                 <motion.button
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => onNavigate('login')}
+                    onClick={() => onNavigate('login', { clearPostLoginIntent: true })}
                     className="self-start text-muted-foreground mb-8"
                     disabled={loading}
                 >

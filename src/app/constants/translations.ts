@@ -162,6 +162,8 @@ type TranslationKey =
     | 'profile.loading'
     | 'profile.loadingEmail'
     | 'profile.noEmail'
+    | 'profile.logoutFailed'
+    | 'profile.logoutUnexpectedError'
     | 'language.title'
     | 'language.selectedLanguage'
     | 'language.back'
@@ -232,6 +234,29 @@ type TranslationKey =
     | 'details.editEvent'
     | 'details.deleteEvent'
     | 'details.deleting'
+    | 'details.fallbackTitle'
+    | 'details.fallbackDescription'
+    | 'details.fallbackLocation'
+    | 'details.shareInviteLine'
+    | 'details.shareLabelEvent'
+    | 'details.shareLabelDate'
+    | 'details.shareLabelLocation'
+    | 'details.shareOpenLink'
+    | 'details.linkCopied'
+    | 'details.copyLinkPrompt'
+    | 'details.shareEvent'
+    | 'details.sharing'
+    | 'details.eventNotResolved'
+    | 'details.joinFailed'
+    | 'details.joinUnexpectedError'
+    | 'details.loginRequired'
+    | 'details.leaveFailed'
+    | 'details.leaveUnexpectedError'
+    | 'details.deleteOnlyCreator'
+    | 'details.deleteConfirm'
+    | 'details.deleteParticipantsFailed'
+    | 'details.deleteFailed'
+    | 'details.deleteUnexpectedError'
     | 'participants.back'
     | 'participants.title'
     | 'participants.loading'
@@ -281,6 +306,8 @@ type TranslationKey =
     | 'resetPassword.failed'
     | 'resetPassword.unexpectedError'
     | 'resetPassword.success'
+    | 'resetPassword.restoreSessionFailed'
+    | 'resetPassword.recoverySessionMissing'
     | 'inviteUsers.title'
     | 'inviteUsers.back'
     | 'inviteUsers.inviteButton'
@@ -469,6 +496,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.loading': 'Loading...',
         'profile.loadingEmail': 'Loading email...',
         'profile.noEmail': 'No email',
+        'profile.logoutFailed': 'Could not log out',
+        'profile.logoutUnexpectedError': 'An error occurred while logging out',
 
         'language.title': 'Language',
         'language.selectedLanguage': 'Selected language',
@@ -543,6 +572,30 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.editEvent': 'Edit Event',
         'details.deleteEvent': 'Delete Event',
         'details.deleting': 'Deleting...',
+        'details.fallbackTitle': 'Coffee & Cowork',
+        'details.fallbackDescription':
+            "Let's grab coffee and get some work done together. Bring your laptop!",
+        'details.fallbackLocation': 'Blue Bottle, Downtown',
+        'details.shareInviteLine': 'Join me on Gathr',
+        'details.shareLabelEvent': 'Event:',
+        'details.shareLabelDate': 'Date:',
+        'details.shareLabelLocation': 'Location:',
+        'details.shareOpenLink': 'Open event:',
+        'details.linkCopied': 'Event link copied',
+        'details.copyLinkPrompt': 'Copy event link:',
+        'details.shareEvent': 'Share Event',
+        'details.sharing': 'Sharing...',
+        'details.eventNotResolved': 'Could not identify the event',
+        'details.joinFailed': 'Could not join the event',
+        'details.joinUnexpectedError': 'Something went wrong while joining',
+        'details.loginRequired': 'Please log in first',
+        'details.leaveFailed': 'Could not leave the event',
+        'details.leaveUnexpectedError': 'Something went wrong while leaving',
+        'details.deleteOnlyCreator': 'Only the creator can delete this event',
+        'details.deleteConfirm': 'Delete this event? This cannot be undone.',
+        'details.deleteParticipantsFailed': 'Could not remove event participants',
+        'details.deleteFailed': 'Could not delete the event',
+        'details.deleteUnexpectedError': 'Something went wrong while deleting the event',
 
         'participants.back': 'Back',
         'participants.title': 'Participants',
@@ -595,6 +648,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Failed to reset password',
         'resetPassword.unexpectedError': 'An error occurred while resetting the password',
         'resetPassword.success': 'Password changed successfully. Please log in again.',
+        'resetPassword.restoreSessionFailed': 'Failed to restore session',
+        'resetPassword.recoverySessionMissing':
+            'Recovery session is missing. Open the password reset link again.',
         'inviteUsers.title': 'Invite Users',
         'inviteUsers.back': 'Back',
         'inviteUsers.inviteButton': 'Invite',
@@ -782,6 +838,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.loading': 'Загрузка...',
         'profile.loadingEmail': 'Загрузка email...',
         'profile.noEmail': 'Нет email',
+        'profile.logoutFailed': 'Не удалось выйти из аккаунта',
+        'profile.logoutUnexpectedError': 'Произошла ошибка при выходе',
 
         'language.title': 'Язык',
         'language.selectedLanguage': 'Выбранный язык',
@@ -856,6 +914,30 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.editEvent': 'Редактировать событие',
         'details.deleteEvent': 'Удалить событие',
         'details.deleting': 'Удаление...',
+        'details.fallbackTitle': 'Кофе и коворкинг',
+        'details.fallbackDescription':
+            'Давай выпьем кофе и поработаем вместе. Не забудь ноутбук!',
+        'details.fallbackLocation': 'Blue Bottle, центр',
+        'details.shareInviteLine': 'Присоединяйся ко мне в Gathr',
+        'details.shareLabelEvent': 'Событие:',
+        'details.shareLabelDate': 'Дата:',
+        'details.shareLabelLocation': 'Место:',
+        'details.shareOpenLink': 'Открыть событие:',
+        'details.linkCopied': 'Ссылка на событие скопирована',
+        'details.copyLinkPrompt': 'Скопируй ссылку на событие:',
+        'details.shareEvent': 'Поделиться',
+        'details.sharing': 'Отправка...',
+        'details.eventNotResolved': 'Не удалось определить событие',
+        'details.joinFailed': 'Не удалось присоединиться к событию',
+        'details.joinUnexpectedError': 'Произошла ошибка при присоединении',
+        'details.loginRequired': 'Сначала войди в аккаунт',
+        'details.leaveFailed': 'Не удалось выйти из события',
+        'details.leaveUnexpectedError': 'Произошла ошибка при выходе из события',
+        'details.deleteOnlyCreator': 'Удалять событие может только создатель',
+        'details.deleteConfirm': 'Удалить это событие? Это действие нельзя отменить.',
+        'details.deleteParticipantsFailed': 'Не удалось удалить участников события',
+        'details.deleteFailed': 'Не удалось удалить событие',
+        'details.deleteUnexpectedError': 'Произошла ошибка при удалении события',
 
         'participants.back': 'Назад',
         'participants.title': 'Участники',
@@ -908,6 +990,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Не удалось сбросить пароль',
         'resetPassword.unexpectedError': 'Произошла ошибка при сбросе пароля',
         'resetPassword.success': 'Пароль успешно изменён. Войдите снова.',
+        'resetPassword.restoreSessionFailed': 'Не удалось восстановить сессию',
+        'resetPassword.recoverySessionMissing':
+            'Сессия восстановления отсутствует. Откройте ссылку сброса пароля ещё раз.',
         'inviteUsers.title': 'Пригласить пользователей',
         'inviteUsers.back': 'Назад',
         'inviteUsers.inviteButton': 'Пригласить',
@@ -1095,6 +1180,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.loading': 'Se încarcă...',
         'profile.loadingEmail': 'Se încarcă emailul...',
         'profile.noEmail': 'Fără email',
+        'profile.logoutFailed': 'Nu te-ai putut deconecta',
+        'profile.logoutUnexpectedError': 'A apărut o eroare la deconectare',
 
         'language.title': 'Limbă',
         'language.selectedLanguage': 'Limba selectată',
@@ -1169,6 +1256,30 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.editEvent': 'Editează evenimentul',
         'details.deleteEvent': 'Șterge evenimentul',
         'details.deleting': 'Se șterge...',
+        'details.fallbackTitle': 'Cafea & coworking',
+        'details.fallbackDescription':
+            'Hai să bem o cafea și să lucrăm împreună. Nu uita laptopul!',
+        'details.fallbackLocation': 'Blue Bottle, centru',
+        'details.shareInviteLine': 'Alătură-te mie pe Gathr',
+        'details.shareLabelEvent': 'Eveniment:',
+        'details.shareLabelDate': 'Data:',
+        'details.shareLabelLocation': 'Locația:',
+        'details.shareOpenLink': 'Deschide evenimentul:',
+        'details.linkCopied': 'Linkul evenimentului a fost copiat',
+        'details.copyLinkPrompt': 'Copiază linkul evenimentului:',
+        'details.shareEvent': 'Distribuie evenimentul',
+        'details.sharing': 'Se distribuie...',
+        'details.eventNotResolved': 'Evenimentul nu a putut fi identificat',
+        'details.joinFailed': 'Nu te-ai putut alătura evenimentului',
+        'details.joinUnexpectedError': 'A apărut o eroare la alăturare',
+        'details.loginRequired': 'Autentifică-te mai întâi',
+        'details.leaveFailed': 'Nu ai putut părăsi evenimentul',
+        'details.leaveUnexpectedError': 'A apărut o eroare la părăsire',
+        'details.deleteOnlyCreator': 'Doar creatorul poate șterge acest eveniment',
+        'details.deleteConfirm': 'Stergi acest eveniment? Actiunea nu poate fi anulata.',
+        'details.deleteParticipantsFailed': 'Nu s-au putut elimina participanții evenimentului',
+        'details.deleteFailed': 'Evenimentul nu a putut fi șters',
+        'details.deleteUnexpectedError': 'A apărut o eroare la ștergerea evenimentului',
 
         'participants.back': 'Înapoi',
         'participants.title': 'Participanți',
@@ -1222,6 +1333,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Resetarea parolei a eșuat',
         'resetPassword.unexpectedError': 'A apărut o eroare la resetarea parolei',
         'resetPassword.success': 'Parola a fost schimbată cu succes. Autentifică-te din nou.',
+        'resetPassword.restoreSessionFailed': 'Sesiunea nu a putut fi restabilită',
+        'resetPassword.recoverySessionMissing':
+            'Lipsește sesiunea de recuperare. Deschide din nou linkul de resetare a parolei.',
         'inviteUsers.title': 'Invită utilizatori',
         'inviteUsers.back': 'Înapoi',
         'inviteUsers.inviteButton': 'Invită',
@@ -1409,6 +1523,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.loading': 'Завантаження...',
         'profile.loadingEmail': 'Завантаження email...',
         'profile.noEmail': 'Немає email',
+        'profile.logoutFailed': 'Не вдалося вийти з облікового запису',
+        'profile.logoutUnexpectedError': 'Сталася помилка під час виходу',
 
         'language.title': 'Мова',
         'language.selectedLanguage': 'Обрана мова',
@@ -1483,6 +1599,30 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.editEvent': 'Редагувати подію',
         'details.deleteEvent': 'Видалити подію',
         'details.deleting': 'Видалення...',
+        'details.fallbackTitle': 'Кава та коворкінг',
+        'details.fallbackDescription':
+            'Зустріньмось на каві й попрацюємо разом. Не забудь ноутбук!',
+        'details.fallbackLocation': 'Blue Bottle, центр',
+        'details.shareInviteLine': 'Приєднуйся до мене в Gathr',
+        'details.shareLabelEvent': 'Подія:',
+        'details.shareLabelDate': 'Дата:',
+        'details.shareLabelLocation': 'Локація:',
+        'details.shareOpenLink': 'Відкрити подію:',
+        'details.linkCopied': 'Посилання на подію скопійовано',
+        'details.copyLinkPrompt': 'Скопіюй посилання на подію:',
+        'details.shareEvent': 'Поділитися',
+        'details.sharing': 'Надсилання...',
+        'details.eventNotResolved': 'Не вдалося визначити подію',
+        'details.joinFailed': 'Не вдалося приєднатися до події',
+        'details.joinUnexpectedError': 'Сталася помилка під час приєднання',
+        'details.loginRequired': 'Спочатку увійди в акаунт',
+        'details.leaveFailed': 'Не вдалося вийти з події',
+        'details.leaveUnexpectedError': 'Сталася помилка під час виходу з події',
+        'details.deleteOnlyCreator': 'Видалити подію може лише автор',
+        'details.deleteConfirm': 'Видалити цю подію? Цю дію не можна скасувати.',
+        'details.deleteParticipantsFailed': 'Не вдалося видалити учасників події',
+        'details.deleteFailed': 'Не вдалося видалити подію',
+        'details.deleteUnexpectedError': 'Сталася помилка під час видалення події',
 
         'participants.back': 'Назад',
         'participants.title': 'Учасники',
@@ -1535,6 +1675,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Не вдалося скинути пароль',
         'resetPassword.unexpectedError': 'Сталася помилка під час скидання пароля',
         'resetPassword.success': 'Пароль успішно змінено. Увійдіть ще раз.',
+        'resetPassword.restoreSessionFailed': 'Не вдалося відновити сесію',
+        'resetPassword.recoverySessionMissing':
+            'Сесія відновлення відсутня. Відкрийте посилання скидання пароля ще раз.',
         'inviteUsers.title': 'Запросити користувачів',
         'inviteUsers.back': 'Назад',
         'inviteUsers.inviteButton': 'Запросити',
@@ -1722,6 +1865,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.loading': 'Wird geladen...',
         'profile.loadingEmail': 'E-Mail wird geladen...',
         'profile.noEmail': 'Keine E-Mail',
+        'profile.logoutFailed': 'Abmeldung fehlgeschlagen',
+        'profile.logoutUnexpectedError': 'Beim Abmelden ist ein Fehler aufgetreten',
 
         'language.title': 'Sprache',
         'language.selectedLanguage': 'Ausgewählte Sprache',
@@ -1804,6 +1949,30 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.editEvent': 'Event bearbeiten',
         'details.deleteEvent': 'Event löschen',
         'details.deleting': 'Wird gelöscht...',
+        'details.fallbackTitle': 'Kaffee & Coworking',
+        'details.fallbackDescription':
+            'Lass uns Kaffee trinken und zusammen arbeiten. Nimm deinen Laptop mit!',
+        'details.fallbackLocation': 'Blue Bottle, Innenstadt',
+        'details.shareInviteLine': 'Mach mit bei Gathr',
+        'details.shareLabelEvent': 'Event:',
+        'details.shareLabelDate': 'Datum:',
+        'details.shareLabelLocation': 'Ort:',
+        'details.shareOpenLink': 'Event öffnen:',
+        'details.linkCopied': 'Event-Link kopiert',
+        'details.copyLinkPrompt': 'Event-Link kopieren:',
+        'details.shareEvent': 'Event teilen',
+        'details.sharing': 'Wird geteilt...',
+        'details.eventNotResolved': 'Event konnte nicht ermittelt werden',
+        'details.joinFailed': 'Beitritt zum Event fehlgeschlagen',
+        'details.joinUnexpectedError': 'Beim Beitreten ist ein Fehler aufgetreten',
+        'details.loginRequired': 'Bitte zuerst anmelden',
+        'details.leaveFailed': 'Event konnte nicht verlassen werden',
+        'details.leaveUnexpectedError': 'Beim Verlassen ist ein Fehler aufgetreten',
+        'details.deleteOnlyCreator': 'Nur der Ersteller kann dieses Event löschen',
+        'details.deleteConfirm': 'Dieses Event löschen? Das kann nicht rückgängig gemacht werden.',
+        'details.deleteParticipantsFailed': 'Teilnehmer des Events konnten nicht entfernt werden',
+        'details.deleteFailed': 'Event konnte nicht gelöscht werden',
+        'details.deleteUnexpectedError': 'Beim Löschen ist ein Fehler aufgetreten',
 
         'participants.back': 'Zurück',
         'participants.title': 'Teilnehmer',
@@ -1849,6 +2018,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'resetPassword.failed': 'Passwort konnte nicht zurückgesetzt werden',
         'resetPassword.unexpectedError': 'Beim Zurücksetzen des Passworts ist ein Fehler aufgetreten',
         'resetPassword.success': 'Passwort erfolgreich geändert. Bitte melde dich erneut an.',
+        'resetPassword.restoreSessionFailed': 'Sitzung konnte nicht wiederhergestellt werden',
+        'resetPassword.recoverySessionMissing':
+            'Wiederherstellungssitzung fehlt. Öffne den Passwort-Zurücksetzen-Link erneut.',
 
         'inviteUsers.title': 'Benutzer einladen',
         'inviteUsers.back': 'Zurück',

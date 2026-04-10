@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { TouchButton } from './TouchButton';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { EventLocationMap } from './EventLocationMap';
+import { buildJoinEventLoginPayload } from '../auth/postLoginIntent';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -17,16 +18,21 @@ export function EventDetailsScreen({
   ) => void;
   event?: any;
 }) {
-  const defaultEvent = {
-    id: '',
-    title: 'Coffee & Cowork',
-    description: "Let's grab coffee and get some work done together. Bring your laptop!",
-    date_time: new Date().toISOString(),
-    location: 'Blue Bottle, Downtown',
-    creator_id: null,
-  };
+  const { translate } = useLanguage();
 
-  const [eventData, setEventData] = useState(event || defaultEvent);
+  const defaultEvent = useMemo(
+    () => ({
+      id: '',
+      title: translate('details.fallbackTitle'),
+      description: translate('details.fallbackDescription'),
+      date_time: new Date().toISOString(),
+      location: translate('details.fallbackLocation'),
+      creator_id: null,
+    }),
+    [translate]
+  );
+
+  const [eventData, setEventData] = useState(() => event || defaultEvent);
   const [resolvedBackTarget, setResolvedBackTarget] = useState(
     event?.backTarget || 'home'
   );
@@ -41,8 +47,6 @@ export function EventDetailsScreen({
 
   const autoJoinAttemptedRef = useRef(false);
 
-  const { translate } = useLanguage();
-
   const backTarget = event?.backTarget || 'home';
   const pendingAuthAction = event?.authAction || null;
 
@@ -53,12 +57,12 @@ export function EventDetailsScreen({
     eventDate.getTime() < Date.now();
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Date not specified';
+    if (!dateString) return translate('common.dateNotSpecified');
 
     const date = new Date(dateString);
 
     if (Number.isNaN(date.getTime())) {
-      return 'Invalid date';
+      return translate('common.invalidDate');
     }
 
     return date.toLocaleString();
@@ -84,11 +88,11 @@ export function EventDetailsScreen({
 
   const buildShareText = () => {
     const lines = [
-      'Join me on Gathr',
+      translate('details.shareInviteLine'),
       '',
-      `Event: ${eventData.title || translate('common.event')}`,
-      `Date: ${formatDate(eventData.date_time)}`,
-      `Location: ${eventData.location || translate('details.locationNotSpecified')}`,
+      `${translate('details.shareLabelEvent')} ${eventData.title || translate('common.event')}`,
+      `${translate('details.shareLabelDate')} ${formatDate(eventData.date_time)}`,
+      `${translate('details.shareLabelLocation')} ${eventData.location || translate('details.locationNotSpecified')}`,
     ];
 
     if (eventData.description) {
@@ -96,7 +100,7 @@ export function EventDetailsScreen({
     }
 
     if (eventShareUrl) {
-      lines.push('', 'Open event:', eventShareUrl);
+      lines.push('', translate('details.shareOpenLink'), eventShareUrl);
     }
 
     return lines.join('\n');
@@ -195,7 +199,7 @@ export function EventDetailsScreen({
     setEventData(event || defaultEvent);
     setResolvedBackTarget(event?.backTarget || 'home');
     autoJoinAttemptedRef.current = false;
-  }, [event]);
+  }, [event, defaultEvent]);
 
   useEffect(() => {
     loadEvent();
@@ -257,7 +261,7 @@ export function EventDetailsScreen({
 
       if (navigator.share) {
         await navigator.share({
-          title: eventData.title || 'Gathr Event',
+          title: eventData.title || translate('common.event'),
           text: shareText,
           url: eventShareUrl,
         });
@@ -266,7 +270,7 @@ export function EventDetailsScreen({
 
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareText);
-        alert('Event link copied');
+        alert(translate('details.linkCopied'));
         return;
       }
 
@@ -282,7 +286,7 @@ export function EventDetailsScreen({
       console.error('Unexpected share error:', error);
 
       try {
-        window.prompt('Copy event link:', eventShareUrl);
+        window.prompt(translate('details.copyLinkPrompt'), eventShareUrl);
       } catch (promptError) {
         console.error('Prompt fallback failed:', promptError);
       }
@@ -297,7 +301,7 @@ export function EventDetailsScreen({
     }
 
     if (!eventData.id) {
-      alert('Не удалось определить событие');
+      alert(translate('details.eventNotResolved'));
       return false;
     }
 
@@ -310,7 +314,7 @@ export function EventDetailsScreen({
 
     if (error) {
       console.error('Ошибка присоединения:', error);
-      alert('Не удалось присоединиться к событию');
+      alert(translate('details.joinFailed'));
       return false;
     }
 
@@ -360,33 +364,12 @@ export function EventDetailsScreen({
 
   const handleJoin = async () => {
     if (!currentUserId) {
-      onNavigate(
-        'login',
-        {
-          returnToAfterAuth: {
-            screen: 'event-details',
-            data: {
-              ...eventData,
-              backTarget: 'home',
-            },
-          },
-          actionAfterAuth: {
-            type: 'join-event',
-            eventId: eventData.id,
-          },
-          backScreen: 'event-details',
-          backData: {
-            ...eventData,
-            backTarget: 'home',
-          },
-        },
-        'forward'
-      );
+      onNavigate('login', buildJoinEventLoginPayload(eventData), 'forward');
       return;
     }
 
     if (!eventData.id) {
-      alert('Не удалось определить событие');
+      alert(translate('details.eventNotResolved'));
       return;
     }
 
@@ -396,7 +379,7 @@ export function EventDetailsScreen({
       await performJoin();
     } catch (error) {
       console.error('Unexpected join error:', error);
-      alert('Произошла ошибка при присоединении');
+      alert(translate('details.joinUnexpectedError'));
     } finally {
       setLoadingAction(false);
     }
@@ -404,12 +387,12 @@ export function EventDetailsScreen({
 
   const handleLeave = async () => {
     if (!currentUserId) {
-      alert('Сначала войди в аккаунт');
+      alert(translate('details.loginRequired'));
       return;
     }
 
     if (!eventData.id) {
-      alert('Не удалось определить событие');
+      alert(translate('details.eventNotResolved'));
       return;
     }
 
@@ -424,7 +407,7 @@ export function EventDetailsScreen({
 
       if (error) {
         console.error('Ошибка выхода из события:', error);
-        alert('Не удалось выйти из события');
+        alert(translate('details.leaveFailed'));
         setLoadingAction(false);
         return;
       }
@@ -433,7 +416,7 @@ export function EventDetailsScreen({
       await loadParticipants();
     } catch (error) {
       console.error('Unexpected leave error:', error);
-      alert('Произошла ошибка при выходе из события');
+      alert(translate('details.leaveUnexpectedError'));
     } finally {
       setLoadingAction(false);
     }
@@ -441,21 +424,21 @@ export function EventDetailsScreen({
 
   const handleDeleteEvent = async () => {
     if (!currentUserId) {
-      alert('Сначала войди в аккаунт');
+      alert(translate('details.loginRequired'));
       return;
     }
 
     if (!eventData.id) {
-      alert('Не удалось определить событие');
+      alert(translate('details.eventNotResolved'));
       return;
     }
 
     if (!isCreator) {
-      alert('Удалять событие может только создатель');
+      alert(translate('details.deleteOnlyCreator'));
       return;
     }
 
-    const confirmed = window.confirm('Удалить это событие? Это действие нельзя отменить.');
+    const confirmed = window.confirm(translate('details.deleteConfirm'));
 
     if (!confirmed) {
       return;
@@ -471,7 +454,7 @@ export function EventDetailsScreen({
 
       if (participantsError) {
         console.error('Ошибка удаления участников события:', participantsError);
-        alert('Не удалось удалить участников события');
+        alert(translate('details.deleteParticipantsFailed'));
         setLoadingDelete(false);
         return;
       }
@@ -484,7 +467,7 @@ export function EventDetailsScreen({
 
       if (eventError) {
         console.error('Ошибка удаления события:', eventError);
-        alert('Не удалось удалить событие');
+        alert(translate('details.deleteFailed'));
         setLoadingDelete(false);
         return;
       }
@@ -492,7 +475,7 @@ export function EventDetailsScreen({
       onNavigate('home');
     } catch (error) {
       console.error('Unexpected delete event error:', error);
-      alert('Произошла ошибка при удалении события');
+      alert(translate('details.deleteUnexpectedError'));
     } finally {
       setLoadingDelete(false);
     }
@@ -552,7 +535,7 @@ export function EventDetailsScreen({
                 disabled={sharing || !eventData.id}
                 style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
               >
-                {sharing ? 'Sharing...' : 'Share Event'}
+                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
               </TouchButton>
             </motion.div>
 

@@ -180,10 +180,14 @@ type TranslationKey =
     | 'admin.pendingInvitations'
     | 'admin.supportRequests'
     | 'admin.latestEvents'
+    | 'admin.latestPendingInvitations'
+    | 'admin.invitedBy'
     | 'admin.readOnly'
     | 'admin.unavailable'
     | 'admin.noEvents'
+    | 'admin.noPendingInvitations'
     | 'admin.notAvailable'
+
     | 'home.discover'
     | 'home.joined'
     | 'home.myEvents'
@@ -532,10 +536,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Pending invites',
         'admin.supportRequests': 'Support requests',
         'admin.latestEvents': 'Latest events',
+        'admin.latestPendingInvitations': 'Latest pending invitations',
+        'admin.invitedBy': 'Invited by',
         'admin.readOnly': 'Read only',
         'admin.unavailable': 'Unavailable',
         'admin.noEvents': 'No events to show',
+        'admin.noPendingInvitations': 'No pending invitations',
         'admin.notAvailable': 'Not available',
+
 
         'home.discover': 'Discover',
         'home.joined': 'Joined',
@@ -891,10 +899,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Ожидают приглашения',
         'admin.supportRequests': 'Запросы в поддержку',
         'admin.latestEvents': 'Последние события',
+        'admin.latestPendingInvitations': 'Последние ожидающие приглашения',
+        'admin.invitedBy': 'Пригласил',
         'admin.readOnly': 'Только чтение',
         'admin.unavailable': 'Недоступно',
         'admin.noEvents': 'Нет событий для отображения',
+        'admin.noPendingInvitations': 'Нет ожидающих приглашений',
         'admin.notAvailable': 'Нет данных',
+
 
         'home.discover': 'События',
         'home.joined': 'Участвую',
@@ -1250,10 +1262,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Invitații în așteptare',
         'admin.supportRequests': 'Cereri de suport',
         'admin.latestEvents': 'Ultimele evenimente',
+        'admin.latestPendingInvitations': 'Ultimele invitații în așteptare',
+        'admin.invitedBy': 'Invitat de',
         'admin.readOnly': 'Doar citire',
         'admin.unavailable': 'Indisponibil',
         'admin.noEvents': 'Nu există evenimente de afișat',
+        'admin.noPendingInvitations': 'Nu există invitații în așteptare',
         'admin.notAvailable': 'Nu este disponibil',
+
 
         'home.discover': 'Descoperă',
         'home.joined': 'Particip',
@@ -1610,10 +1626,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Запрошення в очікуванні',
         'admin.supportRequests': 'Запити в підтримку',
         'admin.latestEvents': 'Останні події',
+        'admin.latestPendingInvitations': 'Останні запрошення в очікуванні',
+        'admin.invitedBy': 'Запросив',
         'admin.readOnly': 'Лише читання',
         'admin.unavailable': 'Недоступно',
         'admin.noEvents': 'Немає подій для відображення',
+        'admin.noPendingInvitations': 'Немає запрошень в очікуванні',
         'admin.notAvailable': 'Немає даних',
+
 
         'home.discover': 'Події',
         'home.joined': 'Беру участь',
@@ -1969,10 +1989,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Offene Einladungen',
         'admin.supportRequests': 'Supportanfragen',
         'admin.latestEvents': 'Neueste Events',
+        'admin.latestPendingInvitations': 'Neueste offene Einladungen',
+        'admin.invitedBy': 'Eingeladen von',
         'admin.readOnly': 'Nur lesen',
         'admin.unavailable': 'Nicht verfügbar',
         'admin.noEvents': 'Keine Events zum Anzeigen',
+        'admin.noPendingInvitations': 'Keine offenen Einladungen',
         'admin.notAvailable': 'Nicht verfügbar',
+
 
         'home.discover': 'Entdecken',
         'home.joined': 'Beigetreten',

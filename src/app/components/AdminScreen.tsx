@@ -12,6 +12,14 @@ type EventPreview = {
   location: string | null;
 };
 
+type InvitationPreview = {
+  id: string;
+  created_at: string | null;
+  inviterName: string | null;
+  eventTitle: string | null;
+};
+
+
 type AdminSummary = {
   totalUsers: SummaryValue;
   totalEvents: SummaryValue;
@@ -34,8 +42,13 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
   const { translate } = useLanguage();
   const [summary, setSummary] = useState<AdminSummary>(INITIAL_SUMMARY);
   const [latestEvents, setLatestEvents] = useState<EventPreview[]>([]);
+  const [latestPendingInvitations, setLatestPendingInvitations] = useState<InvitationPreview[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [eventsUnavailable, setEventsUnavailable] = useState(false);
+  const [invitationsUnavailable, setInvitationsUnavailable] = useState(false);
+
 
   useEffect(() => {
     const loadAdminOverview = async () => {
@@ -52,6 +65,7 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           pendingInvitationsResult,
           supportRequestsResult,
           latestEventsResult,
+          latestPendingInvitationsResult,
         ] = await Promise.allSettled([
           supabase.from('profiles').select('*', { count: 'exact', head: true }),
           supabase.from('events').select('*', { count: 'exact', head: true }),
@@ -70,7 +84,23 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
             .select('id, title, date_time, location')
             .order('date_time', { ascending: false })
             .limit(5),
+          supabase
+            .from('event_invitations')
+            .select(`
+              id,
+              created_at,
+              inviter:profiles!event_invitations_inviter_id_fkey (
+                name
+              ),
+              events (
+                title
+              )
+            `)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false })
+            .limit(5),
         ]);
+
 
         setSummary({
           totalUsers:
@@ -91,7 +121,7 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
               : null,
           pendingInvitations:
             pendingInvitationsResult.status === 'fulfilled' &&
-            !pendingInvitationsResult.value.error
+              !pendingInvitationsResult.value.error
               ? pendingInvitationsResult.value.count ?? 0
               : null,
           supportRequests:
@@ -107,14 +137,48 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           setLatestEvents([]);
           setEventsUnavailable(true);
         }
+
+        if (
+          latestPendingInvitationsResult.status === 'fulfilled' &&
+          !latestPendingInvitationsResult.value.error
+        ) {
+          const normalizedInvitations = (
+            (latestPendingInvitationsResult.value.data as any[] | null) || []
+          ).map((invitation: any) => {
+            const inviterData = Array.isArray(invitation.inviter)
+              ? invitation.inviter[0]
+              : invitation.inviter;
+
+            const eventData = Array.isArray(invitation.events)
+              ? invitation.events[0]
+              : invitation.events;
+
+            return {
+              id: invitation.id,
+              created_at: invitation.created_at ?? null,
+              inviterName: inviterData?.name ?? null,
+              eventTitle: eventData?.title ?? null,
+            };
+          });
+
+          setLatestPendingInvitations(normalizedInvitations);
+          setInvitationsUnavailable(false);
+        } else {
+          setLatestPendingInvitations([]);
+          setInvitationsUnavailable(true);
+        }
+
       } catch (error) {
         console.error('Unexpected admin overview load error:', error);
         setSummary(INITIAL_SUMMARY);
         setLatestEvents([]);
+        setLatestPendingInvitations([]);
         setEventsUnavailable(true);
+        setInvitationsUnavailable(true);
       } finally {
         setLoading(false);
       }
+
     };
 
     loadAdminOverview();
@@ -273,6 +337,61 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
               </div>
             )}
           </div>
+
+          <div
+            className="rounded-xl border p-5"
+            style={{
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: '#1A1A1A',
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3>{translate('admin.latestPendingInvitations')}</h3>
+              <span className="text-xs text-muted-foreground">
+                {translate('admin.readOnly')}
+              </span>
+            </div>
+
+            {loading && (
+              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
+            )}
+
+            {!loading && invitationsUnavailable && (
+              <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
+            )}
+
+            {!loading && !invitationsUnavailable && latestPendingInvitations.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                {translate('admin.noPendingInvitations')}
+              </p>
+            )}
+
+            {!loading && !invitationsUnavailable && latestPendingInvitations.length > 0 && (
+              <div className="space-y-3">
+                {latestPendingInvitations.map((invitation) => (
+                  <div
+                    key={invitation.id}
+                    className="rounded-lg border p-3"
+                    style={{
+                      borderColor: 'rgba(255, 255, 255, 0.08)',
+                      backgroundColor: '#111111',
+                    }}
+                  >
+                    <p className="mb-1">
+                      {invitation.eventTitle || translate('common.event')}
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {translate('admin.invitedBy')}: {invitation.inviterName || translate('common.unknown')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(invitation.created_at)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
 
           <div
             className="rounded-xl border p-5"

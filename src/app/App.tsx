@@ -56,17 +56,44 @@ export default function App() {
   const { translate } = useLanguage();
 
   useEffect(() => {
+    const getViewportHeight = () => {
+      const visualHeight = window.visualViewport?.height;
+
+      if (visualHeight && Number.isFinite(visualHeight)) {
+        return Math.round(visualHeight);
+      }
+
+      return window.innerHeight;
+    };
+
     const updateAppHeight = () => {
-      document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+      document.documentElement.style.setProperty('--app-height', `${getViewportHeight()}px`);
     };
 
     updateAppHeight();
     window.addEventListener('resize', updateAppHeight);
     window.addEventListener('orientationchange', updateAppHeight);
+    window.addEventListener('pageshow', updateAppHeight);
+    window.visualViewport?.addEventListener('resize', updateAppHeight);
+    window.visualViewport?.addEventListener('scroll', updateAppHeight);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        requestAnimationFrame(() => {
+          updateAppHeight();
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('resize', updateAppHeight);
       window.removeEventListener('orientationchange', updateAppHeight);
+      window.removeEventListener('pageshow', updateAppHeight);
+      window.visualViewport?.removeEventListener('resize', updateAppHeight);
+      window.visualViewport?.removeEventListener('scroll', updateAppHeight);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -335,20 +362,24 @@ export default function App() {
   };
 
   const showBottomNav = ['home', 'notifications', 'profile'].includes(currentScreen);
+  const isMobileViewport = window.innerWidth < 768;
 
   if (!authChecked) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-secondary">
+      <div
+        className="w-full flex items-center justify-center bg-secondary overflow-hidden"
+        style={{ minHeight: 'var(--app-height, 100dvh)', height: 'var(--app-height, 100dvh)' }}
+      >
         <div
           className="relative overflow-hidden flex flex-col items-center justify-center w-full min-h-screen md:min-h-0 md:w-auto"
           style={{
             width: '100%',
             height: 'var(--app-height, 100dvh)',
-            maxWidth: '390px',
-            maxHeight: '844px',
+            maxWidth: isMobileViewport ? '100%' : '390px',
+            maxHeight: isMobileViewport ? 'none' : '844px',
             backgroundColor: '#0F0F0F',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-            borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
+            borderRadius: isMobileViewport ? '0' : '2.5rem',
           }}
         >
           <LoadingLogo label={translate('common.loading')} />
@@ -358,17 +389,20 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-secondary">
+    <div
+      className="w-full flex items-center justify-center bg-secondary overflow-hidden"
+      style={{ minHeight: 'var(--app-height, 100dvh)', height: 'var(--app-height, 100dvh)' }}
+    >
       <div
         className="relative overflow-hidden flex flex-col w-full min-h-screen md:min-h-0 md:w-auto"
         style={{
           width: '100%',
           height: 'var(--app-height, 100dvh)',
-          maxWidth: '390px',
-          maxHeight: '844px',
+          maxWidth: isMobileViewport ? '100%' : '390px',
+          maxHeight: isMobileViewport ? 'none' : '844px',
           backgroundColor: '#0F0F0F',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-          borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
+          borderRadius: isMobileViewport ? '0' : '2.5rem',
         }}
       >
         <FeedbackHost />

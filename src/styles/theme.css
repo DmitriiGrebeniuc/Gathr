@@ -163,6 +163,24 @@
     overflow: hidden;
   }
 
+  #root .no-scrollbar,
+  #root .overflow-y-auto,
+  #root .overflow-x-auto,
+  #root .overflow-auto {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  #root .no-scrollbar::-webkit-scrollbar,
+  #root .overflow-y-auto::-webkit-scrollbar,
+  #root .overflow-x-auto::-webkit-scrollbar,
+  #root .overflow-auto::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+    background: transparent;
+  }
+
   h1 {
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);

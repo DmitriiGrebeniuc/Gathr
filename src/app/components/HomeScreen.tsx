@@ -595,6 +595,9 @@ export function HomeScreen({
             scrollPaddingLeft: '0.25rem',
             scrollPaddingRight: '0.25rem',
             WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+            paddingLeft: '0.125rem',
+            paddingRight: '0.125rem',
           }}
         >
           <motion.button
@@ -639,8 +642,8 @@ export function HomeScreen({
                   boxShadow: isActive ? '0 0 0 1px rgba(212, 175, 55, 0.12)' : 'none',
                 }}
               >
-                <span className="mr-2">{activityMeta.emoji}</span>
-                <span>{activityMeta.label}</span>
+                  <span className="mr-1.5">{activityMeta.emoji}</span>
+                  <span>{activityMeta.label}</span>
               </motion.button>
             );
           })}

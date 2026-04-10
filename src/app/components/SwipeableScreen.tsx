@@ -23,7 +23,11 @@ export function SwipeableScreen({
   }
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) {
+    if (event.pointerType !== 'touch') {
+      return;
+    }
+
+    if (event.button !== 0) {
       return;
     }
 

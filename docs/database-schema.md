@@ -4,14 +4,17 @@
 
 Gathr uses Supabase (PostgreSQL) as its primary data storage layer.
 
-The schema is designed around event coordination and user interaction.
+This document reflects the schema that can be observed from the frontend code in this repository.
+It does not assert database constraints or RLS rules unless they are directly visible in the project files.
 
-Core entities:
-- users (managed by Supabase Auth)
-- profiles
-- events
-- participants
-- notification_settings
+Current core entities used by the client:
+- `auth.users`
+- `profiles`
+- `events`
+- `participants`
+- `notification_settings`
+- `support_requests`
+- `event_invitations`
 
 ---
 
@@ -22,12 +25,12 @@ User authentication is managed by Supabase Auth.
 ### Table
 - `auth.users`
 
-This table is managed by Supabase and contains:
-- user id
-- email
-- authentication metadata
-
-Application-level tables reference `auth.users.id`.
+Observed usage:
+- current session lookup
+- login
+- signup
+- logout
+- password reset and recovery flow
 
 ---
 
@@ -35,18 +38,22 @@ Application-level tables reference `auth.users.id`.
 
 ### Table: `profiles`
 
-Represents user profile data.
+Represents user profile data and entitlement state used by the client.
 
-### Fields
+### Observed fields
 
-- `id` (uuid, primary key, references auth.users.id)
-- `name` (text)
+- `id`
+- `name`
+- `plan`
+- `has_unlimited_access`
 
 ### Usage
 
 - display user names
 - resolve creator names for events
 - resolve participant names
+- edit current profile name
+- resolve client-side event and invitation limits
 
 ---
 
@@ -56,18 +63,18 @@ Represents user profile data.
 
 Core entity representing an event.
 
-### Fields
+### Observed fields
 
-- `id` (uuid, primary key)
-- `title` (text)
-- `description` (text)
-- `date_time` (timestamp)
-- `location` (text)
-- `location_place_id` (text)
-- `location_lat` (numeric)
-- `location_lng` (numeric)
-- `activity_type` (text)
-- `creator_id` (uuid, references auth.users.id)
+- `id`
+- `title`
+- `description`
+- `date_time`
+- `location`
+- `location_place_id`
+- `location_lat`
+- `location_lng`
+- `activity_type`
+- `creator_id`
 
 ### Usage
 
@@ -75,11 +82,9 @@ Core entity representing an event.
 - event detail view
 - event editing
 - event filtering
-
-### Constraints (logical)
-
-- only the creator can update the event
-- only the creator can delete the event
+- invitation context
+- notification generation
+- shared-event entry path
 
 ---
 
@@ -89,23 +94,20 @@ Core entity representing an event.
 
 Represents the relationship between users and events.
 
-### Fields
+### Observed fields
 
-- `event_id` (uuid, references events.id)
-- `user_id` (uuid, references auth.users.id)
-- `created_at` (timestamp)
+- `id`
+- `event_id`
+- `user_id`
+- `created_at`
 
 ### Usage
 
 - track event membership
 - build joined events list
 - calculate participant count
-- generate notifications
-
-### Constraints (logical)
-
-- a user should not join the same event multiple times
-- the creator is automatically a participant
+- render participant lists
+- generate join notifications
 
 ---
 
@@ -115,119 +117,129 @@ Represents the relationship between users and events.
 
 Stores user-specific notification preferences.
 
-### Fields
+### Observed fields
 
-- `user_id` (uuid, references auth.users.id)
-- `notify_upcoming_events` (boolean)
-- `notify_new_participants` (boolean)
+- `user_id`
+- `notify_upcoming_events`
+- `notify_new_participants`
+- `notify_event_invitations`
+- `updated_at`
 
-### Default behavior
+### Default behavior in the client
 
 If no row exists:
 - notifications are treated as enabled
 
 ---
 
-## 7. Relationships
+## 7. Support Requests
+
+### Table: `support_requests`
+
+Stores user-submitted support messages.
+
+### Observed fields
+
+- `user_id`
+- `subject`
+- `message`
+
+### Usage
+
+- submit support form requests from `SupportScreen.tsx`
+
+---
+
+## 8. Event Invitations
+
+### Table: `event_invitations`
+
+Stores invitations sent by event creators to other users.
+
+### Observed fields
+
+- `id`
+- `event_id`
+- `inviter_id`
+- `invitee_id`
+- `status`
+- `created_at`
+- `responded_at`
+
+### Observed statuses
+
+- `pending`
+- `accepted`
+- `declined`
+
+### Usage
+
+- filter invite candidates
+- create event invitations
+- generate invite notifications
+- accept or decline invitations
+
+---
+
+## 9. Relationships
+
+Observed client-side relationship model:
 
 ### User to Profile
-- one-to-one
+- one-to-one in application usage
 
 ### User to Events
-- one-to-many (creator)
+- one-to-many creator relationship
 
 ### User to Participants
-- one-to-many
+- one-to-many participation relationship
 
 ### Event to Participants
 - one-to-many
 
-### Event to Creator
-- many-to-one
+### Event to Invitations
+- one-to-many
 
 ---
 
-## 8. Realtime Subscriptions
+## 10. Realtime-Relevant Tables
 
 Supabase realtime is used on the following tables:
 
 - `events`
 - `participants`
+- `event_invitations`
 
 ### Effects
 
 - UI updates when events change
-- participant lists update in real time
-- notification feed refreshes automatically
+- participant views refresh in real time
+- notifications refresh when invitations change
 
 ---
 
-## 9. Suggested Constraints and Improvements
+## 11. Verification Boundaries
 
-### Unique constraint
+The repository frontend confirms table usage and observed fields.
 
-```sql
-UNIQUE (event_id, user_id)
-```
+The repository does not contain a verified SQL source of truth for:
+- exact foreign keys
+- exact `ON DELETE` behavior
+- exact unique constraints
+- exact RLS policy definitions
 
-Prevents duplicate participation records.
-
-### Foreign key constraints
-
-- participants.event_id -> events.id
-- participants.user_id -> auth.users.id
-- events.creator_id -> auth.users.id
-
-### Indexes
-
-Recommended indexes:
-
-- events(date_time)
-- events(creator_id)
-- participants(user_id)
-- participants(event_id)
-
----
-
-## 10. Row Level Security (Recommended)
-
-For production usage, enable RLS policies.
-
-### Profiles
-- users can read all profiles
-- users can update only their own profile
-
-### Events
-- anyone can read events
-- only creator can update or delete event
-
-### Participants
-- users can join/leave events
-- users can read participants
-
-### Notification settings
-- users can read and update only their own settings
-
----
-
-## 11. Future Extensions
-
-Potential schema improvements:
-
-- add `max_participants` to events
-- add `status` to events (active, cancelled, completed)
-- add `is_private` flag
-- add invitation system
-- add event categories table instead of enum-like activity_type
-- add notification history table for persistent notifications
+Those backend details should be documented from migrations, SQL dumps, or Supabase schema exports when available.
 
 ---
 
 ## 12. Summary
 
-The current schema is optimized for:
-- fast MVP delivery
-- simple relational model
-- realtime-driven UI
+The current client-observed schema is centered on:
+- profiles
+- events
+- participants
+- notification settings
+- support requests
+- invitations
 
-It is sufficient for early-stage usage and can be extended incrementally as the product grows.
+It is sufficient to explain the current frontend behavior without making unverified backend claims.

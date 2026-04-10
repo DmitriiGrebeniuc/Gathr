@@ -32,13 +32,13 @@ The application follows a frontend-centric SPA architecture with a managed backe
 
 ```text
 User Interface
-  ↓
+  ->
 Application Shell
-  ↓
+  ->
 Feature Screens and UI Components
-  ↓
+  ->
 Shared Infrastructure Layer
-  ↓
+  ->
 Supabase Platform
     - Auth
     - Database
@@ -68,6 +68,7 @@ Responsible for:
 - application bootstrap
 - session gate
 - recovery token handling
+- shared-event entry handling
 - screen navigation
 - screen transition orchestration
 - mobile viewport shell
@@ -78,6 +79,7 @@ Implemented in:
 - `src/lib/language.ts`
 - `src/app/context/LanguageContext.tsx`
 - `src/app/constants/*`
+- `src/app/auth/*`
 
 Responsible for:
 - backend client initialization
@@ -85,6 +87,8 @@ Responsible for:
 - translation lookup
 - shared constants and metadata
 - shared plan/limit resolution
+- shared auth-navigation payload helpers
+- shared-event path resolution
 
 #### Backend platform layer
 Implemented through Supabase.
@@ -92,7 +96,6 @@ Implemented through Supabase.
 Responsible for:
 - authentication
 - storage of domain entities
-- user-related and event-related queries
 - notification preference storage
 - invitation storage
 - support request storage
@@ -144,11 +147,12 @@ Responsible for:
 2. `src/main.tsx` mounts the React tree.
 3. Global styles are loaded from `src/styles/index.css`.
 4. `LanguageProvider` wraps the app and restores language from local storage.
-5. `App.tsx` checks auth and recovery state.
-6. Depending on session state, the shell opens either:
+5. `App.tsx` checks auth, recovery state, and shared-event path state.
+6. Depending on state, the shell opens either:
    - `welcome`
    - `home`
    - `reset-password` in recovery flow
+   - `event-details` for a resolved shared event
 7. The shell subscribes to auth state changes.
 
 ## 6. Navigation Architecture
@@ -161,6 +165,7 @@ The root shell stores:
 - `direction`
 - `history`
 - `authChecked`
+- pending auth-return state
 
 Screen groups:
 - main: `home`, `notifications`, `profile`
@@ -173,6 +178,9 @@ Navigation directions:
 - `back`
 - `up`
 - `down`
+
+Observed navigation exception:
+- shared event deep link at `/event/:eventId`
 
 ## 7. Authentication Architecture
 
@@ -187,6 +195,7 @@ Current responsibilities:
 - session persistence
 - logout
 - auth state synchronization with the root shell
+- return-to-screen and post-login action handling for guarded flows
 
 ## 8. Localization Architecture
 
@@ -218,6 +227,7 @@ Current product areas:
 - security
 - profile
 - language
+- shared event entry flow
 
 ## 10. Realtime Architecture
 
@@ -228,6 +238,9 @@ Current subscriptions:
 - Event Details: `participants`, current `events` row
 - Participants: `participants`
 - Notifications: `participants`, `events`, `event_invitations`
+
+Observed realtime pattern:
+- feature-level refetch after relevant realtime events
 
 ## 11. Data Access Pattern
 
@@ -246,7 +259,6 @@ Trade-offs:
 ## 12. Entitlement and Limit Architecture
 
 Profile-level entitlement fields:
-- `role`
 - `plan`
 - `has_unlimited_access`
 
@@ -298,7 +310,7 @@ Mid term:
 - evaluate route-based or hybrid navigation
 - optimize realtime refresh
 - formalize server-side plan enforcement
-- add admin-only surfaces guarded by `profiles.role`
+- add admin-only surfaces if backend role logic becomes part of the verified schema
 
 Long term:
 - feature-based folder structure

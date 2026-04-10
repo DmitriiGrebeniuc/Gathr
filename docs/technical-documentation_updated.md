@@ -14,6 +14,7 @@ The product currently enables users to:
 - receive event-related notifications
 - manage profile, language, security, and notification settings
 - submit support requests
+- open shared events through `/event/:id`
 
 ## 2. Technology Stack
 
@@ -47,6 +48,7 @@ The product currently enables users to:
 ```text
 src/
   app/
+    auth/
     components/
     constants/
     context/
@@ -95,6 +97,7 @@ Key state:
 - `direction`
 - `history`
 - `authChecked`
+- pending auth-return state
 
 Supported screens:
 - `welcome`
@@ -115,6 +118,9 @@ Supported screens:
 - `support`
 - `language`
 
+Observed exception:
+- shared event deep link at `/event/:eventId`
+
 ## 6. Authentication Architecture
 
 Implemented auth flows:
@@ -124,6 +130,7 @@ Implemented auth flows:
 - forgot password email request
 - password recovery reset flow
 - authenticated password change
+- post-login return and action flow for guarded event join
 
 ## 7. Localization Architecture
 
@@ -150,8 +157,7 @@ Active backend entities:
 - `support_requests`
 - `event_invitations`
 
-Profile entitlement fields:
-- `role`
+Profile entitlement fields read by the client:
 - `plan`
 - `has_unlimited_access`
 
@@ -192,6 +198,8 @@ Profile entitlement fields:
 - determine current user relationship to event
 - support join/leave
 - support creator edit/delete
+- support event sharing through `/event/:id`
+- support login redirect and auto-join return flow
 - show map
 - react to realtime changes
 
@@ -213,7 +221,7 @@ Implemented across:
 Invitation sending:
 - excludes creator
 - excludes current participants
-- excludes already pending/accepted invitees
+- excludes already pending or accepted invitees
 - enforces invitations-per-event limit unless unlimited
 - inserts into `event_invitations`
 
@@ -271,11 +279,10 @@ Current behavior:
 ## 19. Plan and Limit Layer
 
 Relevant profile fields:
-- `role`
 - `plan`
 - `has_unlimited_access`
 
-Shared plan limits are expected in:
+Shared plan limits are defined in:
 - `src/app/constants/planLimits.ts`
 
 Currently enforced client-side limits:
@@ -289,6 +296,9 @@ Observed subscriptions:
 - Event Details: `participants`, current event row
 - Participants: `participants`
 - Notifications: `participants`, `events`, `event_invitations`
+
+Observed pattern:
+- feature-level refresh after relevant realtime events
 
 ## 21. Mobile and Platform Integration
 
@@ -316,5 +326,4 @@ Android project is present in the repository.
 - split translations by domain
 - replace alert-based feedback
 - move critical flows into RPC/server-side logic
-- add admin-only surfaces
 - formalize server-side plan enforcement

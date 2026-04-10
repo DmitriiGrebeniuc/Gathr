@@ -2,14 +2,18 @@
 
 ## 1. Overview
 
-Gathr is a mobile-first event management application built as a React single-page application with Supabase as the backend platform and Capacitor as the Android delivery layer.
+Gathr is a mobile-first event coordination application built as a React single-page application with Supabase as the backend platform and Capacitor as the Android delivery layer.
 
 The current architecture is optimized for MVP delivery speed while already supporting:
 - authenticated user flows
 - event lifecycle management
+- invitations
+- notification preferences
+- support requests
 - realtime updates
 - localized UI
 - Android packaging
+- early plan/limit enforcement
 
 ---
 
@@ -23,6 +27,7 @@ The application follows a frontend-centric SPA architecture with a managed backe
 - Supabase as BaaS for authentication, database, and realtime
 - mobile-like UI shell rendered inside a bounded viewport container
 - Capacitor wrapper for Android delivery
+- direct feature-to-Supabase access from screen components
 
 ---
 
@@ -30,13 +35,13 @@ The application follows a frontend-centric SPA architecture with a managed backe
 
 ```text
 User Interface
-  ↓
+  ->
 Application Shell
-  ↓
+  ->
 Feature Screens and UI Components
-  ↓
+  ->
 Shared Infrastructure Layer
-  ↓
+  ->
 Supabase Platform
     - Auth
     - Database
@@ -55,6 +60,7 @@ Responsible for:
 - local UI state
 - visual transitions
 - gesture handling
+- direct data loading and write actions
 
 #### Application shell layer
 Implemented in:
@@ -64,9 +70,10 @@ Implemented in:
 Responsible for:
 - application bootstrap
 - session gate
+- recovery token handling
 - screen navigation
 - screen transition orchestration
-- main layout shell
+- mobile viewport shell
 
 #### Shared infrastructure layer
 Implemented in:
@@ -74,12 +81,15 @@ Implemented in:
 - `src/lib/language.ts`
 - `src/app/context/LanguageContext.tsx`
 - `src/app/constants/*`
+- `src/app/auth/*`
 
 Responsible for:
 - backend client initialization
 - language persistence
 - translation lookup
 - shared constants and metadata
+- shared auth-navigation payload helpers
+- shared-event path resolution
 
 #### Backend platform layer
 Implemented through Supabase.
@@ -88,6 +98,7 @@ Responsible for:
 - authentication
 - storage of domain entities
 - user-related and event-related queries
+- invitation and support data access
 - realtime subscriptions
 
 ---
@@ -97,10 +108,12 @@ Responsible for:
 1. The browser loads the Vite application.
 2. `src/main.tsx` mounts the React tree.
 3. `LanguageProvider` restores language from local storage.
-4. `App.tsx` checks current Supabase session.
-5. Depending on session state, the shell opens either:
+4. `App.tsx` checks recovery tokens and shared-event path state.
+5. Depending on state, the shell opens:
    - `welcome`
    - `home`
+   - `reset-password`
+   - `event-details` for a shared event
 6. The shell subscribes to auth state changes.
 
 ---
@@ -117,8 +130,9 @@ The root shell stores:
 - `direction`
 - `history`
 - `authChecked`
+- pending auth-return state
 
-The application transitions between screens by updating `currentScreen` rather than relying on URL-based routing.
+The application transitions between screens by updating `currentScreen` rather than relying on route-based navigation for regular in-app movement.
 
 ## 5.2 Screen groups
 
@@ -135,10 +149,16 @@ The application transitions between screens by updating `currentScreen` rather t
 - `language`
 - `event-details`
 - `participants`
+- `invite-users`
+- `reset-password`
 
 ### Modal-like screens
 - `create-event`
-- `edit-event`
+
+### Auth screens
+- `welcome`
+- `login`
+- `signup`
 
 ## 5.3 Navigation behavior
 
@@ -158,10 +178,12 @@ Advantages:
 - natural mobile-like UX
 
 Trade-offs:
-- no deep linking
-- no browser-native route semantics
+- browser-native route semantics are not the primary navigation model
 - back button handling becomes application-managed
 - navigation payloads are not yet strongly typed
+
+Observed exception:
+- the app supports a shared-event deep link at `/event/:eventId`
 
 ---
 
@@ -174,21 +196,18 @@ Supabase Auth is the single authentication provider.
 - user login
 - session persistence
 - logout
+- forgot-password email request
+- password recovery flow
 - auth state synchronization with the root shell
+- return-to-screen behavior after login for some guarded actions
 
 ### Auth integration points
-- root session check in `App.tsx`
+- root session and recovery check in `App.tsx`
 - auth state subscription in `App.tsx`
 - login and signup screens
+- reset password screen
 - logout in `ProfileScreen.tsx`
-
-### Observed auth-dependent modules
-- Home
-- Profile
-- Create Event
-- Edit Event
-- Event Details
-- Notifications
+- post-login action payload helpers in `src/app/auth/postLoginIntent.ts`
 
 ---
 
@@ -208,14 +227,6 @@ Localization is a first-class subsystem.
 - Romanian
 - Ukrainian
 - German
-
-### Persistence
-The selected language is stored in browser local storage under a dedicated key.
-
-### Architectural strengths
-- centralized provider model
-- typed translation keys
-- persistent language setting across sessions
 
 ---
 
@@ -242,12 +253,15 @@ Responsibilities:
 - collect event input
 - resolve activity type
 - resolve location through autocomplete and map picker
+- prevent creating past events
+- enforce active future event limit on the client
 - insert a new event
 - insert creator participation row
 
 Backend dependencies:
 - `events`
 - `participants`
+- `profiles`
 
 ## 8.3 Event editing feature
 
@@ -266,7 +280,9 @@ Responsibilities:
 - load participants
 - determine user relationship to event
 - join / leave event
-- creator-only edit and delete actions
+- support creator edit and delete actions
+- support event sharing through `/event/:id`
+- optionally auto-join after login when opened from guarded join flow
 - map rendering
 - realtime synchronization
 
@@ -275,12 +291,28 @@ Backend dependencies:
 - `participants`
 - `profiles`
 
-## 8.5 Notifications feature
+## 8.5 Participants and invitations feature
+
+Responsibilities:
+- load participants
+- mark creator and current user
+- open invite flow for creators
+- resolve invite candidates
+- create invitation rows
+- enforce per-event invitation limit on the client
+
+Backend dependencies:
+- `participants`
+- `profiles`
+- `event_invitations`
+
+## 8.6 Notifications feature
 
 Responsibilities:
 - build notification feed dynamically
 - show upcoming joined events
 - show participant joins on owned events
+- show pending invitations
 - respect user notification settings
 - refresh through realtime channels
 
@@ -288,18 +320,24 @@ Backend dependencies:
 - `events`
 - `participants`
 - `notification_settings`
+- `event_invitations`
 - `profiles`
 
-## 8.6 Profile feature
+## 8.7 Profile and settings feature
 
 Responsibilities:
 - load user identity
-- load profile name
-- provide access to settings and account actions
+- edit profile name
+- manage language
+- manage notification settings
+- change password for authenticated user
+- submit support requests
 - log out the user
 
 Backend dependencies:
 - `profiles`
+- `notification_settings`
+- `support_requests`
 - Supabase Auth user object
 
 ---
@@ -318,24 +356,19 @@ Subscriptions:
 - all changes in `participants`
 - changes in the current event row
 
+### Participants
+Subscriptions:
+- all changes in `participants`
+
 ### Notifications
 Subscriptions:
 - all changes in `participants`
 - all changes in `events`
+- all changes in `event_invitations`
 
 ### Architectural pattern
 The current realtime pattern favors correctness and simplicity over minimal data transfer.
 In most cases, a realtime event triggers a targeted refetch or a complete feature-level refresh.
-
-### Benefits
-- robust MVP behavior
-- low conceptual complexity
-- easier debugging
-
-### Future optimization opportunities
-- narrower channel filters
-- optimistic local patching
-- denormalized notification records if feed volume increases
 
 ---
 
@@ -356,13 +389,7 @@ The frontend interacts directly with Supabase from feature screens.
 - database access is coupled to UI components
 - repeated query patterns may emerge
 - testing is harder without service abstraction
-
-### Recommended future direction
-Introduce feature services or repositories, for example:
-- `events.service.ts`
-- `participants.service.ts`
-- `notifications.service.ts`
-- `profiles.service.ts`
+- multi-step writes are harder to harden
 
 ---
 
@@ -375,15 +402,10 @@ Capacitor is used to package the web build into an Android application.
 - `appName`: `Gathr`
 - `webDir`: `dist`
 
-### Implications
-- the web app remains the primary codebase
-- Android delivery depends on the build output generated by Vite
-- platform-specific behavior must be handled in the shell and native wrapper integration
-
 ### Known mobile-related architecture areas
 - viewport shell sizing
-- system back navigation behavior
 - swipe-back interactions
+- full-screen shell behavior on small screens
 - integration with native Google Maps opening flow
 
 ---
@@ -395,26 +417,20 @@ Capacitor is used to package the web build into an Android application.
 - reusable localization subsystem
 - realtime-enabled feature flows
 - clear mobile-first shell design
-- Android packaging already integrated
+- Android packaging integrated
+- invitations, support flow, and plan limits already connected to product flows
 
 ---
 
 ## 13. Current Risks
 
-### Navigation growth risk
-The custom screen-state navigation model will become harder to maintain as the number of flows grows.
-
-### UI/data coupling
-Direct Supabase queries inside screen components increase coupling between UI and backend access.
-
-### Type safety risk
-Navigation payloads and feature data contracts are not yet fully typed.
-
-### Translation catalog growth
-A single large translation file will become harder to maintain over time.
-
-### Realtime scaling risk
-Feature-wide refetches are correct for MVP, but may become costly at higher volumes.
+- navigation growth risk
+- UI/data coupling
+- type safety risk in navigation payloads
+- translation catalog growth
+- realtime scaling risk
+- client-side limit enforcement risk
+- multi-step write consistency risk
 
 ---
 
@@ -424,13 +440,13 @@ Feature-wide refetches are correct for MVP, but may become costly at higher volu
 - introduce stronger TypeScript models for domain entities
 - extract data access into feature services
 - split translation catalog by feature domain
-- document database schema and RLS policies explicitly
+- document verified backend schema and policies from SQL source of truth
 
 ### Mid term
-- evaluate migration to route-based navigation or hybrid navigation
+- evaluate route-based or hybrid navigation without breaking current mobile-like flow
 - introduce shared hooks for event and participant loading
 - optimize realtime refresh strategy
-- formalize error handling and toast-based feedback
+- formalize error handling and feedback patterns
 
 ### Long term
 - adopt feature-based folder structure

@@ -4,6 +4,9 @@
 
 Gathr uses Supabase PostgreSQL as its primary data storage layer.
 
+This document reflects what is directly observable from the frontend code in this repository.
+Exact database constraints and RLS rules are not treated as verified unless they are present in project files.
+
 Current core entities:
 - `auth.users`
 - `profiles`
@@ -20,7 +23,7 @@ User authentication is managed by Supabase Auth.
 ### Table
 - `auth.users`
 
-Application-level tables are functionally rooted in the profile layer, which references `auth.users.id`.
+Application-level tables are functionally rooted in the profile layer, which is queried by client features through user IDs.
 
 ## 3. Profiles
 
@@ -29,16 +32,10 @@ Application-level tables are functionally rooted in the profile layer, which ref
 Represents application-level user profile data and entitlement state.
 
 ### Fields
-- `id` uuid, primary key, references `auth.users.id`
-- `name` text
-- `role` text, default `user`
-- `plan` text, default `free`
-- `has_unlimited_access` boolean, default `false`
-
-### Constraints
-- `profiles.id -> auth.users.id` with `ON DELETE CASCADE`
-- role check: `user`, `admin`
-- plan check: `free`, `pro`
+- `id`
+- `name`
+- `plan`
+- `has_unlimited_access`
 
 ## 4. Events
 
@@ -56,8 +53,8 @@ Represents application-level user profile data and entitlement state.
 - `activity_type`
 - `creator_id`
 
-### Foreign key
-- `events.creator_id -> profiles.id` with `ON DELETE CASCADE`
+### Observed relationship
+- `events.creator_id` identifies the creator profile used by the client
 
 ## 5. Participants
 
@@ -69,12 +66,9 @@ Represents application-level user profile data and entitlement state.
 - `user_id`
 - `created_at`
 
-### Foreign keys
-- `participants.event_id -> events.id` with `ON DELETE CASCADE`
-- `participants.user_id -> profiles.id` with `ON DELETE CASCADE`
-
-### Constraints
-- unique `(event_id, user_id)`
+### Observed relationships
+- `participants.event_id` links to an event
+- `participants.user_id` links to the participant user/profile
 
 ## 6. Notification Settings
 
@@ -88,8 +82,8 @@ Represents application-level user profile data and entitlement state.
 - `created_at`
 - `updated_at`
 
-### Foreign key
-- `notification_settings.user_id -> profiles.id` with `ON DELETE CASCADE`
+### Observed relationship
+- `notification_settings.user_id` identifies the current user
 
 ## 7. Support Requests
 
@@ -103,8 +97,8 @@ Represents application-level user profile data and entitlement state.
 - `status`
 - `created_at`
 
-### Foreign key
-- `support_requests.user_id -> profiles.id` with `ON DELETE CASCADE`
+### Observed relationship
+- `support_requests.user_id` identifies the sender
 
 ## 8. Event Invitations
 
@@ -119,19 +113,15 @@ Represents application-level user profile data and entitlement state.
 - `created_at`
 - `responded_at`
 
-### Status values
+### Status values observed in the client
 - `pending`
 - `accepted`
 - `declined`
 
-### Foreign keys
-- `event_invitations.event_id -> events.id` with `ON DELETE CASCADE`
-- `event_invitations.inviter_id -> profiles.id` with `ON DELETE CASCADE`
-- `event_invitations.invitee_id -> profiles.id` with `ON DELETE CASCADE`
-
-### Constraints
-- unique `(event_id, invitee_id)`
-- inviter cannot invite self
+### Observed relationships
+- `event_invitations.event_id` links to an event
+- `event_invitations.inviter_id` identifies the inviter
+- `event_invitations.invitee_id` identifies the invitee
 
 ## 9. Relationship Model
 
@@ -156,22 +146,25 @@ Realtime is currently used against:
 - `participants`
 - `event_invitations`
 
-## 11. Row Level Security
+## 11. Verification Boundaries
 
-RLS is enabled on the main public tables.
+The current repository confirms:
+- table usage
+- observed fields
+- client-side relationships
+- which tables participate in realtime-driven UI
 
-Current intended behavior:
-- profiles: authenticated users can read profiles, insert/update only own profile
-- events: authenticated users can read events, insert only own events, update/delete only own events
-- participants: authenticated users can read participants, insert only self, delete self, creators can remove participants from own events
-- notification settings: users can read/insert/update only own settings
-- support requests: users can insert own requests and read only own requests
-- event invitations: inviter/invitee can read related invitations, only creator can create them, only invitee can respond
+The current repository does not confirm:
+- exact foreign keys
+- exact `ON DELETE` behavior
+- exact unique constraints
+- exact RLS policy definitions
+
+Those backend details should be documented from migrations or schema exports when available.
 
 ## 12. Entitlement and Limit Relevance
 
 Schema fields relevant to plan enforcement:
-- `profiles.role`
 - `profiles.plan`
 - `profiles.has_unlimited_access`
 

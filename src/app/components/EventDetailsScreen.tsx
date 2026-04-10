@@ -10,7 +10,11 @@ export function EventDetailsScreen({
   onNavigate,
   event,
 }: {
-  onNavigate: (screen: string, data?: any) => void;
+  onNavigate: (
+    screen: string,
+    data?: any,
+    customDirection?: 'forward' | 'back' | 'up' | 'down'
+  ) => void;
   event?: any;
 }) {
   const defaultEvent = {
@@ -285,42 +289,59 @@ export function EventDetailsScreen({
   };
 
   const handleJoin = async () => {
-    if (!currentUserId) {
-      alert('Сначала войди в аккаунт');
-      return;
-    }
-
-    if (!eventData.id) {
-      alert('Не удалось определить событие');
-      return;
-    }
-
-    setLoadingAction(true);
-
-    try {
-      const { error } = await supabase.from('participants').insert([
-        {
-          user_id: currentUserId,
-          event_id: eventData.id,
+  if (!currentUserId) {
+    onNavigate(
+      'login',
+      {
+        redirectAfterAuth: {
+          screen: 'event-details',
+          data: {
+            ...eventData,
+            backTarget: 'home',
+          },
         },
-      ]);
+        backScreen: 'event-details',
+        backData: {
+          ...eventData,
+          backTarget: 'home',
+        },
+      },
+      'forward'
+    );
+    return;
+  }
 
-      if (error) {
-        console.error('Ошибка присоединения:', error);
-        alert('Не удалось присоединиться к событию');
-        setLoadingAction(false);
-        return;
-      }
+  if (!eventData.id) {
+    alert('Не удалось определить событие');
+    return;
+  }
 
-      setHasJoined(true);
-      await loadParticipants();
-    } catch (error) {
-      console.error('Unexpected join error:', error);
-      alert('Произошла ошибка при присоединении');
-    } finally {
+  setLoadingAction(true);
+
+  try {
+    const { error } = await supabase.from('participants').insert([
+      {
+        user_id: currentUserId,
+        event_id: eventData.id,
+      },
+    ]);
+
+    if (error) {
+      console.error('Ошибка присоединения:', error);
+      alert('Не удалось присоединиться к событию');
       setLoadingAction(false);
+      return;
     }
-  };
+
+    setHasJoined(true);
+    await loadParticipants();
+  } catch (error) {
+    console.error('Unexpected join error:', error);
+    alert('Произошла ошибка при присоединении');
+  } finally {
+    setLoadingAction(false);
+  }
+};
 
   const handleLeave = async () => {
     if (!currentUserId) {

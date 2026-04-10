@@ -25,12 +25,25 @@ import { InviteUsersScreen } from './components/InviteUsersScreen';
 
 type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
 
+type AuthRedirect = {
+  screen: string;
+  data?: any;
+} | null;
+
+type LoginContext = {
+  backScreen: string;
+  backData?: any;
+} | null;
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('welcome');
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
+
+  const [pendingAuthRedirect, setPendingAuthRedirect] = useState<AuthRedirect>(null);
+  const [loginContext, setLoginContext] = useState<LoginContext>(null);
 
   const isRecoveryModeRef = useRef(false);
   const handledSharedEventRef = useRef(false);
@@ -178,17 +191,35 @@ export default function App() {
         return;
       }
 
-      const sharedEventId = getSharedEventIdFromPath();
-
-      if (sharedEventId && handledSharedEventRef.current) {
-        return;
-      }
-
       if (session?.user) {
+        if (pendingAuthRedirect) {
+          setDirection('forward');
+          setCurrentScreen(pendingAuthRedirect.screen);
+          setHistory([pendingAuthRedirect.screen]);
+          if (pendingAuthRedirect.data) {
+            setSelectedEvent(pendingAuthRedirect.data);
+          }
+          setPendingAuthRedirect(null);
+          setLoginContext(null);
+          return;
+        }
+
+        const sharedEventId = getSharedEventIdFromPath();
+
+        if (sharedEventId && handledSharedEventRef.current) {
+          return;
+        }
+
         setCurrentScreen('home');
         setHistory(['home']);
         setDirection('forward');
       } else {
+        const sharedEventId = getSharedEventIdFromPath();
+
+        if (sharedEventId && handledSharedEventRef.current) {
+          return;
+        }
+
         setCurrentScreen('welcome');
         setHistory(['welcome']);
         setDirection('back');
@@ -198,14 +229,27 @@ export default function App() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [pendingAuthRedirect]);
 
   const handleNavigate = (
     screen: string,
     data?: any,
     customDirection?: NavigationDirection
   ) => {
-    if (data) {
+    if (screen === 'login' && data?.redirectAfterAuth) {
+      setPendingAuthRedirect(data.redirectAfterAuth);
+      setLoginContext({
+        backScreen: data.backScreen || 'welcome',
+        backData: data.backData,
+      });
+    }
+
+    if (screen === 'welcome' && pendingAuthRedirect) {
+      setPendingAuthRedirect(null);
+      setLoginContext(null);
+    }
+
+    if (data && !data.redirectAfterAuth) {
       setSelectedEvent(data);
     }
 
@@ -298,7 +342,13 @@ export default function App() {
           <AnimatePresence mode="wait" initial={false}>
             <ScreenTransition key={currentScreen} direction={direction}>
               {currentScreen === 'welcome' && <WelcomeScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'login' && <LoginScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'login' && (
+                <LoginScreen
+                  onNavigate={handleNavigate}
+                  backTarget={loginContext?.backScreen || 'welcome'}
+                  backData={loginContext?.backData}
+                />
+              )}
               {currentScreen === 'signup' && <SignUpScreen onNavigate={handleNavigate} />}
               {currentScreen === 'reset-password' && (
                 <ResetPasswordScreen onNavigate={handleNavigate} />

@@ -7,8 +7,12 @@ import { useLanguage } from '../context/LanguageContext';
 
 export function LoginScreen({
   onNavigate,
+  backTarget = 'welcome',
+  backData,
 }: {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
+  backTarget?: string;
+  backData?: any;
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -81,11 +85,11 @@ export function LoginScreen({
   };
 
   return (
-    <SwipeableScreen onSwipeBack={() => onNavigate('welcome')}>
+    <SwipeableScreen onSwipeBack={() => onNavigate(backTarget, backData)}>
       <div className="h-full flex flex-col px-6 py-8 bg-background">
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => onNavigate('welcome')}
+          onClick={() => onNavigate(backTarget, backData)}
           className="self-start text-muted-foreground mb-8"
           disabled={loading || resetLoading}
         >

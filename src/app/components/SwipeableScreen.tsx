@@ -13,10 +13,29 @@ export function SwipeableScreen({
   enableSwipeBack = true
 }: SwipeableScreenProps) {
   const x = useMotionValue(0);
-  const opacity = useTransform(x, [0, 100], [1, 0.3]);
+  const opacity = useTransform(x, [0, 16], [1, 0.98]);
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.x > 100 && enableSwipeBack && onSwipeBack) {
+    const pointerX =
+      'clientX' in event
+        ? event.clientX
+        : 'changedTouches' in event
+          ? event.changedTouches[0]?.clientX ?? 0
+          : 0;
+
+    const startedNearEdge = pointerX - info.offset.x <= 32;
+    const horizontalDistance = info.offset.x;
+    const verticalDistance = Math.abs(info.offset.y);
+    const horizontalVelocity = info.velocity.x;
+    const horizontalDominant = horizontalDistance > verticalDistance * 1.25;
+
+    if (
+      startedNearEdge &&
+      horizontalDominant &&
+      enableSwipeBack &&
+      onSwipeBack &&
+      (horizontalDistance > 72 || horizontalVelocity > 500)
+    ) {
       onSwipeBack();
     }
   };
@@ -28,11 +47,12 @@ export function SwipeableScreen({
   return (
     <motion.div
       drag="x"
-      dragConstraints={{ left: 0, right: 300 }}
-      dragElastic={{ left: 0, right: 0.2 }}
+      dragDirectionLock
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.04 }}
       onDragEnd={handleDragEnd}
       style={{ x, opacity }}
-      className="h-full w-full"
+      className="h-full w-full overflow-x-hidden"
     >
       {children}
     </motion.div>

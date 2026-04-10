@@ -42,13 +42,14 @@ export function PullToRefresh({ children, onRefresh }: PullToRefreshProps) {
 
       <motion.div
         drag="y"
+        dragDirectionLock
         dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.3, bottom: 0 }}
+        dragElastic={{ top: 0.22, bottom: 0 }}
         onDragEnd={handleDragEnd}
         style={{ y }}
         animate={isRefreshing ? { y: 60 } : { y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="h-full"
+        className="h-full overflow-x-hidden"
       >
         {children}
       </motion.div>

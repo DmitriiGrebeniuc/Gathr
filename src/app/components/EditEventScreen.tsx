@@ -169,11 +169,12 @@ export function EditEventScreen({
   return (
     <motion.div
       drag="y"
+      dragDirectionLock
       dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={{ top: 0, bottom: 0.3 }}
+      dragElastic={{ top: 0, bottom: 0.22 }}
       onDragEnd={handleDragEnd}
       style={{ y, opacity }}
-      className="h-full flex flex-col bg-background"
+      className="h-full flex flex-col bg-background overflow-x-hidden"
     >
       <div className="flex items-center justify-between px-6 py-4 border-b border-border">
         <motion.button

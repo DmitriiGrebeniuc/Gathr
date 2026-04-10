@@ -11,10 +11,10 @@ export function ScreenTransition({ children, direction = 'forward' }: ScreenTran
     forward: {
       initial: { x: '100%', opacity: 0 },
       animate: { x: 0, opacity: 1 },
-      exit: { x: '-20%', opacity: 0 },
+      exit: { x: '-8%', opacity: 0 },
     },
     back: {
-      initial: { x: '-20%', opacity: 0 },
+      initial: { x: '-8%', opacity: 0 },
       animate: { x: 0, opacity: 1 },
       exit: { x: '100%', opacity: 0 },
     },
@@ -39,11 +39,11 @@ export function ScreenTransition({ children, direction = 'forward' }: ScreenTran
       exit={selectedVariant.exit}
       transition={{
         type: 'spring',
-        stiffness: 300,
-        damping: 30,
-        mass: 0.8,
+        stiffness: 320,
+        damping: 34,
+        mass: 0.9,
       }}
-      className="absolute inset-0 bg-background"
+      className="absolute inset-0 bg-background overflow-x-hidden"
     >
       {children}
     </motion.div>

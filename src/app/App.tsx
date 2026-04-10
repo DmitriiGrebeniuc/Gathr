@@ -47,6 +47,7 @@ export default function App() {
 
   const isRecoveryModeRef = useRef(false);
   const handledSharedEventRef = useRef(false);
+  const pendingAuthRedirectRef = useRef<AuthRedirect>(null);
 
   const { translate } = useLanguage();
 
@@ -192,13 +193,18 @@ export default function App() {
       }
 
       if (session?.user) {
-        if (pendingAuthRedirect) {
+        if (pendingAuthRedirectRef.current) {
+          const redirect = pendingAuthRedirectRef.current;
+
           setDirection('forward');
-          setCurrentScreen(pendingAuthRedirect.screen);
-          setHistory([pendingAuthRedirect.screen]);
-          if (pendingAuthRedirect.data) {
-            setSelectedEvent(pendingAuthRedirect.data);
+          setCurrentScreen(redirect.screen);
+          setHistory([redirect.screen]);
+
+          if (redirect.data) {
+            setSelectedEvent(redirect.data);
           }
+
+          pendingAuthRedirectRef.current = null;
           setPendingAuthRedirect(null);
           setLoginContext(null);
           return;
@@ -241,6 +247,7 @@ export default function App() {
     customDirection?: NavigationDirection
   ) => {
     if (screen === 'login' && data?.redirectAfterAuth) {
+      pendingAuthRedirectRef.current = data.redirectAfterAuth;
       setPendingAuthRedirect(data.redirectAfterAuth);
       setLoginContext({
         backScreen: data.backScreen || 'welcome',
@@ -249,6 +256,7 @@ export default function App() {
     }
 
     if (screen === 'welcome' && pendingAuthRedirect) {
+      pendingAuthRedirectRef.current = null;
       setPendingAuthRedirect(null);
       setLoginContext(null);
     }

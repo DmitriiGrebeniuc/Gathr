@@ -2,6 +2,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
 
 type SummaryValue = number | null;
 
@@ -10,6 +11,20 @@ type EventPreview = {
   title: string;
   date_time: string | null;
   location: string | null;
+};
+
+type AdminModerationEvent = {
+  id: string;
+  title: string;
+  description: string | null;
+  date_time: string | null;
+  location: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
+  creator_id: string | null;
+  creatorName: string | null;
+  activity_type: ActivityType | null;
+  participantCount: number;
 };
 
 type AdminUser = {
@@ -56,24 +71,50 @@ const INITIAL_SUMMARY: AdminSummary = {
   supportRequests: null,
 };
 
-export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
-  const { translate } = useLanguage();
+export function AdminScreen({
+  onNavigate,
+}: {
+  onNavigate: (
+    screen: string,
+    data?: any,
+    customDirection?: 'forward' | 'back' | 'up' | 'down'
+  ) => void;
+}) {
+  const { language, translate } = useLanguage();
   const [summary, setSummary] = useState<AdminSummary>(INITIAL_SUMMARY);
   const [latestEvents, setLatestEvents] = useState<EventPreview[]>([]);
+  const [moderationEvents, setModerationEvents] = useState<AdminModerationEvent[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [creatorFilter, setCreatorFilter] = useState('');
+  const [activityFilter, setActivityFilter] = useState<ActivityType | 'all'>('all');
+  const [timeFilter, setTimeFilter] = useState<'future' | 'past'>('future');
   const [latestPendingInvitations, setLatestPendingInvitations] = useState<InvitationPreview[]>(
     []
   );
   const [loading, setLoading] = useState(true);
   const [eventsUnavailable, setEventsUnavailable] = useState(false);
+  const [moderationUnavailable, setModerationUnavailable] = useState(false);
   const [invitationsUnavailable, setInvitationsUnavailable] = useState(false);
   const [usersUnavailable, setUsersUnavailable] = useState(false);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
+  const isPastEvent = (dateString?: string | null) => {
+    if (!dateString) {
+      return false;
+    }
 
-  useEffect(() => {
-    const loadAdminOverview = async () => {
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+      return false;
+    }
+
+    return date.getTime() < Date.now();
+  };
+
+  const loadAdminOverview = async () => {
       setLoading(true);
 
       try {
@@ -87,6 +128,7 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           pendingInvitationsResult,
           supportRequestsResult,
           latestEventsResult,
+          moderationEventsResult,
           latestPendingInvitationsResult,
           usersListResult,
         ] = await Promise.allSettled([
@@ -108,6 +150,12 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
             .select('id, title, date_time, location')
             .order('date_time', { ascending: false })
             .limit(5),
+          supabase
+            .from('events')
+            .select(
+              'id, title, description, date_time, location, location_lat, location_lng, creator_id, activity_type'
+            )
+            .order('date_time', { ascending: false }),
           supabase
             .from('event_invitations')
             .select(`
@@ -165,6 +213,74 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           setEventsUnavailable(true);
         }
 
+        if (moderationEventsResult.status === 'fulfilled' && !moderationEventsResult.value.error) {
+          const baseEvents = (moderationEventsResult.value.data as any[] | null) || [];
+          const creatorIds = Array.from(
+            new Set(baseEvents.map((event) => event.creator_id).filter(Boolean))
+          ) as string[];
+
+          const participantCountsResult = await supabase.from('participants').select('event_id');
+
+          const participantCountsMap: Record<string, number> = {};
+
+          if (!participantCountsResult.error) {
+            ((participantCountsResult.data as { event_id: string | null }[] | null) || []).forEach(
+              (participant) => {
+                if (!participant.event_id) {
+                  return;
+                }
+
+                participantCountsMap[participant.event_id] =
+                  (participantCountsMap[participant.event_id] || 0) + 1;
+              }
+            );
+          }
+
+          let creatorNameMap: Record<string, string> = {};
+
+          if (creatorIds.length > 0) {
+            const creatorProfilesResult = await supabase
+              .from('profiles')
+              .select('id, name')
+              .in('id', creatorIds);
+
+            if (!creatorProfilesResult.error) {
+              ((creatorProfilesResult.data as { id: string; name: string | null }[] | null) || []).forEach(
+                (profile) => {
+                  creatorNameMap[profile.id] = profile.name || translate('common.unknown');
+                }
+              );
+            }
+          }
+
+          const normalizedModerationEvents: AdminModerationEvent[] = baseEvents.map((event) => ({
+            id: event.id,
+            title: event.title || translate('common.event'),
+            description: event.description ?? null,
+            date_time: event.date_time ?? null,
+            location: event.location ?? null,
+            location_lat: typeof event.location_lat === 'number' ? event.location_lat : null,
+            location_lng: typeof event.location_lng === 'number' ? event.location_lng : null,
+            creator_id: event.creator_id ?? null,
+            creatorName: event.creator_id
+              ? creatorNameMap[event.creator_id] || translate('common.unknown')
+              : translate('common.unknown'),
+            activity_type: (event.activity_type || 'other') as ActivityType,
+            participantCount: participantCountsMap[event.id] || 0,
+          }));
+
+          setModerationEvents(normalizedModerationEvents);
+          setModerationUnavailable(
+            !!participantCountsResult.error ||
+              (creatorIds.length > 0 &&
+                Object.keys(creatorNameMap).length === 0 &&
+                baseEvents.some((event) => !!event.creator_id))
+          );
+        } else {
+          setModerationEvents([]);
+          setModerationUnavailable(true);
+        }
+
         if (
           latestPendingInvitationsResult.status === 'fulfilled' &&
           !latestPendingInvitationsResult.value.error
@@ -217,11 +333,13 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
         console.error('Unexpected admin overview load error:', error);
         setSummary(INITIAL_SUMMARY);
         setLatestEvents([]);
+        setModerationEvents([]);
         setUsers([]);
         setSelectedUserId(null);
         setUserSearch('');
         setLatestPendingInvitations([]);
         setEventsUnavailable(true);
+        setModerationUnavailable(true);
         setInvitationsUnavailable(true);
         setUsersUnavailable(true);
 
@@ -232,8 +350,9 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
 
     };
 
+  useEffect(() => {
     loadAdminOverview();
-  }, []);
+  }, [language]);
 
   const formatDate = (dateString?: string | null) => {
     if (!dateString) {
@@ -307,6 +426,90 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
 
   const selectedUser =
     filteredUsers.find((user) => user.id === selectedUserId) || filteredUsers[0] || null;
+
+  const normalizedCreatorFilter = creatorFilter.trim().toLowerCase();
+
+  const filteredModerationEvents = moderationEvents.filter((event) => {
+    const matchesTime = timeFilter === 'future' ? !isPastEvent(event.date_time) : isPastEvent(event.date_time);
+    const matchesCreator = !normalizedCreatorFilter
+      ? true
+      : (event.creatorName || '').toLowerCase().includes(normalizedCreatorFilter);
+    const matchesActivity =
+      activityFilter === 'all' ? true : (event.activity_type || 'other') === activityFilter;
+
+    return matchesTime && matchesCreator && matchesActivity;
+  });
+
+  const handleViewEventDetails = (event: AdminModerationEvent) => {
+    onNavigate(
+      'event-details',
+      {
+        ...event,
+        backTarget: 'admin',
+      },
+      'forward'
+    );
+  };
+
+  const handleViewParticipants = (event: AdminModerationEvent) => {
+    onNavigate(
+      'participants',
+      {
+        ...event,
+        backTarget: 'admin',
+      },
+      'forward'
+    );
+  };
+
+  const handleDeleteEvent = async (event: AdminModerationEvent) => {
+    const confirmed = window.confirm(translate('admin.deleteEventConfirm'));
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingEventId(event.id);
+
+    try {
+      const { error: invitationsError } = await supabase
+        .from('event_invitations')
+        .delete()
+        .eq('event_id', event.id);
+
+      if (invitationsError) {
+        console.error('Admin delete event invitations error:', invitationsError);
+        alert(translate('admin.deleteEventFailed'));
+        return;
+      }
+
+      const { error: participantsError } = await supabase
+        .from('participants')
+        .delete()
+        .eq('event_id', event.id);
+
+      if (participantsError) {
+        console.error('Admin delete participants error:', participantsError);
+        alert(translate('admin.deleteEventFailed'));
+        return;
+      }
+
+      const { error: eventError } = await supabase.from('events').delete().eq('id', event.id);
+
+      if (eventError) {
+        console.error('Admin delete event error:', eventError);
+        alert(translate('admin.deleteEventFailed'));
+        return;
+      }
+
+      await loadAdminOverview();
+    } catch (error) {
+      console.error('Unexpected admin delete event error:', error);
+      alert(translate('admin.deleteEventUnexpectedError'));
+    } finally {
+      setDeletingEventId(null);
+    }
+  };
 
 
 
@@ -401,6 +604,208 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
                     </p>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          <div
+            className="rounded-xl border p-5"
+            style={{
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: '#1A1A1A',
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <h3>{translate('admin.eventsModerationTitle')}</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {translate('admin.eventsModerationDescription')}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => setTimeFilter('future')}
+                className="px-3 py-2 rounded-lg text-sm transition-opacity"
+                style={{
+                  backgroundColor:
+                    timeFilter === 'future' ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                  border:
+                    timeFilter === 'future'
+                      ? '1px solid rgba(212, 175, 55, 0.35)'
+                      : '1px solid rgba(255, 255, 255, 0.08)',
+                  color: timeFilter === 'future' ? '#D4AF37' : 'inherit',
+                }}
+              >
+                {translate('admin.futureFilter')}
+              </button>
+              <button
+                onClick={() => setTimeFilter('past')}
+                className="px-3 py-2 rounded-lg text-sm transition-opacity"
+                style={{
+                  backgroundColor:
+                    timeFilter === 'past' ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                  border:
+                    timeFilter === 'past'
+                      ? '1px solid rgba(212, 175, 55, 0.35)'
+                      : '1px solid rgba(255, 255, 255, 0.08)',
+                  color: timeFilter === 'past' ? '#D4AF37' : 'inherit',
+                }}
+              >
+                {translate('admin.pastFilter')}
+              </button>
+            </div>
+
+            <input
+              type="text"
+              placeholder={translate('admin.creatorFilterPlaceholder')}
+              value={creatorFilter}
+              onChange={(e) => setCreatorFilter(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
+              style={{
+                backgroundColor: '#111111',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+            />
+
+            <div className="flex flex-wrap gap-2 mb-4">
+              <button
+                onClick={() => setActivityFilter('all')}
+                className="px-3 py-2 rounded-full text-xs transition-opacity"
+                style={{
+                  backgroundColor:
+                    activityFilter === 'all' ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                  border:
+                    activityFilter === 'all'
+                      ? '1px solid rgba(212, 175, 55, 0.35)'
+                      : '1px solid rgba(255, 255, 255, 0.08)',
+                  color: activityFilter === 'all' ? '#D4AF37' : 'inherit',
+                }}
+              >
+                {translate('admin.allActivityTypes')}
+              </button>
+
+              {ACTIVITY_TYPES.map((activityType) => {
+                const meta = getActivityTypeMeta(activityType.value, language);
+                const isSelected = activityFilter === activityType.value;
+
+                return (
+                  <button
+                    key={activityType.value}
+                    onClick={() => setActivityFilter(activityType.value)}
+                    className="px-3 py-2 rounded-full text-xs transition-opacity"
+                    style={{
+                      backgroundColor: isSelected ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                      border: isSelected
+                        ? '1px solid rgba(212, 175, 55, 0.35)'
+                        : '1px solid rgba(255, 255, 255, 0.08)',
+                      color: isSelected ? '#D4AF37' : 'inherit',
+                    }}
+                  >
+                    {meta.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {loading && (
+              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
+            )}
+
+            {!loading && moderationUnavailable && (
+              <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
+            )}
+
+            {!loading && !moderationUnavailable && filteredModerationEvents.length === 0 && (
+              <p className="text-sm text-muted-foreground">{translate('admin.noModerationEvents')}</p>
+            )}
+
+            {!loading && !moderationUnavailable && filteredModerationEvents.length > 0 && (
+              <div className="space-y-3">
+                {filteredModerationEvents.map((event) => {
+                  const activityMeta = getActivityTypeMeta(event.activity_type || 'other', language);
+
+                  return (
+                    <div
+                      key={event.id}
+                      className="rounded-lg border p-4"
+                      style={{
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
+                        backgroundColor: '#111111',
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                          <p className="mb-1">{event.title || translate('common.event')}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDate(event.date_time)}
+                          </p>
+                        </div>
+                        <span
+                          className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                          style={{
+                            borderColor: 'rgba(212, 175, 55, 0.28)',
+                            color: '#D4AF37',
+                            backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                          }}
+                        >
+                          {activityMeta.label}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 mb-4">
+                        <p className="text-xs text-muted-foreground">
+                          {translate('admin.creatorLabel')}: {event.creatorName || translate('common.unknown')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {translate('admin.participantsLabel')}: {event.participantCount}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {event.location || translate('admin.notAvailable')}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => handleViewEventDetails(event)}
+                          className="px-3 py-2 rounded-lg text-xs transition-opacity"
+                          style={{
+                            backgroundColor: 'rgba(212, 175, 55, 0.12)',
+                            border: '1px solid rgba(212, 175, 55, 0.35)',
+                            color: '#D4AF37',
+                          }}
+                        >
+                          {translate('admin.viewEventDetails')}
+                        </button>
+                        <button
+                          onClick={() => handleViewParticipants(event)}
+                          className="px-3 py-2 rounded-lg text-xs transition-opacity"
+                          style={{
+                            backgroundColor: '#171717',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                          }}
+                        >
+                          {translate('admin.viewParticipants')}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event)}
+                          disabled={deletingEventId === event.id}
+                          className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
+                          style={{
+                            backgroundColor: 'rgba(255, 77, 109, 0.08)',
+                            border: '1px solid rgba(255, 77, 109, 0.28)',
+                            color: '#FF4D6D',
+                          }}
+                        >
+                          {deletingEventId === event.id
+                            ? translate('admin.deletingEvent')
+                            : translate('details.deleteEvent')}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

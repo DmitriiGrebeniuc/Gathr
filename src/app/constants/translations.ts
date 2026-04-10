@@ -180,6 +180,21 @@ type TranslationKey =
     | 'admin.pendingInvitations'
     | 'admin.supportRequests'
     | 'admin.latestEvents'
+    | 'admin.eventsModerationTitle'
+    | 'admin.eventsModerationDescription'
+    | 'admin.futureFilter'
+    | 'admin.pastFilter'
+    | 'admin.creatorFilterPlaceholder'
+    | 'admin.allActivityTypes'
+    | 'admin.noModerationEvents'
+    | 'admin.creatorLabel'
+    | 'admin.participantsLabel'
+    | 'admin.viewEventDetails'
+    | 'admin.viewParticipants'
+    | 'admin.deletingEvent'
+    | 'admin.deleteEventConfirm'
+    | 'admin.deleteEventFailed'
+    | 'admin.deleteEventUnexpectedError'
     | 'admin.usersTitle'
     | 'admin.userSearchPlaceholder'
     | 'admin.noUsers'
@@ -548,6 +563,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Pending invites',
         'admin.supportRequests': 'Support requests',
         'admin.latestEvents': 'Latest events',
+        'admin.eventsModerationTitle': 'Events moderation',
+        'admin.eventsModerationDescription': 'Review events, inspect details, and remove problematic items.',
+        'admin.futureFilter': 'Future',
+        'admin.pastFilter': 'Past',
+        'admin.creatorFilterPlaceholder': 'Filter by creator',
+        'admin.allActivityTypes': 'All activities',
+        'admin.noModerationEvents': 'No events match the selected filters',
+        'admin.creatorLabel': 'Creator',
+        'admin.participantsLabel': 'Participants',
+        'admin.viewEventDetails': 'Open event',
+        'admin.viewParticipants': 'Participants',
+        'admin.deletingEvent': 'Deleting...',
+        'admin.deleteEventConfirm': 'Delete this event? This action cannot be undone.',
+        'admin.deleteEventFailed': 'Failed to delete event',
+        'admin.deleteEventUnexpectedError': 'An unexpected error occurred while deleting the event',
         'admin.usersTitle': 'Users',
         'admin.userSearchPlaceholder': 'Search users by name',
         'admin.noUsers': 'No users to show',
@@ -923,6 +953,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Ожидают приглашения',
         'admin.supportRequests': 'Запросы в поддержку',
         'admin.latestEvents': 'Последние события',
+        'admin.eventsModerationTitle': 'Модерация событий',
+        'admin.eventsModerationDescription': 'Проверяй события, открывай детали и удаляй проблемные записи.',
+        'admin.futureFilter': 'Будущие',
+        'admin.pastFilter': 'Прошедшие',
+        'admin.creatorFilterPlaceholder': 'Фильтр по создателю',
+        'admin.allActivityTypes': 'Все активности',
+        'admin.noModerationEvents': 'Нет событий под выбранные фильтры',
+        'admin.creatorLabel': 'Создатель',
+        'admin.participantsLabel': 'Участники',
+        'admin.viewEventDetails': 'Открыть событие',
+        'admin.viewParticipants': 'Участники',
+        'admin.deletingEvent': 'Удаление...',
+        'admin.deleteEventConfirm': 'Удалить это событие? Действие нельзя отменить.',
+        'admin.deleteEventFailed': 'Не удалось удалить событие',
+        'admin.deleteEventUnexpectedError': 'Произошла непредвиденная ошибка при удалении события',
         'admin.usersTitle': 'Пользователи',
         'admin.userSearchPlaceholder': 'Поиск пользователей по имени',
         'admin.noUsers': 'Нет пользователей для отображения',
@@ -1297,6 +1342,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Invitații în așteptare',
         'admin.supportRequests': 'Cereri de suport',
         'admin.latestEvents': 'Ultimele evenimente',
+        'admin.eventsModerationTitle': 'Moderare evenimente',
+        'admin.eventsModerationDescription': 'Revizuiește evenimentele, deschide detaliile și elimină elementele problematice.',
+        'admin.futureFilter': 'Viitoare',
+        'admin.pastFilter': 'Trecute',
+        'admin.creatorFilterPlaceholder': 'Filtrează după creator',
+        'admin.allActivityTypes': 'Toate activitățile',
+        'admin.noModerationEvents': 'Niciun eveniment nu corespunde filtrelor selectate',
+        'admin.creatorLabel': 'Creator',
+        'admin.participantsLabel': 'Participanți',
+        'admin.viewEventDetails': 'Deschide evenimentul',
+        'admin.viewParticipants': 'Participanți',
+        'admin.deletingEvent': 'Se șterge...',
+        'admin.deleteEventConfirm': 'Ștergi acest eveniment? Acțiunea nu poate fi anulată.',
+        'admin.deleteEventFailed': 'Nu s-a putut șterge evenimentul',
+        'admin.deleteEventUnexpectedError': 'A apărut o eroare neașteptată la ștergerea evenimentului',
         'admin.usersTitle': 'Utilizatori',
         'admin.userSearchPlaceholder': 'Caută utilizatori după nume',
         'admin.noUsers': 'Nu există utilizatori de afișat',
@@ -1673,6 +1733,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Запрошення в очікуванні',
         'admin.supportRequests': 'Запити в підтримку',
         'admin.latestEvents': 'Останні події',
+        'admin.eventsModerationTitle': 'Модерація подій',
+        'admin.eventsModerationDescription': 'Переглядай події, відкривай деталі та видаляй проблемні записи.',
+        'admin.futureFilter': 'Майбутні',
+        'admin.pastFilter': 'Минулі',
+        'admin.creatorFilterPlaceholder': 'Фільтр за автором',
+        'admin.allActivityTypes': 'Усі активності',
+        'admin.noModerationEvents': 'Немає подій під вибрані фільтри',
+        'admin.creatorLabel': 'Автор',
+        'admin.participantsLabel': 'Учасники',
+        'admin.viewEventDetails': 'Відкрити подію',
+        'admin.viewParticipants': 'Учасники',
+        'admin.deletingEvent': 'Видалення...',
+        'admin.deleteEventConfirm': 'Видалити цю подію? Дію не можна скасувати.',
+        'admin.deleteEventFailed': 'Не вдалося видалити подію',
+        'admin.deleteEventUnexpectedError': 'Сталася неочікувана помилка під час видалення події',
         'admin.usersTitle': 'Користувачі',
         'admin.userSearchPlaceholder': 'Пошук користувачів за іменем',
         'admin.noUsers': 'Немає користувачів для відображення',
@@ -2050,6 +2125,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Offene Einladungen',
         'admin.supportRequests': 'Supportanfragen',
         'admin.latestEvents': 'Neueste Events',
+        'admin.eventsModerationTitle': 'Event-Moderation',
+        'admin.eventsModerationDescription': 'Prüfe Events, öffne Details und entferne problematische Einträge.',
+        'admin.futureFilter': 'Zukünftig',
+        'admin.pastFilter': 'Vergangen',
+        'admin.creatorFilterPlaceholder': 'Nach Ersteller filtern',
+        'admin.allActivityTypes': 'Alle Aktivitäten',
+        'admin.noModerationEvents': 'Keine Events entsprechen den ausgewählten Filtern',
+        'admin.creatorLabel': 'Ersteller',
+        'admin.participantsLabel': 'Teilnehmer',
+        'admin.viewEventDetails': 'Event öffnen',
+        'admin.viewParticipants': 'Teilnehmer',
+        'admin.deletingEvent': 'Wird gelöscht...',
+        'admin.deleteEventConfirm': 'Dieses Event löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
+        'admin.deleteEventFailed': 'Event konnte nicht gelöscht werden',
+        'admin.deleteEventUnexpectedError': 'Beim Löschen des Events ist ein unerwarteter Fehler aufgetreten',
         'admin.usersTitle': 'Benutzer',
         'admin.userSearchPlaceholder': 'Benutzer nach Namen suchen',
         'admin.noUsers': 'Keine Benutzer zum Anzeigen',

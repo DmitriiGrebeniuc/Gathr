@@ -1,5 +1,4 @@
-import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
-import { ReactNode } from 'react';
+import { ReactNode, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 
 interface SwipeableScreenProps {
   children: ReactNode;
@@ -12,49 +11,70 @@ export function SwipeableScreen({
   onSwipeBack,
   enableSwipeBack = true
 }: SwipeableScreenProps) {
-  const x = useMotionValue(0);
-  const opacity = useTransform(x, [0, 16], [1, 0.98]);
-
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const pointerX =
-      'clientX' in event
-        ? event.clientX
-        : 'changedTouches' in event
-          ? event.changedTouches[0]?.clientX ?? 0
-          : 0;
-
-    const startedNearEdge = pointerX - info.offset.x <= 32;
-    const horizontalDistance = info.offset.x;
-    const verticalDistance = Math.abs(info.offset.y);
-    const horizontalVelocity = info.velocity.x;
-    const horizontalDominant = horizontalDistance > verticalDistance * 1.25;
-
-    if (
-      startedNearEdge &&
-      horizontalDominant &&
-      enableSwipeBack &&
-      onSwipeBack &&
-      (horizontalDistance > 72 || horizontalVelocity > 500)
-    ) {
-      onSwipeBack();
-    }
-  };
+  const gestureRef = useRef<{
+    startX: number;
+    startY: number;
+    startTime: number;
+    tracking: boolean;
+  } | null>(null);
 
   if (!enableSwipeBack || !onSwipeBack) {
     return <>{children}</>;
   }
 
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) {
+      return;
+    }
+
+    if (event.clientX > 32) {
+      gestureRef.current = null;
+      return;
+    }
+
+    gestureRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      startTime: performance.now(),
+      tracking: true,
+    };
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = gestureRef.current;
+    gestureRef.current = null;
+
+    if (!gesture?.tracking) {
+      return;
+    }
+
+    const deltaX = event.clientX - gesture.startX;
+    const deltaY = Math.abs(event.clientY - gesture.startY);
+    const duration = Math.max(performance.now() - gesture.startTime, 1);
+    const velocityX = deltaX / duration;
+    const horizontalDominant = deltaX > deltaY * 1.25;
+
+    if (deltaX > 72 && horizontalDominant) {
+      onSwipeBack();
+      return;
+    }
+
+    if (deltaX > 42 && horizontalDominant && velocityX > 0.45) {
+      onSwipeBack();
+    }
+  };
+
   return (
-    <motion.div
-      drag="x"
-      dragDirectionLock
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={{ left: 0, right: 0.04 }}
-      onDragEnd={handleDragEnd}
-      style={{ x, opacity }}
+    <div
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => {
+        gestureRef.current = null;
+      }}
       className="h-full w-full overflow-x-hidden"
+      style={{ touchAction: 'pan-y' }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

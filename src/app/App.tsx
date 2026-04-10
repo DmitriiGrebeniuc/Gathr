@@ -56,6 +56,21 @@ export default function App() {
   const { translate } = useLanguage();
 
   useEffect(() => {
+    const updateAppHeight = () => {
+      document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+    };
+
+    updateAppHeight();
+    window.addEventListener('resize', updateAppHeight);
+    window.addEventListener('orientationchange', updateAppHeight);
+
+    return () => {
+      window.removeEventListener('resize', updateAppHeight);
+      window.removeEventListener('orientationchange', updateAppHeight);
+    };
+  }, []);
+
+  useEffect(() => {
     const href = window.location.href;
     const pathname = window.location.pathname;
 
@@ -328,7 +343,7 @@ export default function App() {
           className="relative overflow-hidden flex flex-col items-center justify-center w-full min-h-screen md:min-h-0 md:w-auto"
           style={{
             width: '100%',
-            height: '100dvh',
+            height: 'var(--app-height, 100dvh)',
             maxWidth: '390px',
             maxHeight: '844px',
             backgroundColor: '#0F0F0F',
@@ -348,7 +363,7 @@ export default function App() {
         className="relative overflow-hidden flex flex-col w-full min-h-screen md:min-h-0 md:w-auto"
         style={{
           width: '100%',
-          height: '100dvh',
+          height: 'var(--app-height, 100dvh)',
           maxWidth: '390px',
           maxHeight: '844px',
           backgroundColor: '#0F0F0F',

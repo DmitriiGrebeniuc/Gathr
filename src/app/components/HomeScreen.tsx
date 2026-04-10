@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type UIEvent } from 'react';
 import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
@@ -30,6 +30,7 @@ export function HomeScreen({
 }: {
   onNavigate: (screen: string, data?: any) => void;
 }) {
+  const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined'>('discover');
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -446,6 +447,11 @@ export function HomeScreen({
     await fetchEvents(true);
   };
 
+  const handleContentScroll = (event: UIEvent<HTMLDivElement>) => {
+    const nextCompact = event.currentTarget.scrollTop > 18;
+    setIsHeaderCompact((prev) => (prev === nextCompact ? prev : nextCompact));
+  };
+
   useEffect(() => {
     const eventsChannel = supabase
       .channel('home-events')
@@ -493,15 +499,39 @@ export function HomeScreen({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-        <h1 className="text-2xl" style={{ color: '#D4AF37' }}>
+      <motion.div
+        animate={{
+          paddingTop: isHeaderCompact ? 12 : 16,
+          paddingBottom: isHeaderCompact ? 12 : 16,
+        }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        className="sticky top-0 z-20 flex items-center justify-between px-6 border-b border-border"
+        style={{
+          backgroundColor: 'rgba(15, 15, 15, 0.94)',
+          backdropFilter: 'blur(14px)',
+        }}
+      >
+        <motion.h1
+          animate={{
+            scale: isHeaderCompact ? 0.92 : 1,
+            transformOrigin: 'left center',
+          }}
+          transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+          className="text-2xl"
+          style={{ color: '#D4AF37' }}
+        >
           Gathr
-        </h1>
+        </motion.h1>
 
         <motion.button
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 0.92 }}
+          animate={{
+            width: isHeaderCompact ? 36 : 40,
+            height: isHeaderCompact ? 36 : 40,
+          }}
+          transition={{ type: 'spring', stiffness: 320, damping: 30 }}
           onClick={() => onNavigate('profile')}
-          className="w-10 h-10 rounded-full flex items-center justify-center border"
+          className="rounded-full flex items-center justify-center border shrink-0"
           style={{
             backgroundColor: '#3A3A3A',
             borderColor: 'rgba(212, 175, 55, 0.45)',
@@ -510,9 +540,9 @@ export function HomeScreen({
           }}
           title={currentUserName}
         >
-          <span className="text-sm">{getInitials(currentUserName)}</span>
+          <span className={isHeaderCompact ? 'text-xs' : 'text-sm'}>{getInitials(currentUserName)}</span>
         </motion.button>
-      </div>
+      </motion.div>
 
       <div className="flex border-b border-border">
         <motion.button
@@ -558,12 +588,20 @@ export function HomeScreen({
         </motion.button>
       </div>
 
-      <div className="border-b border-border px-4 py-3">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar">
-          <button
+      <div className="border-b border-border px-4 py-2">
+        <div
+          className="flex gap-2 overflow-x-auto no-scrollbar"
+          style={{
+            scrollPaddingLeft: '0.25rem',
+            scrollPaddingRight: '0.25rem',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          <motion.button
             type="button"
             onClick={() => setSelectedActivityType('all')}
-            className="shrink-0 px-3 py-2 rounded-full text-sm border transition-all"
+            whileTap={{ scale: 0.96 }}
+            className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
             style={{
               backgroundColor:
                 selectedActivityType === 'all' ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
@@ -572,32 +610,38 @@ export function HomeScreen({
                   ? 'rgba(212, 175, 55, 0.5)'
                   : 'rgba(255, 255, 255, 0.1)',
               color: selectedActivityType === 'all' ? '#D4AF37' : '#F5F5F5',
+              boxShadow:
+                selectedActivityType === 'all'
+                  ? '0 0 0 1px rgba(212, 175, 55, 0.12)'
+                  : 'none',
             }}
           >
             {translate('home.all')}
-          </button>
+          </motion.button>
 
           {ACTIVITY_TYPES.map((type) => {
             const isActive = selectedActivityType === type.value;
             const activityMeta = getActivityTypeMeta(type.value, language);
 
             return (
-              <button
+              <motion.button
                 key={type.value}
                 type="button"
                 onClick={() => setSelectedActivityType(type.value)}
-                className="shrink-0 px-3 py-2 rounded-full text-sm border transition-all"
+                whileTap={{ scale: 0.96 }}
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
                 style={{
                   backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
                   borderColor: isActive
                     ? 'rgba(212, 175, 55, 0.5)'
                     : 'rgba(255, 255, 255, 0.1)',
                   color: isActive ? '#D4AF37' : '#F5F5F5',
+                  boxShadow: isActive ? '0 0 0 1px rgba(212, 175, 55, 0.12)' : 'none',
                 }}
               >
                 <span className="mr-2">{activityMeta.emoji}</span>
                 <span>{activityMeta.label}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -607,6 +651,7 @@ export function HomeScreen({
         <div
           className="h-full overflow-y-auto px-6 py-4 space-y-3"
           style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
+          onScroll={handleContentScroll}
         >
           {shouldShowInitialLoader && (
             <div className="flex justify-center py-8">

@@ -45,11 +45,20 @@ export function PullToRefresh({ children, onRefresh }: PullToRefreshProps) {
         dragDirectionLock
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={{ top: 0.22, bottom: 0 }}
+        dragMomentum={false}
+        dragTransition={{ power: 0.08, timeConstant: 140 }}
         onDragEnd={handleDragEnd}
         style={{ y }}
         animate={isRefreshing ? { y: 60 } : { y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="h-full overflow-x-hidden"
+        onPointerDownCapture={(event) => {
+          const target = event.target as HTMLElement | null;
+
+          if (target?.closest('input, textarea, button, [role="button"], a')) {
+            y.set(0);
+          }
+        }}
       >
         {children}
       </motion.div>

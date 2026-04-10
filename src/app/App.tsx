@@ -214,6 +214,10 @@ export default function App() {
         setHistory(['home']);
         setDirection('forward');
       } else {
+        if (pendingAuthRedirect) {
+          return;
+        }
+
         const sharedEventId = getSharedEventIdFromPath();
 
         if (sharedEventId && handledSharedEventRef.current) {

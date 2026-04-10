@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { TouchButton } from './TouchButton';
@@ -39,9 +39,12 @@ export function EventDetailsScreen({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
 
+  const autoJoinAttemptedRef = useRef(false);
+
   const { translate } = useLanguage();
 
   const backTarget = event?.backTarget || 'home';
+  const pendingAuthAction = event?.authAction || null;
 
   const eventDate = eventData.date_time ? new Date(eventData.date_time) : null;
   const isPastEvent =
@@ -154,7 +157,6 @@ export function EventDetailsScreen({
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        console.error('Ошибка получения пользователя:', userError);
         setCurrentUserId(null);
         setHasJoined(false);
         setIsCreator(false);
@@ -192,6 +194,7 @@ export function EventDetailsScreen({
   useEffect(() => {
     setEventData(event || defaultEvent);
     setResolvedBackTarget(event?.backTarget || 'home');
+    autoJoinAttemptedRef.current = false;
   }, [event]);
 
   useEffect(() => {
@@ -288,37 +291,16 @@ export function EventDetailsScreen({
     }
   };
 
-  const handleJoin = async () => {
-  if (!currentUserId) {
-    onNavigate(
-      'login',
-      {
-        redirectAfterAuth: {
-          screen: 'event-details',
-          data: {
-            ...eventData,
-            backTarget: 'home',
-          },
-        },
-        backScreen: 'event-details',
-        backData: {
-          ...eventData,
-          backTarget: 'home',
-        },
-      },
-      'forward'
-    );
-    return;
-  }
+  const performJoin = async () => {
+    if (!currentUserId) {
+      return false;
+    }
 
-  if (!eventData.id) {
-    alert('Не удалось определить событие');
-    return;
-  }
+    if (!eventData.id) {
+      alert('Не удалось определить событие');
+      return false;
+    }
 
-  setLoadingAction(true);
-
-  try {
     const { error } = await supabase.from('participants').insert([
       {
         user_id: currentUserId,
@@ -329,19 +311,96 @@ export function EventDetailsScreen({
     if (error) {
       console.error('Ошибка присоединения:', error);
       alert('Не удалось присоединиться к событию');
-      setLoadingAction(false);
-      return;
+      return false;
     }
 
     setHasJoined(true);
     await loadParticipants();
-  } catch (error) {
-    console.error('Unexpected join error:', error);
-    alert('Произошла ошибка при присоединении');
-  } finally {
-    setLoadingAction(false);
-  }
-};
+    return true;
+  };
+
+  useEffect(() => {
+    const autoJoinAfterAuth = async () => {
+      if (!pendingAuthAction) {
+        return;
+      }
+
+      if (pendingAuthAction.type !== 'join-event') {
+        return;
+      }
+
+      if (!currentUserId) {
+        return;
+      }
+
+      if (!eventData.id || pendingAuthAction.eventId !== eventData.id) {
+        return;
+      }
+
+      if (hasJoined || loadingAction) {
+        return;
+      }
+
+      if (autoJoinAttemptedRef.current) {
+        return;
+      }
+
+      autoJoinAttemptedRef.current = true;
+      setLoadingAction(true);
+
+      try {
+        await performJoin();
+      } finally {
+        setLoadingAction(false);
+      }
+    };
+
+    autoJoinAfterAuth();
+  }, [pendingAuthAction, currentUserId, eventData.id, hasJoined]);
+
+  const handleJoin = async () => {
+    if (!currentUserId) {
+      onNavigate(
+        'login',
+        {
+          returnToAfterAuth: {
+            screen: 'event-details',
+            data: {
+              ...eventData,
+              backTarget: 'home',
+            },
+          },
+          actionAfterAuth: {
+            type: 'join-event',
+            eventId: eventData.id,
+          },
+          backScreen: 'event-details',
+          backData: {
+            ...eventData,
+            backTarget: 'home',
+          },
+        },
+        'forward'
+      );
+      return;
+    }
+
+    if (!eventData.id) {
+      alert('Не удалось определить событие');
+      return;
+    }
+
+    setLoadingAction(true);
+
+    try {
+      await performJoin();
+    } catch (error) {
+      console.error('Unexpected join error:', error);
+      alert('Произошла ошибка при присоединении');
+    } finally {
+      setLoadingAction(false);
+    }
+  };
 
   const handleLeave = async () => {
     if (!currentUserId) {

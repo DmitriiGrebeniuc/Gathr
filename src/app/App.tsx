@@ -25,10 +25,20 @@ import { InviteUsersScreen } from './components/InviteUsersScreen';
 
 type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
 
-type AuthRedirect = {
-  screen: string;
-  data?: any;
-} | null;
+type PendingAfterAuth =
+  | {
+      returnTo: {
+        screen: string;
+        data?: any;
+      };
+      action?:
+        | {
+            type: 'join-event';
+            eventId: string;
+          }
+        | null;
+    }
+  | null;
 
 type LoginContext = {
   backScreen: string;
@@ -42,12 +52,12 @@ export default function App() {
   const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const [pendingAuthRedirect, setPendingAuthRedirect] = useState<AuthRedirect>(null);
+  const [pendingAfterAuth, setPendingAfterAuth] = useState<PendingAfterAuth>(null);
   const [loginContext, setLoginContext] = useState<LoginContext>(null);
 
+  const pendingAfterAuthRef = useRef<PendingAfterAuth>(null);
   const isRecoveryModeRef = useRef(false);
   const handledSharedEventRef = useRef(false);
-  const pendingAuthRedirectRef = useRef<AuthRedirect>(null);
 
   const { translate } = useLanguage();
 
@@ -171,7 +181,7 @@ export default function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         isRecoveryModeRef.current = true;
         setCurrentScreen('reset-password');
@@ -193,19 +203,22 @@ export default function App() {
       }
 
       if (session?.user) {
-        if (pendingAuthRedirectRef.current) {
-          const redirect = pendingAuthRedirectRef.current;
+        if (pendingAfterAuthRef.current) {
+          const pending = pendingAfterAuthRef.current;
 
           setDirection('forward');
-          setCurrentScreen(redirect.screen);
-          setHistory([redirect.screen]);
+          setCurrentScreen(pending.returnTo.screen);
+          setHistory([pending.returnTo.screen]);
 
-          if (redirect.data) {
-            setSelectedEvent(redirect.data);
+          if (pending.returnTo.data) {
+            setSelectedEvent({
+              ...pending.returnTo.data,
+              authAction: pending.action || null,
+            });
           }
 
-          pendingAuthRedirectRef.current = null;
-          setPendingAuthRedirect(null);
+          pendingAfterAuthRef.current = null;
+          setPendingAfterAuth(null);
           setLoginContext(null);
           return;
         }
@@ -220,7 +233,7 @@ export default function App() {
         setHistory(['home']);
         setDirection('forward');
       } else {
-        if (pendingAuthRedirect) {
+        if (pendingAfterAuthRef.current) {
           return;
         }
 
@@ -246,22 +259,28 @@ export default function App() {
     data?: any,
     customDirection?: NavigationDirection
   ) => {
-    if (screen === 'login' && data?.redirectAfterAuth) {
-      pendingAuthRedirectRef.current = data.redirectAfterAuth;
-      setPendingAuthRedirect(data.redirectAfterAuth);
+    if (screen === 'login' && data?.returnToAfterAuth) {
+      const pending: PendingAfterAuth = {
+        returnTo: data.returnToAfterAuth,
+        action: data.actionAfterAuth || null,
+      };
+
+      pendingAfterAuthRef.current = pending;
+      setPendingAfterAuth(pending);
+
       setLoginContext({
         backScreen: data.backScreen || 'welcome',
         backData: data.backData,
       });
     }
 
-    if (screen === 'welcome' && pendingAuthRedirect) {
-      pendingAuthRedirectRef.current = null;
-      setPendingAuthRedirect(null);
+    if (screen === 'welcome' && pendingAfterAuth) {
+      pendingAfterAuthRef.current = null;
+      setPendingAfterAuth(null);
       setLoginContext(null);
     }
 
-    if (data && !data.redirectAfterAuth) {
+    if (data && !data.returnToAfterAuth) {
       setSelectedEvent(data);
     }
 

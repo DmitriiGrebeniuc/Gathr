@@ -367,11 +367,11 @@ export default function App() {
   if (!authChecked) {
     return (
       <div
-        className="w-full flex items-center justify-center bg-secondary overflow-hidden"
+        className="w-full flex items-start justify-start md:items-center md:justify-center bg-secondary overflow-hidden"
         style={{ minHeight: 'var(--app-height, 100dvh)', height: 'var(--app-height, 100dvh)' }}
       >
         <div
-          className="relative overflow-hidden flex flex-col items-center justify-center w-full min-h-screen md:min-h-0 md:w-auto"
+          className="relative overflow-hidden flex flex-col items-center justify-center w-full h-full md:min-h-0 md:w-auto"
           style={{
             width: '100%',
             height: 'var(--app-height, 100dvh)',
@@ -390,11 +390,11 @@ export default function App() {
 
   return (
     <div
-      className="w-full flex items-center justify-center bg-secondary overflow-hidden"
+      className="w-full flex items-start justify-start md:items-center md:justify-center bg-secondary overflow-hidden"
       style={{ minHeight: 'var(--app-height, 100dvh)', height: 'var(--app-height, 100dvh)' }}
     >
       <div
-        className="relative overflow-hidden flex flex-col w-full min-h-screen md:min-h-0 md:w-auto"
+        className="relative overflow-hidden flex flex-col w-full h-full md:min-h-0 md:w-auto"
         style={{
           width: '100%',
           height: 'var(--app-height, 100dvh)',

@@ -1,9 +1,27 @@
 import { motion } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
+import { useState } from 'react';
 
-export function WelcomeScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
+export function WelcomeScreen({
+  onNavigate,
+  onGoogleLogin,
+}: {
+  onNavigate: (screen: string, data?: any) => void;
+  onGoogleLogin: () => Promise<void>;
+}) {
   const { translate } = useLanguage();
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+
+    try {
+      await onGoogleLogin();
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-6 bg-background">
@@ -41,21 +59,38 @@ export function WelcomeScreen({ onNavigate }: { onNavigate: (screen: string) => 
         className="w-full max-w-sm space-y-3 pb-12"
       >
         <TouchButton
-          onClick={() => onNavigate('login')}
+          onClick={handleGoogleLogin}
           variant="primary"
           fullWidth
+          disabled={googleLoading}
+          className="flex items-center justify-center gap-3"
+        >
+          <span
+            className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-semibold"
+            style={{ color: '#0F0F0F' }}
+          >
+            G
+          </span>
+          {googleLoading ? translate('login.submitting') : translate('welcome.google')}
+        </TouchButton>
+
+        <TouchButton
+          onClick={() => onNavigate('login')}
+          variant="ghost"
+          fullWidth
+          disabled={googleLoading}
+          style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
         >
           {translate('welcome.login')}
         </TouchButton>
 
-        <TouchButton
+        <button
           onClick={() => onNavigate('signup')}
-          variant="ghost"
-          fullWidth
-          style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
+          className="w-full pt-2 text-sm text-muted-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+          disabled={googleLoading}
         >
           {translate('welcome.signup')}
-        </TouchButton>
+        </button>
       </motion.div>
     </div>
   );

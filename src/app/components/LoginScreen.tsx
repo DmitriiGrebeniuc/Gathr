@@ -8,10 +8,12 @@ import { feedback } from '../lib/feedback';
 
 export function LoginScreen({
   onNavigate,
+  onGoogleLogin,
   backTarget = 'welcome',
   backData,
 }: {
   onNavigate: (screen: string, data?: any) => void;
+  onGoogleLogin: () => Promise<void>;
   backTarget?: string;
   backData?: any;
 }) {
@@ -19,8 +21,19 @@ export function LoginScreen({
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const { translate } = useLanguage();
+
+  const handleGoogleAuth = async () => {
+    setGoogleLoading(true);
+
+    try {
+      await onGoogleLogin();
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -92,7 +105,7 @@ export function LoginScreen({
           whileTap={{ scale: 0.95 }}
           onClick={() => onNavigate(backTarget, backData)}
           className="self-start text-muted-foreground mb-8"
-          disabled={loading || resetLoading}
+          disabled={loading || resetLoading || googleLoading}
         >
           ← {translate('login.back')}
         </motion.button>
@@ -108,6 +121,41 @@ export function LoginScreen({
           </motion.h2>
 
           <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <TouchButton
+                onClick={handleGoogleAuth}
+                variant="primary"
+                fullWidth
+                disabled={loading || resetLoading || googleLoading}
+                className="flex items-center justify-center gap-3"
+              >
+                <span
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-semibold"
+                  style={{ color: '#0F0F0F' }}
+                >
+                  G
+                </span>
+                {googleLoading ? translate('login.submitting') : translate('login.google')}
+              </TouchButton>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.18 }}
+              className="flex items-center gap-3 py-1"
+            >
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                {translate('login.emailDivider')}
+              </span>
+              <div className="h-px flex-1 bg-border" />
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -154,7 +202,7 @@ export function LoginScreen({
                 onClick={handleForgotPassword}
                 className="text-sm text-accent"
                 style={{ color: '#D4AF37' }}
-                disabled={loading || resetLoading}
+                disabled={loading || resetLoading || googleLoading}
               >
                 {resetLoading
                   ? translate('login.sendingReset')
@@ -169,9 +217,10 @@ export function LoginScreen({
             >
               <TouchButton
                 onClick={handleLogin}
-                variant="primary"
+                variant="secondary"
                 fullWidth
                 className="mt-2"
+                disabled={loading || resetLoading || googleLoading}
               >
                 {loading ? translate('login.submitting') : translate('login.submit')}
               </TouchButton>
@@ -188,7 +237,7 @@ export function LoginScreen({
                 onClick={() => onNavigate('signup')}
                 className="text-accent"
                 style={{ color: '#D4AF37' }}
-                disabled={loading || resetLoading}
+                disabled={loading || resetLoading || googleLoading}
               >
                 {translate('login.signupLink')}
               </button>

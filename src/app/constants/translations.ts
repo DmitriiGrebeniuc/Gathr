@@ -32,10 +32,13 @@ type TranslationKey =
     | 'activity.tech'
     | 'activity.other'
     | 'welcome.tagline'
+    | 'welcome.google'
     | 'welcome.login'
     | 'welcome.signup'
     | 'login.back'
     | 'login.title'
+    | 'login.google'
+    | 'login.emailDivider'
     | 'login.email'
     | 'login.emailPlaceholder'
     | 'login.password'
@@ -47,6 +50,7 @@ type TranslationKey =
     | 'login.enterEmail'
     | 'login.enterPassword'
     | 'login.failed'
+    | 'login.googleFailed'
     | 'login.unexpectedError'
     | 'signup.back'
     | 'signup.title'
@@ -406,11 +410,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Other',
 
         'welcome.tagline': 'Fast. Simple. Together.',
-        'welcome.login': 'Log In',
-        'welcome.signup': 'Sign Up',
+        'welcome.google': 'Continue with Google',
+        'welcome.login': 'Continue with email',
+        'welcome.signup': 'Create account with email',
 
         'login.back': 'Back',
         'login.title': 'Welcome back',
+        'login.google': 'Continue with Google',
+        'login.emailDivider': 'Or continue with email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
         'login.password': 'Password',
@@ -422,6 +429,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.enterEmail': 'Enter email',
         'login.enterPassword': 'Enter password',
         'login.failed': 'Failed to log in',
+        'login.googleFailed': 'Failed to continue with Google',
         'login.unexpectedError': 'An error occurred while logging in',
 
         'signup.back': 'Back',
@@ -796,11 +804,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Другое',
 
         'welcome.tagline': 'Быстро. Просто. Вместе.',
-        'welcome.login': 'Войти',
-        'welcome.signup': 'Регистрация',
+        'welcome.google': 'Продолжить через Google',
+        'welcome.login': 'Войти по email',
+        'welcome.signup': 'Создать аккаунт по email',
 
         'login.back': 'Назад',
         'login.title': 'С возвращением',
+        'login.google': 'Продолжить через Google',
+        'login.emailDivider': 'Или войти по email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
         'login.password': 'Пароль',
@@ -812,6 +823,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.enterEmail': 'Введите email',
         'login.enterPassword': 'Введите пароль',
         'login.failed': 'Не удалось войти',
+        'login.googleFailed': 'Не удалось продолжить через Google',
         'login.unexpectedError': 'Произошла ошибка при входе',
 
         'signup.back': 'Назад',
@@ -1185,11 +1197,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Altele',
 
         'welcome.tagline': 'Rapid. Simplu. Împreună.',
-        'welcome.login': 'Autentificare',
-        'welcome.signup': 'Înregistrare',
+        'welcome.google': 'Continuă cu Google',
+        'welcome.login': 'Continuă cu email',
+        'welcome.signup': 'Creează cont cu email',
 
         'login.back': 'Înapoi',
         'login.title': 'Bine ai revenit',
+        'login.google': 'Continuă cu Google',
+        'login.emailDivider': 'Sau continuă cu email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
         'login.password': 'Parolă',
@@ -1201,6 +1216,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.enterEmail': 'Introdu emailul',
         'login.enterPassword': 'Introdu parola',
         'login.failed': 'Autentificarea a eșuat',
+        'login.googleFailed': 'Nu s-a putut continua cu Google',
         'login.unexpectedError': 'A apărut o eroare la autentificare',
 
         'signup.back': 'Înapoi',
@@ -1576,11 +1592,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Інше',
 
         'welcome.tagline': 'Швидко. Просто. Разом.',
-        'welcome.login': 'Увійти',
-        'welcome.signup': 'Реєстрація',
+        'welcome.google': 'Продовжити через Google',
+        'welcome.login': 'Увійти через email',
+        'welcome.signup': 'Створити акаунт через email',
 
         'login.back': 'Назад',
         'login.title': 'З поверненням',
+        'login.google': 'Продовжити через Google',
+        'login.emailDivider': 'Або увійти через email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
         'login.password': 'Пароль',
@@ -1592,6 +1611,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.enterEmail': 'Введіть email',
         'login.enterPassword': 'Введіть пароль',
         'login.failed': 'Не вдалося увійти',
+        'login.googleFailed': 'Не вдалося продовжити через Google',
         'login.unexpectedError': 'Сталася помилка під час входу',
 
         'signup.back': 'Назад',
@@ -1968,11 +1988,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Andere',
 
         'welcome.tagline': 'Schnell. Einfach. Gemeinsam.',
-        'welcome.login': 'Anmelden',
-        'welcome.signup': 'Registrieren',
+        'welcome.google': 'Mit Google fortfahren',
+        'welcome.login': 'Mit E-Mail fortfahren',
+        'welcome.signup': 'Konto mit E-Mail erstellen',
 
         'login.back': 'Zurück',
         'login.title': 'Willkommen zurück',
+        'login.google': 'Mit Google fortfahren',
+        'login.emailDivider': 'Oder mit E-Mail fortfahren',
         'login.email': 'E-Mail',
         'login.emailPlaceholder': 'your@email.com',
         'login.password': 'Passwort',
@@ -1984,6 +2007,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.enterEmail': 'E-Mail eingeben',
         'login.enterPassword': 'Passwort eingeben',
         'login.failed': 'Anmeldung fehlgeschlagen',
+        'login.googleFailed': 'Mit Google konnte nicht fortgefahren werden',
         'login.unexpectedError': 'Beim Anmelden ist ein Fehler aufgetreten',
 
         'signup.back': 'Zurück',

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
+import type { User } from '@supabase/supabase-js';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { SignUpScreen } from './components/SignUpScreen';
@@ -24,6 +25,7 @@ import { LanguageScreen } from './components/LanguageScreen';
 import { FeedbackHost } from './components/FeedbackHost';
 import { useLanguage } from './context/LanguageContext';
 import { InviteUsersScreen } from './components/InviteUsersScreen';
+import { feedback } from './lib/feedback';
 import { getSharedEventIdFromPath } from './auth/sharedEventPath';
 import { loadSharedEventById } from './auth/loadSharedEvent';
 import type { PostLoginIntent } from './auth/postLoginIntent';
@@ -39,21 +41,237 @@ type LoginContext = {
   backData?: any;
 } | null;
 
+const AUTH_REDIRECT_STATE_KEY = 'gathr-auth-redirect-state';
+
+function readStoredAuthRedirectState(): {
+  pendingAfterAuth: PostLoginIntent | null;
+  loginContext: LoginContext;
+} {
+  if (typeof window === 'undefined') {
+    return {
+      pendingAfterAuth: null,
+      loginContext: null,
+    };
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(AUTH_REDIRECT_STATE_KEY);
+
+    if (!raw) {
+      return {
+        pendingAfterAuth: null,
+        loginContext: null,
+      };
+    }
+
+    const parsed = JSON.parse(raw) as {
+      pendingAfterAuth?: PostLoginIntent | null;
+      loginContext?: LoginContext;
+    };
+
+    return {
+      pendingAfterAuth: parsed.pendingAfterAuth ?? null,
+      loginContext: parsed.loginContext ?? null,
+    };
+  } catch (error) {
+    console.error('Failed to read stored auth redirect state:', error);
+    return {
+      pendingAfterAuth: null,
+      loginContext: null,
+    };
+  }
+}
+
+function getAuthFlowType(href: string) {
+  const match = href.match(/[?#&]type=([^&#]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 export default function App() {
+  const initialAuthRedirectState = readStoredAuthRedirectState();
   const [currentScreen, setCurrentScreen] = useState('welcome');
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const [pendingAfterAuth, setPendingAfterAuth] = useState<PostLoginIntent | null>(null);
-  const [loginContext, setLoginContext] = useState<LoginContext>(null);
+  const [pendingAfterAuth, setPendingAfterAuth] = useState<PostLoginIntent | null>(
+    initialAuthRedirectState.pendingAfterAuth
+  );
+  const [loginContext, setLoginContext] = useState<LoginContext>(
+    initialAuthRedirectState.loginContext
+  );
 
-  const pendingAfterAuthRef = useRef<PostLoginIntent | null>(null);
+  const pendingAfterAuthRef = useRef<PostLoginIntent | null>(
+    initialAuthRedirectState.pendingAfterAuth
+  );
   const isRecoveryModeRef = useRef(false);
   const handledSharedEventRef = useRef(false);
 
   const { translate } = useLanguage();
+  const isMobileViewport = window.innerWidth < 768;
+
+  const persistAuthRedirectState = (
+    nextPendingAfterAuth: PostLoginIntent | null,
+    nextLoginContext: LoginContext
+  ) => {
+    try {
+      if (!nextPendingAfterAuth && !nextLoginContext) {
+        window.sessionStorage.removeItem(AUTH_REDIRECT_STATE_KEY);
+        return;
+      }
+
+      window.sessionStorage.setItem(
+        AUTH_REDIRECT_STATE_KEY,
+        JSON.stringify({
+          pendingAfterAuth: nextPendingAfterAuth,
+          loginContext: nextLoginContext,
+        })
+      );
+    } catch (error) {
+      console.error('Failed to persist auth redirect state:', error);
+    }
+  };
+
+  const updateAuthRedirectState = (
+    nextPendingAfterAuth: PostLoginIntent | null,
+    nextLoginContext: LoginContext
+  ) => {
+    pendingAfterAuthRef.current = nextPendingAfterAuth;
+    setPendingAfterAuth(nextPendingAfterAuth);
+    setLoginContext(nextLoginContext);
+    persistAuthRedirectState(nextPendingAfterAuth, nextLoginContext);
+  };
+
+  const clearAuthRedirectState = () => {
+    updateAuthRedirectState(null, null);
+  };
+
+  const getPreferredProfileName = (user: User) => {
+    const metadata = user.user_metadata ?? {};
+    const profileNameCandidates = [
+      metadata.name,
+      metadata.full_name,
+      metadata.user_name,
+      metadata.preferred_username,
+      metadata.given_name,
+      metadata.nickname,
+    ];
+
+    const metadataName = profileNameCandidates.find(
+      (candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0
+    );
+
+    if (metadataName) {
+      return metadataName.trim();
+    }
+
+    const emailName = user.email?.split('@')[0]?.trim();
+
+    if (emailName) {
+      return emailName;
+    }
+
+    return translate('common.user');
+  };
+
+  const syncProfileFromAuthUser = async (user: User) => {
+    const fallbackName = getPreferredProfileName(user);
+
+    try {
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Failed to load profile after auth:', profileError);
+        return;
+      }
+
+      if (!existingProfile) {
+        const { error: insertError } = await supabase.from('profiles').insert({
+          id: user.id,
+          name: fallbackName,
+        });
+
+        if (
+          insertError &&
+          insertError.code !== '23505' &&
+          !insertError.message.toLowerCase().includes('duplicate key')
+        ) {
+          console.error('Failed to create missing profile after auth:', insertError);
+        }
+
+        return;
+      }
+
+      if (!existingProfile.name?.trim() && fallbackName) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ name: fallbackName })
+          .eq('id', user.id);
+
+        if (updateError) {
+          console.error('Failed to enrich profile name after auth:', updateError);
+        }
+      }
+    } catch (error) {
+      console.error('Unexpected profile sync error:', error);
+    }
+  };
+
+  const applySignedInNavigation = async (user: User) => {
+    await syncProfileFromAuthUser(user);
+
+    if (pendingAfterAuthRef.current) {
+      const pending = pendingAfterAuthRef.current;
+
+      setDirection('forward');
+      setCurrentScreen(pending.returnTo.screen);
+      setHistory([pending.returnTo.screen]);
+
+      if (pending.returnTo.data) {
+        setSelectedEvent({
+          ...pending.returnTo.data,
+          authAction: pending.action || null,
+        });
+      }
+
+      clearAuthRedirectState();
+      return;
+    }
+
+    const sharedEventId = getSharedEventIdFromPath(window.location.pathname);
+
+    if (sharedEventId && handledSharedEventRef.current) {
+      return;
+    }
+
+    setCurrentScreen('home');
+    setHistory(['home']);
+    setDirection('forward');
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        console.error('Google OAuth sign-in failed:', error);
+        feedback.error(error.message || translate('login.googleFailed'));
+      }
+    } catch (error) {
+      console.error('Unexpected Google OAuth sign-in error:', error);
+      feedback.error(translate('login.googleFailed'));
+    }
+  };
 
   useEffect(() => {
     const getViewportHeight = () => {
@@ -103,11 +321,12 @@ export default function App() {
 
     const accessTokenMatch = href.match(/[?#&]access_token=([^&#]+)/);
     const refreshTokenMatch = href.match(/[?#&]refresh_token=([^&#]+)/);
+    const authFlowType = getAuthFlowType(href);
 
     const accessToken = accessTokenMatch ? decodeURIComponent(accessTokenMatch[1]) : null;
     const refreshToken = refreshTokenMatch ? decodeURIComponent(refreshTokenMatch[1]) : null;
 
-    const isRecovery = !!accessToken;
+    const isRecovery = authFlowType === 'recovery' && !!accessToken;
 
     const openSharedEventIfNeeded = async () => {
       if (handledSharedEventRef.current) {
@@ -178,8 +397,7 @@ export default function App() {
           setCurrentScreen('welcome');
           setHistory(['welcome']);
         } else if (session?.user) {
-          setCurrentScreen('home');
-          setHistory(['home']);
+          await applySignedInNavigation(session.user);
         } else {
           setCurrentScreen('welcome');
           setHistory(['welcome']);
@@ -206,7 +424,11 @@ export default function App() {
         return;
       }
 
-      if (event === 'SIGNED_IN' && window.location.href.includes('access_token=')) {
+      if (
+        event === 'SIGNED_IN' &&
+        getAuthFlowType(window.location.href) === 'recovery' &&
+        window.location.href.includes('access_token=')
+      ) {
         isRecoveryModeRef.current = true;
         setCurrentScreen('reset-password');
         setHistory(['reset-password']);
@@ -219,35 +441,7 @@ export default function App() {
       }
 
       if (session?.user) {
-        if (pendingAfterAuthRef.current) {
-          const pending = pendingAfterAuthRef.current;
-
-          setDirection('forward');
-          setCurrentScreen(pending.returnTo.screen);
-          setHistory([pending.returnTo.screen]);
-
-          if (pending.returnTo.data) {
-            setSelectedEvent({
-              ...pending.returnTo.data,
-              authAction: pending.action || null,
-            });
-          }
-
-          pendingAfterAuthRef.current = null;
-          setPendingAfterAuth(null);
-          setLoginContext(null);
-          return;
-        }
-
-        const sharedEventId = getSharedEventIdFromPath(window.location.pathname);
-
-        if (sharedEventId && handledSharedEventRef.current) {
-          return;
-        }
-
-        setCurrentScreen('home');
-        setHistory(['home']);
-        setDirection('forward');
+        void applySignedInNavigation(session.user);
       } else {
         if (pendingAfterAuthRef.current) {
           return;
@@ -259,6 +453,7 @@ export default function App() {
           return;
         }
 
+        clearAuthRedirectState();
         setCurrentScreen('welcome');
         setHistory(['welcome']);
         setDirection('back');
@@ -276,15 +471,11 @@ export default function App() {
     customDirection?: NavigationDirection
   ) => {
     if (currentScreen === 'login' && loginContext && screen === loginContext.backScreen && screen !== 'signup') {
-      pendingAfterAuthRef.current = null;
-      setPendingAfterAuth(null);
-      setLoginContext(null);
+      clearAuthRedirectState();
     }
 
     if (screen === 'login' && isClearPostLoginIntentPayload(data)) {
-      pendingAfterAuthRef.current = null;
-      setPendingAfterAuth(null);
-      setLoginContext(null);
+      clearAuthRedirectState();
     }
 
     if (screen === 'login' && isLoginNavigationPayload(data)) {
@@ -293,19 +484,14 @@ export default function App() {
         action: data.actionAfterAuth ?? null,
       };
 
-      pendingAfterAuthRef.current = pending;
-      setPendingAfterAuth(pending);
-
-      setLoginContext({
+      updateAuthRedirectState(pending, {
         backScreen: data.backScreen || 'welcome',
         backData: data.backData,
       });
     }
 
     if (screen === 'welcome' && pendingAfterAuth) {
-      pendingAfterAuthRef.current = null;
-      setPendingAfterAuth(null);
-      setLoginContext(null);
+      clearAuthRedirectState();
     }
 
     if (data && !isLoginNavigationPayload(data) && !isClearPostLoginIntentPayload(data)) {
@@ -362,7 +548,6 @@ export default function App() {
   };
 
   const showBottomNav = ['home', 'notifications', 'profile'].includes(currentScreen);
-  const isMobileViewport = window.innerWidth < 768;
 
   if (!authChecked) {
     return (
@@ -410,10 +595,13 @@ export default function App() {
         <div className="flex-1 overflow-hidden relative">
           <AnimatePresence mode="wait" initial={false}>
             <ScreenTransition key={currentScreen} direction={direction}>
-              {currentScreen === 'welcome' && <WelcomeScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'welcome' && (
+                <WelcomeScreen onNavigate={handleNavigate} onGoogleLogin={handleGoogleLogin} />
+              )}
               {currentScreen === 'login' && (
                 <LoginScreen
                   onNavigate={handleNavigate}
+                  onGoogleLogin={handleGoogleLogin}
                   backTarget={loginContext?.backScreen || 'welcome'}
                   backData={loginContext?.backData}
                 />

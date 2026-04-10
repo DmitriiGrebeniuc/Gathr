@@ -1,428 +1,170 @@
-import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence } from 'motion/react';
-import { WelcomeScreen } from './components/WelcomeScreen';
-import { LoginScreen } from './components/LoginScreen';
-import { SignUpScreen } from './components/SignUpScreen';
-import { HomeScreen } from './components/HomeScreen';
-import { CreateEventScreen } from './components/CreateEventScreen';
-import { EditEventScreen } from './components/EditEventScreen';
-import { EventDetailsScreen } from './components/EventDetailsScreen';
-import { ParticipantsScreen } from './components/ParticipantsScreen';
-import { NotificationsScreen } from './components/NotificationsScreen';
-import { ProfileScreen } from './components/ProfileScreen';
-import { EditProfileScreen } from './components/EditProfileScreen';
-import { NotificationSettingsScreen } from './components/NotificationSettingsScreen';
-import { SecurityScreen } from './components/SecurityScreen';
-import { SupportScreen } from './components/SupportScreen';
-import { BottomNav } from './components/BottomNav';
-import { ScreenTransition } from './components/ScreenTransition';
-import { LoadingLogo } from './components/LoadingLogo';
-import { ResetPasswordScreen } from './components/ResetPasswordScreen';
-import { supabase } from '../lib/supabase';
-import { LanguageScreen } from './components/LanguageScreen';
-import { useLanguage } from './context/LanguageContext';
-import { InviteUsersScreen } from './components/InviteUsersScreen';
+import { motion } from 'motion/react';
+import { useState } from 'react';
+import { supabase } from '../../lib/supabase';
+import { TouchButton } from './TouchButton';
+import { SwipeableScreen } from './SwipeableScreen';
+import { useLanguage } from '../context/LanguageContext';
 
-type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
+export function ResetPasswordScreen({
+    onNavigate,
+}: {
+    onNavigate: (screen: string, data?: any) => void;
+}) {
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-type PendingAfterAuth =
-  | {
-      returnTo: {
-        screen: string;
-        data?: any;
-      };
-      action?:
-        | {
-            type: 'join-event';
-            eventId: string;
-          }
-        | null;
-    }
-  | null;
+    const { translate } = useLanguage();
 
-type LoginContext = {
-  backScreen: string;
-  backData?: any;
-} | null;
-
-export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('welcome');
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [direction, setDirection] = useState<NavigationDirection>('forward');
-  const [history, setHistory] = useState<string[]>(['welcome']);
-  const [authChecked, setAuthChecked] = useState(false);
-
-  const [pendingAfterAuth, setPendingAfterAuth] = useState<PendingAfterAuth>(null);
-  const [loginContext, setLoginContext] = useState<LoginContext>(null);
-
-  const pendingAfterAuthRef = useRef<PendingAfterAuth>(null);
-  const isRecoveryModeRef = useRef(false);
-  const handledSharedEventRef = useRef(false);
-
-  const { translate } = useLanguage();
-
-  useEffect(() => {
-    const href = window.location.href;
-    const pathname = window.location.pathname;
-
-    const accessTokenMatch = href.match(/[?#&]access_token=([^&#]+)/);
-    const refreshTokenMatch = href.match(/[?#&]refresh_token=([^&#]+)/);
-
-    const accessToken = accessTokenMatch ? decodeURIComponent(accessTokenMatch[1]) : null;
-    const refreshToken = refreshTokenMatch ? decodeURIComponent(refreshTokenMatch[1]) : null;
-
-    const isRecovery = !!accessToken;
-
-    const getSharedEventIdFromPath = () => {
-      const match = pathname.match(/^\/event\/([^/]+)$/);
-      return match ? decodeURIComponent(match[1]) : null;
-    };
-
-    const loadSharedEvent = async (eventId: string) => {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('id', eventId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Ошибка загрузки shared event:', error);
-        return null;
-      }
-
-      return data || null;
-    };
-
-    const openSharedEventIfNeeded = async () => {
-      if (handledSharedEventRef.current) {
-        return false;
-      }
-
-      const sharedEventId = getSharedEventIdFromPath();
-
-      if (!sharedEventId) {
-        return false;
-      }
-
-      const sharedEvent = await loadSharedEvent(sharedEventId);
-
-      if (!sharedEvent) {
-        return false;
-      }
-
-      handledSharedEventRef.current = true;
-      setSelectedEvent({
-        ...sharedEvent,
-        backTarget: 'home',
-      });
-      setCurrentScreen('event-details');
-      setHistory(['event-details']);
-      setDirection('forward');
-
-      return true;
-    };
-
-    const checkSession = async () => {
-      try {
-        if (isRecovery && accessToken && refreshToken) {
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-
-          if (sessionError) {
-            console.error('Ошибка установки recovery session:', sessionError);
-            setCurrentScreen('welcome');
-            setHistory(['welcome']);
-            setAuthChecked(true);
+    const handleResetPassword = async () => {
+        if (!password.trim()) {
+            alert(translate('resetPassword.enterPassword'));
             return;
-          }
-
-          isRecoveryModeRef.current = true;
-          setCurrentScreen('reset-password');
-          setHistory(['reset-password']);
-          setAuthChecked(true);
-          return;
         }
 
-        const openedSharedEvent = await openSharedEventIfNeeded();
-
-        if (openedSharedEvent) {
-          setAuthChecked(true);
-          return;
+        if (!confirmPassword.trim()) {
+            alert(translate('resetPassword.enterConfirmPassword'));
+            return;
         }
 
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('Ошибка получения сессии:', error);
-          setCurrentScreen('welcome');
-          setHistory(['welcome']);
-        } else if (session?.user) {
-          setCurrentScreen('home');
-          setHistory(['home']);
-        } else {
-          setCurrentScreen('welcome');
-          setHistory(['welcome']);
+        if (password.trim().length < 6) {
+            alert(translate('resetPassword.passwordTooShort'));
+            return;
         }
-      } catch (error) {
-        console.error('Unexpected session check error:', error);
-        setCurrentScreen('welcome');
-        setHistory(['welcome']);
-      } finally {
-        setAuthChecked(true);
-      }
-    };
 
-    checkSession();
+        if (password !== confirmPassword) {
+            alert(translate('resetPassword.passwordsDoNotMatch'));
+            return;
+        }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        isRecoveryModeRef.current = true;
-        setCurrentScreen('reset-password');
-        setHistory(['reset-password']);
-        setDirection('forward');
-        return;
-      }
+        setLoading(true);
 
-      if (event === 'SIGNED_IN' && window.location.href.includes('access_token=')) {
-        isRecoveryModeRef.current = true;
-        setCurrentScreen('reset-password');
-        setHistory(['reset-password']);
-        setDirection('forward');
-        return;
-      }
+        try {
+            const {
+                data: { session },
+                error: sessionError,
+            } = await supabase.auth.getSession();
 
-      if (isRecoveryModeRef.current) {
-        return;
-      }
+            if (sessionError) {
+                console.error('Ошибка получения recovery session:', sessionError);
+                alert(sessionError.message || 'Failed to restore session');
+                return;
+            }
 
-      if (session?.user) {
-        if (pendingAfterAuthRef.current) {
-          const pending = pendingAfterAuthRef.current;
+            if (!session) {
+                alert('Recovery session is missing. Please open the password reset link again.');
+                return;
+            }
 
-          setDirection('forward');
-          setCurrentScreen(pending.returnTo.screen);
-          setHistory([pending.returnTo.screen]);
-
-          if (pending.returnTo.data) {
-            setSelectedEvent({
-              ...pending.returnTo.data,
-              authAction: pending.action || null,
+            const { error } = await supabase.auth.updateUser({
+                password: password.trim(),
             });
-          }
 
-          pendingAfterAuthRef.current = null;
-          setPendingAfterAuth(null);
-          setLoginContext(null);
-          return;
+            if (error) {
+                console.error('Ошибка сброса пароля:', error);
+                alert(error.message || translate('resetPassword.failed'));
+                return;
+            }
+
+            await supabase.auth.signOut();
+
+            alert(translate('resetPassword.success'));
+            onNavigate('login', { clearPostLoginIntent: true });
+        } catch (error) {
+            console.error('Unexpected reset password error:', error);
+            alert(translate('resetPassword.unexpectedError'));
+        } finally {
+            setLoading(false);
         }
-
-        const sharedEventId = getSharedEventIdFromPath();
-
-        if (sharedEventId && handledSharedEventRef.current) {
-          return;
-        }
-
-        setCurrentScreen('home');
-        setHistory(['home']);
-        setDirection('forward');
-      } else {
-        if (pendingAfterAuthRef.current) {
-          return;
-        }
-
-        const sharedEventId = getSharedEventIdFromPath();
-
-        if (sharedEventId && handledSharedEventRef.current) {
-          return;
-        }
-
-        setCurrentScreen('welcome');
-        setHistory(['welcome']);
-        setDirection('back');
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
     };
-  }, []);
 
-  const handleNavigate = (
-    screen: string,
-    data?: any,
-    customDirection?: NavigationDirection
-  ) => {
-    if (screen === 'login' && data?.returnToAfterAuth) {
-      const pending: PendingAfterAuth = {
-        returnTo: data.returnToAfterAuth,
-        action: data.actionAfterAuth || null,
-      };
-
-      pendingAfterAuthRef.current = pending;
-      setPendingAfterAuth(pending);
-
-      setLoginContext({
-        backScreen: data.backScreen || 'welcome',
-        backData: data.backData,
-      });
-    }
-
-    if (screen === 'welcome' && pendingAfterAuth) {
-      pendingAfterAuthRef.current = null;
-      setPendingAfterAuth(null);
-      setLoginContext(null);
-    }
-
-    if (data && !data.returnToAfterAuth) {
-      setSelectedEvent(data);
-    }
-
-    const mainScreens = ['home', 'notifications', 'profile'];
-    const detailScreens = [
-      'edit-profile',
-      'notification-settings',
-      'security',
-      'support',
-      'language',
-      'event-details',
-      'participants',
-      'reset-password',
-      'invite-users',
-    ];
-    const modalScreens = ['create-event'];
-
-    let navDirection: NavigationDirection = customDirection || 'forward';
-
-    if (!customDirection) {
-      if (history.includes(screen) && history.indexOf(screen) < history.length - 1) {
-        navDirection = 'back';
-      } else if (modalScreens.includes(screen)) {
-        navDirection = 'up';
-      } else if (detailScreens.includes(currentScreen) && mainScreens.includes(screen)) {
-        navDirection = 'back';
-      } else if (mainScreens.includes(currentScreen) && mainScreens.includes(screen)) {
-        navDirection = 'forward';
-      } else if (mainScreens.includes(currentScreen) && detailScreens.includes(screen)) {
-        navDirection = 'forward';
-      }
-    }
-
-    setDirection(navDirection);
-    setCurrentScreen(screen);
-
-    if (navDirection === 'back') {
-      setHistory((prev) => {
-        const lastIndex = prev.lastIndexOf(screen);
-
-        if (lastIndex === -1) {
-          return prev;
-        }
-
-        return prev.slice(0, lastIndex + 1);
-      });
-    } else {
-      setHistory((prev) => [...prev, screen]);
-    }
-  };
-
-  const showBottomNav = ['home', 'notifications', 'profile'].includes(currentScreen);
-
-  if (!authChecked) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-secondary">
-        <div
-          className="relative overflow-hidden flex flex-col items-center justify-center w-full min-h-screen md:min-h-0 md:w-auto"
-          style={{
-            width: '100%',
-            height: '100dvh',
-            maxWidth: '390px',
-            maxHeight: '844px',
-            backgroundColor: '#0F0F0F',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-            borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
-          }}
-        >
-          <LoadingLogo label={translate('common.loading')} />
-        </div>
-      </div>
+        <SwipeableScreen onSwipeBack={() => onNavigate('login', { clearPostLoginIntent: true })}>
+            <div className="h-full flex flex-col px-6 py-8 bg-background">
+                <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => onNavigate('login', { clearPostLoginIntent: true })}
+                    className="self-start text-muted-foreground mb-8"
+                    disabled={loading}
+                >
+                    ← {translate('resetPassword.back')}
+                </motion.button>
+
+                <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+                    <motion.h2
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="mb-3"
+                    >
+                        {translate('resetPassword.title')}
+                    </motion.h2>
+
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.15 }}
+                        className="text-sm text-muted-foreground mb-8"
+                    >
+                        {translate('resetPassword.description')}
+                    </motion.p>
+
+                    <div className="space-y-4">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <label className="block mb-2 text-sm text-muted-foreground">
+                                {translate('resetPassword.newPassword')}
+                            </label>
+                            <input
+                                type="password"
+                                placeholder={translate('resetPassword.newPasswordPlaceholder')}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
+                                style={{ backgroundColor: '#1A1A1A' }}
+                            />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            <label className="block mb-2 text-sm text-muted-foreground">
+                                {translate('resetPassword.confirmPassword')}
+                            </label>
+                            <input
+                                type="password"
+                                placeholder={translate('resetPassword.confirmPasswordPlaceholder')}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
+                                style={{ backgroundColor: '#1A1A1A' }}
+                            />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <TouchButton
+                                onClick={handleResetPassword}
+                                variant="primary"
+                                fullWidth
+                                className="mt-6"
+                            >
+                                {loading
+                                    ? translate('resetPassword.submitting')
+                                    : translate('resetPassword.submit')}
+                            </TouchButton>
+                        </motion.div>
+                    </div>
+                </div>
+            </div>
+        </SwipeableScreen>
     );
-  }
-
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-secondary">
-      <div
-        className="relative overflow-hidden flex flex-col w-full min-h-screen md:min-h-0 md:w-auto"
-        style={{
-          width: '100%',
-          height: '100dvh',
-          maxWidth: '390px',
-          maxHeight: '844px',
-          backgroundColor: '#0F0F0F',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-          borderRadius: window.innerWidth < 768 ? '0' : '2.5rem',
-        }}
-      >
-        <div className="flex-1 overflow-hidden relative">
-          <AnimatePresence mode="wait" initial={false}>
-            <ScreenTransition key={currentScreen} direction={direction}>
-              {currentScreen === 'welcome' && <WelcomeScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'login' && (
-                <LoginScreen
-                  onNavigate={handleNavigate}
-                  backTarget={loginContext?.backScreen || 'welcome'}
-                  backData={loginContext?.backData}
-                />
-              )}
-              {currentScreen === 'signup' && <SignUpScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'reset-password' && (
-                <ResetPasswordScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'home' && <HomeScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'create-event' && <CreateEventScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'edit-event' && (
-                <EditEventScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'event-details' && (
-                <EventDetailsScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'participants' && (
-                <ParticipantsScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'invite-users' && (
-                <InviteUsersScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'notifications' && (
-                <NotificationsScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'profile' && <ProfileScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'edit-profile' && (
-                <EditProfileScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'notification-settings' && (
-                <NotificationSettingsScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'security' && <SecurityScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'support' && <SupportScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'language' && (
-                <LanguageScreen onNavigate={handleNavigate} />
-              )}
-            </ScreenTransition>
-          </AnimatePresence>
-        </div>
-
-        <AnimatePresence>
-          {showBottomNav && (
-            <BottomNav activeScreen={currentScreen} onNavigate={handleNavigate} />
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
-  );
 }

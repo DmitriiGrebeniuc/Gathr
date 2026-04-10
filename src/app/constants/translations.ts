@@ -180,13 +180,25 @@ type TranslationKey =
     | 'admin.pendingInvitations'
     | 'admin.supportRequests'
     | 'admin.latestEvents'
-    | 'admin.latestPendingInvitations'
-    | 'admin.invitedBy'
+    | 'admin.usersTitle'
+    | 'admin.userSearchPlaceholder'
+    | 'admin.noUsers'
+    | 'admin.noUsersMatch'
+    | 'admin.userProfileTitle'
+    | 'admin.selectUser'
+    | 'admin.roleLabel'
+    | 'admin.planLabel'
+    | 'admin.unlimitedAccessLabel'
+    | 'admin.enabled'
+    | 'admin.disabled'
     | 'admin.readOnly'
     | 'admin.unavailable'
     | 'admin.noEvents'
-    | 'admin.noPendingInvitations'
     | 'admin.notAvailable'
+
+    | 'admin.noPendingInvitations'
+    | 'admin.latestPendingInvitations'
+    | 'admin.invitedBy'
 
     | 'home.discover'
     | 'home.joined'
@@ -536,13 +548,25 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Pending invites',
         'admin.supportRequests': 'Support requests',
         'admin.latestEvents': 'Latest events',
-        'admin.latestPendingInvitations': 'Latest pending invitations',
-        'admin.invitedBy': 'Invited by',
+        'admin.usersTitle': 'Users',
+        'admin.userSearchPlaceholder': 'Search users by name',
+        'admin.noUsers': 'No users to show',
+        'admin.noUsersMatch': 'No users match this search',
+        'admin.userProfileTitle': 'User profile',
+        'admin.selectUser': 'Select a user to view details',
+        'admin.roleLabel': 'Role',
+        'admin.planLabel': 'Plan',
+        'admin.unlimitedAccessLabel': 'Unlimited access',
+        'admin.enabled': 'Enabled',
+        'admin.disabled': 'Disabled',
         'admin.readOnly': 'Read only',
         'admin.unavailable': 'Unavailable',
         'admin.noEvents': 'No events to show',
-        'admin.noPendingInvitations': 'No pending invitations',
         'admin.notAvailable': 'Not available',
+        'admin.latestPendingInvitations': 'Latest pending invitations',
+        'admin.invitedBy': 'Invited by',
+        'admin.noPendingInvitations': 'No pending invitations',
+
 
 
         'home.discover': 'Discover',
@@ -899,13 +923,24 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Ожидают приглашения',
         'admin.supportRequests': 'Запросы в поддержку',
         'admin.latestEvents': 'Последние события',
-        'admin.latestPendingInvitations': 'Последние ожидающие приглашения',
-        'admin.invitedBy': 'Пригласил',
+        'admin.usersTitle': 'Пользователи',
+        'admin.userSearchPlaceholder': 'Поиск пользователей по имени',
+        'admin.noUsers': 'Нет пользователей для отображения',
+        'admin.noUsersMatch': 'Ничего не найдено',
+        'admin.userProfileTitle': 'Профиль пользователя',
+        'admin.selectUser': 'Выбери пользователя, чтобы посмотреть детали',
+        'admin.roleLabel': 'Роль',
+        'admin.planLabel': 'План',
+        'admin.unlimitedAccessLabel': 'Безлимитный доступ',
+        'admin.enabled': 'Включен',
+        'admin.disabled': 'Выключен',
         'admin.readOnly': 'Только чтение',
         'admin.unavailable': 'Недоступно',
         'admin.noEvents': 'Нет событий для отображения',
-        'admin.noPendingInvitations': 'Нет ожидающих приглашений',
         'admin.notAvailable': 'Нет данных',
+        'admin.latestPendingInvitations': 'Последние ожидающие приглашения',
+        'admin.invitedBy': 'Пригласил',
+        'admin.noPendingInvitations': 'Нет ожидающих приглашений',
 
 
         'home.discover': 'События',
@@ -1262,13 +1297,25 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Invitații în așteptare',
         'admin.supportRequests': 'Cereri de suport',
         'admin.latestEvents': 'Ultimele evenimente',
-        'admin.latestPendingInvitations': 'Ultimele invitații în așteptare',
-        'admin.invitedBy': 'Invitat de',
+        'admin.usersTitle': 'Utilizatori',
+        'admin.userSearchPlaceholder': 'Caută utilizatori după nume',
+        'admin.noUsers': 'Nu există utilizatori de afișat',
+        'admin.noUsersMatch': 'Niciun utilizator nu corespunde căutării',
+        'admin.userProfileTitle': 'Profil utilizator',
+        'admin.selectUser': 'Selectează un utilizator pentru a vedea detaliile',
+        'admin.roleLabel': 'Rol',
+        'admin.planLabel': 'Plan',
+        'admin.unlimitedAccessLabel': 'Acces nelimitat',
+        'admin.enabled': 'Activ',
+        'admin.disabled': 'Inactiv',
         'admin.readOnly': 'Doar citire',
         'admin.unavailable': 'Indisponibil',
         'admin.noEvents': 'Nu există evenimente de afișat',
-        'admin.noPendingInvitations': 'Nu există invitații în așteptare',
         'admin.notAvailable': 'Nu este disponibil',
+        'admin.latestPendingInvitations': 'Ultimele invitații în așteptare',
+        'admin.invitedBy': 'Invitat de',
+        'admin.noPendingInvitations': 'Nu există invitații în așteptare',
+
 
 
         'home.discover': 'Descoperă',
@@ -1626,13 +1673,27 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Запрошення в очікуванні',
         'admin.supportRequests': 'Запити в підтримку',
         'admin.latestEvents': 'Останні події',
-        'admin.latestPendingInvitations': 'Останні запрошення в очікуванні',
-        'admin.invitedBy': 'Запросив',
+        'admin.usersTitle': 'Користувачі',
+        'admin.userSearchPlaceholder': 'Пошук користувачів за іменем',
+        'admin.noUsers': 'Немає користувачів для відображення',
+        'admin.noUsersMatch': 'Нічого не знайдено',
+        'admin.userProfileTitle': 'Профіль користувача',
+        'admin.selectUser': 'Оберіть користувача, щоб подивитися деталі',
+        'admin.roleLabel': 'Роль',
+        'admin.planLabel': 'План',
+        'admin.unlimitedAccessLabel': 'Безлімітний доступ',
+        'admin.enabled': 'Увімкнено',
+        'admin.disabled': 'Вимкнено',
         'admin.readOnly': 'Лише читання',
         'admin.unavailable': 'Недоступно',
         'admin.noEvents': 'Немає подій для відображення',
-        'admin.noPendingInvitations': 'Немає запрошень в очікуванні',
         'admin.notAvailable': 'Немає даних',
+
+        'admin.latestPendingInvitations': 'Останні запрошення в очікуванні',
+        'admin.invitedBy': 'Запросив',
+        'admin.noPendingInvitations': 'Немає запрошень в очікуванні',
+
+
 
 
         'home.discover': 'Події',
@@ -1989,13 +2050,27 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pendingInvitations': 'Offene Einladungen',
         'admin.supportRequests': 'Supportanfragen',
         'admin.latestEvents': 'Neueste Events',
-        'admin.latestPendingInvitations': 'Neueste offene Einladungen',
-        'admin.invitedBy': 'Eingeladen von',
+        'admin.usersTitle': 'Benutzer',
+        'admin.userSearchPlaceholder': 'Benutzer nach Namen suchen',
+        'admin.noUsers': 'Keine Benutzer zum Anzeigen',
+        'admin.noUsersMatch': 'Keine Benutzer gefunden',
+        'admin.userProfileTitle': 'Benutzerprofil',
+        'admin.selectUser': 'Wähle einen Benutzer aus, um Details zu sehen',
+        'admin.roleLabel': 'Rolle',
+        'admin.planLabel': 'Plan',
+        'admin.unlimitedAccessLabel': 'Unbegrenzter Zugriff',
+        'admin.enabled': 'Aktiv',
+        'admin.disabled': 'Inaktiv',
         'admin.readOnly': 'Nur lesen',
         'admin.unavailable': 'Nicht verfügbar',
         'admin.noEvents': 'Keine Events zum Anzeigen',
-        'admin.noPendingInvitations': 'Keine offenen Einladungen',
         'admin.notAvailable': 'Nicht verfügbar',
+
+        'admin.latestPendingInvitations': 'Neueste offene Einladungen',
+        'admin.invitedBy': 'Eingeladen von',
+        'admin.noPendingInvitations': 'Keine offenen Einladungen',
+
+
 
 
         'home.discover': 'Entdecken',

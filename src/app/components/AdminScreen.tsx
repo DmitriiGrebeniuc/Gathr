@@ -12,6 +12,15 @@ type EventPreview = {
   location: string | null;
 };
 
+type AdminUser = {
+  id: string;
+  name: string | null;
+  role: string | null;
+  plan: string | null;
+  has_unlimited_access: boolean | null;
+};
+
+
 type InvitationPreview = {
   id: string;
   created_at: string | null;
@@ -42,12 +51,16 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
   const { translate } = useLanguage();
   const [summary, setSummary] = useState<AdminSummary>(INITIAL_SUMMARY);
   const [latestEvents, setLatestEvents] = useState<EventPreview[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [latestPendingInvitations, setLatestPendingInvitations] = useState<InvitationPreview[]>(
     []
   );
   const [loading, setLoading] = useState(true);
   const [eventsUnavailable, setEventsUnavailable] = useState(false);
   const [invitationsUnavailable, setInvitationsUnavailable] = useState(false);
+  const [usersUnavailable, setUsersUnavailable] = useState(false);
 
 
   useEffect(() => {
@@ -66,6 +79,7 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           supportRequestsResult,
           latestEventsResult,
           latestPendingInvitationsResult,
+          usersListResult,
         ] = await Promise.allSettled([
           supabase.from('profiles').select('*', { count: 'exact', head: true }),
           supabase.from('events').select('*', { count: 'exact', head: true }),
@@ -99,7 +113,12 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
             .eq('status', 'pending')
             .order('created_at', { ascending: false })
             .limit(5),
+          supabase
+            .from('profiles')
+            .select('id, name, role, plan, has_unlimited_access')
+            .order('name', { ascending: true }),
         ]);
+
 
 
         setSummary({
@@ -168,16 +187,35 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
           setInvitationsUnavailable(true);
         }
 
+        if (usersListResult.status === 'fulfilled' && !usersListResult.value.error) {
+          const nextUsers = (usersListResult.value.data as AdminUser[] | null) || [];
+
+          setUsers(nextUsers);
+          setUsersUnavailable(false);
+          setSelectedUserId((prev) =>
+            prev && nextUsers.some((user) => user.id === prev) ? prev : nextUsers[0]?.id ?? null
+          );
+        } else {
+          setUsers([]);
+          setUsersUnavailable(true);
+          setSelectedUserId(null);
+        }
+
+
       } catch (error) {
         console.error('Unexpected admin overview load error:', error);
         setSummary(INITIAL_SUMMARY);
         setLatestEvents([]);
+        setUsers([]);
+        setSelectedUserId(null);
         setLatestPendingInvitations([]);
         setEventsUnavailable(true);
         setInvitationsUnavailable(true);
+        setUsersUnavailable(true);
       } finally {
         setLoading(false);
       }
+
 
     };
 
@@ -242,6 +280,21 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
       value: getSummaryValue(summary.supportRequests),
     },
   ];
+
+  const normalizedUserSearch = userSearch.trim().toLowerCase();
+
+  const filteredUsers = users.filter((user) => {
+    if (!normalizedUserSearch) {
+      return true;
+    }
+
+    const name = user.name?.toLowerCase() || '';
+    return name.includes(normalizedUserSearch);
+  });
+
+  const selectedUser =
+    users.find((user) => user.id === selectedUserId) || filteredUsers[0] || null;
+
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -391,6 +444,122 @@ export function AdminScreen({ onNavigate }: { onNavigate: (screen: string) => vo
               </div>
             )}
           </div>
+
+          <div
+            className="rounded-xl border p-5"
+            style={{
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: '#1A1A1A',
+            }}
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3>{translate('admin.usersTitle')}</h3>
+              <span className="text-xs text-muted-foreground">
+                {translate('admin.readOnly')}
+              </span>
+            </div>
+
+            <input
+              type="text"
+              placeholder={translate('admin.userSearchPlaceholder')}
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
+              style={{
+                backgroundColor: '#111111',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+            />
+
+            {loading && (
+              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
+            )}
+
+            {!loading && usersUnavailable && (
+              <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
+            )}
+
+            {!loading && !usersUnavailable && users.length === 0 && (
+              <p className="text-sm text-muted-foreground">{translate('admin.noUsers')}</p>
+            )}
+
+            {!loading && !usersUnavailable && users.length > 0 && filteredUsers.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                {translate('admin.noUsersMatch')}
+              </p>
+            )}
+
+            {!loading && !usersUnavailable && filteredUsers.length > 0 && (
+              <div className="space-y-3">
+                <div className="space-y-2 max-h-56 overflow-y-auto">
+                  {filteredUsers.map((user) => {
+                    const isSelected = user.id === selectedUserId;
+
+                    return (
+                      <button
+                        key={user.id}
+                        onClick={() => setSelectedUserId(user.id)}
+                        className="w-full rounded-lg border p-3 text-left transition-colors"
+                        style={{
+                          borderColor: isSelected
+                            ? 'rgba(212, 175, 55, 0.35)'
+                            : 'rgba(255, 255, 255, 0.08)',
+                          backgroundColor: '#111111',
+                        }}
+                      >
+                        <p className="mb-1">{user.name || translate('common.user')}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {translate('admin.roleLabel')}: {user.role || translate('admin.notAvailable')}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div
+                  className="rounded-lg border p-4"
+                  style={{
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    backgroundColor: '#111111',
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <h4>{translate('admin.userProfileTitle')}</h4>
+                    <span className="text-xs text-muted-foreground">
+                      {translate('admin.readOnly')}
+                    </span>
+                  </div>
+
+                  {!selectedUser && (
+                    <p className="text-sm text-muted-foreground">
+                      {translate('admin.selectUser')}
+                    </p>
+                  )}
+
+                  {selectedUser && (
+                    <div className="space-y-2">
+                      <p>
+                        {translate('common.name')}: {selectedUser.name || translate('common.user')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {translate('admin.roleLabel')}: {selectedUser.role || translate('admin.notAvailable')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {translate('admin.planLabel')}: {selectedUser.plan || translate('admin.notAvailable')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {translate('admin.unlimitedAccessLabel')}:{' '}
+                        {selectedUser.has_unlimited_access
+                          ? translate('admin.enabled')
+                          : translate('admin.disabled')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
 
 
           <div

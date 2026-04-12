@@ -87,6 +87,15 @@ function getAuthFlowType(href: string) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+type CurrentProfileAccess = {
+  id: string;
+  name: string | null;
+  role?: string | null;
+  plan?: string | null;
+  has_unlimited_access?: boolean | null;
+  is_banned?: boolean | null;
+};
+
 export default function App() {
   const initialAuthRedirectState = readStoredAuthRedirectState();
   const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -145,6 +154,22 @@ export default function App() {
 
   const clearAuthRedirectState = () => {
     updateAuthRedirectState(null, null);
+  };
+
+  const redirectBlockedAccountToWelcome = async () => {
+    clearAuthRedirectState();
+    setSelectedEvent(null);
+    setCurrentScreen('welcome');
+    setHistory(['welcome']);
+    setDirection('back');
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Failed to sign out blocked user:', error);
+    }
+
+    feedback.error(translate('auth.accountBlocked'));
   };
 
   const getPreferredProfileName = (user: User) => {
@@ -222,8 +247,31 @@ export default function App() {
     }
   };
 
+  const getCurrentProfileAccess = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_my_profile_access').maybeSingle();
+
+      if (error) {
+        console.error('Failed to load current profile access:', error);
+        return null;
+      }
+
+      return (data as CurrentProfileAccess | null) ?? null;
+    } catch (error) {
+      console.error('Unexpected current profile access error:', error);
+      return null;
+    }
+  };
+
   const applySignedInNavigation = async (user: User) => {
     await syncProfileFromAuthUser(user);
+
+    const profileAccess = await getCurrentProfileAccess();
+
+    if (profileAccess?.is_banned) {
+      await redirectBlockedAccountToWelcome();
+      return;
+    }
 
     if (pendingAfterAuthRef.current) {
       const pending = pendingAfterAuthRef.current;

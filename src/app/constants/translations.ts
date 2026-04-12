@@ -208,11 +208,28 @@ type TranslationKey =
     | 'admin.noUsersMatch'
     | 'admin.userProfileTitle'
     | 'admin.selectUser'
+    | 'admin.userStatusLabel'
     | 'admin.saveChanges'
     | 'admin.savingUser'
     | 'admin.updateUserSuccess'
     | 'admin.updateUserFailed'
     | 'admin.updateUserUnexpectedError'
+    | 'admin.banUser'
+    | 'admin.unbanUser'
+    | 'admin.banningUser'
+    | 'admin.unbanningUser'
+    | 'admin.banUserConfirmDescription'
+    | 'admin.unbanUserConfirmDescription'
+    | 'admin.banUserHint'
+    | 'admin.cannotBanSelf'
+    | 'admin.userBannedSuccess'
+    | 'admin.userUnbannedSuccess'
+    | 'admin.banUserFailed'
+    | 'admin.unbanUserFailed'
+    | 'admin.banUserUnexpectedError'
+    | 'admin.unbanUserUnexpectedError'
+    | 'admin.activeStatus'
+    | 'admin.bannedStatus'
     | 'admin.deleteUser'
     | 'admin.deletingUser'
     | 'admin.deleteUserConfirm'
@@ -368,6 +385,7 @@ type TranslationKey =
     | 'login.resetEmailSent'
     | 'login.resetFailed'
     | 'login.resetUnexpectedError'
+    | 'auth.accountBlocked'
     | 'resetPassword.back'
     | 'resetPassword.title'
     | 'resetPassword.description'
@@ -621,11 +639,28 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.noUsersMatch': 'No users match this search',
         'admin.userProfileTitle': 'User profile',
         'admin.selectUser': 'Select a user to view details',
+        'admin.userStatusLabel': 'Status',
         'admin.saveChanges': 'Save changes',
         'admin.savingUser': 'Saving...',
         'admin.updateUserSuccess': 'User access updated',
         'admin.updateUserFailed': 'Failed to update user access',
         'admin.updateUserUnexpectedError': 'An unexpected error occurred while updating the user',
+        'admin.banUser': 'Ban user',
+        'admin.unbanUser': 'Unban user',
+        'admin.banningUser': 'Banning user...',
+        'admin.unbanningUser': 'Unbanning user...',
+        'admin.banUserConfirmDescription': 'Block this user from accessing the app?',
+        'admin.unbanUserConfirmDescription': 'Restore access for this user?',
+        'admin.banUserHint': 'Banned users are signed out and cannot enter the app until they are unbanned.',
+        'admin.cannotBanSelf': 'You cannot ban your own admin account',
+        'admin.userBannedSuccess': 'User has been banned',
+        'admin.userUnbannedSuccess': 'User has been unbanned',
+        'admin.banUserFailed': 'Failed to ban user',
+        'admin.unbanUserFailed': 'Failed to unban user',
+        'admin.banUserUnexpectedError': 'An unexpected error occurred while banning the user',
+        'admin.unbanUserUnexpectedError': 'An unexpected error occurred while unbanning the user',
+        'admin.activeStatus': 'Active',
+        'admin.bannedStatus': 'Banned',
         'admin.deleteUser': 'Delete user',
         'admin.deletingUser': 'Deleting user...',
         'admin.deleteUserConfirm': 'Delete this user? This action cannot be undone.',
@@ -787,6 +822,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.resetEmailSent': 'We sent a password reset link to your email',
         'login.resetFailed': 'Failed to send password reset email',
         'login.resetUnexpectedError': 'An error occurred while sending the reset email',
+        'auth.accountBlocked': 'Your account has been blocked',
 
         'resetPassword.back': 'Back',
         'resetPassword.title': 'Set new password',
@@ -1041,11 +1077,28 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.noUsersMatch': 'Ничего не найдено',
         'admin.userProfileTitle': 'Профиль пользователя',
         'admin.selectUser': 'Выбери пользователя, чтобы посмотреть детали',
+        'admin.userStatusLabel': 'Статус',
         'admin.saveChanges': 'Сохранить изменения',
         'admin.savingUser': 'Сохранение...',
         'admin.updateUserSuccess': 'Доступ пользователя обновлен',
         'admin.updateUserFailed': 'Не удалось обновить доступ пользователя',
         'admin.updateUserUnexpectedError': 'Произошла непредвиденная ошибка при обновлении пользователя',
+        'admin.banUser': 'Забанить пользователя',
+        'admin.unbanUser': 'Разбанить пользователя',
+        'admin.banningUser': 'Блокировка пользователя...',
+        'admin.unbanningUser': 'Разблокировка пользователя...',
+        'admin.banUserConfirmDescription': 'Заблокировать этому пользователю доступ к приложению?',
+        'admin.unbanUserConfirmDescription': 'Восстановить этому пользователю доступ к приложению?',
+        'admin.banUserHint': 'Забаненные пользователи выходят из сессии и не могут зайти в приложение, пока их не разбанят.',
+        'admin.cannotBanSelf': 'Нельзя забанить собственный admin-аккаунт',
+        'admin.userBannedSuccess': 'Пользователь заблокирован',
+        'admin.userUnbannedSuccess': 'Пользователь разблокирован',
+        'admin.banUserFailed': 'Не удалось заблокировать пользователя',
+        'admin.unbanUserFailed': 'Не удалось разблокировать пользователя',
+        'admin.banUserUnexpectedError': 'Произошла непредвиденная ошибка при блокировке пользователя',
+        'admin.unbanUserUnexpectedError': 'Произошла непредвиденная ошибка при разблокировке пользователя',
+        'admin.activeStatus': 'Активен',
+        'admin.bannedStatus': 'Заблокирован',
         'admin.deleteUser': 'Удалить пользователя',
         'admin.deletingUser': 'Удаление пользователя...',
         'admin.deleteUserConfirm': 'Удалить этого пользователя? Действие нельзя отменить.',
@@ -1206,6 +1259,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.resetEmailSent': 'Мы отправили ссылку для сброса пароля на ваш email',
         'login.resetFailed': 'Не удалось отправить письмо для сброса пароля',
         'login.resetUnexpectedError': 'Произошла ошибка при отправке письма для сброса пароля',
+        'auth.accountBlocked': 'Ваш аккаунт заблокирован',
 
         'resetPassword.back': 'Назад',
         'resetPassword.title': 'Новый пароль',
@@ -1465,6 +1519,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.updateUserSuccess': 'Accesul utilizatorului a fost actualizat',
         'admin.updateUserFailed': 'Nu s-a putut actualiza accesul utilizatorului',
         'admin.updateUserUnexpectedError': 'A apărut o eroare neașteptată la actualizarea utilizatorului',
+        'admin.userStatusLabel': 'Status',
+        'admin.banUser': 'Blochează utilizatorul',
+        'admin.unbanUser': 'Deblochează utilizatorul',
+        'admin.banningUser': 'Se blochează utilizatorul...',
+        'admin.unbanningUser': 'Se deblochează utilizatorul...',
+        'admin.banUserConfirmDescription': 'Blochezi accesul acestui utilizator în aplicație?',
+        'admin.unbanUserConfirmDescription': 'Restabilești accesul acestui utilizator?',
+        'admin.banUserHint': 'Utilizatorii blocați sunt deconectați și nu mai pot intra în aplicație până la deblocare.',
+        'admin.cannotBanSelf': 'Nu îți poți bloca propriul cont de admin',
+        'admin.userBannedSuccess': 'Utilizatorul a fost blocat',
+        'admin.userUnbannedSuccess': 'Utilizatorul a fost deblocat',
+        'admin.banUserFailed': 'Nu s-a putut bloca utilizatorul',
+        'admin.unbanUserFailed': 'Nu s-a putut debloca utilizatorul',
+        'admin.banUserUnexpectedError': 'A apărut o eroare neașteptată la blocarea utilizatorului',
+        'admin.unbanUserUnexpectedError': 'A apărut o eroare neașteptată la deblocarea utilizatorului',
+        'admin.activeStatus': 'Activ',
+        'admin.bannedStatus': 'Blocat',
         'admin.deleteUser': 'Șterge utilizatorul',
         'admin.deletingUser': 'Se șterge utilizatorul...',
         'admin.deleteUserConfirm': 'Ștergi acest utilizator? Acțiunea nu poate fi anulată.',
@@ -1627,6 +1698,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.resetEmailSent': 'Am trimis linkul pentru resetarea parolei pe email',
         'login.resetFailed': 'Nu s-a putut trimite emailul pentru resetarea parolei',
         'login.resetUnexpectedError': 'A apărut o eroare la trimiterea emailului pentru resetarea parolei',
+        'auth.accountBlocked': 'Contul tău a fost blocat',
 
         'resetPassword.back': 'Înapoi',
         'resetPassword.title': 'Parolă nouă',
@@ -1886,6 +1958,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.updateUserSuccess': 'Доступ користувача оновлено',
         'admin.updateUserFailed': 'Не вдалося оновити доступ користувача',
         'admin.updateUserUnexpectedError': 'Сталася неочікувана помилка під час оновлення користувача',
+        'admin.userStatusLabel': 'Статус',
+        'admin.banUser': 'Забанити користувача',
+        'admin.unbanUser': 'Розбанити користувача',
+        'admin.banningUser': 'Блокування користувача...',
+        'admin.unbanningUser': 'Розблокування користувача...',
+        'admin.banUserConfirmDescription': 'Заблокувати цьому користувачу доступ до застосунку?',
+        'admin.unbanUserConfirmDescription': 'Відновити цьому користувачу доступ до застосунку?',
+        'admin.banUserHint': 'Забанені користувачі виходять із сесії й не можуть зайти в застосунок, поки їх не розбанять.',
+        'admin.cannotBanSelf': 'Не можна забанити власний admin-акаунт',
+        'admin.userBannedSuccess': 'Користувача заблоковано',
+        'admin.userUnbannedSuccess': 'Користувача розблоковано',
+        'admin.banUserFailed': 'Не вдалося заблокувати користувача',
+        'admin.unbanUserFailed': 'Не вдалося розблокувати користувача',
+        'admin.banUserUnexpectedError': 'Сталася неочікувана помилка під час блокування користувача',
+        'admin.unbanUserUnexpectedError': 'Сталася неочікувана помилка під час розблокування користувача',
+        'admin.activeStatus': 'Активний',
+        'admin.bannedStatus': 'Заблокований',
         'admin.deleteUser': 'Видалити користувача',
         'admin.deletingUser': 'Видалення користувача...',
         'admin.deleteUserConfirm': 'Видалити цього користувача? Дію не можна скасувати.',
@@ -2049,6 +2138,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.resetEmailSent': 'Ми надіслали посилання для скидання пароля на ваш email',
         'login.resetFailed': 'Не вдалося надіслати лист для скидання пароля',
         'login.resetUnexpectedError': 'Сталася помилка під час надсилання листа для скидання пароля',
+        'auth.accountBlocked': 'Ваш акаунт заблоковано',
 
         'resetPassword.back': 'Назад',
         'resetPassword.title': 'Новий пароль',
@@ -2308,6 +2398,23 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.updateUserSuccess': 'Benutzerzugriff aktualisiert',
         'admin.updateUserFailed': 'Benutzerzugriff konnte nicht aktualisiert werden',
         'admin.updateUserUnexpectedError': 'Beim Aktualisieren des Benutzers ist ein unerwarteter Fehler aufgetreten',
+        'admin.userStatusLabel': 'Status',
+        'admin.banUser': 'Benutzer sperren',
+        'admin.unbanUser': 'Benutzer entsperren',
+        'admin.banningUser': 'Benutzer wird gesperrt...',
+        'admin.unbanningUser': 'Benutzer wird entsperrt...',
+        'admin.banUserConfirmDescription': 'Diesen Benutzer vom Zugriff auf die App ausschließen?',
+        'admin.unbanUserConfirmDescription': 'Den Zugriff für diesen Benutzer wieder freigeben?',
+        'admin.banUserHint': 'Gesperrte Benutzer werden abgemeldet und können die App erst nach dem Entsperren wieder nutzen.',
+        'admin.cannotBanSelf': 'Du kannst dein eigenes Admin-Konto nicht sperren',
+        'admin.userBannedSuccess': 'Benutzer wurde gesperrt',
+        'admin.userUnbannedSuccess': 'Benutzer wurde entsperrt',
+        'admin.banUserFailed': 'Benutzer konnte nicht gesperrt werden',
+        'admin.unbanUserFailed': 'Benutzer konnte nicht entsperrt werden',
+        'admin.banUserUnexpectedError': 'Beim Sperren des Benutzers ist ein unerwarteter Fehler aufgetreten',
+        'admin.unbanUserUnexpectedError': 'Beim Entsperren des Benutzers ist ein unerwarteter Fehler aufgetreten',
+        'admin.activeStatus': 'Aktiv',
+        'admin.bannedStatus': 'Gesperrt',
         'admin.deleteUser': 'Benutzer löschen',
         'admin.deletingUser': 'Benutzer wird gelöscht...',
         'admin.deleteUserConfirm': 'Diesen Benutzer löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
@@ -2472,6 +2579,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'login.resetEmailSent': 'Wir haben dir einen Link zum Zurücksetzen des Passworts per E-Mail gesendet',
         'login.resetFailed': 'E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden',
         'login.resetUnexpectedError': 'Beim Senden der E-Mail zum Zurücksetzen des Passworts ist ein Fehler aufgetreten',
+        'auth.accountBlocked': 'Dein Konto wurde gesperrt',
 
         'resetPassword.back': 'Zurück',
         'resetPassword.title': 'Neues Passwort',

@@ -35,6 +35,7 @@ type AdminUser = {
   role: string | null;
   plan: string | null;
   has_unlimited_access: boolean | null;
+  is_banned: boolean | null;
 };
 
 type AdminListProfilesRow = {
@@ -43,6 +44,7 @@ type AdminListProfilesRow = {
   role: string | null;
   plan: string | null;
   has_unlimited_access: boolean | null;
+  is_banned: boolean | null;
 };
 
 
@@ -104,7 +106,7 @@ export function AdminScreen({
   const [usersUnavailable, setUsersUnavailable] = useState(false);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
-  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [banMutatingUserId, setBanMutatingUserId] = useState<string | null>(null);
   const [editableRole, setEditableRole] = useState<'user' | 'admin'>('user');
   const [editablePlan, setEditablePlan] = useState<'free' | 'pro'>('free');
   const [editableUnlimitedAccess, setEditableUnlimitedAccess] = useState(false);
@@ -587,20 +589,24 @@ export function AdminScreen({
     }
   };
 
-  const handleDeleteSelectedUser = async () => {
+  const handleToggleSelectedUserBan = async () => {
     if (!selectedUser) {
       return;
     }
 
     if (selectedUser.id === currentAdminId) {
-      feedback.warning(translate('admin.deleteUserSelfBlocked'));
+      feedback.warning(translate('admin.cannotBanSelf'));
       return;
     }
 
+    const nextBanState = !selectedUser.is_banned;
+
     const confirmed = await feedback.confirm({
-      title: translate('admin.deleteUser'),
-      description: translate('admin.deleteUserConfirm'),
-      confirmLabel: translate('admin.deleteUser'),
+      title: nextBanState ? translate('admin.banUser') : translate('admin.unbanUser'),
+      description: nextBanState
+        ? translate('admin.banUserConfirmDescription')
+        : translate('admin.unbanUserConfirmDescription'),
+      confirmLabel: nextBanState ? translate('admin.banUser') : translate('admin.unbanUser'),
       cancelLabel: translate('common.cancel'),
       variant: 'destructive',
     });
@@ -609,39 +615,43 @@ export function AdminScreen({
       return;
     }
 
-    setDeletingUserId(selectedUser.id);
+    setBanMutatingUserId(selectedUser.id);
 
     try {
-      const { error } = await supabase.rpc('admin_delete_user', {
+      const { error } = await supabase.rpc('admin_set_user_ban_state', {
         target_profile_id: selectedUser.id,
+        new_is_banned: nextBanState,
       });
 
       if (error) {
-        console.error('Admin delete user error:', error);
+        console.error('Admin set user ban state error:', error);
 
         const message = String(error.message || '').toLowerCase();
 
         if (message.includes('self')) {
-          feedback.warning(translate('admin.deleteUserSelfBlocked'));
+          feedback.warning(translate('admin.cannotBanSelf'));
           return;
         }
 
-        if (message.includes('created events') || message.includes('has_created_events')) {
-          feedback.warning(translate('admin.deleteUserHasEventsBlocked'));
-          return;
-        }
-
-        feedback.error(translate('admin.deleteUserFailed'));
+        feedback.error(
+          nextBanState ? translate('admin.banUserFailed') : translate('admin.unbanUserFailed')
+        );
         return;
       }
 
-      feedback.success(translate('admin.deleteUserSuccess'));
+      feedback.success(
+        nextBanState ? translate('admin.userBannedSuccess') : translate('admin.userUnbannedSuccess')
+      );
       await loadAdminOverview();
     } catch (error) {
-      console.error('Unexpected admin delete user error:', error);
-      feedback.error(translate('admin.deleteUserUnexpectedError'));
+      console.error('Unexpected admin set user ban state error:', error);
+      feedback.error(
+        nextBanState
+          ? translate('admin.banUserUnexpectedError')
+          : translate('admin.unbanUserUnexpectedError')
+      );
     } finally {
-      setDeletingUserId(null);
+      setBanMutatingUserId(null);
     }
   };
 
@@ -1127,13 +1137,21 @@ export function AdminScreen({
                   )}
 
                   {selectedUser && (
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <p>
-                          {translate('common.name')}: {selectedUser.name || translate('common.user')}
-                        </p>
-                        <p className="text-xs text-muted-foreground break-all">{selectedUser.id}</p>
-                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <p>
+                            {translate('common.name')}: {selectedUser.name || translate('common.user')}
+                          </p>
+                          <p className="text-xs text-muted-foreground break-all">{selectedUser.id}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {translate('admin.userStatusLabel')}:{' '}
+                            <span style={{ color: selectedUser.is_banned ? '#FF4D6D' : '#D4AF37' }}>
+                              {selectedUser.is_banned
+                                ? translate('admin.bannedStatus')
+                                : translate('admin.activeStatus')}
+                            </span>
+                          </p>
+                        </div>
 
                       <div className="space-y-2">
                         <label className="block text-xs text-muted-foreground">
@@ -1241,7 +1259,7 @@ export function AdminScreen({
                           disabled={
                             !isSelectedUserDirty ||
                             savingUserId === selectedUser.id ||
-                            deletingUserId === selectedUser.id
+                            banMutatingUserId === selectedUser.id
                           }
                           className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
                           style={{
@@ -1257,9 +1275,9 @@ export function AdminScreen({
 
                         <button
                           type="button"
-                          onClick={handleDeleteSelectedUser}
+                          onClick={handleToggleSelectedUserBan}
                           disabled={
-                            deletingUserId === selectedUser.id ||
+                            banMutatingUserId === selectedUser.id ||
                             savingUserId === selectedUser.id
                           }
                           className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
@@ -1269,13 +1287,17 @@ export function AdminScreen({
                             color: '#FF4D6D',
                           }}
                         >
-                          {deletingUserId === selectedUser.id
-                            ? translate('admin.deletingUser')
-                            : translate('admin.deleteUser')}
+                          {banMutatingUserId === selectedUser.id
+                            ? selectedUser.is_banned
+                              ? translate('admin.unbanningUser')
+                              : translate('admin.banningUser')
+                            : selectedUser.is_banned
+                              ? translate('admin.unbanUser')
+                              : translate('admin.banUser')}
                         </button>
 
                         <p className="text-[11px] text-muted-foreground">
-                          {translate('admin.deleteUserHint')}
+                          {translate('admin.banUserHint')}
                         </p>
                       </div>
                     </div>

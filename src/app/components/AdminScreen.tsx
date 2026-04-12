@@ -1167,85 +1167,83 @@ export function AdminScreen({
                 backgroundColor: '#1A1A1A',
               }}
             >
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <h3>{translate('admin.usersTitle')}</h3>
-            </div>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h3>{translate('admin.usersTitle')}</h3>
+              </div>
 
-            <input
-              type="text"
-              placeholder={translate('admin.userSearchPlaceholder')}
-              value={userSearch}
-              onChange={(e) => setUserSearch(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
-              style={{
-                backgroundColor: '#111111',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}
-            />
+              <input
+                type="text"
+                placeholder={translate('admin.userSearchPlaceholder')}
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
+                style={{
+                  backgroundColor: '#111111',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                }}
+              />
 
-            {loading && (
-              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
-            )}
+              {loading && (
+                <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
+              )}
 
-            {!loading && usersUnavailable && (
-              <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
-            )}
+              {!loading && usersUnavailable && (
+                <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
+              )}
 
-            {!loading && !usersUnavailable && users.length === 0 && (
-              <p className="text-sm text-muted-foreground">{translate('admin.noUsers')}</p>
-            )}
+              {!loading && !usersUnavailable && users.length === 0 && (
+                <p className="text-sm text-muted-foreground">{translate('admin.noUsers')}</p>
+              )}
 
-            {!loading && !usersUnavailable && users.length > 0 && filteredUsers.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                {translate('admin.noUsersMatch')}
-              </p>
-            )}
+              {!loading && !usersUnavailable && users.length > 0 && filteredUsers.length === 0 && (
+                <p className="text-sm text-muted-foreground">{translate('admin.noUsersMatch')}</p>
+              )}
 
-            {!loading && !usersUnavailable && filteredUsers.length > 0 && (
-              <div className="space-y-3">
-                <div className="space-y-2 max-h-56 overflow-y-auto">
-                  {filteredUsers.map((user) => {
-                    const isSelected = user.id === selectedUserId;
+              {!loading && !usersUnavailable && filteredUsers.length > 0 && (
+                <div className="space-y-3">
+                  <div className="space-y-2 max-h-56 overflow-y-auto">
+                    {filteredUsers.map((user) => {
+                      const isSelected = user.id === selectedUserId;
 
-                    return (
-                      <button
-                        key={user.id}
-                        onClick={() => setSelectedUserId(user.id)}
-                        className="w-full rounded-lg border p-3 text-left transition-colors"
-                        style={{
-                          borderColor: isSelected
-                            ? 'rgba(212, 175, 55, 0.35)'
-                            : 'rgba(255, 255, 255, 0.08)',
-                          backgroundColor: '#111111',
-                        }}
-                      >
-                        <p className="mb-1">{user.name || translate('common.user')}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {translate('admin.roleLabel')}: {user.role || translate('admin.notAvailable')}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div
-                  className="rounded-lg border p-4"
-                  style={{
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                    backgroundColor: '#111111',
-                  }}
-                >
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <h4>{translate('admin.userProfileTitle')}</h4>
+                      return (
+                        <button
+                          key={user.id}
+                          onClick={() => setSelectedUserId(user.id)}
+                          className="w-full rounded-lg border p-3 text-left transition-colors"
+                          style={{
+                            borderColor: isSelected
+                              ? 'rgba(212, 175, 55, 0.35)'
+                              : 'rgba(255, 255, 255, 0.08)',
+                            backgroundColor: '#111111',
+                          }}
+                        >
+                          <p className="mb-1">{user.name || translate('common.user')}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {translate('admin.roleLabel')}: {user.role || translate('admin.notAvailable')}
+                          </p>
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  {!selectedUser && (
-                    <p className="text-sm text-muted-foreground">
-                      {translate('admin.selectUser')}
-                    </p>
-                  )}
+                  <div
+                    className="rounded-lg border p-4"
+                    style={{
+                      borderColor: 'rgba(255, 255, 255, 0.08)',
+                      backgroundColor: '#111111',
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <h4>{translate('admin.userProfileTitle')}</h4>
+                    </div>
 
-                  {selectedUser && (
+                    {!selectedUser && (
+                      <p className="text-sm text-muted-foreground">
+                        {translate('admin.selectUser')}
+                      </p>
+                    )}
+
+                    {selectedUser && (
                       <div className="space-y-4">
                         <div className="space-y-1">
                           <p>
@@ -1262,158 +1260,161 @@ export function AdminScreen({
                           </p>
                         </div>
 
-                      <div className="space-y-2">
-                        <label className="block text-xs text-muted-foreground">
-                          {translate('admin.roleLabel')}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {(['user', 'admin'] as const).map((roleOption) => {
-                            const isActive = editableRole === roleOption;
+                        <div className="space-y-2">
+                          <label className="block text-xs text-muted-foreground">
+                            {translate('admin.roleLabel')}
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {(['user', 'admin'] as const).map((roleOption) => {
+                              const isActive = editableRole === roleOption;
 
-                            return (
-                              <button
-                                key={roleOption}
-                                type="button"
-                                onClick={() => setEditableRole(roleOption)}
-                                className="rounded-lg px-3 py-2 text-sm transition-colors"
-                                style={{
-                                  backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#171717',
-                                  border: isActive
-                                    ? '1px solid rgba(212, 175, 55, 0.35)'
-                                    : '1px solid rgba(255, 255, 255, 0.08)',
-                                  color: isActive ? '#D4AF37' : '#F5F5F5',
-                                }}
-                              >
-                                {translate(roleOption === 'admin' ? 'admin.roleAdmin' : 'admin.roleUser')}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block text-xs text-muted-foreground">
-                          {translate('admin.planLabel')}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {(['free', 'pro'] as const).map((planOption) => {
-                            const isActive = editablePlan === planOption;
-
-                            return (
-                              <button
-                                key={planOption}
-                                type="button"
-                                onClick={() => setEditablePlan(planOption)}
-                                className="rounded-lg px-3 py-2 text-sm transition-colors"
-                                style={{
-                                  backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#171717',
-                                  border: isActive
-                                    ? '1px solid rgba(212, 175, 55, 0.35)'
-                                    : '1px solid rgba(255, 255, 255, 0.08)',
-                                  color: isActive ? '#D4AF37' : '#F5F5F5',
-                                }}
-                              >
-                                {translate(planOption === 'pro' ? 'admin.planPro' : 'admin.planFree')}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setEditableUnlimitedAccess((prev) => !prev)}
-                        className="w-full rounded-xl border px-4 py-3 text-left transition-colors"
-                        style={{
-                          backgroundColor: editableUnlimitedAccess ? 'rgba(212, 175, 55, 0.08)' : '#171717',
-                          borderColor: editableUnlimitedAccess
-                            ? 'rgba(212, 175, 55, 0.3)'
-                            : 'rgba(255, 255, 255, 0.08)',
-                        }}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <p>{translate('admin.unlimitedAccessLabel')}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {editableUnlimitedAccess
-                                ? translate('admin.enabled')
-                                : translate('admin.disabled')}
-                            </p>
+                              return (
+                                <button
+                                  key={roleOption}
+                                  type="button"
+                                  onClick={() => setEditableRole(roleOption)}
+                                  className="rounded-lg px-3 py-2 text-sm transition-colors"
+                                  style={{
+                                    backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#171717',
+                                    border: isActive
+                                      ? '1px solid rgba(212, 175, 55, 0.35)'
+                                      : '1px solid rgba(255, 255, 255, 0.08)',
+                                    color: isActive ? '#D4AF37' : '#F5F5F5',
+                                  }}
+                                >
+                                  {translate(roleOption === 'admin' ? 'admin.roleAdmin' : 'admin.roleUser')}
+                                </button>
+                              );
+                            })}
                           </div>
-                          <div
-                            className="h-6 w-11 rounded-full p-1 transition-colors"
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-xs text-muted-foreground">
+                            {translate('admin.planLabel')}
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {(['free', 'pro'] as const).map((planOption) => {
+                              const isActive = editablePlan === planOption;
+
+                              return (
+                                <button
+                                  key={planOption}
+                                  type="button"
+                                  onClick={() => setEditablePlan(planOption)}
+                                  className="rounded-lg px-3 py-2 text-sm transition-colors"
+                                  style={{
+                                    backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#171717',
+                                    border: isActive
+                                      ? '1px solid rgba(212, 175, 55, 0.35)'
+                                      : '1px solid rgba(255, 255, 255, 0.08)',
+                                    color: isActive ? '#D4AF37' : '#F5F5F5',
+                                  }}
+                                >
+                                  {translate(planOption === 'pro' ? 'admin.planPro' : 'admin.planFree')}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setEditableUnlimitedAccess((prev) => !prev)}
+                          className="w-full rounded-xl border px-4 py-3 text-left transition-colors"
+                          style={{
+                            backgroundColor: editableUnlimitedAccess ? 'rgba(212, 175, 55, 0.08)' : '#171717',
+                            borderColor: editableUnlimitedAccess
+                              ? 'rgba(212, 175, 55, 0.3)'
+                              : 'rgba(255, 255, 255, 0.08)',
+                          }}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p>{translate('admin.unlimitedAccessLabel')}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {editableUnlimitedAccess
+                                  ? translate('admin.enabled')
+                                  : translate('admin.disabled')}
+                              </p>
+                            </div>
+                            <div
+                              className="h-6 w-11 rounded-full p-1 transition-colors"
+                              style={{
+                                backgroundColor: editableUnlimitedAccess
+                                  ? 'rgba(212, 175, 55, 0.36)'
+                                  : 'rgba(255, 255, 255, 0.14)',
+                              }}
+                            >
+                              <div
+                                className="h-4 w-4 rounded-full transition-transform"
+                                style={{
+                                  backgroundColor: editableUnlimitedAccess ? '#D4AF37' : '#F5F5F5',
+                                  transform: editableUnlimitedAccess
+                                    ? 'translateX(20px)'
+                                    : 'translateX(0)',
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </button>
+
+                        <div className="grid grid-cols-1 gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSaveSelectedUser}
+                            disabled={
+                              !isSelectedUserDirty ||
+                              savingUserId === selectedUser.id ||
+                              banMutatingUserId === selectedUser.id
+                            }
+                            className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
                             style={{
-                              backgroundColor: editableUnlimitedAccess
-                                ? 'rgba(212, 175, 55, 0.36)'
-                                : 'rgba(255, 255, 255, 0.14)',
+                              backgroundColor: 'rgba(212, 175, 55, 0.12)',
+                              border: '1px solid rgba(212, 175, 55, 0.35)',
+                              color: '#D4AF37',
                             }}
                           >
-                            <div
-                              className="h-4 w-4 rounded-full transition-transform"
-                              style={{
-                                backgroundColor: editableUnlimitedAccess ? '#D4AF37' : '#F5F5F5',
-                                transform: editableUnlimitedAccess
-                                  ? 'translateX(20px)'
-                                  : 'translateX(0)',
-                              }}
-                            />
-                          </div>
+                            {savingUserId === selectedUser.id
+                              ? translate('admin.savingUser')
+                              : translate('admin.saveChanges')}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleToggleSelectedUserBan}
+                            disabled={
+                              banMutatingUserId === selectedUser.id ||
+                              savingUserId === selectedUser.id
+                            }
+                            className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
+                            style={{
+                              backgroundColor: 'rgba(255, 77, 109, 0.08)',
+                              border: '1px solid rgba(255, 77, 109, 0.28)',
+                              color: '#FF4D6D',
+                            }}
+                          >
+                            {banMutatingUserId === selectedUser.id
+                              ? selectedUser.is_banned
+                                ? translate('admin.unbanningUser')
+                                : translate('admin.banningUser')
+                              : selectedUser.is_banned
+                                ? translate('admin.unbanUser')
+                                : translate('admin.banUser')}
+                          </button>
+
+                          <p className="text-[11px] text-muted-foreground">
+                            {translate('admin.banUserHint')}
+                          </p>
                         </div>
-                      </button>
-
-                      <div className="grid grid-cols-1 gap-2">
-                        <button
-                          type="button"
-                          onClick={handleSaveSelectedUser}
-                          disabled={
-                            !isSelectedUserDirty ||
-                            savingUserId === selectedUser.id ||
-                            banMutatingUserId === selectedUser.id
-                          }
-                          className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
-                          style={{
-                            backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                            border: '1px solid rgba(212, 175, 55, 0.35)',
-                            color: '#D4AF37',
-                          }}
-                        >
-                          {savingUserId === selectedUser.id
-                            ? translate('admin.savingUser')
-                            : translate('admin.saveChanges')}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleToggleSelectedUserBan}
-                          disabled={
-                            banMutatingUserId === selectedUser.id ||
-                            savingUserId === selectedUser.id
-                          }
-                          className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
-                          style={{
-                            backgroundColor: 'rgba(255, 77, 109, 0.08)',
-                            border: '1px solid rgba(255, 77, 109, 0.28)',
-                            color: '#FF4D6D',
-                          }}
-                        >
-                          {banMutatingUserId === selectedUser.id
-                            ? selectedUser.is_banned
-                              ? translate('admin.unbanningUser')
-                              : translate('admin.banningUser')
-                            : selectedUser.is_banned
-                              ? translate('admin.unbanUser')
-                              : translate('admin.banUser')}
-                        </button>
-
-                        <p className="text-[11px] text-muted-foreground">
-                          {translate('admin.banUserHint')}
-                        </p>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          )}
+
           {activePage === 'support' && (
             <div
               className="rounded-xl border p-5"
@@ -1458,7 +1459,8 @@ export function AdminScreen({
                     >
                       <div className="space-y-1 mb-3">
                         <p className="text-xs text-muted-foreground">
-                          {translate('admin.supportRequestFrom')}: {request.userName || translate('common.user')}
+                          {translate('admin.supportRequestFrom')}:{' '}
+                          {request.userName || translate('common.user')}
                         </p>
                         {request.created_at && (
                           <p className="text-xs text-muted-foreground">
@@ -1488,8 +1490,6 @@ export function AdminScreen({
                   ))}
                 </div>
               )}
-            </div>
-          )}
             </div>
           )}
         </div>

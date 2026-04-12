@@ -260,6 +260,17 @@ type TranslationKey =
     | 'admin.submittedAt'
     | 'admin.subjectLabel'
     | 'admin.messageLabel'
+    | 'admin.supportStatusLabel'
+    | 'admin.supportStatusNew'
+    | 'admin.supportStatusInProgress'
+    | 'admin.supportStatusResolved'
+    | 'admin.startTicket'
+    | 'admin.resolveTicket'
+    | 'admin.reopenTicket'
+    | 'admin.backToNew'
+    | 'admin.supportStatusUpdated'
+    | 'admin.supportStatusUpdateFailed'
+    | 'admin.supportStatusUpdateUnexpectedError'
 
     | 'admin.noPendingInvitations'
     | 'admin.latestPendingInvitations'
@@ -699,6 +710,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.submittedAt': 'Submitted at',
         'admin.subjectLabel': 'Subject',
         'admin.messageLabel': 'Message',
+        'admin.supportStatusLabel': 'Status',
+        'admin.supportStatusNew': 'New',
+        'admin.supportStatusInProgress': 'In progress',
+        'admin.supportStatusResolved': 'Resolved',
+        'admin.startTicket': 'Start',
+        'admin.resolveTicket': 'Resolve',
+        'admin.reopenTicket': 'Reopen',
+        'admin.backToNew': 'Back to new',
+        'admin.supportStatusUpdated': 'Support ticket status updated',
+        'admin.supportStatusUpdateFailed': 'Failed to update support ticket status',
+        'admin.supportStatusUpdateUnexpectedError':
+            'An unexpected error occurred while updating the support ticket status',
         'admin.latestPendingInvitations': 'Latest pending invitations',
         'admin.invitedBy': 'Invited by',
         'admin.noPendingInvitations': 'No pending invitations',
@@ -1149,6 +1172,17 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.submittedAt': '\u041e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e',
         'admin.subjectLabel': '\u0422\u0435\u043c\u0430',
         'admin.messageLabel': '\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435',
+        'admin.supportStatusLabel': '\u0421\u0442\u0430\u0442\u0443\u0441',
+        'admin.supportStatusNew': '\u041d\u043e\u0432\u044b\u0439',
+        'admin.supportStatusInProgress': '\u0412 \u0440\u0430\u0431\u043e\u0442\u0435',
+        'admin.supportStatusResolved': '\u0420\u0435\u0448\u0435\u043d\u043e',
+        'admin.startTicket': '\u0412\u0437\u044f\u0442\u044c \u0432 \u0440\u0430\u0431\u043e\u0442\u0443',
+        'admin.resolveTicket': '\u041e\u0442\u043c\u0435\u0442\u0438\u0442\u044c \u043a\u0430\u043a \u0440\u0435\u0448\u0451\u043d\u043d\u044b\u0439',
+        'admin.reopenTicket': '\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0441\u043d\u043e\u0432\u0430',
+        'admin.backToNew': '\u0412\u0435\u0440\u043d\u0443\u0442\u044c \u0432 \u043d\u043e\u0432\u044b\u0435',
+        'admin.supportStatusUpdated': '\u0421\u0442\u0430\u0442\u0443\u0441 \u0437\u0430\u044f\u0432\u043a\u0438 \u043e\u0431\u043d\u043e\u0432\u043b\u0451\u043d',
+        'admin.supportStatusUpdateFailed': '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u0441\u0442\u0430\u0442\u0443\u0441 \u0437\u0430\u044f\u0432\u043a\u0438',
+        'admin.supportStatusUpdateUnexpectedError': '\u041f\u0440\u043e\u0438\u0437\u043e\u0448\u043b\u0430 \u043d\u0435\u043f\u0440\u0435\u0434\u0432\u0438\u0434\u0435\u043d\u043d\u0430\u044f \u043e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0438 \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u0437\u0430\u044f\u0432\u043a\u0438',
 
         'home.discover': 'События',
         'home.joined': 'Участвую',
@@ -1596,6 +1630,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.submittedAt': 'Trimis la',
         'admin.subjectLabel': 'Subiect',
         'admin.messageLabel': 'Mesaj',
+        'admin.supportStatusLabel': 'Status',
+        'admin.supportStatusNew': 'Nou',
+        'admin.supportStatusInProgress': 'In lucru',
+        'admin.supportStatusResolved': 'Rezolvat',
+        'admin.startTicket': 'Preia',
+        'admin.resolveTicket': 'Rezolva',
+        'admin.reopenTicket': 'Redeschide',
+        'admin.backToNew': 'Inapoi la nou',
+        'admin.supportStatusUpdated': 'Statusul cererii a fost actualizat',
+        'admin.supportStatusUpdateFailed': 'Nu s-a putut actualiza statusul cererii',
+        'admin.supportStatusUpdateUnexpectedError':
+            'A aparut o eroare neasteptata la actualizarea statusului cererii',
 
         'home.discover': 'Descoperă',
         'home.joined': 'Particip',
@@ -2046,6 +2092,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.submittedAt': '\u041d\u0430\u0434\u0456\u0441\u043b\u0430\u043d\u043e',
         'admin.subjectLabel': '\u0422\u0435\u043c\u0430',
         'admin.messageLabel': '\u041f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f',
+        'admin.supportStatusLabel': '\u0421\u0442\u0430\u0442\u0443\u0441',
+        'admin.supportStatusNew': '\u041d\u043e\u0432\u0438\u0439',
+        'admin.supportStatusInProgress': '\u0412 \u0440\u043e\u0431\u043e\u0442\u0456',
+        'admin.supportStatusResolved': '\u0412\u0438\u0440\u0456\u0448\u0435\u043d\u043e',
+        'admin.startTicket': '\u0412\u0437\u044f\u0442\u0438 \u0432 \u0440\u043e\u0431\u043e\u0442\u0443',
+        'admin.resolveTicket': '\u041f\u043e\u0437\u043d\u0430\u0447\u0438\u0442\u0438 \u044f\u043a \u0432\u0438\u0440\u0456\u0448\u0435\u043d\u043e',
+        'admin.reopenTicket': '\u0412\u0456\u0434\u043a\u0440\u0438\u0442\u0438 \u0437\u043d\u043e\u0432\u0443',
+        'admin.backToNew': '\u041f\u043e\u0432\u0435\u0440\u043d\u0443\u0442\u0438 \u0432 \u043d\u043e\u0432\u0456',
+        'admin.supportStatusUpdated': '\u0421\u0442\u0430\u0442\u0443\u0441 \u0437\u0430\u043f\u0438\u0442\u0443 \u043e\u043d\u043e\u0432\u043b\u0435\u043d\u043e',
+        'admin.supportStatusUpdateFailed': '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u043e\u043d\u043e\u0432\u0438\u0442\u0438 \u0441\u0442\u0430\u0442\u0443\u0441 \u0437\u0430\u043f\u0438\u0442\u0443',
+        'admin.supportStatusUpdateUnexpectedError':
+            '\u0421\u0442\u0430\u043b\u0430\u0441\u044f \u043d\u0435\u043f\u0435\u0440\u0435\u0434\u0431\u0430\u0447\u0435\u043d\u0430 \u043f\u043e\u043c\u0438\u043b\u043a\u0430 \u043f\u0456\u0434 \u0447\u0430\u0441 \u043e\u043d\u043e\u0432\u043b\u0435\u043d\u043d\u044f \u0441\u0442\u0430\u0442\u0443\u0441\u0443 \u0437\u0430\u043f\u0438\u0442\u0443',
 
         'home.discover': 'Події',
         'home.joined': 'Беру участь',
@@ -2495,6 +2553,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.submittedAt': 'Gesendet am',
         'admin.subjectLabel': 'Betreff',
         'admin.messageLabel': 'Nachricht',
+        'admin.supportStatusLabel': 'Status',
+        'admin.supportStatusNew': 'Neu',
+        'admin.supportStatusInProgress': 'In Bearbeitung',
+        'admin.supportStatusResolved': 'Geloest',
+        'admin.startTicket': 'Starten',
+        'admin.resolveTicket': 'Loesen',
+        'admin.reopenTicket': 'Erneut oeffnen',
+        'admin.backToNew': 'Zurueck zu neu',
+        'admin.supportStatusUpdated': 'Der Status der Anfrage wurde aktualisiert',
+        'admin.supportStatusUpdateFailed': 'Der Status der Anfrage konnte nicht aktualisiert werden',
+        'admin.supportStatusUpdateUnexpectedError':
+            'Beim Aktualisieren des Status der Anfrage ist ein unerwarteter Fehler aufgetreten',
 
         'home.discover': 'Entdecken',
         'home.joined': 'Beigetreten',

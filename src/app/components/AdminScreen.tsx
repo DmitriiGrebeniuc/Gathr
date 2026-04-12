@@ -7,6 +7,7 @@ import { feedback } from '../lib/feedback';
 
 type SummaryValue = number | null;
 type AdminPage = 'overview' | 'events' | 'users' | 'support';
+type SupportRequestStatus = 'new' | 'in_progress' | 'resolved';
 
 type EventPreview = {
   id: string;
@@ -61,7 +62,7 @@ type SupportRequestPreview = {
   user_id: string | null;
   subject: string | null;
   message: string | null;
-  status: string | null;
+  status: SupportRequestStatus;
   created_at: string | null;
   userName: string | null;
 };
@@ -116,6 +117,7 @@ export function AdminScreen({
   const [invitationsUnavailable, setInvitationsUnavailable] = useState(false);
   const [usersUnavailable, setUsersUnavailable] = useState(false);
   const [supportUnavailable, setSupportUnavailable] = useState(false);
+  const [updatingSupportRequestId, setUpdatingSupportRequestId] = useState<string | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
   const [banMutatingUserId, setBanMutatingUserId] = useState<string | null>(null);
@@ -135,6 +137,14 @@ export function AdminScreen({
     }
 
     return date.getTime() < Date.now();
+  };
+
+  const normalizeSupportStatus = (value: unknown): SupportRequestStatus => {
+    if (value === 'in_progress' || value === 'resolved') {
+      return value;
+    }
+
+    return 'new';
   };
 
   const loadAdminOverview = async () => {
@@ -367,10 +377,7 @@ export function AdminScreen({
                 typeof request.message === 'string' && request.message.trim()
                   ? request.message
                   : null,
-              status:
-                typeof request.status === 'string' && request.status.trim()
-                  ? request.status
-                  : null,
+              status: normalizeSupportStatus(request.status),
               created_at:
                 typeof request.created_at === 'string' && request.created_at.trim()
                   ? request.created_at
@@ -737,6 +744,61 @@ export function AdminScreen({
       );
     } finally {
       setBanMutatingUserId(null);
+    }
+  };
+
+  const getSupportStatusMeta = (status: SupportRequestStatus) => {
+    switch (status) {
+      case 'in_progress':
+        return {
+          label: translate('admin.supportStatusInProgress'),
+          color: '#D4AF37',
+          backgroundColor: 'rgba(212, 175, 55, 0.12)',
+          borderColor: 'rgba(212, 175, 55, 0.28)',
+        };
+      case 'resolved':
+        return {
+          label: translate('admin.supportStatusResolved'),
+          color: '#34D399',
+          backgroundColor: 'rgba(52, 211, 153, 0.12)',
+          borderColor: 'rgba(52, 211, 153, 0.28)',
+        };
+      case 'new':
+      default:
+        return {
+          label: translate('admin.supportStatusNew'),
+          color: '#60A5FA',
+          backgroundColor: 'rgba(96, 165, 250, 0.12)',
+          borderColor: 'rgba(96, 165, 250, 0.28)',
+        };
+    }
+  };
+
+  const handleUpdateSupportRequestStatus = async (
+    requestId: string,
+    nextStatus: SupportRequestStatus
+  ) => {
+    setUpdatingSupportRequestId(requestId);
+
+    try {
+      const { error } = await supabase.rpc('admin_update_support_request_status', {
+        target_request_id: requestId,
+        new_status: nextStatus,
+      });
+
+      if (error) {
+        console.error('Admin update support request status error:', error);
+        feedback.error(translate('admin.supportStatusUpdateFailed'));
+        return;
+      }
+
+      feedback.success(translate('admin.supportStatusUpdated'));
+      await loadAdminOverview();
+    } catch (error) {
+      console.error('Unexpected admin update support request status error:', error);
+      feedback.error(translate('admin.supportStatusUpdateUnexpectedError'));
+    } finally {
+      setUpdatingSupportRequestId(null);
     }
   };
 
@@ -1401,9 +1463,6 @@ export function AdminScreen({
             >
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3>{translate('admin.supportPageTitle')}</h3>
-                <span className="text-xs text-muted-foreground">
-                  {translate('admin.readOnly')}
-                </span>
               </div>
 
               {loading && (
@@ -1425,44 +1484,132 @@ export function AdminScreen({
               {!loading && !supportUnavailable && supportRequests.length > 0 && (
                 <div className="space-y-3">
                   {supportRequests.map((request) => (
-                    <div
-                      key={request.id}
-                      className="rounded-lg border p-4"
-                      style={{
-                        borderColor: 'rgba(255, 255, 255, 0.08)',
-                        backgroundColor: '#111111',
-                      }}
-                    >
-                      <div className="space-y-1 mb-3">
-                        <p className="text-xs text-muted-foreground">
-                          {translate('admin.supportRequestFrom')}:{' '}
-                          {request.userName || translate('common.user')}
-                        </p>
-                        {request.created_at && (
-                          <p className="text-xs text-muted-foreground">
-                            {translate('admin.submittedAt')}: {formatDate(request.created_at)}
-                          </p>
-                        )}
-                      </div>
+                    (() => {
+                      const statusMeta = getSupportStatusMeta(request.status);
+                      const isUpdating = updatingSupportRequestId === request.id;
 
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
-                            {translate('admin.subjectLabel')}
-                          </p>
-                          <p>{request.subject || translate('admin.notAvailable')}</p>
-                        </div>
+                      return (
+                        <div
+                          key={request.id}
+                          className="rounded-lg border p-4"
+                          style={{
+                            borderColor: 'rgba(255, 255, 255, 0.08)',
+                            backgroundColor: '#111111',
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">
+                                {translate('admin.supportRequestFrom')}:{' '}
+                                {request.userName || translate('common.user')}
+                              </p>
+                              {request.created_at && (
+                                <p className="text-xs text-muted-foreground">
+                                  {translate('admin.submittedAt')}: {formatDate(request.created_at)}
+                                </p>
+                              )}
+                            </div>
 
-                        <div>
-                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
-                            {translate('admin.messageLabel')}
-                          </p>
-                          <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
-                            {request.message || translate('admin.notAvailable')}
-                          </p>
+                            <div className="text-right">
+                              <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                                {translate('admin.supportStatusLabel')}
+                              </p>
+                              <span
+                                className="inline-flex rounded-full border px-2 py-1 text-[10px]"
+                                style={{
+                                  color: statusMeta.color,
+                                  backgroundColor: statusMeta.backgroundColor,
+                                  borderColor: statusMeta.borderColor,
+                                }}
+                              >
+                                {statusMeta.label}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                                {translate('admin.subjectLabel')}
+                              </p>
+                              <p>{request.subject || translate('admin.notAvailable')}</p>
+                            </div>
+
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                                {translate('admin.messageLabel')}
+                              </p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
+                                {request.message || translate('admin.notAvailable')}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              {request.status === 'new' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateSupportRequestStatus(request.id, 'in_progress')}
+                                  disabled={isUpdating}
+                                  className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
+                                  style={{
+                                    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+                                    border: '1px solid rgba(212, 175, 55, 0.35)',
+                                    color: '#D4AF37',
+                                  }}
+                                >
+                                  {translate('admin.startTicket')}
+                                </button>
+                              )}
+
+                              {request.status === 'in_progress' && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateSupportRequestStatus(request.id, 'resolved')}
+                                    disabled={isUpdating}
+                                    className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
+                                    style={{
+                                      backgroundColor: 'rgba(52, 211, 153, 0.12)',
+                                      border: '1px solid rgba(52, 211, 153, 0.28)',
+                                      color: '#34D399',
+                                    }}
+                                  >
+                                    {translate('admin.resolveTicket')}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateSupportRequestStatus(request.id, 'new')}
+                                    disabled={isUpdating}
+                                    className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
+                                    style={{
+                                      backgroundColor: '#171717',
+                                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                                    }}
+                                  >
+                                    {translate('admin.backToNew')}
+                                  </button>
+                                </>
+                              )}
+
+                              {request.status === 'resolved' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateSupportRequestStatus(request.id, 'new')}
+                                  disabled={isUpdating}
+                                  className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
+                                  style={{
+                                    backgroundColor: '#171717',
+                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                  }}
+                                >
+                                  {translate('admin.reopenTicket')}
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })()
                   ))}
                 </div>
               )}

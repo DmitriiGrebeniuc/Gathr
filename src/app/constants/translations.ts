@@ -301,6 +301,9 @@ type TranslationKey =
     | 'home.createFirstEvent'
     | 'home.joinedWillAppear'
     | 'home.noEventsFromOthers'
+    | 'home.launchOverlayTitle'
+    | 'home.launchOverlayText'
+    | 'home.launchOverlayButton'
     | 'create.title'
     | 'create.cancel'
     | 'create.eventTitle'
@@ -756,6 +759,10 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.createFirstEvent': 'Create your first event by tapping the + button.',
         'home.joinedWillAppear': 'Events you join will appear here.',
         'home.noEventsFromOthers': 'There are no events from other users yet.',
+        'home.launchOverlayTitle': 'You are among the first Gathr users',
+        'home.launchOverlayText':
+            'Gathr has just launched. Real events, activity, and honest feedback matter the most right now. Create meetups, join them, and help us make the app stronger.',
+        'home.launchOverlayButton': 'Continue',
 
         'create.title': 'Create Event',
         'create.cancel': 'Cancel',
@@ -1214,6 +1221,10 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.createFirstEvent': 'Создай свое первое событие через кнопку +.',
         'home.joinedWillAppear': 'События, к которым ты присоединишься, появятся здесь.',
         'home.noEventsFromOthers': 'Пока нет событий от других пользователей.',
+        'home.launchOverlayTitle': 'Ты среди первых пользователей Gathr',
+        'home.launchOverlayText':
+            'Gathr только открылся. Сейчас особенно важны реальные события, активность и честная обратная связь. Создавай встречи, вступай в них и помогай нам сделать приложение сильнее.',
+        'home.launchOverlayButton': 'Продолжить',
 
         'create.title': 'Создать событие',
         'create.cancel': 'Отмена',
@@ -1677,6 +1688,10 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.createFirstEvent': 'Creează primul tău eveniment folosind butonul +.',
         'home.joinedWillAppear': 'Evenimentele la care participi vor apărea aici.',
         'home.noEventsFromOthers': 'Încă nu există evenimente de la alți utilizatori.',
+        'home.launchOverlayTitle': 'Ești printre primii utilizatori Gathr',
+        'home.launchOverlayText':
+            'Gathr tocmai s-a lansat. Acum contează cel mai mult evenimentele reale, activitatea și feedbackul sincer. Creează întâlniri, alătură-te lor și ajută-ne să facem aplicația mai puternică.',
+        'home.launchOverlayButton': 'Continuă',
 
         'create.title': 'Creează eveniment',
         'create.cancel': 'Anulează',
@@ -2143,6 +2158,10 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.createFirstEvent': 'Створи свою першу подію через кнопку +.',
         'home.joinedWillAppear': 'Події, до яких ти приєднаєшся, зʼявляться тут.',
         'home.noEventsFromOthers': 'Поки немає подій від інших користувачів.',
+        'home.launchOverlayTitle': 'Ти серед перших користувачів Gathr',
+        'home.launchOverlayText':
+            'Gathr щойно відкрився. Зараз особливо важливі реальні події, активність і чесний зворотний звʼязок. Створюй зустрічі, долучайся до них і допомагай нам зробити застосунок сильнішим.',
+        'home.launchOverlayButton': 'Продовжити',
 
         'create.title': 'Створити подію',
         'create.cancel': 'Скасувати',
@@ -2608,6 +2627,10 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.createFirstEvent': 'Erstelle dein erstes Event mit der + Taste.',
         'home.joinedWillAppear': 'Events, denen du beitrittst, erscheinen hier.',
         'home.noEventsFromOthers': 'Es gibt noch keine Events von anderen Nutzern.',
+        'home.launchOverlayTitle': 'Du gehörst zu den ersten Gathr-Nutzern',
+        'home.launchOverlayText':
+            'Gathr ist gerade gestartet. Echte Events, Aktivität und ehrliches Feedback sind jetzt besonders wichtig. Erstelle Treffen, nimm daran teil und hilf uns, die App stärker zu machen.',
+        'home.launchOverlayButton': 'Weiter',
 
         'create.title': 'Event erstellen',
         'create.cancel': 'Abbrechen',

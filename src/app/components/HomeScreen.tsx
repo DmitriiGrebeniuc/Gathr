@@ -32,6 +32,7 @@ type CityFilterOption = {
 
 const SERVER_BATCH_SIZE = 100;
 const LOCAL_BATCH_SIZE = 10;
+const HOME_LAUNCH_OVERLAY_DISMISSED_KEY = 'gathr-home-launch-overlay-dismissed';
 
 export function HomeScreen({
   onNavigate,
@@ -44,6 +45,13 @@ export function HomeScreen({
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
   const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [isLaunchOverlayVisible, setIsLaunchOverlayVisible] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.localStorage.getItem(HOME_LAUNCH_OVERLAY_DISMISSED_KEY) !== 'true';
+  });
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -589,6 +597,16 @@ export function HomeScreen({
     setCitySearchQuery('');
   };
 
+  const handleDismissLaunchOverlay = () => {
+    setIsLaunchOverlayVisible(false);
+
+    try {
+      window.localStorage.setItem(HOME_LAUNCH_OVERLAY_DISMISSED_KEY, 'true');
+    } catch (error) {
+      console.error('Failed to persist home launch overlay dismissal:', error);
+    }
+  };
+
   useEffect(() => {
     fetchEvents(true);
   }, [language]);
@@ -1013,6 +1031,61 @@ export function HomeScreen({
       >
         <span className="text-2xl">+</span>
       </motion.button>
+
+      {isLaunchOverlayVisible && (
+        <div
+          className="absolute inset-0 z-40 flex items-center justify-center px-6"
+          style={{
+            backgroundColor: 'rgba(8, 8, 8, 0.68)',
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18 }}
+            className="w-full max-w-sm rounded-2xl border p-6"
+            style={{
+              backgroundColor: 'rgba(20, 20, 20, 0.96)',
+              borderColor: 'rgba(212, 175, 55, 0.24)',
+              boxShadow: '0 18px 48px rgba(0, 0, 0, 0.42)',
+            }}
+          >
+            <div className="space-y-3">
+              <div
+                className="inline-flex rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.18em]"
+                style={{
+                  borderColor: 'rgba(212, 175, 55, 0.28)',
+                  color: '#D4AF37',
+                  backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                }}
+              >
+                Gathr
+              </div>
+
+              <h2 className="text-xl leading-tight">{translate('home.launchOverlayTitle')}</h2>
+
+              <p className="text-sm leading-6 text-muted-foreground">
+                {translate('home.launchOverlayText')}
+              </p>
+            </div>
+
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDismissLaunchOverlay}
+              className="mt-6 w-full rounded-xl px-4 py-3 text-sm font-medium"
+              style={{
+                backgroundColor: '#D4AF37',
+                color: '#0F0F0F',
+                boxShadow: '0 8px 24px rgba(212, 175, 55, 0.24)',
+              }}
+            >
+              {translate('home.launchOverlayButton')}
+            </motion.button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

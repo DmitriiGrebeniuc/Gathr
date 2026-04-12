@@ -792,8 +792,37 @@ export function AdminScreen({
         return;
       }
 
-      feedback.success(translate('admin.supportStatusUpdated'));
+      let resolvedEmailFailed = false;
+
+      if (nextStatus === 'resolved') {
+        const { data, error: emailError } = await supabase.functions.invoke(
+          'send-support-resolved-email',
+          {
+            body: {
+              support_request_id: requestId,
+            },
+          }
+        );
+
+        if (emailError || data?.success === false) {
+          console.error('Support resolved email send error:', emailError || data);
+          resolvedEmailFailed = true;
+        }
+      }
+
       await loadAdminOverview();
+
+      if (nextStatus === 'resolved') {
+        if (resolvedEmailFailed) {
+          feedback.warning(translate('admin.supportResolvedEmailFailed'));
+        } else {
+          feedback.success(translate('admin.supportResolvedEmailSent'));
+        }
+
+        return;
+      }
+
+      feedback.success(translate('admin.supportStatusUpdated'));
     } catch (error) {
       console.error('Unexpected admin update support request status error:', error);
       feedback.error(translate('admin.supportStatusUpdateUnexpectedError'));

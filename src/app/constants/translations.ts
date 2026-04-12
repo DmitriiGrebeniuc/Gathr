@@ -224,6 +224,7 @@ type TranslationKey =
     | 'home.myEvents'
     | 'home.all'
     | 'home.allCities'
+    | 'home.cityFilterLabel'
     | 'home.loadMore'
     | 'home.loading'
     | 'home.createdBy'
@@ -614,6 +615,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.myEvents': 'My Events',
         'home.all': 'All',
         'home.allCities': 'All cities',
+        'home.cityFilterLabel': 'City',
         'home.loadMore': 'Load more',
         'home.loading': 'Loading...',
         'home.createdBy': 'Created by',
@@ -1009,6 +1011,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.myEvents': 'Мои события',
         'home.all': 'Все',
         'home.allCities': 'Все города',
+        'home.cityFilterLabel': 'Город',
         'home.loadMore': 'Загрузить еще',
         'home.loading': 'Загрузка...',
         'home.createdBy': 'Создал',
@@ -1405,6 +1408,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.myEvents': 'Evenimentele mele',
         'home.all': 'Toate',
         'home.allCities': 'Toate orașele',
+        'home.cityFilterLabel': 'Oraș',
         'home.loadMore': 'Încarcă mai mult',
         'home.loading': 'Se încarcă...',
         'home.createdBy': 'Creat de',
@@ -1804,6 +1808,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.myEvents': 'Мої події',
         'home.all': 'Усі',
         'home.allCities': 'Усі міста',
+        'home.cityFilterLabel': 'Місто',
         'home.loadMore': 'Завантажити ще',
         'home.loading': 'Завантаження...',
         'home.createdBy': 'Створив',
@@ -2202,6 +2207,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.myEvents': 'Meine Events',
         'home.all': 'Alle',
         'home.allCities': 'Alle Städte',
+        'home.cityFilterLabel': 'Stadt',
         'home.loadMore': 'Mehr laden',
         'home.loading': 'Wird geladen...',
         'home.createdBy': 'Erstellt von',

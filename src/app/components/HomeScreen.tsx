@@ -41,6 +41,7 @@ export function HomeScreen({
   const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined'>('discover');
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -443,6 +444,17 @@ export function HomeScreen({
       .sort((a, b) => a.city.localeCompare(b.city, language));
   }, [events, language]);
 
+  const selectedCityLabel = useMemo(() => {
+    if (selectedCity === 'all') {
+      return translate('home.allCities');
+    }
+
+    return (
+      availableCities.find((cityOption) => cityOption.cityNormalized === selectedCity)?.city ||
+      translate('home.allCities')
+    );
+  }, [availableCities, selectedCity, translate]);
+
   const sortedEvents = useMemo(() => {
     const result = [...filteredEvents];
 
@@ -535,6 +547,15 @@ export function HomeScreen({
   useEffect(() => {
     setVisibleCount(LOCAL_BATCH_SIZE);
   }, [activeTab, selectedActivityType, selectedCity]);
+
+  useEffect(() => {
+    if (
+      selectedCity !== 'all' &&
+      !availableCities.some((cityOption) => cityOption.cityNormalized === selectedCity)
+    ) {
+      setSelectedCity('all');
+    }
+  }, [availableCities, selectedCity]);
 
   useEffect(() => {
     fetchEvents(true);
@@ -692,59 +713,96 @@ export function HomeScreen({
           })}
         </div>
 
-        <div
-          className="mt-2 flex gap-2 overflow-x-auto no-scrollbar"
-          style={{
-            scrollPaddingLeft: '0.25rem',
-            scrollPaddingRight: '0.25rem',
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehaviorX: 'contain',
-            paddingLeft: '0.125rem',
-            paddingRight: '0.125rem',
-          }}
-        >
+        <div className="mt-2">
           <motion.button
             type="button"
-            onClick={() => setSelectedCity('all')}
-            whileTap={{ scale: 0.96 }}
-            className="shrink-0 px-3 py-1 rounded-full text-[11px] border transition-all"
+            onClick={() => setIsCityPickerOpen((prev) => !prev)}
+            whileTap={{ scale: 0.98 }}
+            className="w-full rounded-xl border px-3 py-2 text-left transition-all"
             style={{
-              backgroundColor:
-                selectedCity === 'all' ? 'rgba(212, 175, 55, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-              borderColor:
-                selectedCity === 'all'
-                  ? 'rgba(212, 175, 55, 0.45)'
-                  : 'rgba(255, 255, 255, 0.08)',
-              color: selectedCity === 'all' ? '#D4AF37' : '#B8B8B8',
+              backgroundColor: isCityPickerOpen ? 'rgba(212, 175, 55, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+              borderColor: isCityPickerOpen
+                ? 'rgba(212, 175, 55, 0.35)'
+                : 'rgba(255, 255, 255, 0.08)',
             }}
           >
-            {translate('home.allCities')}
-          </motion.button>
-
-          {availableCities.map((cityOption) => {
-            const isActive = selectedCity === cityOption.cityNormalized;
-
-            return (
-              <motion.button
-                key={cityOption.cityNormalized}
-                type="button"
-                onClick={() => setSelectedCity(cityOption.cityNormalized)}
-                whileTap={{ scale: 0.96 }}
-                className="shrink-0 px-3 py-1 rounded-full text-[11px] border transition-all"
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  {translate('home.cityFilterLabel')}
+                </p>
+                <p
+                  className="truncate text-sm"
+                  style={{ color: selectedCity === 'all' ? '#F5F5F5' : '#D4AF37' }}
+                >
+                  {selectedCityLabel}
+                </p>
+              </div>
+              <span
+                className="shrink-0 text-xs text-muted-foreground transition-transform"
                 style={{
-                  backgroundColor: isActive
-                    ? 'rgba(212, 175, 55, 0.12)'
-                    : 'rgba(255, 255, 255, 0.03)',
-                  borderColor: isActive
-                    ? 'rgba(212, 175, 55, 0.45)'
-                    : 'rgba(255, 255, 255, 0.08)',
-                  color: isActive ? '#D4AF37' : '#B8B8B8',
+                  transform: isCityPickerOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               >
-                {cityOption.city}
-              </motion.button>
-            );
-          })}
+                ▼
+              </span>
+            </div>
+          </motion.button>
+
+          {isCityPickerOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.16 }}
+              className="mt-2 rounded-xl border overflow-hidden"
+              style={{
+                backgroundColor: '#141414',
+                borderColor: 'rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <div className="max-h-48 overflow-y-auto no-scrollbar py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCity('all');
+                    setIsCityPickerOpen(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm transition-colors"
+                  style={{
+                    color: selectedCity === 'all' ? '#D4AF37' : '#F5F5F5',
+                    backgroundColor:
+                      selectedCity === 'all' ? 'rgba(212, 175, 55, 0.08)' : 'transparent',
+                  }}
+                >
+                  {translate('home.allCities')}
+                </button>
+
+                {availableCities.map((cityOption) => {
+                  const isActive = selectedCity === cityOption.cityNormalized;
+
+                  return (
+                    <button
+                      key={cityOption.cityNormalized}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCity(cityOption.cityNormalized);
+                        setIsCityPickerOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm transition-colors"
+                      style={{
+                        color: isActive ? '#D4AF37' : '#F5F5F5',
+                        backgroundColor: isActive
+                          ? 'rgba(212, 175, 55, 0.08)'
+                          : 'transparent',
+                      }}
+                    >
+                      {cityOption.city}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 

@@ -16,10 +16,17 @@ type EventItem = {
   description?: string | null;
   date_time?: string | null;
   location?: string | null;
+  city?: string | null;
+  city_normalized?: string | null;
   creator_id?: string | null;
   creatorName?: string | null;
   activity_type?: ActivityType | null;
   participantCount: number;
+};
+
+type CityFilterOption = {
+  city: string;
+  cityNormalized: string;
 };
 
 const SERVER_BATCH_SIZE = 100;
@@ -33,6 +40,7 @@ export function HomeScreen({
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined'>('discover');
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
+  const [selectedCity, setSelectedCity] = useState<string>('all');
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -250,6 +258,8 @@ export function HomeScreen({
         description: event.description,
         date_time: event.date_time,
         location: event.location,
+        city: event.city,
+        city_normalized: event.city_normalized,
         creator_id: event.creator_id,
         creatorName: event.creator_id
           ? creatorNameMap[event.creator_id] || translate('common.unknown')
@@ -344,6 +354,8 @@ export function HomeScreen({
         description: event.description,
         date_time: event.date_time,
         location: event.location,
+        city: event.city,
+        city_normalized: event.city_normalized,
         creator_id: event.creator_id,
         creatorName: event.creator_id
           ? creatorNameMap[event.creator_id] || translate('common.unknown')
@@ -370,13 +382,22 @@ export function HomeScreen({
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
       const past = isPastEvent(event.date_time);
+      const matchesActivity =
+        selectedActivityType === 'all' ||
+        (event.activity_type || 'other') === selectedActivityType;
+      const matchesCity =
+        selectedCity === 'all' || event.city_normalized === selectedCity;
+
+      if (!matchesActivity || !matchesCity) {
+        return false;
+      }
 
       if (!currentUserId) {
         if (activeTab !== 'discover' || past) {
           return false;
         }
 
-        return selectedActivityType === 'all' || (event.activity_type || 'other') === selectedActivityType;
+        return true;
       }
 
       const isMyEvent = event.creator_id === currentUserId;
@@ -396,9 +417,31 @@ export function HomeScreen({
         return false;
       }
 
-      return selectedActivityType === 'all' || (event.activity_type || 'other') === selectedActivityType;
+      return true;
     });
-  }, [events, currentUserId, joinedEventIds, activeTab, selectedActivityType]);
+  }, [events, currentUserId, joinedEventIds, activeTab, selectedActivityType, selectedCity]);
+
+  const availableCities = useMemo<CityFilterOption[]>(() => {
+    const cityMap = new Map<string, string>();
+
+    events.forEach((event) => {
+      const city = event.city?.trim();
+      const cityNormalized = event.city_normalized?.trim();
+
+      if (!city || !cityNormalized || cityMap.has(cityNormalized)) {
+        return;
+      }
+
+      cityMap.set(cityNormalized, city);
+    });
+
+    return Array.from(cityMap.entries())
+      .map(([cityNormalized, city]) => ({
+        city,
+        cityNormalized,
+      }))
+      .sort((a, b) => a.city.localeCompare(b.city, language));
+  }, [events, language]);
 
   const sortedEvents = useMemo(() => {
     const result = [...filteredEvents];
@@ -491,7 +534,7 @@ export function HomeScreen({
 
   useEffect(() => {
     setVisibleCount(LOCAL_BATCH_SIZE);
-  }, [activeTab, selectedActivityType]);
+  }, [activeTab, selectedActivityType, selectedCity]);
 
   useEffect(() => {
     fetchEvents(true);
@@ -648,6 +691,61 @@ export function HomeScreen({
             );
           })}
         </div>
+
+        <div
+          className="mt-2 flex gap-2 overflow-x-auto no-scrollbar"
+          style={{
+            scrollPaddingLeft: '0.25rem',
+            scrollPaddingRight: '0.25rem',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+            paddingLeft: '0.125rem',
+            paddingRight: '0.125rem',
+          }}
+        >
+          <motion.button
+            type="button"
+            onClick={() => setSelectedCity('all')}
+            whileTap={{ scale: 0.96 }}
+            className="shrink-0 px-3 py-1 rounded-full text-[11px] border transition-all"
+            style={{
+              backgroundColor:
+                selectedCity === 'all' ? 'rgba(212, 175, 55, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+              borderColor:
+                selectedCity === 'all'
+                  ? 'rgba(212, 175, 55, 0.45)'
+                  : 'rgba(255, 255, 255, 0.08)',
+              color: selectedCity === 'all' ? '#D4AF37' : '#B8B8B8',
+            }}
+          >
+            {translate('home.allCities')}
+          </motion.button>
+
+          {availableCities.map((cityOption) => {
+            const isActive = selectedCity === cityOption.cityNormalized;
+
+            return (
+              <motion.button
+                key={cityOption.cityNormalized}
+                type="button"
+                onClick={() => setSelectedCity(cityOption.cityNormalized)}
+                whileTap={{ scale: 0.96 }}
+                className="shrink-0 px-3 py-1 rounded-full text-[11px] border transition-all"
+                style={{
+                  backgroundColor: isActive
+                    ? 'rgba(212, 175, 55, 0.12)'
+                    : 'rgba(255, 255, 255, 0.03)',
+                  borderColor: isActive
+                    ? 'rgba(212, 175, 55, 0.45)'
+                    : 'rgba(255, 255, 255, 0.08)',
+                  color: isActive ? '#D4AF37' : '#B8B8B8',
+                }}
+              >
+                {cityOption.city}
+              </motion.button>
+            );
+          })}
+        </div>
       </div>
 
       <PullToRefresh onRefresh={handleRefresh}>
@@ -679,7 +777,9 @@ export function HomeScreen({
               </h3>
 
               <p className="text-sm text-muted-foreground">
-                {selectedActivityType !== 'all'
+                {selectedCity !== 'all'
+                  ? translate('home.noEventsForCity')
+                  : selectedActivityType !== 'all'
                   ? translate('home.noEventsForFilter')
                   : activeTab === 'my'
                     ? translate('home.createFirstEvent')

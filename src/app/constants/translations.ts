@@ -223,6 +223,7 @@ type TranslationKey =
     | 'home.joined'
     | 'home.myEvents'
     | 'home.all'
+    | 'home.allCities'
     | 'home.loadMore'
     | 'home.loading'
     | 'home.createdBy'
@@ -234,6 +235,7 @@ type TranslationKey =
     | 'home.noJoinedEvents'
     | 'home.noDiscoverEvents'
     | 'home.noEventsForFilter'
+    | 'home.noEventsForCity'
     | 'home.createFirstEvent'
     | 'home.joinedWillAppear'
     | 'home.noEventsFromOthers'
@@ -611,6 +613,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.joined': 'Joined',
         'home.myEvents': 'My Events',
         'home.all': 'All',
+        'home.allCities': 'All cities',
         'home.loadMore': 'Load more',
         'home.loading': 'Loading...',
         'home.createdBy': 'Created by',
@@ -622,6 +625,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.noJoinedEvents': 'No joined events yet',
         'home.noDiscoverEvents': 'No discover events yet',
         'home.noEventsForFilter': 'No events found for this activity type.',
+        'home.noEventsForCity': 'No events found for this city.',
         'home.createFirstEvent': 'Create your first event by tapping the + button.',
         'home.joinedWillAppear': 'Events you join will appear here.',
         'home.noEventsFromOthers': 'There are no events from other users yet.',
@@ -1004,6 +1008,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.joined': 'Участвую',
         'home.myEvents': 'Мои события',
         'home.all': 'Все',
+        'home.allCities': 'Все города',
         'home.loadMore': 'Загрузить еще',
         'home.loading': 'Загрузка...',
         'home.createdBy': 'Создал',
@@ -1015,6 +1020,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.noJoinedEvents': 'Ты пока никуда не присоединился',
         'home.noDiscoverEvents': 'Событий пока нет',
         'home.noEventsForFilter': 'По этому типу активности событий не найдено.',
+        'home.noEventsForCity': 'Для этого города событий не найдено.',
         'home.createFirstEvent': 'Создай свое первое событие через кнопку +.',
         'home.joinedWillAppear': 'События, к которым ты присоединишься, появятся здесь.',
         'home.noEventsFromOthers': 'Пока нет событий от других пользователей.',
@@ -1398,6 +1404,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.joined': 'Particip',
         'home.myEvents': 'Evenimentele mele',
         'home.all': 'Toate',
+        'home.allCities': 'Toate orașele',
         'home.loadMore': 'Încarcă mai mult',
         'home.loading': 'Se încarcă...',
         'home.createdBy': 'Creat de',
@@ -1409,6 +1416,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.noJoinedEvents': 'Nu ai participări încă',
         'home.noDiscoverEvents': 'Nu există evenimente momentan',
         'home.noEventsForFilter': 'Nu au fost găsite evenimente pentru acest tip de activitate.',
+        'home.noEventsForCity': 'Nu au fost găsite evenimente pentru acest oraș.',
         'home.createFirstEvent': 'Creează primul tău eveniment folosind butonul +.',
         'home.joinedWillAppear': 'Evenimentele la care participi vor apărea aici.',
         'home.noEventsFromOthers': 'Încă nu există evenimente de la alți utilizatori.',
@@ -1795,6 +1803,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.joined': 'Беру участь',
         'home.myEvents': 'Мої події',
         'home.all': 'Усі',
+        'home.allCities': 'Усі міста',
         'home.loadMore': 'Завантажити ще',
         'home.loading': 'Завантаження...',
         'home.createdBy': 'Створив',
@@ -1806,6 +1815,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.noJoinedEvents': 'Ти поки ні до чого не приєднався',
         'home.noDiscoverEvents': 'Подій поки немає',
         'home.noEventsForFilter': 'Для цього типу активності подій не знайдено.',
+        'home.noEventsForCity': 'Для цього міста подій не знайдено.',
         'home.createFirstEvent': 'Створи свою першу подію через кнопку +.',
         'home.joinedWillAppear': 'Події, до яких ти приєднаєшся, зʼявляться тут.',
         'home.noEventsFromOthers': 'Поки немає подій від інших користувачів.',
@@ -2191,6 +2201,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.joined': 'Beigetreten',
         'home.myEvents': 'Meine Events',
         'home.all': 'Alle',
+        'home.allCities': 'Alle Städte',
         'home.loadMore': 'Mehr laden',
         'home.loading': 'Wird geladen...',
         'home.createdBy': 'Erstellt von',
@@ -2202,6 +2213,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.noJoinedEvents': 'Du bist noch keinem Event beigetreten',
         'home.noDiscoverEvents': 'Noch keine Events vorhanden',
         'home.noEventsForFilter': 'Für diesen Aktivitätstyp wurden keine Events gefunden.',
+        'home.noEventsForCity': 'Für diese Stadt wurden keine Events gefunden.',
         'home.createFirstEvent': 'Erstelle dein erstes Event mit der + Taste.',
         'home.joinedWillAppear': 'Events, denen du beitrittst, erscheinen hier.',
         'home.noEventsFromOthers': 'Es gibt noch keine Events von anderen Nutzern.',

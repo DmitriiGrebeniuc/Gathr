@@ -4,6 +4,10 @@ type AddressComponent = {
   types?: string[];
 };
 
+type GeocoderLikeResult = {
+  address_components?: AddressComponent[];
+};
+
 export function normalizeCityName(value: string | null | undefined) {
   if (!value) {
     return null;
@@ -41,6 +45,28 @@ export function extractCityFromAddressComponents(components: AddressComponent[] 
         city,
         cityNormalized: normalizeCityName(city),
       };
+    }
+  }
+
+  return {
+    city: null,
+    cityNormalized: null,
+  };
+}
+
+export function extractCityFromGeocoderResults(results: GeocoderLikeResult[] | null | undefined) {
+  if (!Array.isArray(results) || results.length === 0) {
+    return {
+      city: null,
+      cityNormalized: null,
+    };
+  }
+
+  for (const result of results) {
+    const extracted = extractCityFromAddressComponents(result?.address_components);
+
+    if (extracted.city) {
+      return extracted;
     }
   }
 

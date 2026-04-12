@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GoogleMap, LoadScriptNext, Marker } from '@react-google-maps/api';
-import { extractCityFromAddressComponents } from '../lib/locationCity';
+import { extractCityFromGeocoderResults } from '../lib/locationCity';
 
 const GOOGLE_LIBRARIES: ('places')[] = ['places'];
 
@@ -104,32 +104,22 @@ export function EventLocationMap({
 
       try {
         const geocoder = new (window as any).google.maps.Geocoder();
+        const response = await geocoder.geocode({
+          location: { lat: nextLat, lng: nextLng },
+        });
 
-        geocoder.geocode(
-          {
-            location: { lat: nextLat, lng: nextLng },
-          },
-          (results: any) => {
-            const firstResult = Array.isArray(results) && results.length > 0 ? results[0] : null;
+        const results = Array.isArray(response?.results) ? response.results : [];
+        const firstResult = results[0] ?? null;
+        const { city, cityNormalized } = extractCityFromGeocoderResults(results);
 
-            const address = firstResult?.formatted_address || '';
-            const placeId = firstResult?.place_id || null;
-            const { city, cityNormalized } = extractCityFromAddressComponents(
-              firstResult?.address_components
-            );
-
-            onPick?.({
-              lat: nextLat,
-              lng: nextLng,
-              address,
-              placeId,
-              city,
-              cityNormalized,
-            });
-
-            setIsResolvingAddress(false);
-          }
-        );
+        onPick?.({
+          lat: nextLat,
+          lng: nextLng,
+          address: firstResult?.formatted_address || '',
+          placeId: firstResult?.place_id || null,
+          city,
+          cityNormalized,
+        });
       } catch (error) {
         console.error('Reverse geocoding error:', error);
 
@@ -141,7 +131,7 @@ export function EventLocationMap({
           city: null,
           cityNormalized: null,
         });
-
+      } finally {
         setIsResolvingAddress(false);
       }
     },

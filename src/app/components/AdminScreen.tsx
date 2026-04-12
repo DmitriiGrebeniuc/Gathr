@@ -6,7 +6,7 @@ import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../const
 import { feedback } from '../lib/feedback';
 
 type SummaryValue = number | null;
-type AdminPage = 'overview' | 'events' | 'users';
+type AdminPage = 'overview' | 'events' | 'users' | 'support';
 
 type EventPreview = {
   id: string;
@@ -56,6 +56,15 @@ type InvitationPreview = {
   eventTitle: string | null;
 };
 
+type SupportRequestPreview = {
+  id: string;
+  user_id: string | null;
+  subject: string | null;
+  message: string | null;
+  created_at: string | null;
+  userName: string | null;
+};
+
 
 type AdminSummary = {
   totalUsers: SummaryValue;
@@ -99,11 +108,13 @@ export function AdminScreen({
   const [latestPendingInvitations, setLatestPendingInvitations] = useState<InvitationPreview[]>(
     []
   );
+  const [supportRequests, setSupportRequests] = useState<SupportRequestPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventsUnavailable, setEventsUnavailable] = useState(false);
   const [moderationUnavailable, setModerationUnavailable] = useState(false);
   const [invitationsUnavailable, setInvitationsUnavailable] = useState(false);
   const [usersUnavailable, setUsersUnavailable] = useState(false);
+  const [supportUnavailable, setSupportUnavailable] = useState(false);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
   const [banMutatingUserId, setBanMutatingUserId] = useState<string | null>(null);
@@ -148,6 +159,7 @@ export function AdminScreen({
           moderationEventsResult,
           latestPendingInvitationsResult,
           usersListResult,
+          supportRequestsListResult,
         ] = await Promise.allSettled([
           supabase.from('profiles').select('id', { count: 'exact', head: true }),
 
@@ -189,6 +201,7 @@ export function AdminScreen({
             .order('created_at', { ascending: false })
             .limit(5),
           supabase.rpc('admin_list_profiles'),
+          supabase.from('support_requests').select('*'),
 
         ]);
 
@@ -327,6 +340,99 @@ export function AdminScreen({
           setLatestPendingInvitations([]);
           setInvitationsUnavailable(true);
         }
+
+        if (
+          supportRequestsListResult.status === 'fulfilled' &&
+          !supportRequestsListResult.value.error
+        ) {
+          const baseSupportRequests =
+            (supportRequestsListResult.value.data as Record<string, unknown>[] | null) || [];
+
+          const supportUserIds = Array.from(
+            new Set(
+              baseSupportRequests
+                .map((request) =>
+                  typeof request.user_id === 'string' && request.user_id.trim()
+                    ? request.user_id
+                    : null
+                )
+                .filter(Boolean)
+            )
+          ) as string[];
+
+          let supportUserNameMap: Record<string, string> = {};
+
+          if (supportUserIds.length > 0) {
+            const supportProfilesResult = await supabase
+              .from('profiles')
+              .select('id, name')
+              .in('id', supportUserIds);
+
+            if (!supportProfilesResult.error) {
+              (
+                (supportProfilesResult.data as { id: string; name: string | null }[] | null) || []
+              ).forEach((profile) => {
+                supportUserNameMap[profile.id] = profile.name || translate('common.user');
+              });
+            }
+          }
+
+          const normalizedSupportRequests = baseSupportRequests
+            .map((request, index) => ({
+              id:
+                typeof request.id === 'string' && request.id.trim()
+                  ? request.id
+                  : `${request.user_id ?? 'support'}-${request.subject ?? 'request'}-${index}`,
+              user_id:
+                typeof request.user_id === 'string' && request.user_id.trim()
+                  ? request.user_id
+                  : null,
+              subject:
+                typeof request.subject === 'string' && request.subject.trim()
+                  ? request.subject
+                  : null,
+              message:
+                typeof request.message === 'string' && request.message.trim()
+                  ? request.message
+                  : null,
+              created_at:
+                typeof request.created_at === 'string' && request.created_at.trim()
+                  ? request.created_at
+                  : null,
+              userName:
+                typeof request.user_id === 'string' && request.user_id.trim()
+                  ? supportUserNameMap[request.user_id] || translate('common.user')
+                  : translate('common.user'),
+              sortIndex: index,
+            }))
+            .sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                const aTime = new Date(a.created_at).getTime();
+                const bTime = new Date(b.created_at).getTime();
+
+                if (!Number.isNaN(aTime) && !Number.isNaN(bTime) && aTime !== bTime) {
+                  return bTime - aTime;
+                }
+              }
+
+              if (a.created_at && !b.created_at) {
+                return -1;
+              }
+
+              if (!a.created_at && b.created_at) {
+                return 1;
+              }
+
+              return a.sortIndex - b.sortIndex;
+            })
+            .map(({ sortIndex, ...request }) => request);
+
+          setSupportRequests(normalizedSupportRequests);
+          setSupportUnavailable(false);
+        } else {
+          setSupportRequests([]);
+          setSupportUnavailable(true);
+        }
         
         if (usersListResult.status === 'fulfilled' && !usersListResult.value.error) {
           const nextUsers = (usersListResult.value.data as AdminListProfilesRow[] | null) || [];
@@ -355,10 +461,12 @@ export function AdminScreen({
         setSelectedUserId(null);
         setUserSearch('');
         setLatestPendingInvitations([]);
+        setSupportRequests([]);
         setEventsUnavailable(true);
         setModerationUnavailable(true);
         setInvitationsUnavailable(true);
         setUsersUnavailable(true);
+        setSupportUnavailable(true);
 
       } finally {
         setLoading(false);
@@ -434,6 +542,7 @@ export function AdminScreen({
     { key: 'overview', label: translate('admin.pageOverview') },
     { key: 'events', label: translate('admin.pageEvents') },
     { key: 'users', label: translate('admin.pageUsers') },
+    { key: 'support', label: translate('admin.pageSupport') },
   ];
 
   const normalizedUserSearch = userSearch.trim().toLowerCase();
@@ -675,7 +784,7 @@ export function AdminScreen({
       >
         <div className="max-w-sm mx-auto space-y-6">
           <div
-            className="rounded-xl border p-1 grid grid-cols-3 gap-1"
+            className="rounded-xl border p-1 grid grid-cols-4 gap-1"
             style={{
               borderColor: 'rgba(255, 255, 255, 0.08)',
               backgroundColor: '#141414',
@@ -1305,6 +1414,82 @@ export function AdminScreen({
                 </div>
               </div>
             )}
+          {activePage === 'support' && (
+            <div
+              className="rounded-xl border p-5"
+              style={{
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: '#1A1A1A',
+              }}
+            >
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h3>{translate('admin.supportPageTitle')}</h3>
+                <span className="text-xs text-muted-foreground">
+                  {translate('admin.readOnly')}
+                </span>
+              </div>
+
+              {loading && (
+                <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
+              )}
+
+              {!loading && supportUnavailable && (
+                <p className="text-sm text-muted-foreground">
+                  {translate('admin.supportRequestsUnavailable')}
+                </p>
+              )}
+
+              {!loading && !supportUnavailable && supportRequests.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {translate('admin.noSupportRequests')}
+                </p>
+              )}
+
+              {!loading && !supportUnavailable && supportRequests.length > 0 && (
+                <div className="space-y-3">
+                  {supportRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="rounded-lg border p-4"
+                      style={{
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
+                        backgroundColor: '#111111',
+                      }}
+                    >
+                      <div className="space-y-1 mb-3">
+                        <p className="text-xs text-muted-foreground">
+                          {translate('admin.supportRequestFrom')}: {request.userName || translate('common.user')}
+                        </p>
+                        {request.created_at && (
+                          <p className="text-xs text-muted-foreground">
+                            {translate('admin.submittedAt')}: {formatDate(request.created_at)}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                            {translate('admin.subjectLabel')}
+                          </p>
+                          <p>{request.subject || translate('admin.notAvailable')}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                            {translate('admin.messageLabel')}
+                          </p>
+                          <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
+                            {request.message || translate('admin.notAvailable')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
             </div>
           )}
         </div>

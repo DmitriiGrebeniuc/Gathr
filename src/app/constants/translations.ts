@@ -202,6 +202,7 @@ type TranslationKey =
     | 'admin.pageOverview'
     | 'admin.pageEvents'
     | 'admin.pageUsers'
+    | 'admin.pageSupport'
     | 'admin.usersTitle'
     | 'admin.userSearchPlaceholder'
     | 'admin.noUsers'
@@ -252,6 +253,13 @@ type TranslationKey =
     | 'admin.unavailable'
     | 'admin.noEvents'
     | 'admin.notAvailable'
+    | 'admin.supportPageTitle'
+    | 'admin.noSupportRequests'
+    | 'admin.supportRequestsUnavailable'
+    | 'admin.supportRequestFrom'
+    | 'admin.submittedAt'
+    | 'admin.subjectLabel'
+    | 'admin.messageLabel'
 
     | 'admin.noPendingInvitations'
     | 'admin.latestPendingInvitations'
@@ -633,6 +641,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pageOverview': 'Overview',
         'admin.pageEvents': 'Events',
         'admin.pageUsers': 'Users',
+        'admin.pageSupport': 'Support',
         'admin.usersTitle': 'Users',
         'admin.userSearchPlaceholder': 'Search users by name',
         'admin.noUsers': 'No users to show',
@@ -683,6 +692,13 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.unavailable': 'Unavailable',
         'admin.noEvents': 'No events to show',
         'admin.notAvailable': 'Not available',
+        'admin.supportPageTitle': 'Support requests',
+        'admin.noSupportRequests': 'No support requests yet',
+        'admin.supportRequestsUnavailable': 'Support requests are unavailable right now',
+        'admin.supportRequestFrom': 'From',
+        'admin.submittedAt': 'Submitted at',
+        'admin.subjectLabel': 'Subject',
+        'admin.messageLabel': 'Message',
         'admin.latestPendingInvitations': 'Latest pending invitations',
         'admin.invitedBy': 'Invited by',
         'admin.noPendingInvitations': 'No pending invitations',
@@ -1069,8 +1085,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.deleteEventFailed': 'Не удалось удалить событие',
         'admin.deleteEventUnexpectedError': 'Произошла непредвиденная ошибка при удалении события',
         'admin.pageOverview': 'Обзор',
-        'admin.pageEvents': 'События',
-        'admin.pageUsers': 'Пользователи',
+        'admin.pageUsers': '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0438',
+        'admin.pageSupport': '\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430',
         'admin.usersTitle': 'Пользователи',
         'admin.userSearchPlaceholder': 'Поиск пользователей по имени',
         'admin.noUsers': 'Нет пользователей для отображения',
@@ -1125,6 +1141,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.invitedBy': 'Пригласил',
         'admin.noPendingInvitations': 'Нет ожидающих приглашений',
 
+
+        'admin.supportPageTitle': '\u0417\u0430\u043f\u0440\u043e\u0441\u044b \u0432 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0443',
+        'admin.noSupportRequests': '\u0417\u0430\u043f\u0440\u043e\u0441\u043e\u0432 \u0432 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0443 \u043f\u043e\u043a\u0430 \u043d\u0435\u0442',
+        'admin.supportRequestsUnavailable': '\u0417\u0430\u043f\u0440\u043e\u0441\u044b \u0432 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0443 \u0441\u0435\u0439\u0447\u0430\u0441 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b',
+        'admin.supportRequestFrom': '\u041e\u0442',
+        'admin.submittedAt': '\u041e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e',
+        'admin.subjectLabel': '\u0422\u0435\u043c\u0430',
+        'admin.messageLabel': '\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435',
 
         'home.discover': 'События',
         'home.joined': 'Участвую',
@@ -1508,6 +1532,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.pageOverview': 'Prezentare',
         'admin.pageEvents': 'Evenimente',
         'admin.pageUsers': 'Utilizatori',
+        'admin.pageSupport': 'Suport',
         'admin.usersTitle': 'Utilizatori',
         'admin.userSearchPlaceholder': 'Caută utilizatori după nume',
         'admin.noUsers': 'Nu există utilizatori de afișat',
@@ -1563,6 +1588,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.noPendingInvitations': 'Nu există invitații în așteptare',
 
 
+
+        'admin.supportPageTitle': 'Cereri de suport',
+        'admin.noSupportRequests': 'Nu exist? cereri de suport momentan',
+        'admin.supportRequestsUnavailable': 'Cererile de suport sunt indisponibile acum',
+        'admin.supportRequestFrom': 'De la',
+        'admin.submittedAt': 'Trimis la',
+        'admin.subjectLabel': 'Subiect',
+        'admin.messageLabel': 'Mesaj',
 
         'home.discover': 'Descoperă',
         'home.joined': 'Particip',
@@ -1946,6 +1979,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.deleteEventUnexpectedError': 'Сталася неочікувана помилка під час видалення події',
         'admin.pageOverview': 'Огляд',
         'admin.pageEvents': 'Події',
+        'admin.pageSupport': '\u041f\u0456\u0434\u0442\u0440\u0438\u043c\u043a\u0430',
         'admin.pageUsers': 'Користувачі',
         'admin.usersTitle': 'Користувачі',
         'admin.userSearchPlaceholder': 'Пошук користувачів за іменем',
@@ -2004,6 +2038,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
 
 
 
+
+        'admin.supportPageTitle': '\u0417\u0430\u043f\u0438\u0442\u0438 \u0432 \u043f\u0456\u0434\u0442\u0440\u0438\u043c\u043a\u0443',
+        'admin.noSupportRequests': '\u0417\u0430\u043f\u0438\u0442\u0456\u0432 \u0443 \u043f\u0456\u0434\u0442\u0440\u0438\u043c\u043a\u0443 \u043f\u043e\u043a\u0438 \u043d\u0435\u043c\u0430\u0454',
+        'admin.supportRequestsUnavailable': '\u0417\u0430\u043f\u0438\u0442\u0438 \u0432 \u043f\u0456\u0434\u0442\u0440\u0438\u043c\u043a\u0443 \u0437\u0430\u0440\u0430\u0437 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0456',
+        'admin.supportRequestFrom': '\u0412\u0456\u0434',
+        'admin.submittedAt': '\u041d\u0430\u0434\u0456\u0441\u043b\u0430\u043d\u043e',
+        'admin.subjectLabel': '\u0422\u0435\u043c\u0430',
+        'admin.messageLabel': '\u041f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f',
 
         'home.discover': 'Події',
         'home.joined': 'Беру участь',
@@ -2385,6 +2427,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.deleteEventFailed': 'Event konnte nicht gelöscht werden',
         'admin.deleteEventUnexpectedError': 'Beim Löschen des Events ist ein unerwarteter Fehler aufgetreten',
         'admin.pageOverview': 'Übersicht',
+        'admin.pageSupport': 'Support',
         'admin.pageEvents': 'Events',
         'admin.pageUsers': 'Benutzer',
         'admin.usersTitle': 'Benutzer',
@@ -2444,6 +2487,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
 
 
 
+
+        'admin.supportPageTitle': 'Supportanfragen',
+        'admin.noSupportRequests': 'Noch keine Supportanfragen',
+        'admin.supportRequestsUnavailable': 'Supportanfragen sind aktuell nicht verf?gbar',
+        'admin.supportRequestFrom': 'Von',
+        'admin.submittedAt': 'Gesendet am',
+        'admin.subjectLabel': 'Betreff',
+        'admin.messageLabel': 'Nachricht',
 
         'home.discover': 'Entdecken',
         'home.joined': 'Beigetreten',

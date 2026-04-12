@@ -110,6 +110,14 @@ export function EventLocationMap({
               location: { lat: nextLat, lng: nextLng },
             },
             (callbackResults: any, status: any) => {
+              console.log('[EventLocationMap] reverse geocode callback', {
+                lat: nextLat,
+                lng: nextLng,
+                status,
+                resultsCount: Array.isArray(callbackResults) ? callbackResults.length : null,
+                firstResult: Array.isArray(callbackResults) ? callbackResults[0] : null,
+              });
+
               if (status === 'OK' || status === (window as any).google?.maps?.GeocoderStatus?.OK) {
                 resolve(Array.isArray(callbackResults) ? callbackResults : []);
                 return;
@@ -131,6 +139,16 @@ export function EventLocationMap({
         const firstResult = results[0] ?? null;
         const { city, cityNormalized } = extractCityFromGeocoderResults(results);
 
+        console.log('[EventLocationMap] resolved map pick payload', {
+          lat: nextLat,
+          lng: nextLng,
+          address: firstResult?.formatted_address || '',
+          placeId: firstResult?.place_id || null,
+          city,
+          cityNormalized,
+          results,
+        });
+
         onPick?.({
           lat: nextLat,
           lng: nextLng,
@@ -141,6 +159,10 @@ export function EventLocationMap({
         });
       } catch (error) {
         console.error('Reverse geocoding error:', error);
+        console.log('[EventLocationMap] reverse geocode failed fallback payload', {
+          lat: nextLat,
+          lng: nextLng,
+        });
 
         onPick?.({
           lat: nextLat,

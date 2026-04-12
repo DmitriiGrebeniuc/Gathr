@@ -225,6 +225,8 @@ type TranslationKey =
     | 'home.all'
     | 'home.allCities'
     | 'home.cityFilterLabel'
+    | 'home.citySearchPlaceholder'
+    | 'home.noCitiesFound'
     | 'home.loadMore'
     | 'home.loading'
     | 'home.createdBy'
@@ -616,6 +618,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.all': 'All',
         'home.allCities': 'All cities',
         'home.cityFilterLabel': 'City',
+        'home.citySearchPlaceholder': 'Search city',
+        'home.noCitiesFound': 'No cities found',
         'home.loadMore': 'Load more',
         'home.loading': 'Loading...',
         'home.createdBy': 'Created by',
@@ -1012,6 +1016,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.all': 'Все',
         'home.allCities': 'Все города',
         'home.cityFilterLabel': 'Город',
+        'home.citySearchPlaceholder': 'Поиск города',
+        'home.noCitiesFound': 'Города не найдены',
         'home.loadMore': 'Загрузить еще',
         'home.loading': 'Загрузка...',
         'home.createdBy': 'Создал',
@@ -1409,6 +1415,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.all': 'Toate',
         'home.allCities': 'Toate orașele',
         'home.cityFilterLabel': 'Oraș',
+        'home.citySearchPlaceholder': 'Caută oraș',
+        'home.noCitiesFound': 'Nu au fost găsite orașe',
         'home.loadMore': 'Încarcă mai mult',
         'home.loading': 'Se încarcă...',
         'home.createdBy': 'Creat de',
@@ -1809,6 +1817,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.all': 'Усі',
         'home.allCities': 'Усі міста',
         'home.cityFilterLabel': 'Місто',
+        'home.citySearchPlaceholder': 'Пошук міста',
+        'home.noCitiesFound': 'Міста не знайдено',
         'home.loadMore': 'Завантажити ще',
         'home.loading': 'Завантаження...',
         'home.createdBy': 'Створив',
@@ -2208,6 +2218,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.all': 'Alle',
         'home.allCities': 'Alle Städte',
         'home.cityFilterLabel': 'Stadt',
+        'home.citySearchPlaceholder': 'Stadt suchen',
+        'home.noCitiesFound': 'Keine Städte gefunden',
         'home.loadMore': 'Mehr laden',
         'home.loading': 'Wird geladen...',
         'home.createdBy': 'Erstellt von',

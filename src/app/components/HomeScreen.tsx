@@ -9,6 +9,7 @@ import {
   getActivityTypeMeta,
 } from '../constants/activityTypes';
 import { LoadingLogo } from './LoadingLogo';
+import { normalizeCityName } from '../lib/locationCity';
 
 type EventItem = {
   id: string;
@@ -42,6 +43,7 @@ export function HomeScreen({
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
+  const [citySearchQuery, setCitySearchQuery] = useState('');
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -444,6 +446,18 @@ export function HomeScreen({
       .sort((a, b) => a.city.localeCompare(b.city, language));
   }, [events, language]);
 
+  const filteredCityOptions = useMemo(() => {
+    const normalizedQuery = normalizeCityName(citySearchQuery);
+
+    if (!normalizedQuery) {
+      return availableCities;
+    }
+
+    return availableCities.filter((cityOption) =>
+      normalizeCityName(cityOption.city)?.includes(normalizedQuery)
+    );
+  }, [availableCities, citySearchQuery]);
+
   const selectedCityLabel = useMemo(() => {
     if (selectedCity === 'all') {
       return translate('home.allCities');
@@ -556,6 +570,24 @@ export function HomeScreen({
       setSelectedCity('all');
     }
   }, [availableCities, selectedCity]);
+
+  const toggleCityPicker = () => {
+    setIsCityPickerOpen((prev) => {
+      const nextOpen = !prev;
+
+      if (nextOpen || prev) {
+        setCitySearchQuery('');
+      }
+
+      return nextOpen;
+    });
+  };
+
+  const handleSelectCity = (nextCity: string) => {
+    setSelectedCity(nextCity);
+    setIsCityPickerOpen(false);
+    setCitySearchQuery('');
+  };
 
   useEffect(() => {
     fetchEvents(true);
@@ -716,7 +748,7 @@ export function HomeScreen({
         <div className="mt-2">
           <motion.button
             type="button"
-            onClick={() => setIsCityPickerOpen((prev) => !prev)}
+            onClick={toggleCityPicker}
             whileTap={{ scale: 0.98 }}
             className="w-full rounded-xl border px-3 py-2 text-left transition-all"
             style={{
@@ -760,13 +792,26 @@ export function HomeScreen({
                 borderColor: 'rgba(255, 255, 255, 0.08)',
               }}
             >
+              <div className="border-b border-border px-3 py-2">
+                <input
+                  type="text"
+                  value={citySearchQuery}
+                  onChange={(event) => setCitySearchQuery(event.target.value)}
+                  placeholder={translate('home.citySearchPlaceholder')}
+                  autoComplete="off"
+                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"
+                  style={{
+                    backgroundColor: '#1A1A1A',
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    color: '#F5F5F5',
+                  }}
+                />
+              </div>
+
               <div className="max-h-48 overflow-y-auto no-scrollbar py-1">
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedCity('all');
-                    setIsCityPickerOpen(false);
-                  }}
+                  onClick={() => handleSelectCity('all')}
                   className="w-full px-3 py-2 text-left text-sm transition-colors"
                   style={{
                     color: selectedCity === 'all' ? '#D4AF37' : '#F5F5F5',
@@ -777,17 +822,14 @@ export function HomeScreen({
                   {translate('home.allCities')}
                 </button>
 
-                {availableCities.map((cityOption) => {
+                {filteredCityOptions.map((cityOption) => {
                   const isActive = selectedCity === cityOption.cityNormalized;
 
                   return (
                     <button
                       key={cityOption.cityNormalized}
                       type="button"
-                      onClick={() => {
-                        setSelectedCity(cityOption.cityNormalized);
-                        setIsCityPickerOpen(false);
-                      }}
+                      onClick={() => handleSelectCity(cityOption.cityNormalized)}
                       className="w-full px-3 py-2 text-left text-sm transition-colors"
                       style={{
                         color: isActive ? '#D4AF37' : '#F5F5F5',
@@ -800,6 +842,12 @@ export function HomeScreen({
                     </button>
                   );
                 })}
+
+                {filteredCityOptions.length === 0 && (
+                  <div className="px-3 py-3 text-sm text-muted-foreground">
+                    {translate('home.noCitiesFound')}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

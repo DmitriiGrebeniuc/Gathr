@@ -61,6 +61,7 @@ type SupportRequestPreview = {
   user_id: string | null;
   subject: string | null;
   message: string | null;
+  status: string | null;
   created_at: string | null;
   userName: string | null;
 };
@@ -201,7 +202,7 @@ export function AdminScreen({
             .order('created_at', { ascending: false })
             .limit(5),
           supabase.rpc('admin_list_profiles'),
-          supabase.from('support_requests').select('*'),
+          supabase.rpc('admin_list_support_requests'),
 
         ]);
 
@@ -348,35 +349,6 @@ export function AdminScreen({
           const baseSupportRequests =
             (supportRequestsListResult.value.data as Record<string, unknown>[] | null) || [];
 
-          const supportUserIds = Array.from(
-            new Set(
-              baseSupportRequests
-                .map((request) =>
-                  typeof request.user_id === 'string' && request.user_id.trim()
-                    ? request.user_id
-                    : null
-                )
-                .filter(Boolean)
-            )
-          ) as string[];
-
-          let supportUserNameMap: Record<string, string> = {};
-
-          if (supportUserIds.length > 0) {
-            const supportProfilesResult = await supabase
-              .from('profiles')
-              .select('id, name')
-              .in('id', supportUserIds);
-
-            if (!supportProfilesResult.error) {
-              (
-                (supportProfilesResult.data as { id: string; name: string | null }[] | null) || []
-              ).forEach((profile) => {
-                supportUserNameMap[profile.id] = profile.name || translate('common.user');
-              });
-            }
-          }
-
           const normalizedSupportRequests = baseSupportRequests
             .map((request, index) => ({
               id:
@@ -395,13 +367,17 @@ export function AdminScreen({
                 typeof request.message === 'string' && request.message.trim()
                   ? request.message
                   : null,
+              status:
+                typeof request.status === 'string' && request.status.trim()
+                  ? request.status
+                  : null,
               created_at:
                 typeof request.created_at === 'string' && request.created_at.trim()
                   ? request.created_at
                   : null,
               userName:
-                typeof request.user_id === 'string' && request.user_id.trim()
-                  ? supportUserNameMap[request.user_id] || translate('common.user')
+                typeof request.user_name === 'string' && request.user_name.trim()
+                  ? request.user_name
                   : translate('common.user'),
               sortIndex: index,
             }))

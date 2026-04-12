@@ -606,11 +606,11 @@ export function EventDetailsScreen({
                 </div>
 
                 {hasLocationCoordinates && (
-                  <div className="pl-[52px]">
+                  <div className="mt-3 -mx-6 sm:mx-0">
                     <EventLocationMap
                       lat={eventData.location_lat}
                       lng={eventData.location_lng}
-                      height={240}
+                      height={256}
                     />
                   </div>
                 )}

@@ -374,13 +374,13 @@ export function CreateEventScreen({
               onChange={setLocation}
               disabled={loading}
             />
-            <div className="mt-3">
+            <div className="mt-3 -mx-6 sm:mx-0">
               <EventLocationMap
                 lat={location.lat}
                 lng={location.lng}
                 editable
                 onPick={handleMapPick}
-                height={220}
+                height={248}
               />
             </div>
           </motion.div>

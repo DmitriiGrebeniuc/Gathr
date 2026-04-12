@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GoogleMap, LoadScriptNext, Marker } from '@react-google-maps/api';
+import { extractCityFromAddressComponents } from '../lib/locationCity';
 
 const GOOGLE_LIBRARIES: ('places')[] = ['places'];
 
@@ -13,6 +14,8 @@ type EventLocationMapProps = {
     lng: number;
     address: string;
     placeId: string | null;
+    city: string | null;
+    cityNormalized: string | null;
   }) => void;
 };
 
@@ -91,6 +94,8 @@ export function EventLocationMap({
           lng: nextLng,
           address: '',
           placeId: null,
+          city: null,
+          cityNormalized: null,
         });
         return;
       }
@@ -109,12 +114,17 @@ export function EventLocationMap({
 
             const address = firstResult?.formatted_address || '';
             const placeId = firstResult?.place_id || null;
+            const { city, cityNormalized } = extractCityFromAddressComponents(
+              firstResult?.address_components
+            );
 
             onPick?.({
               lat: nextLat,
               lng: nextLng,
               address,
               placeId,
+              city,
+              cityNormalized,
             });
 
             setIsResolvingAddress(false);
@@ -128,6 +138,8 @@ export function EventLocationMap({
           lng: nextLng,
           address: '',
           placeId: null,
+          city: null,
+          cityNormalized: null,
         });
 
         setIsResolvingAddress(false);

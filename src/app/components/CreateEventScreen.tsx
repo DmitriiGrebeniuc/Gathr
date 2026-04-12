@@ -35,6 +35,8 @@ export function CreateEventScreen({
     placeId: null,
     lat: null,
     lng: null,
+    city: null,
+    cityNormalized: null,
   });
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
@@ -55,17 +57,23 @@ export function CreateEventScreen({
     lng,
     address,
     placeId,
+    city,
+    cityNormalized,
   }: {
     lat: number;
     lng: number;
     address: string;
     placeId: string | null;
+    city: string | null;
+    cityNormalized: string | null;
   }) => {
     setLocation({
       address: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
       placeId,
       lat,
       lng,
+      city,
+      cityNormalized,
     });
   };
 
@@ -165,6 +173,8 @@ export function CreateEventScreen({
             location_place_id: location.placeId,
             location_lat: location.lat,
             location_lng: location.lng,
+            city: location.city,
+            city_normalized: location.cityNormalized,
             activity_type: activityType,
             creator_id: user.id,
           },

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LoadScriptNext } from '@react-google-maps/api';
 import { useLanguage } from '../context/LanguageContext';
+import { extractCityFromAddressComponents } from '../lib/locationCity';
 
 const GOOGLE_LIBRARIES: ('places')[] = ['places'];
 
@@ -9,6 +10,8 @@ export type LocationValue = {
   placeId: string | null;
   lat: number | null;
   lng: number | null;
+  city: string | null;
+  cityNormalized: string | null;
 };
 
 type LocationAutocompleteProps = {
@@ -24,6 +27,8 @@ const EMPTY_LOCATION: LocationValue = {
   placeId: null,
   lat: null,
   lng: null,
+  city: null,
+  cityNormalized: null,
 };
 
 const isCapacitorNativeApp = () => {
@@ -62,6 +67,8 @@ function PlainLocationInput({
           placeId: null,
           lat: null,
           lng: null,
+          city: null,
+          cityNormalized: null,
         });
       }}
       disabled={disabled}
@@ -105,7 +112,7 @@ function GoogleAutocompleteInput({
     autocompleteRef.current = new (window as any).google.maps.places.Autocomplete(
       inputRef.current,
       {
-        fields: ['formatted_address', 'geometry', 'place_id'],
+        fields: ['formatted_address', 'geometry', 'place_id', 'address_components'],
         types: ['geocode'],
       }
     );
@@ -123,12 +130,17 @@ function GoogleAutocompleteInput({
         typeof place?.geometry?.location?.lng === 'function'
           ? place.geometry.location.lng()
           : null;
+      const { city, cityNormalized } = extractCityFromAddressComponents(
+        place?.address_components
+      );
 
       const nextValue: LocationValue = {
         address,
         placeId,
         lat,
         lng,
+        city,
+        cityNormalized,
       };
 
       setInputValue(address);
@@ -149,6 +161,8 @@ function GoogleAutocompleteInput({
       placeId: null,
       lat: null,
       lng: null,
+      city: null,
+      cityNormalized: null,
     });
   };
 

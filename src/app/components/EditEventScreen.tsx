@@ -27,6 +27,8 @@ export function EditEventScreen({
     placeId: null,
     lat: null,
     lng: null,
+    city: null,
+    cityNormalized: null,
   });
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [loading, setLoading] = useState(false);
@@ -43,6 +45,8 @@ export function EditEventScreen({
       placeId: event.location_place_id || null,
       lat: typeof event.location_lat === 'number' ? event.location_lat : null,
       lng: typeof event.location_lng === 'number' ? event.location_lng : null,
+      city: event.city || null,
+      cityNormalized: event.city_normalized || null,
     });
     setActivityType((event.activity_type || 'other') as ActivityType);
 
@@ -76,17 +80,23 @@ export function EditEventScreen({
     lng,
     address,
     placeId,
+    city,
+    cityNormalized,
   }: {
     lat: number;
     lng: number;
     address: string;
     placeId: string | null;
+    city: string | null;
+    cityNormalized: string | null;
   }) => {
     setLocation({
       address: address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
       placeId,
       lat,
       lng,
+      city,
+      cityNormalized,
     });
   };
 
@@ -143,6 +153,8 @@ export function EditEventScreen({
           location_place_id: location.placeId,
           location_lat: location.lat,
           location_lng: location.lng,
+          city: location.city,
+          city_normalized: location.cityNormalized,
           activity_type: activityType,
         })
         .eq('id', event.id)

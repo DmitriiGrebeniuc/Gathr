@@ -104,11 +104,30 @@ export function EventLocationMap({
 
       try {
         const geocoder = new (window as any).google.maps.Geocoder();
-        const response = await geocoder.geocode({
-          location: { lat: nextLat, lng: nextLng },
+        const results = await new Promise<any[]>((resolve, reject) => {
+          geocoder.geocode(
+            {
+              location: { lat: nextLat, lng: nextLng },
+            },
+            (callbackResults: any, status: any) => {
+              if (status === 'OK' || status === (window as any).google?.maps?.GeocoderStatus?.OK) {
+                resolve(Array.isArray(callbackResults) ? callbackResults : []);
+                return;
+              }
+
+              if (
+                status === 'ZERO_RESULTS' ||
+                status === (window as any).google?.maps?.GeocoderStatus?.ZERO_RESULTS
+              ) {
+                resolve([]);
+                return;
+              }
+
+              reject(new Error(`Reverse geocoding failed with status: ${String(status)}`));
+            }
+          );
         });
 
-        const results = Array.isArray(response?.results) ? response.results : [];
         const firstResult = results[0] ?? null;
         const { city, cityNormalized } = extractCityFromGeocoderResults(results);
 

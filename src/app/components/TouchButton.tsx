@@ -16,24 +16,24 @@ export function TouchButton({
 }: TouchButtonProps) {
   const variants = {
     primary: {
-      backgroundColor: '#D4AF37',
-      color: '#0F0F0F',
+      backgroundColor: 'var(--accent)',
+      color: 'var(--accent-foreground)',
       border: 'none',
     },
     secondary: {
-      backgroundColor: '#3A3A3A',
-      color: '#FFFFFF',
+      backgroundColor: 'var(--primary)',
+      color: 'var(--destructive-foreground)',
       border: 'none',
     },
     ghost: {
       backgroundColor: 'transparent',
-      color: '#FFFFFF',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
+      color: 'var(--destructive-foreground)',
+      border: '1px solid var(--border)',
     },
     danger: {
       backgroundColor: 'transparent',
-      color: '#d4183d',
-      border: '1px solid rgba(212, 47, 61, 0.5)',
+      color: 'var(--destructive)',
+      border: '1px solid var(--destructive-border-strong)',
     },
   };
 

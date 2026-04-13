@@ -37,7 +37,7 @@ export function WelcomeScreen({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
             className="text-6xl mb-2 tracking-tight"
-            style={{ color: '#D4AF37' }}
+            style={{ color: 'var(--accent)' }}
           >
             Gathr
           </motion.h1>
@@ -67,7 +67,7 @@ export function WelcomeScreen({
         >
           <span
             className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-semibold"
-            style={{ color: '#0F0F0F' }}
+            style={{ color: 'var(--accent-foreground)' }}
           >
             G
           </span>
@@ -79,7 +79,7 @@ export function WelcomeScreen({
           variant="ghost"
           fullWidth
           disabled={googleLoading}
-          style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
+          style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
         >
           {translate('welcome.login')}
         </TouchButton>

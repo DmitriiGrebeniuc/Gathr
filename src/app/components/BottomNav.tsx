@@ -18,8 +18,8 @@ export function BottomNav({
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className="flex items-center justify-around border-t"
       style={{
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        backgroundColor: '#0F0F0F',
+        borderColor: 'var(--border)',
+        backgroundColor: 'var(--background)',
         backdropFilter: 'blur(10px)',
         paddingTop: '0.75rem',
         paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
@@ -29,13 +29,13 @@ export function BottomNav({
         whileTap={{ scale: 0.9 }}
         onClick={() => onNavigate('home')}
         className="flex flex-col items-center gap-1 transition-colors relative"
-        style={{ color: activeScreen === 'home' ? '#D4AF37' : '#8A8A8A' }}
+        style={{ color: activeScreen === 'home' ? 'var(--accent)' : 'var(--muted-foreground)' }}
       >
         {activeScreen === 'home' && (
           <motion.div
             layoutId="activeIndicator"
             className="absolute -top-1 w-1 h-1 rounded-full"
-            style={{ backgroundColor: '#D4AF37' }}
+            style={{ backgroundColor: 'var(--accent)' }}
           />
         )}
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -49,13 +49,13 @@ export function BottomNav({
         whileTap={{ scale: 0.9 }}
         onClick={() => onNavigate('notifications')}
         className="flex flex-col items-center gap-1 transition-colors relative"
-        style={{ color: activeScreen === 'notifications' ? '#D4AF37' : '#8A8A8A' }}
+        style={{ color: activeScreen === 'notifications' ? 'var(--accent)' : 'var(--muted-foreground)' }}
       >
         {activeScreen === 'notifications' && (
           <motion.div
             layoutId="activeIndicator"
             className="absolute -top-1 w-1 h-1 rounded-full"
-            style={{ backgroundColor: '#D4AF37' }}
+            style={{ backgroundColor: 'var(--accent)' }}
           />
         )}
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -69,13 +69,13 @@ export function BottomNav({
         whileTap={{ scale: 0.9 }}
         onClick={() => onNavigate('profile')}
         className="flex flex-col items-center gap-1 transition-colors relative"
-        style={{ color: activeScreen === 'profile' ? '#D4AF37' : '#8A8A8A' }}
+        style={{ color: activeScreen === 'profile' ? 'var(--accent)' : 'var(--muted-foreground)' }}
       >
         {activeScreen === 'profile' && (
           <motion.div
             layoutId="activeIndicator"
             className="absolute -top-1 w-1 h-1 rounded-full"
-            style={{ backgroundColor: '#D4AF37' }}
+            style={{ backgroundColor: 'var(--accent)' }}
           />
         )}
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

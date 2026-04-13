@@ -525,9 +525,9 @@ export function EventDetailsScreen({
                   <span
                     className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
                     style={{
-                      borderColor: 'rgba(212, 175, 55, 0.28)',
-                      color: '#D4AF37',
-                      backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                      borderColor: 'var(--accent-border-muted)',
+                      color: 'var(--accent)',
+                      backgroundColor: 'var(--accent-soft-muted)',
                     }}
                   >
                     {translate('details.pastEvent')}
@@ -549,7 +549,7 @@ export function EventDetailsScreen({
                 fullWidth
                 onClick={handleShare}
                 disabled={sharing || loadingAction || loadingDelete || !eventData.id}
-                style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
               >
                 {sharing ? translate('details.sharing') : translate('details.shareEvent')}
               </TouchButton>
@@ -564,7 +564,7 @@ export function EventDetailsScreen({
               >
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: '#3A3A3A' }}
+                  style={{ backgroundColor: 'var(--primary)' }}
                 >
                   <span className="text-sm">📅</span>
                 </div>
@@ -583,7 +583,7 @@ export function EventDetailsScreen({
                 <div className="flex items-start gap-3">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: '#3A3A3A' }}
+                    style={{ backgroundColor: 'var(--primary)' }}
                   >
                     <span className="text-sm">📍</span>
                   </div>
@@ -597,7 +597,7 @@ export function EventDetailsScreen({
                         target="_blank"
                         rel="noreferrer"
                         className="inline-block mt-2 text-sm"
-                        style={{ color: '#D4AF37' }}
+                        style={{ color: 'var(--accent)' }}
                       >
                         Открыть в Google Maps
                       </a>
@@ -675,8 +675,8 @@ export function EventDetailsScreen({
                         <div
                           className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2"
                           style={{
-                            backgroundColor: '#3A3A3A',
-                            borderColor: isEventCreator ? '#D4AF37' : 'var(--background)',
+                            backgroundColor: 'var(--primary)',
+                            borderColor: isEventCreator ? 'var(--accent)' : 'var(--background)',
                             boxShadow: isEventCreator ? '0 0 0 1px rgba(212, 175, 55, 0.18)' : 'none',
                           }}
                         >
@@ -687,9 +687,9 @@ export function EventDetailsScreen({
                           <div
                             className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] leading-none border"
                             style={{
-                              backgroundColor: '#0F0F0F',
-                              borderColor: 'rgba(212, 175, 55, 0.28)',
-                              color: '#D4AF37',
+                              backgroundColor: 'var(--background)',
+                              borderColor: 'var(--accent-border-muted)',
+                              color: 'var(--accent)',
                             }}
                           >
                             {translate('details.you')}
@@ -705,7 +705,7 @@ export function EventDetailsScreen({
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.5 }}
                       className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2 border-background"
-                      style={{ backgroundColor: '#2A2A2A' }}
+                      style={{ backgroundColor: 'var(--secondary)' }}
                     >
                       +{participants.length - 4}
                     </motion.div>
@@ -714,7 +714,7 @@ export function EventDetailsScreen({
               ) : (
                 <div
                   className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"
-                  style={{ backgroundColor: '#1A1A1A' }}
+                  style={{ backgroundColor: 'var(--card)' }}
                 >
                   {translate('details.noParticipants')}
                 </div>
@@ -752,7 +752,7 @@ export function EventDetailsScreen({
               ) : (
                 <div
                   className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border"
-                  style={{ backgroundColor: '#1A1A1A' }}
+                  style={{ backgroundColor: 'var(--card)' }}
                 >
                   {translate('details.eventEnded')}
                 </div>
@@ -767,7 +767,7 @@ export function EventDetailsScreen({
                 fullWidth
                 onClick={() => onNavigate('edit-event', eventData)}
                 disabled={loadingDelete || loadingAction}
-                style={{ borderColor: 'rgba(212, 175, 55, 0.3)', color: '#D4AF37' }}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
               >
                 {translate('details.editEvent')}
               </TouchButton>

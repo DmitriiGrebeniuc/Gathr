@@ -151,7 +151,7 @@ export function EditProfileScreen({
           <div className="flex flex-col items-center mb-8">
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center mb-3"
-              style={{ backgroundColor: '#3A3A3A' }}
+              style={{ backgroundColor: 'var(--primary)' }}
             >
               <span className="text-3xl">
                 {loading ? '...' : getInitials()}
@@ -171,9 +171,9 @@ export function EditProfileScreen({
                 disabled={loading || saving}
                 className="w-full px-4 py-3 rounded-xl border transition-all outline-none focus:border-accent"
                 style={{
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
-                  backgroundColor: '#1A1A1A',
-                  color: '#FFFFFF',
+                  borderColor: 'var(--border)',
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--destructive-foreground)',
                 }}
               />
             </div>
@@ -188,9 +188,9 @@ export function EditProfileScreen({
                 disabled
                 className="w-full px-4 py-3 rounded-xl border transition-all outline-none"
                 style={{
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
-                  backgroundColor: '#1A1A1A',
-                  color: '#777777',
+                  borderColor: 'var(--border)',
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--muted-foreground)',
                 }}
               />
             </div>
@@ -200,7 +200,7 @@ export function EditProfileScreen({
             onClick={handleSave}
             disabled={loading || saving}
             className="w-full py-4 rounded-xl transition-all mt-8 disabled:opacity-60"
-            style={{ backgroundColor: '#D4AF37', color: '#0F0F0F' }}
+            style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}
           >
             {loading
               ? translate('editProfile.loading')

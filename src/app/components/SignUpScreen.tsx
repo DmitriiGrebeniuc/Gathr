@@ -103,7 +103,7 @@ export function SignUpScreen({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: 'var(--card)' }}
               />
             </motion.div>
 
@@ -121,7 +121,7 @@ export function SignUpScreen({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: 'var(--card)' }}
               />
             </motion.div>
 
@@ -139,7 +139,7 @@ export function SignUpScreen({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: 'var(--card)' }}
               />
             </motion.div>
 
@@ -168,7 +168,7 @@ export function SignUpScreen({
               <button
                 onClick={() => onNavigate('login')}
                 className="text-accent"
-                style={{ color: '#D4AF37' }}
+                style={{ color: 'var(--accent)' }}
                 disabled={loading}
               >
                 {translate('signup.loginLink')}

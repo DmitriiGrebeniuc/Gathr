@@ -161,9 +161,9 @@ export function ParticipantsScreen({
                                     }
                                     className="px-3 py-2 rounded-lg text-sm transition-opacity"
                                     style={{
-                                        backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                                        border: '1px solid rgba(212, 175, 55, 0.35)',
-                                        color: '#D4AF37',
+                                        backgroundColor: 'var(--accent-soft)',
+                                        border: '1px solid var(--accent-border)',
+                                        color: 'var(--accent)',
                                     }}
                                 >
                                     {translate('inviteUsers.invite')}
@@ -180,7 +180,7 @@ export function ParticipantsScreen({
                         {!loading && participants.length === 0 && (
                             <div
                                 className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"
-                                style={{ backgroundColor: '#1A1A1A' }}
+                                style={{ backgroundColor: 'var(--card)' }}
                             >
                                 {translate('participants.noParticipants')}
                             </div>
@@ -203,14 +203,14 @@ export function ParticipantsScreen({
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: idx * 0.03 }}
                                         className="px-4 py-4 rounded-xl flex items-center gap-3 border border-border"
-                                        style={{ backgroundColor: '#1A1A1A' }}
+                                        style={{ backgroundColor: 'var(--card)' }}
                                     >
                                         <div className="relative">
                                             <div
                                                 className="w-10 h-10 rounded-full flex items-center justify-center text-sm border-2"
                                                 style={{
-                                                    backgroundColor: '#2A2A2A',
-                                                    borderColor: isEventCreator ? '#D4AF37' : 'transparent',
+                                                    backgroundColor: 'var(--secondary)',
+                                                    borderColor: isEventCreator ? 'var(--accent)' : 'transparent',
                                                     boxShadow: isEventCreator ? '0 0 0 1px rgba(212, 175, 55, 0.18)' : 'none',
                                                 }}
                                                 title={
@@ -230,9 +230,9 @@ export function ParticipantsScreen({
                                                 <div
                                                     className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] leading-none border"
                                                     style={{
-                                                        backgroundColor: '#0F0F0F',
-                                                        borderColor: 'rgba(212, 175, 55, 0.28)',
-                                                        color: '#D4AF37',
+                                                        backgroundColor: 'var(--background)',
+                                                        borderColor: 'var(--accent-border-muted)',
+                                                        color: 'var(--accent)',
                                                     }}
                                                 >
                                                     {translate('participants.you')}

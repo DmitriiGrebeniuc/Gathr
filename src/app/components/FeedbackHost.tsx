@@ -48,9 +48,9 @@ export function FeedbackHost() {
         expand={false}
         toastOptions={{
           style: {
-            background: '#171717',
-            color: '#F5F5F5',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'var(--surface-interactive)',
+            color: 'var(--foreground-strong)',
+            border: '1px solid var(--border-subtle)',
             boxShadow: '0 16px 40px rgba(0, 0, 0, 0.45)',
             borderRadius: '16px',
           },
@@ -68,9 +68,9 @@ export function FeedbackHost() {
         <AlertDialogContent
           className="max-w-[calc(100%-2rem)] rounded-2xl border"
           style={{
-            backgroundColor: '#171717',
-            borderColor: 'rgba(255, 255, 255, 0.08)',
-            color: '#F5F5F5',
+            backgroundColor: 'var(--surface-interactive)',
+            borderColor: 'var(--border-subtle)',
+            color: 'var(--foreground-strong)',
           }}
         >
           <AlertDialogHeader>
@@ -85,9 +85,9 @@ export function FeedbackHost() {
               onClick={() => closeConfirm(false)}
               className="rounded-xl border"
               style={{
-                backgroundColor: '#111111',
-                borderColor: 'rgba(255, 255, 255, 0.08)',
-                color: '#F5F5F5',
+                backgroundColor: 'var(--surface-strong)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--foreground-strong)',
               }}
             >
               {request?.cancelLabel || translate('common.cancel')}
@@ -97,8 +97,13 @@ export function FeedbackHost() {
               className="rounded-xl border-0"
               style={{
                 backgroundColor:
-                  request?.variant === 'destructive' ? '#FF4D6D' : '#D4AF37',
-                color: request?.variant === 'destructive' ? '#FFFFFF' : '#111111',
+                  request?.variant === 'destructive'
+                    ? 'var(--destructive-strong)'
+                    : 'var(--accent)',
+                color:
+                  request?.variant === 'destructive'
+                    ? 'var(--destructive-foreground)'
+                    : 'var(--surface-strong)',
               }}
             >
               {request?.confirmLabel || translate('common.save')}

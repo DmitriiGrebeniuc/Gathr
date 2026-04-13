@@ -614,7 +614,7 @@ export function NotificationsScreen({
             <div
               className="rounded-xl p-4 border border-border"
               style={{
-                backgroundColor: '#1A1A1A',
+                backgroundColor: 'var(--card)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
@@ -646,7 +646,7 @@ export function NotificationsScreen({
               >
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
-                  style={{ backgroundColor: '#3A3A3A' }}
+                  style={{ backgroundColor: 'var(--primary)' }}
                   title={
                     notification.type === 'upcoming'
                       ? translate('notifications.upcomingIconLabel')
@@ -680,9 +680,9 @@ export function NotificationsScreen({
                         disabled={isProcessingCurrent}
                         className="px-3 py-2 rounded-lg text-sm transition-opacity"
                         style={{
-                          backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                          border: '1px solid rgba(212, 175, 55, 0.35)',
-                          color: '#D4AF37',
+                          backgroundColor: 'var(--accent-soft)',
+                          border: '1px solid var(--accent-border)',
+                          color: 'var(--accent)',
                           opacity: isProcessingCurrent ? 0.7 : 1,
                         }}
                       >
@@ -696,9 +696,9 @@ export function NotificationsScreen({
                         disabled={isProcessingCurrent}
                         className="px-3 py-2 rounded-lg text-sm transition-opacity"
                         style={{
-                          backgroundColor: '#1A1A1A',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#F5F5F5',
+                          backgroundColor: 'var(--card)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--foreground-strong)',
                           opacity: isProcessingCurrent ? 0.7 : 1,
                         }}
                       >

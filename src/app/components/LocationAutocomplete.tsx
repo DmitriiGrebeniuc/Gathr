@@ -75,8 +75,8 @@ function PlainLocationInput({
       autoComplete="off"
       className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
       style={{
-        backgroundColor: '#1A1A1A',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)',
       }}
     />
   );
@@ -177,8 +177,8 @@ function GoogleAutocompleteInput({
       autoComplete="off"
       className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
       style={{
-        backgroundColor: '#1A1A1A',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)',
       }}
     />
   );

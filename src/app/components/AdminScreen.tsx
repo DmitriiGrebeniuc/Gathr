@@ -774,17 +774,17 @@ export function AdminScreen({
       case 'resolved':
         return {
           label: translate('admin.supportStatusResolved'),
-          color: '#34D399',
-          backgroundColor: 'rgba(52, 211, 153, 0.12)',
-          borderColor: 'rgba(52, 211, 153, 0.28)',
+          color: 'var(--success)',
+          backgroundColor: 'var(--success-soft)',
+          borderColor: 'var(--success-border)',
         };
       case 'new':
       default:
         return {
           label: translate('admin.supportStatusNew'),
-          color: '#60A5FA',
-          backgroundColor: 'rgba(96, 165, 250, 0.12)',
-          borderColor: 'rgba(96, 165, 250, 0.28)',
+          color: 'var(--info)',
+          backgroundColor: 'var(--info-soft)',
+          borderColor: 'var(--info-border)',
         };
     }
   };
@@ -1406,8 +1406,8 @@ export function AdminScreen({
                               className="h-6 w-11 rounded-full p-1 transition-colors"
                               style={{
                                 backgroundColor: editableUnlimitedAccess
-                                  ? 'rgba(212, 175, 55, 0.36)'
-                                  : 'rgba(255, 255, 255, 0.14)',
+                                  ? 'var(--toggle-track-active)'
+                                  : 'var(--toggle-track-inactive)',
                               }}
                             >
                               <div
@@ -1591,9 +1591,9 @@ export function AdminScreen({
                                     disabled={isUpdating}
                                     className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
                                     style={{
-                                      backgroundColor: 'rgba(52, 211, 153, 0.12)',
-                                      border: '1px solid rgba(52, 211, 153, 0.28)',
-                                      color: '#34D399',
+                                      backgroundColor: 'var(--success-soft)',
+                                      border: '1px solid var(--success-border)',
+                                      color: 'var(--success)',
                                     }}
                                   >
                                     {translate('admin.resolveTicket')}

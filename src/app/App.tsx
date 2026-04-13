@@ -610,7 +610,7 @@ export default function App() {
             height: 'var(--app-height, 100dvh)',
             maxWidth: isMobileViewport ? '100%' : '390px',
             maxHeight: isMobileViewport ? 'none' : '844px',
-            backgroundColor: '#0F0F0F',
+            backgroundColor: 'var(--background)',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
             borderRadius: isMobileViewport ? '0' : '2.5rem',
           }}
@@ -633,7 +633,7 @@ export default function App() {
           height: 'var(--app-height, 100dvh)',
           maxWidth: isMobileViewport ? '100%' : '390px',
           maxHeight: isMobileViewport ? 'none' : '844px',
-          backgroundColor: '#0F0F0F',
+          backgroundColor: 'var(--background)',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
           borderRadius: isMobileViewport ? '0' : '2.5rem',
         }}

@@ -261,8 +261,8 @@ export function CreateEventScreen({
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
               style={{
-                backgroundColor: '#1A1A1A',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
               }}
             />
           </motion.div>
@@ -288,11 +288,11 @@ export function CreateEventScreen({
                     onClick={() => setActivityType(type.value)}
                     className="px-3 py-2 rounded-full text-sm border transition-all"
                     style={{
-                      backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
+                      backgroundColor: isActive ? 'var(--accent-soft)' : 'var(--card)',
                       borderColor: isActive
-                        ? 'rgba(212, 175, 55, 0.5)'
-                        : 'rgba(255, 255, 255, 0.1)',
-                      color: isActive ? '#D4AF37' : '#F5F5F5',
+                        ? 'var(--accent-border-strong)'
+                        : 'var(--border)',
+                      color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
                     }}
                   >
                     <span className="mr-2">{activityMeta.emoji}</span>
@@ -318,8 +318,8 @@ export function CreateEventScreen({
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors resize-none"
               style={{
-                backgroundColor: '#1A1A1A',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
               }}
             />
           </motion.div>
@@ -340,8 +340,8 @@ export function CreateEventScreen({
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{
-                  backgroundColor: '#1A1A1A',
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--border)',
                 }}
               />
             </div>
@@ -355,8 +355,8 @@ export function CreateEventScreen({
                 onChange={(e) => setTime(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{
-                  backgroundColor: '#1A1A1A',
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--border)',
                 }}
               />
             </div>

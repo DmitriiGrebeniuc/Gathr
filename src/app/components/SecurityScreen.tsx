@@ -75,8 +75,8 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
           <div
             className="rounded-xl border p-5"
             style={{
-              borderColor: 'rgba(255, 255, 255, 0.1)',
-              backgroundColor: '#1A1A1A',
+              borderColor: 'var(--border)',
+              backgroundColor: 'var(--card)',
             }}
           >
             <h3 className="mb-2">{translate('security.changePasswordTitle')}</h3>
@@ -96,8 +96,8 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                   style={{
-                    backgroundColor: '#111111',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    backgroundColor: 'var(--surface-strong)',
+                    borderColor: 'var(--border)',
                   }}
                   disabled={saving}
                 />
@@ -114,8 +114,8 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                   style={{
-                    backgroundColor: '#111111',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    backgroundColor: 'var(--surface-strong)',
+                    borderColor: 'var(--border)',
                   }}
                   disabled={saving}
                 />
@@ -132,8 +132,8 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
           <div
             className="rounded-xl border p-5"
             style={{
-              borderColor: 'rgba(255, 255, 255, 0.1)',
-              backgroundColor: '#1A1A1A',
+              borderColor: 'var(--border)',
+              backgroundColor: 'var(--card)',
             }}
           >
             <h3 className="mb-2">{translate('security.comingSoonTitle')}</h3>

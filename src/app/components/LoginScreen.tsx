@@ -135,7 +135,7 @@ export function LoginScreen({
               >
                 <span
                   className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-semibold"
-                  style={{ color: '#0F0F0F' }}
+                  style={{ color: 'var(--accent-foreground)' }}
                 >
                   G
                 </span>
@@ -170,7 +170,7 @@ export function LoginScreen({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: 'var(--card)' }}
               />
             </motion.div>
 
@@ -188,7 +188,7 @@ export function LoginScreen({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-                style={{ backgroundColor: '#1A1A1A' }}
+                style={{ backgroundColor: 'var(--card)' }}
               />
             </motion.div>
 
@@ -201,7 +201,7 @@ export function LoginScreen({
               <button
                 onClick={handleForgotPassword}
                 className="text-sm text-accent"
-                style={{ color: '#D4AF37' }}
+                style={{ color: 'var(--accent)' }}
                 disabled={loading || resetLoading || googleLoading}
               >
                 {resetLoading
@@ -236,7 +236,7 @@ export function LoginScreen({
               <button
                 onClick={() => onNavigate('signup')}
                 className="text-accent"
-                style={{ color: '#D4AF37' }}
+                style={{ color: 'var(--accent)' }}
                 disabled={loading || resetLoading || googleLoading}
               >
                 {translate('login.signupLink')}

@@ -214,7 +214,7 @@ export function EventLocationMap({
         className="rounded-2xl border border-border flex items-center justify-center text-sm text-muted-foreground text-center px-4"
         style={{
           height: `${height}px`,
-          backgroundColor: '#1A1A1A',
+          backgroundColor: 'var(--card)',
         }}
       >
         Карта временно доступна только в веб-версии. На телефоне укажи адрес вручную.
@@ -228,7 +228,7 @@ export function EventLocationMap({
         className="rounded-2xl border border-border flex items-center justify-center text-sm text-muted-foreground"
         style={{
           height: `${height}px`,
-          backgroundColor: '#1A1A1A',
+          backgroundColor: 'var(--card)',
         }}
       >
         Google Maps API key is missing

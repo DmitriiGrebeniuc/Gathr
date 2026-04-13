@@ -135,7 +135,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
       className="relative w-14 h-8 rounded-full transition-all disabled:opacity-60"
-      style={{ backgroundColor: checked ? '#D4AF37' : '#3A3A3A' }}
+      style={{ backgroundColor: checked ? 'var(--accent)' : 'var(--primary)' }}
     >
       <div
         className="absolute w-6 h-6 bg-white rounded-full top-1 transition-all"

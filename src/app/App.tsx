@@ -22,6 +22,7 @@ import { LoadingLogo } from './components/LoadingLogo';
 import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { supabase } from '../lib/supabase';
 import { LanguageScreen } from './components/LanguageScreen';
+import { AppearanceScreen } from './components/AppearanceScreen';
 import { FeedbackHost } from './components/FeedbackHost';
 import { useLanguage } from './context/LanguageContext';
 import { InviteUsersScreen } from './components/InviteUsersScreen';
@@ -554,6 +555,7 @@ export default function App() {
       'support',
       'admin',
       'language',
+      'appearance',
       'event-details',
       'participants',
       'reset-password',
@@ -687,6 +689,9 @@ export default function App() {
               {currentScreen === 'admin' && <AdminScreen onNavigate={handleNavigate} />}
               {currentScreen === 'language' && (
                 <LanguageScreen onNavigate={handleNavigate} />
+              )}
+              {currentScreen === 'appearance' && (
+                <AppearanceScreen onNavigate={handleNavigate} />
               )}
             </ScreenTransition>
           </AnimatePresence>

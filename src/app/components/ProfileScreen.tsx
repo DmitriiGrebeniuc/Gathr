@@ -216,6 +216,20 @@ export function ProfileScreen({
             </button>
 
             <button
+              onClick={() => onNavigate('appearance')}
+              className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
+              style={{
+                borderColor: 'var(--border)',
+                backgroundColor: 'var(--card)',
+              }}
+            >
+              <div className="flex justify-between items-center">
+                <span>{translate('profile.appearance')}</span>
+                <span className="text-muted-foreground">в†’</span>
+              </div>
+            </button>
+
+            <button
               onClick={() => onNavigate('security')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
               style={{

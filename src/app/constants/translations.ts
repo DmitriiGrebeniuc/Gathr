@@ -159,6 +159,7 @@ type TranslationKey =
     | 'profile.editProfile'
     | 'profile.notificationSettings'
     | 'profile.language'
+    | 'profile.appearance'
     | 'profile.privacySecurity'
     | 'profile.helpSupport'
     | 'profile.adminMode'
@@ -172,6 +173,13 @@ type TranslationKey =
     | 'language.title'
     | 'language.selectedLanguage'
     | 'language.back'
+    | 'appearance.title'
+    | 'appearance.description'
+    | 'appearance.system'
+    | 'appearance.dark'
+    | 'appearance.light'
+    | 'appearance.currentSystemDark'
+    | 'appearance.currentSystemLight'
     | 'admin.title'
     | 'admin.enabledTitle'
     | 'admin.enabledDescription'
@@ -613,6 +621,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'profile.editProfile': 'Edit Profile',
         'profile.notificationSettings': 'Notification Settings',
         'profile.language': 'Language',
+        'profile.appearance': 'Appearance',
         'profile.privacySecurity': 'Privacy & Security',
         'profile.helpSupport': 'Help & Support',
         'profile.adminMode': 'Admin Mode',
@@ -627,6 +636,13 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'language.title': 'Language',
         'language.selectedLanguage': 'Selected language',
         'language.back': 'Back',
+        'appearance.title': 'Appearance',
+        'appearance.description': 'Choose how Gathr looks on this device.',
+        'appearance.system': 'System',
+        'appearance.dark': 'Dark',
+        'appearance.light': 'Light',
+        'appearance.currentSystemDark': 'Current system theme: Dark',
+        'appearance.currentSystemLight': 'Current system theme: Light',
         'admin.title': 'Admin',
         'admin.enabledTitle': 'Admin mode is enabled',
         'admin.enabledDescription': 'This account has access to the first-stage admin area.',
@@ -909,6 +925,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     },
 
     ru: {
+        'profile.appearance': 'Оформление',
+        'appearance.title': 'Оформление',
+        'appearance.description': 'Выбери, как будет выглядеть Gathr на этом устройстве.',
+        'appearance.system': 'Системная',
+        'appearance.dark': 'Тёмная',
+        'appearance.light': 'Светлая',
+        'appearance.currentSystemDark': 'Текущая системная тема: тёмная',
+        'appearance.currentSystemLight': 'Текущая системная тема: светлая',
         'common.user': 'Пользователь',
         'common.unknown': 'Неизвестно',
         'common.guestUser': 'Гость',
@@ -1371,6 +1395,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     },
 
     ro: {
+        'profile.appearance': 'Aspect',
+        'appearance.title': 'Aspect',
+        'appearance.description': 'Alege cum arată Gathr pe acest dispozitiv.',
+        'appearance.system': 'Sistem',
+        'appearance.dark': 'Întunecată',
+        'appearance.light': 'Luminoasă',
+        'appearance.currentSystemDark': 'Tema de sistem curentă: întunecată',
+        'appearance.currentSystemLight': 'Tema de sistem curentă: luminoasă',
         'common.user': 'Utilizator',
         'common.unknown': 'Necunoscut',
         'common.guestUser': 'Vizitator',
@@ -1839,6 +1871,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     },
 
     uk: {
+        'profile.appearance': 'Зовнішній вигляд',
+        'appearance.title': 'Зовнішній вигляд',
+        'appearance.description': 'Обери, як буде виглядати Gathr на цьому пристрої.',
+        'appearance.system': 'Системна',
+        'appearance.dark': 'Темна',
+        'appearance.light': 'Світла',
+        'appearance.currentSystemDark': 'Поточна системна тема: темна',
+        'appearance.currentSystemLight': 'Поточна системна тема: світла',
         'common.user': 'Користувач',
         'common.unknown': 'Невідомо',
         'common.guestUser': 'Гість',
@@ -2308,6 +2348,14 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     },
 
     de: {
+        'profile.appearance': 'Darstellung',
+        'appearance.title': 'Darstellung',
+        'appearance.description': 'Wähle, wie Gathr auf diesem Gerät aussehen soll.',
+        'appearance.system': 'System',
+        'appearance.dark': 'Dunkel',
+        'appearance.light': 'Hell',
+        'appearance.currentSystemDark': 'Aktuelles Systemdesign: Dunkel',
+        'appearance.currentSystemLight': 'Aktuelles Systemdesign: Hell',
         'common.user': 'Benutzer',
         'common.unknown': 'Unbekannt',
         'common.guestUser': 'Gast',

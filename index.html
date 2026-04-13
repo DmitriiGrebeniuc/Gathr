@@ -6,6 +6,29 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="icon" type="image/png" href="/favicon.png" />
       <title>Gathr</title>
+      <script>
+        (function () {
+          try {
+            var storedThemeMode = window.localStorage.getItem('gathr-theme-mode');
+            var themeMode =
+              storedThemeMode === 'dark' ||
+              storedThemeMode === 'light' ||
+              storedThemeMode === 'system'
+                ? storedThemeMode
+                : 'system';
+            var prefersDark =
+              typeof window.matchMedia === 'function' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var effectiveTheme =
+              themeMode === 'system' ? (prefersDark ? 'dark' : 'light') : themeMode;
+
+            document.documentElement.classList.toggle('dark', effectiveTheme === 'dark');
+            document.documentElement.style.colorScheme = effectiveTheme;
+          } catch (error) {
+            console.error('Failed to initialize theme mode:', error);
+          }
+        })();
+      </script>
     </head>
 
     <body>

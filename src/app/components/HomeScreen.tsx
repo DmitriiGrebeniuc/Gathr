@@ -632,7 +632,7 @@ export function HomeScreen({
           }}
           transition={{ type: 'spring', stiffness: 320, damping: 32 }}
           className="text-2xl"
-          style={{ color: '#D4AF37' }}
+          style={{ color: 'var(--accent)' }}
         >
           Gathr
         </motion.h1>
@@ -647,10 +647,10 @@ export function HomeScreen({
           onClick={() => onNavigate('profile')}
           className="rounded-full flex items-center justify-center border shrink-0"
           style={{
-            backgroundColor: '#3A3A3A',
-            borderColor: 'rgba(212, 175, 55, 0.45)',
-            boxShadow: '0 0 0 1px rgba(212, 175, 55, 0.12)',
-            color: '#F5F5F5',
+            backgroundColor: 'var(--primary)',
+            borderColor: 'var(--accent-border)',
+            boxShadow: 'var(--accent-outline-soft)',
+            color: 'var(--foreground-strong)',
           }}
           title={currentUserName}
         >
@@ -666,7 +666,7 @@ export function HomeScreen({
             }`}
           style={
             activeTab === 'discover'
-              ? { borderColor: '#D4AF37', color: '#D4AF37' }
+              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
               : {}
           }
         >
@@ -680,7 +680,7 @@ export function HomeScreen({
             }`}
           style={
             activeTab === 'joined'
-              ? { borderColor: '#D4AF37', color: '#D4AF37' }
+              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
               : {}
           }
         >
@@ -694,7 +694,7 @@ export function HomeScreen({
             }`}
           style={
             activeTab === 'my'
-              ? { borderColor: '#D4AF37', color: '#D4AF37' }
+              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
               : {}
           }
         >
@@ -721,15 +721,15 @@ export function HomeScreen({
             className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
             style={{
               backgroundColor:
-                selectedActivityType === 'all' ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
+                selectedActivityType === 'all' ? 'var(--accent-soft)' : 'var(--card)',
               borderColor:
                 selectedActivityType === 'all'
-                  ? 'rgba(212, 175, 55, 0.5)'
-                  : 'rgba(255, 255, 255, 0.1)',
-              color: selectedActivityType === 'all' ? '#D4AF37' : '#F5F5F5',
+                  ? 'var(--accent-border-strong)'
+                  : 'var(--border)',
+              color: selectedActivityType === 'all' ? 'var(--accent)' : 'var(--foreground-strong)',
               boxShadow:
                 selectedActivityType === 'all'
-                  ? '0 0 0 1px rgba(212, 175, 55, 0.12)'
+                  ? 'var(--accent-outline-soft)'
                   : 'none',
             }}
           >
@@ -748,12 +748,12 @@ export function HomeScreen({
                 whileTap={{ scale: 0.96 }}
                 className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
                 style={{
-                  backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#1A1A1A',
+                  backgroundColor: isActive ? 'var(--accent-soft)' : 'var(--card)',
                   borderColor: isActive
-                    ? 'rgba(212, 175, 55, 0.5)'
-                    : 'rgba(255, 255, 255, 0.1)',
-                  color: isActive ? '#D4AF37' : '#F5F5F5',
-                  boxShadow: isActive ? '0 0 0 1px rgba(212, 175, 55, 0.12)' : 'none',
+                    ? 'var(--accent-border-strong)'
+                    : 'var(--border)',
+                  color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
+                  boxShadow: isActive ? 'var(--accent-outline-soft)' : 'none',
                 }}
               >
                   <span className="mr-1.5">{activityMeta.emoji}</span>
@@ -770,10 +770,10 @@ export function HomeScreen({
             whileTap={{ scale: 0.98 }}
             className="w-full rounded-xl border px-3 py-2 text-left transition-all"
             style={{
-              backgroundColor: isCityPickerOpen ? 'rgba(212, 175, 55, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+              backgroundColor: isCityPickerOpen ? 'var(--accent-soft-muted)' : 'rgba(255, 255, 255, 0.03)',
               borderColor: isCityPickerOpen
-                ? 'rgba(212, 175, 55, 0.35)'
-                : 'rgba(255, 255, 255, 0.08)',
+                ? 'var(--accent-border)'
+                : 'var(--border-subtle)',
             }}
           >
             <div className="flex items-center justify-between gap-3">
@@ -783,7 +783,10 @@ export function HomeScreen({
                 </p>
                 <p
                   className="truncate text-sm"
-                  style={{ color: selectedCity === 'all' ? '#F5F5F5' : '#D4AF37' }}
+                  style={{
+                    color:
+                      selectedCity === 'all' ? 'var(--foreground-strong)' : 'var(--accent)',
+                  }}
                 >
                   {selectedCityLabel}
                 </p>
@@ -806,8 +809,8 @@ export function HomeScreen({
               transition={{ duration: 0.16 }}
               className="mt-2 rounded-xl border overflow-hidden"
               style={{
-                backgroundColor: '#141414',
-                borderColor: 'rgba(255, 255, 255, 0.08)',
+                backgroundColor: 'var(--surface-overlay)',
+                borderColor: 'var(--border-subtle)',
               }}
             >
               <div className="border-b border-border px-3 py-2">
@@ -819,9 +822,9 @@ export function HomeScreen({
                   autoComplete="off"
                   className="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"
                   style={{
-                    backgroundColor: '#1A1A1A',
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                    color: '#F5F5F5',
+                    backgroundColor: 'var(--card)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--foreground-strong)',
                   }}
                 />
               </div>
@@ -832,9 +835,9 @@ export function HomeScreen({
                   onClick={() => handleSelectCity('all')}
                   className="w-full px-3 py-2 text-left text-sm transition-colors"
                   style={{
-                    color: selectedCity === 'all' ? '#D4AF37' : '#F5F5F5',
+                    color: selectedCity === 'all' ? 'var(--accent)' : 'var(--foreground-strong)',
                     backgroundColor:
-                      selectedCity === 'all' ? 'rgba(212, 175, 55, 0.08)' : 'transparent',
+                      selectedCity === 'all' ? 'var(--accent-soft-muted)' : 'transparent',
                   }}
                 >
                   {translate('home.allCities')}
@@ -850,9 +853,9 @@ export function HomeScreen({
                       onClick={() => handleSelectCity(cityOption.cityNormalized)}
                       className="w-full px-3 py-2 text-left text-sm transition-colors"
                       style={{
-                        color: isActive ? '#D4AF37' : '#F5F5F5',
+                        color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
                         backgroundColor: isActive
-                          ? 'rgba(212, 175, 55, 0.08)'
+                          ? 'var(--accent-soft-muted)'
                           : 'transparent',
                       }}
                     >
@@ -888,7 +891,7 @@ export function HomeScreen({
             <div
               className="rounded-xl p-4 border border-border"
               style={{
-                backgroundColor: '#1A1A1A',
+                backgroundColor: 'var(--card)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
@@ -936,7 +939,7 @@ export function HomeScreen({
                 }
                 className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
                 style={{
-                  backgroundColor: '#1A1A1A',
+                  backgroundColor: 'var(--card)',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                   opacity: past ? 0.72 : 1,
                 }}
@@ -948,9 +951,9 @@ export function HomeScreen({
                     <span
                       className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
                       style={{
-                        borderColor: 'rgba(212, 175, 55, 0.28)',
-                        color: '#D4AF37',
-                        backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                        borderColor: 'var(--accent-border-muted)',
+                        color: 'var(--accent)',
+                        backgroundColor: 'var(--accent-soft-muted)',
                       }}
                     >
                       {translate('home.past')}
@@ -963,7 +966,7 @@ export function HomeScreen({
                     className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border"
                     style={{
                       borderColor: 'rgba(212, 175, 55, 0.22)',
-                      color: '#D4AF37',
+                      color: 'var(--accent)',
                       backgroundColor: 'rgba(212, 175, 55, 0.06)',
                     }}
                   >
@@ -1006,8 +1009,8 @@ export function HomeScreen({
               disabled={loadingMore}
               className="w-full rounded-xl p-4 border border-border text-sm transition-all disabled:opacity-60"
               style={{
-                backgroundColor: '#1A1A1A',
-                color: '#D4AF37',
+                backgroundColor: 'var(--card)',
+                color: 'var(--accent)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
@@ -1024,8 +1027,8 @@ export function HomeScreen({
         className="absolute bottom-24 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
         style={{
           bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
-          backgroundColor: '#D4AF37',
-          color: '#0F0F0F',
+          backgroundColor: 'var(--accent)',
+          color: 'var(--accent-foreground)',
           boxShadow: '0 8px 24px rgba(212, 175, 55, 0.4)',
         }}
       >
@@ -1056,7 +1059,7 @@ export function HomeScreen({
                 className="inline-flex rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.18em]"
                 style={{
                   borderColor: 'rgba(212, 175, 55, 0.28)',
-                  color: '#D4AF37',
+                  color: 'var(--accent)',
                   backgroundColor: 'rgba(212, 175, 55, 0.08)',
                 }}
               >
@@ -1076,8 +1079,8 @@ export function HomeScreen({
               onClick={handleDismissLaunchOverlay}
               className="mt-6 w-full rounded-xl px-4 py-3 text-sm font-medium"
               style={{
-                backgroundColor: '#D4AF37',
-                color: '#0F0F0F',
+                backgroundColor: 'var(--accent)',
+                color: 'var(--accent-foreground)',
                 boxShadow: '0 8px 24px rgba(212, 175, 55, 0.24)',
               }}
             >

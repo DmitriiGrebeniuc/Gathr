@@ -151,15 +151,15 @@ export function ProfileScreen({
           <div className="flex flex-col items-center">
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: '#3A3A3A' }}
+              style={{ backgroundColor: 'var(--primary)' }}
             >
               <span className="text-3xl">{loading ? '••' : getInitials()}</span>
             </div>
 
             {loading ? (
               <div className="w-full flex flex-col items-center gap-2">
-                <div className="h-6 w-32 rounded-full" style={{ backgroundColor: '#1A1A1A' }} />
-                <div className="h-4 w-44 rounded-full" style={{ backgroundColor: '#1A1A1A' }} />
+                <div className="h-6 w-32 rounded-full" style={{ backgroundColor: 'var(--card)' }} />
+                <div className="h-4 w-44 rounded-full" style={{ backgroundColor: 'var(--card)' }} />
               </div>
             ) : (
               <>
@@ -177,8 +177,8 @@ export function ProfileScreen({
               onClick={() => onNavigate('edit-profile')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
               style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
+                borderColor: 'var(--border)',
+                backgroundColor: 'var(--card)',
               }}
             >
               <div className="flex justify-between items-center">
@@ -191,8 +191,8 @@ export function ProfileScreen({
               onClick={() => onNavigate('notification-settings')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
               style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
+                borderColor: 'var(--border)',
+                backgroundColor: 'var(--card)',
               }}
             >
               <div className="flex justify-between items-center">
@@ -205,8 +205,8 @@ export function ProfileScreen({
               onClick={() => onNavigate('language')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
               style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
+                borderColor: 'var(--border)',
+                backgroundColor: 'var(--card)',
               }}
             >
               <div className="flex justify-between items-center">
@@ -219,8 +219,8 @@ export function ProfileScreen({
               onClick={() => onNavigate('security')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
               style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
+                borderColor: 'var(--border)',
+                backgroundColor: 'var(--card)',
               }}
             >
               <div className="flex justify-between items-center">
@@ -233,8 +233,8 @@ export function ProfileScreen({
               onClick={() => onNavigate('support')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
               style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
+                borderColor: 'var(--border)',
+                backgroundColor: 'var(--card)',
               }}
             >
               <div className="flex justify-between items-center">
@@ -248,8 +248,8 @@ export function ProfileScreen({
                 onClick={() => onNavigate('admin')}
                 className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"
                 style={{
-                  borderColor: 'rgba(212, 175, 55, 0.35)',
-                  backgroundColor: '#1A1A1A',
+                  borderColor: 'var(--accent-border)',
+                  backgroundColor: 'var(--card)',
                 }}
               >
                 <div className="flex justify-between items-center">
@@ -265,8 +265,8 @@ export function ProfileScreen({
             disabled={logoutLoading}
             className="w-full py-4 rounded-xl border transition-all mt-8"
             style={{
-              borderColor: 'rgba(212, 47, 61, 0.5)',
-              color: '#d4183d',
+              borderColor: 'var(--destructive-border-strong)',
+              color: 'var(--destructive)',
             }}
           >
             {logoutLoading ? translate('profile.loggingOut') : translate('profile.logout')}

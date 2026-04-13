@@ -86,6 +86,21 @@ const INITIAL_SUMMARY: AdminSummary = {
   supportRequests: null,
 };
 
+const adminCardStyle = {
+  borderColor: 'var(--border)',
+  backgroundColor: 'var(--card)',
+} as const;
+
+const adminNestedCardStyle = {
+  borderColor: 'var(--border-subtle)',
+  backgroundColor: 'var(--surface-strong)',
+} as const;
+
+const adminSegmentedStyle = {
+  borderColor: 'var(--border-subtle)',
+  backgroundColor: 'var(--surface-overlay)',
+} as const;
+
 export function AdminScreen({
   onNavigate,
 }: {
@@ -752,9 +767,9 @@ export function AdminScreen({
       case 'in_progress':
         return {
           label: translate('admin.supportStatusInProgress'),
-          color: '#D4AF37',
-          backgroundColor: 'rgba(212, 175, 55, 0.12)',
-          borderColor: 'rgba(212, 175, 55, 0.28)',
+          color: 'var(--accent)',
+          backgroundColor: 'var(--accent-soft)',
+          borderColor: 'var(--accent-border-muted)',
         };
       case 'resolved':
         return {
@@ -852,10 +867,7 @@ export function AdminScreen({
         <div className="max-w-sm mx-auto space-y-6">
           <div
             className="rounded-xl border p-1 grid grid-cols-4 gap-1"
-            style={{
-              borderColor: 'rgba(255, 255, 255, 0.08)',
-              backgroundColor: '#141414',
-            }}
+            style={adminSegmentedStyle}
           >
             {adminPages.map((page) => {
               const isActive = activePage === page.key;
@@ -867,11 +879,11 @@ export function AdminScreen({
                   onClick={() => setActivePage(page.key)}
                   className="rounded-lg px-3 py-2 text-xs transition-colors"
                   style={{
-                    backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : 'transparent',
+                    backgroundColor: isActive ? 'var(--accent-soft)' : 'transparent',
                     border: isActive
-                      ? '1px solid rgba(212, 175, 55, 0.35)'
+                      ? '1px solid var(--accent-border)'
                       : '1px solid transparent',
-                    color: isActive ? '#D4AF37' : '#F5F5F5',
+                    color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
                   }}
                 >
                   {page.label}
@@ -883,8 +895,8 @@ export function AdminScreen({
           <div
             className="rounded-xl border p-5"
             style={{
-              borderColor: 'rgba(212, 175, 55, 0.28)',
-              backgroundColor: '#1A1A1A',
+              borderColor: 'var(--accent-border-muted)',
+              backgroundColor: 'var(--card)',
             }}
           >
             <h3 className="mb-2">{translate('admin.enabledTitle')}</h3>
@@ -900,13 +912,10 @@ export function AdminScreen({
                   <div
                     key={card.key}
                     className="rounded-xl border p-4"
-                    style={{
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                      backgroundColor: '#1A1A1A',
-                    }}
+                    style={adminCardStyle}
                   >
                     <p className="text-xs text-muted-foreground mb-2">{card.title}</p>
-                    <p className="text-xl" style={{ color: '#D4AF37' }}>
+                    <p className="text-xl" style={{ color: 'var(--accent)' }}>
                       {card.value}
                     </p>
                   </div>
@@ -915,10 +924,7 @@ export function AdminScreen({
 
               <div
                 className="rounded-xl border p-5"
-                style={{
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
-                  backgroundColor: '#1A1A1A',
-                }}
+                style={adminCardStyle}
               >
             <div className="flex items-center justify-between gap-3 mb-4">
               <h3>{translate('admin.latestEvents')}</h3>
@@ -945,10 +951,7 @@ export function AdminScreen({
                   <div
                     key={event.id}
                     className="rounded-lg border p-3"
-                    style={{
-                      borderColor: 'rgba(255, 255, 255, 0.08)',
-                      backgroundColor: '#111111',
-                    }}
+                    style={adminNestedCardStyle}
                   >
                     <p className="mb-1">{event.title || translate('common.event')}</p>
                     <p className="text-xs text-muted-foreground mb-1">
@@ -968,10 +971,7 @@ export function AdminScreen({
           {activePage === 'events' && (
             <div
               className="rounded-xl border p-5"
-              style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
-              }}
+              style={adminCardStyle}
             >
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
@@ -988,12 +988,12 @@ export function AdminScreen({
                 className="px-3 py-2 rounded-lg text-sm transition-opacity"
                 style={{
                   backgroundColor:
-                    timeFilter === 'future' ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                    timeFilter === 'future' ? 'var(--accent-soft)' : 'var(--surface-strong)',
                   border:
                     timeFilter === 'future'
-                      ? '1px solid rgba(212, 175, 55, 0.35)'
-                      : '1px solid rgba(255, 255, 255, 0.08)',
-                  color: timeFilter === 'future' ? '#D4AF37' : 'inherit',
+                      ? '1px solid var(--accent-border)'
+                      : '1px solid var(--border-subtle)',
+                  color: timeFilter === 'future' ? 'var(--accent)' : 'inherit',
                 }}
               >
                 {translate('admin.futureFilter')}
@@ -1003,12 +1003,12 @@ export function AdminScreen({
                 className="px-3 py-2 rounded-lg text-sm transition-opacity"
                 style={{
                   backgroundColor:
-                    timeFilter === 'past' ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                    timeFilter === 'past' ? 'var(--accent-soft)' : 'var(--surface-strong)',
                   border:
                     timeFilter === 'past'
-                      ? '1px solid rgba(212, 175, 55, 0.35)'
-                      : '1px solid rgba(255, 255, 255, 0.08)',
-                  color: timeFilter === 'past' ? '#D4AF37' : 'inherit',
+                      ? '1px solid var(--accent-border)'
+                      : '1px solid var(--border-subtle)',
+                  color: timeFilter === 'past' ? 'var(--accent)' : 'inherit',
                 }}
               >
                 {translate('admin.pastFilter')}
@@ -1022,8 +1022,8 @@ export function AdminScreen({
               onChange={(e) => setCreatorFilter(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
               style={{
-                backgroundColor: '#111111',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'var(--surface-strong)',
+                borderColor: 'var(--border)',
               }}
             />
 
@@ -1033,12 +1033,12 @@ export function AdminScreen({
                 className="px-3 py-2 rounded-full text-xs transition-opacity"
                 style={{
                   backgroundColor:
-                    activityFilter === 'all' ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                    activityFilter === 'all' ? 'var(--accent-soft)' : 'var(--surface-strong)',
                   border:
                     activityFilter === 'all'
-                      ? '1px solid rgba(212, 175, 55, 0.35)'
-                      : '1px solid rgba(255, 255, 255, 0.08)',
-                  color: activityFilter === 'all' ? '#D4AF37' : 'inherit',
+                      ? '1px solid var(--accent-border)'
+                      : '1px solid var(--border-subtle)',
+                  color: activityFilter === 'all' ? 'var(--accent)' : 'inherit',
                 }}
               >
                 {translate('admin.allActivityTypes')}
@@ -1054,11 +1054,11 @@ export function AdminScreen({
                     onClick={() => setActivityFilter(activityType.value)}
                     className="px-3 py-2 rounded-full text-xs transition-opacity"
                     style={{
-                      backgroundColor: isSelected ? 'rgba(212, 175, 55, 0.12)' : '#111111',
+                      backgroundColor: isSelected ? 'var(--accent-soft)' : 'var(--surface-strong)',
                       border: isSelected
-                        ? '1px solid rgba(212, 175, 55, 0.35)'
-                        : '1px solid rgba(255, 255, 255, 0.08)',
-                      color: isSelected ? '#D4AF37' : 'inherit',
+                        ? '1px solid var(--accent-border)'
+                        : '1px solid var(--border-subtle)',
+                      color: isSelected ? 'var(--accent)' : 'inherit',
                     }}
                   >
                     {meta.label}
@@ -1088,10 +1088,7 @@ export function AdminScreen({
                     <div
                       key={event.id}
                       className="rounded-lg border p-4"
-                      style={{
-                        borderColor: 'rgba(255, 255, 255, 0.08)',
-                        backgroundColor: '#111111',
-                      }}
+                      style={adminNestedCardStyle}
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div>
@@ -1103,9 +1100,9 @@ export function AdminScreen({
                         <span
                           className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
                           style={{
-                            borderColor: 'rgba(212, 175, 55, 0.28)',
-                            color: '#D4AF37',
-                            backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                            borderColor: 'var(--accent-border-muted)',
+                            color: 'var(--accent)',
+                            backgroundColor: 'var(--accent-soft-muted)',
                           }}
                         >
                           {activityMeta.label}
@@ -1129,9 +1126,9 @@ export function AdminScreen({
                           onClick={() => handleViewEventDetails(event)}
                           className="px-3 py-2 rounded-lg text-xs transition-opacity"
                           style={{
-                            backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                            border: '1px solid rgba(212, 175, 55, 0.35)',
-                            color: '#D4AF37',
+                            backgroundColor: 'var(--accent-soft)',
+                            border: '1px solid var(--accent-border)',
+                            color: 'var(--accent)',
                           }}
                         >
                           {translate('admin.viewEventDetails')}
@@ -1140,8 +1137,8 @@ export function AdminScreen({
                           onClick={() => handleViewParticipants(event)}
                           className="px-3 py-2 rounded-lg text-xs transition-opacity"
                           style={{
-                            backgroundColor: '#171717',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            backgroundColor: 'var(--surface-interactive)',
+                            border: '1px solid var(--border-subtle)',
                           }}
                         >
                           {translate('admin.viewParticipants')}
@@ -1151,9 +1148,9 @@ export function AdminScreen({
                           disabled={deletingEventId === event.id}
                           className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
                           style={{
-                            backgroundColor: 'rgba(255, 77, 109, 0.08)',
-                            border: '1px solid rgba(255, 77, 109, 0.28)',
-                            color: '#FF4D6D',
+                            backgroundColor: 'var(--destructive-soft)',
+                            border: '1px solid var(--destructive-border)',
+                            color: 'var(--destructive-strong)',
                             marginLeft: 'auto',
                           }}
                         >
@@ -1173,10 +1170,7 @@ export function AdminScreen({
           {activePage === 'overview' && (
             <div
               className="rounded-xl border p-5"
-              style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
-              }}
+              style={adminCardStyle}
             >
             <div className="flex items-center justify-between gap-3 mb-4">
               <h3>{translate('admin.latestPendingInvitations')}</h3>
@@ -1205,10 +1199,7 @@ export function AdminScreen({
                   <div
                     key={invitation.id}
                     className="rounded-lg border p-3"
-                    style={{
-                      borderColor: 'rgba(255, 255, 255, 0.08)',
-                      backgroundColor: '#111111',
-                    }}
+                    style={adminNestedCardStyle}
                   >
                     <p className="mb-1">
                       {invitation.eventTitle || translate('common.event')}
@@ -1229,10 +1220,7 @@ export function AdminScreen({
           {activePage === 'users' && (
             <div
               className="rounded-xl border p-5"
-              style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
-              }}
+              style={adminCardStyle}
             >
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3>{translate('admin.usersTitle')}</h3>
@@ -1245,8 +1233,8 @@ export function AdminScreen({
                 onChange={(e) => setUserSearch(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
                 style={{
-                  backgroundColor: '#111111',
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  backgroundColor: 'var(--surface-strong)',
+                  borderColor: 'var(--border)',
                 }}
               />
 
@@ -1279,9 +1267,9 @@ export function AdminScreen({
                           className="w-full rounded-lg border p-3 text-left transition-colors"
                           style={{
                             borderColor: isSelected
-                              ? 'rgba(212, 175, 55, 0.35)'
-                              : 'rgba(255, 255, 255, 0.08)',
-                            backgroundColor: '#111111',
+                              ? 'var(--accent-border)'
+                              : 'var(--border-subtle)',
+                            backgroundColor: 'var(--surface-strong)',
                           }}
                         >
                           <p className="mb-1">{user.name || translate('common.user')}</p>
@@ -1295,10 +1283,7 @@ export function AdminScreen({
 
                   <div
                     className="rounded-lg border p-4"
-                    style={{
-                      borderColor: 'rgba(255, 255, 255, 0.08)',
-                      backgroundColor: '#111111',
-                    }}
+                    style={adminNestedCardStyle}
                   >
                     <div className="flex items-center justify-between gap-3 mb-3">
                       <h4>{translate('admin.userProfileTitle')}</h4>
@@ -1319,7 +1304,13 @@ export function AdminScreen({
                           <p className="text-xs text-muted-foreground break-all">{selectedUser.id}</p>
                           <p className="text-sm text-muted-foreground">
                             {translate('admin.userStatusLabel')}:{' '}
-                            <span style={{ color: selectedUser.is_banned ? '#FF4D6D' : '#D4AF37' }}>
+                            <span
+                              style={{
+                                color: selectedUser.is_banned
+                                  ? 'var(--destructive-strong)'
+                                  : 'var(--accent)',
+                              }}
+                            >
                               {selectedUser.is_banned
                                 ? translate('admin.bannedStatus')
                                 : translate('admin.activeStatus')}
@@ -1342,11 +1333,13 @@ export function AdminScreen({
                                   onClick={() => setEditableRole(roleOption)}
                                   className="rounded-lg px-3 py-2 text-sm transition-colors"
                                   style={{
-                                    backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#171717',
+                                    backgroundColor: isActive
+                                      ? 'var(--accent-soft)'
+                                      : 'var(--surface-interactive)',
                                     border: isActive
-                                      ? '1px solid rgba(212, 175, 55, 0.35)'
-                                      : '1px solid rgba(255, 255, 255, 0.08)',
-                                    color: isActive ? '#D4AF37' : '#F5F5F5',
+                                      ? '1px solid var(--accent-border)'
+                                      : '1px solid var(--border-subtle)',
+                                    color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
                                   }}
                                 >
                                   {translate(roleOption === 'admin' ? 'admin.roleAdmin' : 'admin.roleUser')}
@@ -1371,11 +1364,13 @@ export function AdminScreen({
                                   onClick={() => setEditablePlan(planOption)}
                                   className="rounded-lg px-3 py-2 text-sm transition-colors"
                                   style={{
-                                    backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : '#171717',
+                                    backgroundColor: isActive
+                                      ? 'var(--accent-soft)'
+                                      : 'var(--surface-interactive)',
                                     border: isActive
-                                      ? '1px solid rgba(212, 175, 55, 0.35)'
-                                      : '1px solid rgba(255, 255, 255, 0.08)',
-                                    color: isActive ? '#D4AF37' : '#F5F5F5',
+                                      ? '1px solid var(--accent-border)'
+                                      : '1px solid var(--border-subtle)',
+                                    color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
                                   }}
                                 >
                                   {translate(planOption === 'pro' ? 'admin.planPro' : 'admin.planFree')}
@@ -1390,10 +1385,12 @@ export function AdminScreen({
                           onClick={() => setEditableUnlimitedAccess((prev) => !prev)}
                           className="w-full rounded-xl border px-4 py-3 text-left transition-colors"
                           style={{
-                            backgroundColor: editableUnlimitedAccess ? 'rgba(212, 175, 55, 0.08)' : '#171717',
+                            backgroundColor: editableUnlimitedAccess
+                              ? 'var(--accent-soft-muted)'
+                              : 'var(--surface-interactive)',
                             borderColor: editableUnlimitedAccess
-                              ? 'rgba(212, 175, 55, 0.3)'
-                              : 'rgba(255, 255, 255, 0.08)',
+                              ? 'var(--accent-border-muted)'
+                              : 'var(--border-subtle)',
                           }}
                         >
                           <div className="flex items-center justify-between gap-3">
@@ -1416,7 +1413,9 @@ export function AdminScreen({
                               <div
                                 className="h-4 w-4 rounded-full transition-transform"
                                 style={{
-                                  backgroundColor: editableUnlimitedAccess ? '#D4AF37' : '#F5F5F5',
+                                  backgroundColor: editableUnlimitedAccess
+                                    ? 'var(--accent)'
+                                    : 'var(--foreground-strong)',
                                   transform: editableUnlimitedAccess
                                     ? 'translateX(20px)'
                                     : 'translateX(0)',
@@ -1437,9 +1436,9 @@ export function AdminScreen({
                             }
                             className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
                             style={{
-                              backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                              border: '1px solid rgba(212, 175, 55, 0.35)',
-                              color: '#D4AF37',
+                              backgroundColor: 'var(--accent-soft)',
+                              border: '1px solid var(--accent-border)',
+                              color: 'var(--accent)',
                             }}
                           >
                             {savingUserId === selectedUser.id
@@ -1456,9 +1455,9 @@ export function AdminScreen({
                             }
                             className="w-full rounded-lg px-4 py-3 text-sm transition-opacity disabled:opacity-50"
                             style={{
-                              backgroundColor: 'rgba(255, 77, 109, 0.08)',
-                              border: '1px solid rgba(255, 77, 109, 0.28)',
-                              color: '#FF4D6D',
+                              backgroundColor: 'var(--destructive-soft)',
+                              border: '1px solid var(--destructive-border)',
+                              color: 'var(--destructive-strong)',
                             }}
                           >
                             {banMutatingUserId === selectedUser.id
@@ -1485,10 +1484,7 @@ export function AdminScreen({
           {activePage === 'support' && (
             <div
               className="rounded-xl border p-5"
-              style={{
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1A1A1A',
-              }}
+              style={adminCardStyle}
             >
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3>{translate('admin.supportPageTitle')}</h3>
@@ -1521,10 +1517,7 @@ export function AdminScreen({
                         <div
                           key={request.id}
                           className="rounded-lg border p-4"
-                          style={{
-                            borderColor: 'rgba(255, 255, 255, 0.08)',
-                            backgroundColor: '#111111',
-                          }}
+                          style={adminNestedCardStyle}
                         >
                           <div className="flex items-start justify-between gap-3 mb-3">
                             <div className="space-y-1">
@@ -1581,9 +1574,9 @@ export function AdminScreen({
                                   disabled={isUpdating}
                                   className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
                                   style={{
-                                    backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                                    border: '1px solid rgba(212, 175, 55, 0.35)',
-                                    color: '#D4AF37',
+                                    backgroundColor: 'var(--accent-soft)',
+                                    border: '1px solid var(--accent-border)',
+                                    color: 'var(--accent)',
                                   }}
                                 >
                                   {translate('admin.startTicket')}
@@ -1611,8 +1604,8 @@ export function AdminScreen({
                                     disabled={isUpdating}
                                     className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
                                     style={{
-                                      backgroundColor: '#171717',
-                                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                                      backgroundColor: 'var(--surface-interactive)',
+                                      border: '1px solid var(--border-subtle)',
                                     }}
                                   >
                                     {translate('admin.backToNew')}
@@ -1627,8 +1620,8 @@ export function AdminScreen({
                                   disabled={isUpdating}
                                   className="px-3 py-2 rounded-lg text-xs transition-opacity disabled:opacity-60"
                                   style={{
-                                    backgroundColor: '#171717',
-                                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                                    backgroundColor: 'var(--surface-interactive)',
+                                    border: '1px solid var(--border-subtle)',
                                   }}
                                 >
                                   {translate('admin.reopenTicket')}

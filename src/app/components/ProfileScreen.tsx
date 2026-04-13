@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
@@ -181,7 +182,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.editProfile')}</span>
-                <span className="text-muted-foreground">{'>'}</span>
+                <ChevronRight size={18} className="text-muted-foreground shrink-0" />
               </div>
             </button>
 
@@ -195,7 +196,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.notificationSettings')}</span>
-                <span className="text-muted-foreground">{'>'}</span>
+                <ChevronRight size={18} className="text-muted-foreground shrink-0" />
               </div>
             </button>
 
@@ -209,7 +210,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.language')}</span>
-                <span className="text-muted-foreground">{'>'}</span>
+                <ChevronRight size={18} className="text-muted-foreground shrink-0" />
               </div>
             </button>
 
@@ -223,7 +224,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.appearance')}</span>
-                <span className="text-muted-foreground">{'>'}</span>
+                <ChevronRight size={18} className="text-muted-foreground shrink-0" />
               </div>
             </button>
 
@@ -237,7 +238,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.privacySecurity')}</span>
-                <span className="text-muted-foreground">{'>'}</span>
+                <ChevronRight size={18} className="text-muted-foreground shrink-0" />
               </div>
             </button>
 
@@ -251,7 +252,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.helpSupport')}</span>
-                <span className="text-muted-foreground">{'>'}</span>
+                <ChevronRight size={18} className="text-muted-foreground shrink-0" />
               </div>
             </button>
 
@@ -266,7 +267,7 @@ export function ProfileScreen({
               >
                 <div className="flex justify-between items-center">
                   <span>{translate('profile.adminMode')}</span>
-                  <span className="text-muted-foreground">{'>'}</span>
+                  <ChevronRight size={18} className="text-muted-foreground shrink-0" />
                 </div>
               </button>
             )}

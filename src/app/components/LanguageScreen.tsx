@@ -1,5 +1,6 @@
 ﻿import { useMemo } from 'react';
 import { motion } from 'motion/react';
+import { Check, ChevronLeft } from 'lucide-react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { LANGUAGES, getLanguageMeta, type LanguageCode } from '../constants/languages';
 import { useLanguage } from '../context/LanguageContext';
@@ -26,9 +27,10 @@ export function LanguageScreen({
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => onNavigate('profile')}
-            className="text-muted-foreground"
+            className="text-muted-foreground inline-flex items-center gap-1.5"
           >
-            {'< '} {translate('language.back')}
+            <ChevronLeft size={18} />
+            <span>{translate('language.back')}</span>
           </motion.button>
 
           <h2>{translate('language.title')}</h2>
@@ -79,12 +81,12 @@ export function LanguageScreen({
                       </div>
 
                       <span
-                        className="text-sm"
+                        className="shrink-0"
                         style={{
                           color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
                         }}
                       >
-                        {isActive ? '[x]' : ''}
+                        {isActive ? <Check size={18} strokeWidth={2.25} /> : null}
                       </span>
                     </div>
                   </motion.button>

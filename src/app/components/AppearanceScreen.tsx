@@ -1,5 +1,6 @@
 ﻿import { useMemo } from 'react';
 import { motion } from 'motion/react';
+import { Check, ChevronLeft } from 'lucide-react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -45,9 +46,10 @@ export function AppearanceScreen({
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => onNavigate('profile')}
-            className="text-muted-foreground"
+            className="text-muted-foreground inline-flex items-center gap-1.5"
           >
-            {'< '} {translate('language.back')}
+            <ChevronLeft size={18} />
+            <span>{translate('language.back')}</span>
           </motion.button>
 
           <h2>{translate('appearance.title')}</h2>
@@ -102,12 +104,12 @@ export function AppearanceScreen({
                       </div>
 
                       <span
-                        className="text-sm"
+                        className="shrink-0"
                         style={{
                           color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
                         }}
                       >
-                        {isActive ? '[x]' : ''}
+                        {isActive ? <Check size={18} strokeWidth={2.25} /> : null}
                       </span>
                     </div>
                   </motion.button>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
+import { ChevronLeft } from 'lucide-react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
@@ -19,7 +20,6 @@ type MyProfileAccess = {
     has_unlimited_access: boolean;
 };
 
-
 export function InviteUsersScreen({
     onNavigate,
     event,
@@ -33,8 +33,6 @@ export function InviteUsersScreen({
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     const { translate } = useLanguage();
-
-    const parentBackTarget = event?.backTarget || 'participants';
 
     const eventPayload = useMemo(
         () => ({
@@ -146,8 +144,6 @@ export function InviteUsersScreen({
 
             const profileData = rawProfileData as MyProfileAccess | null;
 
-
-
             if (profileError) {
                 console.error('Ошибка загрузки профиля для проверки лимитов приглашений:', profileError);
                 feedback.error(translate('inviteUsers.failed'));
@@ -216,9 +212,10 @@ export function InviteUsersScreen({
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={() => onNavigate('participants', eventPayload, 'back')}
-                        className="text-muted-foreground"
+                        className="text-muted-foreground inline-flex items-center gap-1.5"
                     >
-                        ← {translate('inviteUsers.back')}
+                        <ChevronLeft size={18} />
+                        <span>{translate('inviteUsers.back')}</span>
                     </motion.button>
                     <h2>{translate('inviteUsers.title')}</h2>
                     <div className="w-14"></div>
@@ -234,8 +231,8 @@ export function InviteUsersScreen({
 
                         {!loading && users.length === 0 && (
                             <div
-                                className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"
-                                style={{ backgroundColor: '#1A1A1A' }}
+                                className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border-subtle"
+                                style={{ backgroundColor: 'var(--card)' }}
                             >
                                 {translate('inviteUsers.empty')}
                             </div>
@@ -252,17 +249,20 @@ export function InviteUsersScreen({
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         className="px-4 py-4 rounded-xl flex items-center gap-3 border border-border"
-                                        style={{ backgroundColor: '#1A1A1A' }}
+                                        style={{ backgroundColor: 'var(--card)' }}
                                     >
                                         <div
                                             className="w-10 h-10 rounded-full flex items-center justify-center text-sm"
-                                            style={{ backgroundColor: '#2A2A2A' }}
+                                            style={{
+                                                backgroundColor: 'var(--surface-strong)',
+                                                color: 'var(--foreground-strong)',
+                                            }}
                                         >
                                             {displayName.slice(0, 2).toUpperCase()}
                                         </div>
 
-                                        <div className="flex-1">
-                                            <p>{displayName}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="truncate">{displayName}</p>
                                         </div>
 
                                         <button
@@ -270,9 +270,9 @@ export function InviteUsersScreen({
                                             disabled={isInviting}
                                             className="px-3 py-2 rounded-lg text-sm transition-opacity"
                                             style={{
-                                                backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                                                border: '1px solid rgba(212, 175, 55, 0.35)',
-                                                color: '#D4AF37',
+                                                backgroundColor: 'var(--accent-soft)',
+                                                border: '1px solid var(--accent-border)',
+                                                color: 'var(--accent)',
                                                 opacity: isInviting ? 0.7 : 1,
                                             }}
                                         >

@@ -494,6 +494,22 @@ export function EventDetailsScreen({
     }
   };
 
+  const handleOpenInvite = () => {
+    if (!eventData.id) {
+      feedback.error(translate('details.eventNotResolved'));
+      return;
+    }
+
+    onNavigate(
+      'invite-users',
+      {
+        ...eventData,
+        backTarget: resolvedBackTarget,
+      },
+      'forward'
+    );
+  };
+
   return (
     <SwipeableScreen onSwipeBack={() => onNavigate(resolvedBackTarget)}>
       <div className="h-full flex flex-col bg-background">
@@ -537,22 +553,6 @@ export function EventDetailsScreen({
               <p className="text-muted-foreground leading-relaxed">
                 {eventData.description || translate('details.noDescription')}
               </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12 }}
-            >
-              <TouchButton
-                variant="ghost"
-                fullWidth
-                onClick={handleShare}
-                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
-              </TouchButton>
             </motion.div>
 
             <div className="space-y-4">
@@ -731,57 +731,87 @@ export function EventDetailsScreen({
         >
           {!isCreator && (
             <>
-              {hasJoined ? (
+              <div className="grid grid-cols-2 gap-3">
                 <TouchButton
-                  variant="danger"
-                  fullWidth
-                  onClick={handleLeave}
-                  disabled={loadingAction || loadingDelete}
+                  variant="ghost"
+                  onClick={handleShare}
+                  disabled={sharing || loadingAction || loadingDelete || !eventData.id}
+                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
                 >
-                  {loadingAction ? translate('details.leaving') : translate('details.leaveEvent')}
+                  {sharing ? translate('details.sharing') : translate('details.shareEvent')}
                 </TouchButton>
-              ) : !isPastEvent ? (
-                <TouchButton
-                  variant="primary"
-                  fullWidth
-                  onClick={handleJoin}
-                  disabled={loadingAction || loadingDelete}
-                >
-                  {loadingAction ? translate('details.joining') : translate('details.joinEvent')}
-                </TouchButton>
-              ) : (
-                <div
-                  className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border"
-                  style={{ backgroundColor: 'var(--card)' }}
-                >
-                  {translate('details.eventEnded')}
-                </div>
-              )}
+
+                {hasJoined ? (
+                  <TouchButton
+                    variant="danger"
+                    onClick={handleLeave}
+                    disabled={loadingAction || loadingDelete}
+                  >
+                    {loadingAction ? translate('details.leaving') : translate('details.leaveEvent')}
+                  </TouchButton>
+                ) : !isPastEvent ? (
+                  <TouchButton
+                    variant="primary"
+                    onClick={handleJoin}
+                    disabled={loadingAction || loadingDelete}
+                  >
+                    {loadingAction ? translate('details.joining') : translate('details.joinEvent')}
+                  </TouchButton>
+                ) : (
+                  <div
+                    className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--card)' }}
+                  >
+                    {translate('details.eventEnded')}
+                  </div>
+                )}
+              </div>
             </>
           )}
 
           {isCreator && (
             <>
-              <TouchButton
-                variant="ghost"
-                fullWidth
-                onClick={() => onNavigate('edit-event', eventData)}
-                disabled={loadingDelete || loadingAction}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {translate('details.editEvent')}
-              </TouchButton>
+              <div className="grid grid-cols-2 gap-3">
+                <TouchButton
+                  variant="ghost"
+                  onClick={handleShare}
+                  disabled={sharing || loadingAction || loadingDelete || !eventData.id}
+                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+                >
+                  {sharing ? translate('details.sharing') : translate('details.shareEvent')}
+                </TouchButton>
 
-              <TouchButton
-                variant="danger"
-                fullWidth
-                onClick={handleDeleteEvent}
-                disabled={loadingDelete || loadingAction}
-              >
-                {loadingDelete ? translate('details.deleting') : translate('details.deleteEvent')}
-              </TouchButton>
+                <TouchButton
+                  variant="ghost"
+                  onClick={handleOpenInvite}
+                  disabled={loadingAction || loadingDelete || !eventData.id}
+                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+                >
+                  {translate('inviteUsers.invite')}
+                </TouchButton>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <TouchButton
+                  variant="ghost"
+                  onClick={() => onNavigate('edit-event', eventData)}
+                  disabled={loadingDelete || loadingAction}
+                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+                >
+                  {translate('details.editEvent')}
+                </TouchButton>
+
+                <TouchButton
+                  variant="danger"
+                  onClick={handleDeleteEvent}
+                  disabled={loadingDelete || loadingAction}
+                >
+                  {loadingDelete ? translate('details.deleting') : translate('details.deleteEvent')}
+                </TouchButton>
+              </div>
             </>
           )}
+
         </motion.div>
       </div>
     </SwipeableScreen>

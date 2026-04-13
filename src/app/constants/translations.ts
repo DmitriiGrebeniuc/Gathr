@@ -182,6 +182,17 @@ type TranslationKey =
     | 'appearance.light'
     | 'appearance.currentSystemDark'
     | 'appearance.currentSystemLight'
+    | 'onboarding.page1.title'
+    | 'onboarding.page1.body'
+    | 'onboarding.page2.title'
+    | 'onboarding.page2.body'
+    | 'onboarding.page3.title'
+    | 'onboarding.page3.body'
+    | 'onboarding.page4.title'
+    | 'onboarding.page4.body'
+    | 'onboarding.next'
+    | 'onboarding.start'
+    | 'onboarding.skip'
     | 'admin.title'
     | 'admin.enabledTitle'
     | 'admin.enabledDescription'
@@ -649,6 +660,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'appearance.light': 'Light',
         'appearance.currentSystemDark': 'Current system theme: Dark',
         'appearance.currentSystemLight': 'Current system theme: Light',
+        'onboarding.page1.title': 'Gathr helps people gather offline fast',
+        'onboarding.page1.body':
+            'Find and create micro-meetups, sports games, walks, coffee plans, social meetups and other local events.',
+        'onboarding.page2.title': 'Not only discover, but also create',
+        'onboarding.page2.body':
+            'Create your own events in just a few taps, set the place and time, and bring people together around you.',
+        'onboarding.page3.title': 'Share and invite in seconds',
+        'onboarding.page3.body':
+            'Send an event link, invite people, and follow participants in real time.',
+        'onboarding.page4.title': 'You are among the first users',
+        'onboarding.page4.body':
+            'Right now, activity and honest feedback matter most. Use Gathr, create events, and help us make the app stronger.',
+        'onboarding.next': 'Next',
+        'onboarding.start': 'Get started',
+        'onboarding.skip': 'Skip',
         'admin.title': 'Admin',
         'admin.enabledTitle': 'Admin mode is enabled',
         'admin.enabledDescription': 'This account has access to the first-stage admin area.',
@@ -940,6 +966,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'appearance.light': 'Светлая',
         'appearance.currentSystemDark': 'Текущая системная тема: тёмная',
         'appearance.currentSystemLight': 'Текущая системная тема: светлая',
+        'onboarding.page1.title': 'Gathr помогает быстро собираться вживую',
+        'onboarding.page1.body':
+            'Находите и создавайте микро-встречи, спортивные игры, прогулки, кофе, знакомства и другие локальные события.',
+        'onboarding.page2.title': 'Не только искать, но и создавать',
+        'onboarding.page2.body':
+            'Создавайте свои события за пару нажатий, указывайте место, время и собирайте людей вокруг себя.',
+        'onboarding.page3.title': 'Быстро делиться и приглашать',
+        'onboarding.page3.body':
+            'Отправляйте ссылку на событие, приглашайте людей и следите за участниками в реальном времени.',
+        'onboarding.page4.title': 'Вы среди первых пользователей',
+        'onboarding.page4.body':
+            'Сейчас особенно важны активность и честная обратная связь. Пользуйтесь Gathr, создавайте события и помогайте нам сделать приложение сильнее.',
+        'onboarding.next': 'Дальше',
+        'onboarding.start': 'Начать',
+        'onboarding.skip': 'Пропустить',
         'common.user': 'Пользователь',
         'common.unknown': 'Неизвестно',
         'common.guestUser': 'Гость',
@@ -1414,6 +1455,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'appearance.light': 'Luminoasă',
         'appearance.currentSystemDark': 'Tema de sistem curentă: întunecată',
         'appearance.currentSystemLight': 'Tema de sistem curentă: luminoasă',
+        'onboarding.page1.title': 'Gathr te ajută să te întâlnești rapid în viața reală',
+        'onboarding.page1.body':
+            'Găsește și creează micro-întâlniri, jocuri sportive, plimbări, cafea, socializare și alte evenimente locale.',
+        'onboarding.page2.title': 'Nu doar cauți, ci și creezi',
+        'onboarding.page2.body':
+            'Creează propriile evenimente în câteva atingeri, alege locul și ora și adună oameni în jurul tău.',
+        'onboarding.page3.title': 'Distribui și inviți foarte repede',
+        'onboarding.page3.body':
+            'Trimite linkul evenimentului, invită oameni și urmărește participanții în timp real.',
+        'onboarding.page4.title': 'Ești printre primii utilizatori',
+        'onboarding.page4.body':
+            'Acum contează cel mai mult activitatea și feedbackul sincer. Folosește Gathr, creează evenimente și ajută-ne să facem aplicația mai puternică.',
+        'onboarding.next': 'Mai departe',
+        'onboarding.start': 'Începe',
+        'onboarding.skip': 'Sari peste',
         'common.user': 'Utilizator',
         'common.unknown': 'Necunoscut',
         'common.guestUser': 'Vizitator',
@@ -1894,6 +1950,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'appearance.light': 'Світла',
         'appearance.currentSystemDark': 'Поточна системна тема: темна',
         'appearance.currentSystemLight': 'Поточна системна тема: світла',
+        'onboarding.page1.title': 'Gathr допомагає швидко збиратися наживо',
+        'onboarding.page1.body':
+            'Знаходьте й створюйте мікрозустрічі, спортивні ігри, прогулянки, каву, знайомства та інші локальні події.',
+        'onboarding.page2.title': 'Не лише шукати, а й створювати',
+        'onboarding.page2.body':
+            'Створюйте власні події за кілька натискань, вказуйте місце й час та збирайте людей навколо себе.',
+        'onboarding.page3.title': 'Швидко ділитися й запрошувати',
+        'onboarding.page3.body':
+            'Надсилайте посилання на подію, запрошуйте людей і стежте за учасниками в реальному часі.',
+        'onboarding.page4.title': 'Ви серед перших користувачів',
+        'onboarding.page4.body':
+            'Зараз особливо важливі активність і чесний зворотний зв’язок. Користуйтеся Gathr, створюйте події й допомагайте нам зробити застосунок сильнішим.',
+        'onboarding.next': 'Далі',
+        'onboarding.start': 'Почати',
+        'onboarding.skip': 'Пропустити',
         'common.user': 'Користувач',
         'common.unknown': 'Невідомо',
         'common.guestUser': 'Гість',
@@ -2375,6 +2446,21 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'appearance.light': 'Hell',
         'appearance.currentSystemDark': 'Aktuelles Systemdesign: Dunkel',
         'appearance.currentSystemLight': 'Aktuelles Systemdesign: Hell',
+        'onboarding.page1.title': 'Gathr hilft dir, dich schnell offline zu verabreden',
+        'onboarding.page1.body':
+            'Finde und erstelle Micro-Treffen, Sportspiele, Spaziergänge, Kaffeepläne, neue Kontakte und andere lokale Events.',
+        'onboarding.page2.title': 'Nicht nur entdecken, sondern auch erstellen',
+        'onboarding.page2.body':
+            'Erstelle deine eigenen Events in wenigen Schritten, lege Ort und Zeit fest und bringe Menschen um dich herum zusammen.',
+        'onboarding.page3.title': 'Schnell teilen und einladen',
+        'onboarding.page3.body':
+            'Sende einen Event-Link, lade Menschen ein und verfolge Teilnehmer in Echtzeit.',
+        'onboarding.page4.title': 'Du gehörst zu den ersten Nutzern',
+        'onboarding.page4.body':
+            'Gerade jetzt sind Aktivität und ehrliches Feedback besonders wichtig. Nutze Gathr, erstelle Events und hilf uns, die App stärker zu machen.',
+        'onboarding.next': 'Weiter',
+        'onboarding.start': 'Loslegen',
+        'onboarding.skip': 'Überspringen',
         'common.user': 'Benutzer',
         'common.unknown': 'Unbekannt',
         'common.guestUser': 'Gast',

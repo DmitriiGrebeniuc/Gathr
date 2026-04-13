@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
@@ -17,7 +17,6 @@ type MyProfileAccess = {
   plan: string;
   has_unlimited_access: boolean;
 };
-
 
 export function ProfileScreen({
   onNavigate,
@@ -39,7 +38,7 @@ export function ProfileScreen({
         } = await supabase.auth.getUser();
 
         if (authError || !authUser) {
-          console.error('Ошибка получения пользователя:', authError);
+          console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ:', authError);
           setUser(null);
           setLoading(false);
           return;
@@ -51,9 +50,8 @@ export function ProfileScreen({
 
         const profile = rawProfile as MyProfileAccess | null;
 
-
         if (profileError) {
-          console.error('Ошибка получения профиля:', profileError);
+          console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїСЂРѕС„РёР»СЏ:', profileError);
         }
 
         setUser({
@@ -120,7 +118,7 @@ export function ProfileScreen({
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        console.error('Ошибка выхода:', error);
+        console.error('РћС€РёР±РєР° РІС‹С…РѕРґР°:', error);
         feedback.error(error.message || translate('profile.logoutFailed'));
         setLogoutLoading(false);
         return;
@@ -153,7 +151,7 @@ export function ProfileScreen({
               className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
               style={{ backgroundColor: 'var(--primary)' }}
             >
-              <span className="text-3xl">{loading ? '••' : getInitials()}</span>
+              <span className="text-3xl">{loading ? '..' : getInitials()}</span>
             </div>
 
             {loading ? (
@@ -183,7 +181,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.editProfile')}</span>
-                <span className="text-muted-foreground">→</span>
+                <span className="text-muted-foreground">{'>'}</span>
               </div>
             </button>
 
@@ -197,7 +195,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.notificationSettings')}</span>
-                <span className="text-muted-foreground">→</span>
+                <span className="text-muted-foreground">{'>'}</span>
               </div>
             </button>
 
@@ -211,7 +209,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.language')}</span>
-                <span className="text-muted-foreground">→</span>
+                <span className="text-muted-foreground">{'>'}</span>
               </div>
             </button>
 
@@ -225,7 +223,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.appearance')}</span>
-                <span className="text-muted-foreground">в†’</span>
+                <span className="text-muted-foreground">{'>'}</span>
               </div>
             </button>
 
@@ -239,7 +237,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.privacySecurity')}</span>
-                <span className="text-muted-foreground">→</span>
+                <span className="text-muted-foreground">{'>'}</span>
               </div>
             </button>
 
@@ -253,7 +251,7 @@ export function ProfileScreen({
             >
               <div className="flex justify-between items-center">
                 <span>{translate('profile.helpSupport')}</span>
-                <span className="text-muted-foreground">→</span>
+                <span className="text-muted-foreground">{'>'}</span>
               </div>
             </button>
 
@@ -268,7 +266,7 @@ export function ProfileScreen({
               >
                 <div className="flex justify-between items-center">
                   <span>{translate('profile.adminMode')}</span>
-                  <span className="text-muted-foreground">→</span>
+                  <span className="text-muted-foreground">{'>'}</span>
                 </div>
               </button>
             )}

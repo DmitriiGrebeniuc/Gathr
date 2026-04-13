@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useLanguage } from '../context/LanguageContext';
@@ -47,7 +47,7 @@ export function AppearanceScreen({
             onClick={() => onNavigate('profile')}
             className="text-muted-foreground"
           >
-            в†ђ {translate('language.back')}
+            {'< '} {translate('language.back')}
           </motion.button>
 
           <h2>{translate('appearance.title')}</h2>
@@ -107,7 +107,7 @@ export function AppearanceScreen({
                           color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
                         }}
                       >
-                        {isActive ? 'вњ“' : ''}
+                        {isActive ? '[x]' : ''}
                       </span>
                     </div>
                   </motion.button>

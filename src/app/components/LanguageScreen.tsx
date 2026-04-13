@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { LANGUAGES, getLanguageMeta, type LanguageCode } from '../constants/languages';
@@ -28,7 +28,7 @@ export function LanguageScreen({
             onClick={() => onNavigate('profile')}
             className="text-muted-foreground"
           >
-            ← {translate('language.back')}
+            {'< '} {translate('language.back')}
           </motion.button>
 
           <h2>{translate('language.title')}</h2>
@@ -69,9 +69,7 @@ export function LanguageScreen({
                       borderColor: isActive
                         ? 'var(--accent-border-strong)'
                         : 'var(--border)',
-                      boxShadow: isActive
-                        ? 'var(--accent-outline-soft)'
-                        : 'none',
+                      boxShadow: isActive ? 'var(--accent-outline-soft)' : 'none',
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -86,7 +84,7 @@ export function LanguageScreen({
                           color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
                         }}
                       >
-                        {isActive ? '✓' : ''}
+                        {isActive ? '[x]' : ''}
                       </span>
                     </div>
                   </motion.button>

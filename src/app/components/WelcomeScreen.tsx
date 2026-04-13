@@ -4,7 +4,7 @@ import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
 import { useState } from 'react';
 import { LANGUAGES, type LanguageCode } from '../constants/languages';
-import { hasStoredLanguagePreference } from '../../lib/language';
+import { hasCompletedLanguageChoice, markLanguageChoiceCompleted } from '../../lib/language';
 
 export function WelcomeScreen({
   onNavigate,
@@ -15,7 +15,7 @@ export function WelcomeScreen({
 }) {
   const { language, setLanguage, translate } = useLanguage();
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [showLanguageChoice, setShowLanguageChoice] = useState(() => !hasStoredLanguagePreference());
+  const [showLanguageChoice, setShowLanguageChoice] = useState(() => !hasCompletedLanguageChoice());
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
@@ -29,6 +29,7 @@ export function WelcomeScreen({
 
   const handleSelectLanguage = (nextLanguage: LanguageCode) => {
     setLanguage(nextLanguage);
+    markLanguageChoiceCompleted();
     setShowLanguageChoice(false);
   };
 

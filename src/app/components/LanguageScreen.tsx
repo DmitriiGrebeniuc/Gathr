@@ -4,6 +4,7 @@ import { Check, ChevronLeft } from 'lucide-react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { LANGUAGES, getLanguageMeta, type LanguageCode } from '../constants/languages';
 import { useLanguage } from '../context/LanguageContext';
+import { markLanguageChoiceCompleted } from '../../lib/language';
 
 export function LanguageScreen({
   onNavigate,
@@ -18,6 +19,7 @@ export function LanguageScreen({
 
   const handleSelectLanguage = (nextLanguage: LanguageCode) => {
     setLanguage(nextLanguage);
+    markLanguageChoiceCompleted();
   };
 
   return (

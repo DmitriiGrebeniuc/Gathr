@@ -32,6 +32,8 @@ type TranslationKey =
     | 'activity.tech'
     | 'activity.other'
     | 'welcome.tagline'
+    | 'welcome.languageChoiceTitle'
+    | 'welcome.languageChoiceDescription'
     | 'welcome.google'
     | 'welcome.login'
     | 'welcome.signup'
@@ -486,6 +488,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Other',
 
         'welcome.tagline': 'Fast. Simple. Together.',
+        'welcome.languageChoiceTitle': 'Choose your language',
+        'welcome.languageChoiceDescription':
+            'If this is your first time here, choose the language you want to use in Gathr.',
         'welcome.google': 'Continue with Google',
         'welcome.login': 'Continue with email',
         'welcome.signup': 'Create account with email',
@@ -967,6 +972,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Другое',
 
         'welcome.tagline': 'Быстро. Просто. Вместе.',
+        'welcome.languageChoiceTitle': 'Выбери язык',
+        'welcome.languageChoiceDescription':
+            'Если ты здесь впервые, выбери язык, на котором хочешь пользоваться Gathr.',
         'welcome.google': 'Продолжить через Google',
         'welcome.login': 'Войти по email',
         'welcome.signup': 'Создать аккаунт по email',
@@ -1437,6 +1445,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Altele',
 
         'welcome.tagline': 'Rapid. Simplu. Împreună.',
+        'welcome.languageChoiceTitle': 'Alege limba',
+        'welcome.languageChoiceDescription':
+            'Dacă e prima ta vizită aici, alege limba în care vrei să folosești Gathr.',
         'welcome.google': 'Continuă cu Google',
         'welcome.login': 'Continuă cu email',
         'welcome.signup': 'Creează cont cu email',
@@ -1913,6 +1924,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Інше',
 
         'welcome.tagline': 'Швидко. Просто. Разом.',
+        'welcome.languageChoiceTitle': 'Оберіть мову',
+        'welcome.languageChoiceDescription':
+            'Якщо ви тут уперше, оберіть мову, якою хочете користуватися Gathr.',
         'welcome.google': 'Продовжити через Google',
         'welcome.login': 'Увійти через email',
         'welcome.signup': 'Створити акаунт через email',
@@ -2390,6 +2404,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'activity.other': 'Andere',
 
         'welcome.tagline': 'Schnell. Einfach. Gemeinsam.',
+        'welcome.languageChoiceTitle': 'Sprache auswählen',
+        'welcome.languageChoiceDescription':
+            'Wenn du zum ersten Mal hier bist, wähle die Sprache, in der du Gathr nutzen möchtest.',
         'welcome.google': 'Mit Google fortfahren',
         'welcome.login': 'Mit E-Mail fortfahren',
         'welcome.signup': 'Konto mit E-Mail erstellen',

@@ -67,7 +67,7 @@ export function HomeScreen({
   const themePickerRef = useRef<HTMLDivElement | null>(null);
 
   const { language, translate } = useLanguage();
-  const { themeMode, setThemeMode, systemTheme } = useTheme();
+  const { themeMode, setThemeMode, systemTheme, effectiveTheme } = useTheme();
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -505,6 +505,30 @@ export function HomeScreen({
     ],
     [systemTheme, translate]
   );
+
+  const launchOverlayStyles = useMemo(() => {
+    if (effectiveTheme === 'dark') {
+      return {
+        scrimBackground: 'rgba(8, 8, 8, 0.68)',
+        cardBackground: 'rgba(20, 20, 20, 0.96)',
+        cardBorder: 'var(--accent-border-faint)',
+        cardShadow: '0 18px 48px rgba(0, 0, 0, 0.42)',
+        badgeBackground: 'var(--accent-soft-muted)',
+        badgeBorder: 'var(--accent-border-muted)',
+        buttonShadow: '0 8px 24px rgba(212, 175, 55, 0.24)',
+      };
+    }
+
+    return {
+      scrimBackground: 'rgba(63, 47, 18, 0.18)',
+      cardBackground: 'rgba(255, 250, 242, 0.96)',
+      cardBorder: 'var(--accent-border-soft)',
+      cardShadow: '0 18px 48px rgba(66, 50, 20, 0.18)',
+      badgeBackground: 'var(--accent-soft-subtle)',
+      badgeBorder: 'var(--accent-border-soft)',
+      buttonShadow: '0 8px 24px rgba(196, 151, 36, 0.2)',
+    };
+  }, [effectiveTheme]);
 
   const sortedEvents = useMemo(() => {
     const result = [...filteredEvents];
@@ -1168,7 +1192,7 @@ export function HomeScreen({
         <div
           className="absolute inset-0 z-40 flex items-center justify-center px-6"
           style={{
-            backgroundColor: 'rgba(8, 8, 8, 0.68)',
+            backgroundColor: launchOverlayStyles.scrimBackground,
             backdropFilter: 'blur(6px)',
           }}
         >
@@ -1178,18 +1202,18 @@ export function HomeScreen({
             transition={{ duration: 0.18 }}
             className="w-full max-w-sm rounded-2xl border p-6"
             style={{
-              backgroundColor: 'rgba(20, 20, 20, 0.96)',
-              borderColor: 'rgba(212, 175, 55, 0.24)',
-              boxShadow: '0 18px 48px rgba(0, 0, 0, 0.42)',
+              backgroundColor: launchOverlayStyles.cardBackground,
+              borderColor: launchOverlayStyles.cardBorder,
+              boxShadow: launchOverlayStyles.cardShadow,
             }}
           >
             <div className="space-y-3">
               <div
                 className="inline-flex rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.18em]"
                 style={{
-                  borderColor: 'rgba(212, 175, 55, 0.28)',
+                  borderColor: launchOverlayStyles.badgeBorder,
                   color: 'var(--accent)',
-                  backgroundColor: 'rgba(212, 175, 55, 0.08)',
+                  backgroundColor: launchOverlayStyles.badgeBackground,
                 }}
               >
                 Gathr
@@ -1210,7 +1234,7 @@ export function HomeScreen({
               style={{
                 backgroundColor: 'var(--accent)',
                 color: 'var(--accent-foreground)',
-                boxShadow: '0 8px 24px rgba(212, 175, 55, 0.24)',
+                boxShadow: launchOverlayStyles.buttonShadow,
               }}
             >
               {translate('home.launchOverlayButton')}

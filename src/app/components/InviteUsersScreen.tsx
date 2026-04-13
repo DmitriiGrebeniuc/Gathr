@@ -10,6 +10,7 @@ import { feedback } from '../lib/feedback';
 type InviteUserItem = {
     id: string;
     name: string | null;
+    invited?: boolean;
 };
 
 type MyProfileAccess = {
@@ -107,14 +108,19 @@ export function InviteUsersScreen({
             const participantIds = new Set((participantRows || []).map((row: any) => row.user_id));
             const invitedIds = new Set((invitationRows || []).map((row: any) => row.invitee_id));
 
-            const filteredUsers = (allProfiles || []).filter((profile: any) => {
-                if (!profile?.id) return false;
-                if (profile.id === user.id) return false;
-                if (profile.id === event.creator_id) return false;
-                if (participantIds.has(profile.id)) return false;
-                if (invitedIds.has(profile.id)) return false;
-                return true;
-            });
+            const filteredUsers = (allProfiles || [])
+                .filter((profile: any) => {
+                    if (!profile?.id) return false;
+                    if (profile.id === user.id) return false;
+                    if (profile.id === event.creator_id) return false;
+                    if (participantIds.has(profile.id)) return false;
+                    if (invitedIds.has(profile.id)) return false;
+                    return true;
+                })
+                .map((profile: any) => ({
+                    ...profile,
+                    invited: false,
+                }));
 
             setUsers(filteredUsers);
         } catch (error) {
@@ -192,7 +198,16 @@ export function InviteUsersScreen({
             }
 
             feedback.success(translate('inviteUsers.sent'));
-            await loadInviteCandidates();
+            setUsers((prevUsers) =>
+                prevUsers.map((user) =>
+                    user.id === inviteeId
+                        ? {
+                            ...user,
+                            invited: true,
+                        }
+                        : user
+                )
+            );
         } catch (error) {
             console.error('Unexpected invitation send error:', error);
             feedback.error(translate('inviteUsers.unexpectedError'));
@@ -242,6 +257,7 @@ export function InviteUsersScreen({
                             users.map((user) => {
                                 const displayName = user.name || 'User';
                                 const isInviting = invitingUserId === user.id;
+                                const isInvited = user.invited === true;
 
                                 return (
                                     <motion.div
@@ -267,16 +283,20 @@ export function InviteUsersScreen({
 
                                         <button
                                             onClick={() => handleInvite(user.id)}
-                                            disabled={isInviting}
+                                            disabled={isInviting || isInvited}
                                             className="px-3 py-2 rounded-lg text-sm transition-opacity"
                                             style={{
-                                                backgroundColor: 'var(--accent-soft)',
-                                                border: '1px solid var(--accent-border)',
-                                                color: 'var(--accent)',
+                                                backgroundColor: isInvited ? 'var(--success-soft)' : 'var(--accent-soft)',
+                                                border: isInvited
+                                                    ? '1px solid var(--success-border)'
+                                                    : '1px solid var(--accent-border)',
+                                                color: isInvited ? 'var(--success)' : 'var(--accent)',
                                                 opacity: isInviting ? 0.7 : 1,
                                             }}
                                         >
-                                            {isInviting
+                                            {isInvited
+                                                ? translate('inviteUsers.invited')
+                                                : isInviting
                                                 ? translate('inviteUsers.inviting')
                                                 : translate('inviteUsers.inviteButton')}
                                         </button>

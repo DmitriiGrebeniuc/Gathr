@@ -442,6 +442,7 @@ type TranslationKey =
     | 'inviteUsers.back'
     | 'inviteUsers.inviteButton'
     | 'inviteUsers.inviting'
+    | 'inviteUsers.invited'
     | 'inviteUsers.invite'
     | 'inviteUsers.loading'
     | 'inviteUsers.empty'
@@ -919,6 +920,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.back': 'Back',
         'inviteUsers.inviteButton': 'Invite',
         'inviteUsers.inviting': 'Inviting...',
+        'inviteUsers.invited': 'Invited',
         'inviteUsers.invite': 'Invite',
         'inviteUsers.loading': 'Loading users...',
         'inviteUsers.empty': 'No users available to invite',
@@ -1392,6 +1394,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.back': 'Назад',
         'inviteUsers.inviteButton': 'Пригласить',
         'inviteUsers.inviting': 'Отправка...',
+        'inviteUsers.invited': 'Приглашён',
         'inviteUsers.invite': 'Пригласить',
         'inviteUsers.loading': 'Загрузка пользователей...',
         'inviteUsers.empty': 'Нет пользователей для приглашения',
@@ -1871,6 +1874,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.back': 'Înapoi',
         'inviteUsers.inviteButton': 'Invită',
         'inviteUsers.inviting': 'Se trimite...',
+        'inviteUsers.invited': 'Invitat',
         'inviteUsers.invite': 'Invită',
         'inviteUsers.loading': 'Se încarcă utilizatorii...',
         'inviteUsers.empty': 'Nu există utilizatori disponibili pentru invitație',
@@ -2351,6 +2355,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.back': 'Назад',
         'inviteUsers.inviteButton': 'Запросити',
         'inviteUsers.inviting': 'Надсилання...',
+        'inviteUsers.invited': 'Запрошено',
         'inviteUsers.invite': 'Запросити',
         'inviteUsers.loading': 'Завантаження користувачів...',
         'inviteUsers.empty': 'Немає користувачів для запрошення',
@@ -2833,6 +2838,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'inviteUsers.back': 'Zurück',
         'inviteUsers.inviteButton': 'Einladen',
         'inviteUsers.inviting': 'Wird gesendet...',
+        'inviteUsers.invited': 'Eingeladen',
         'inviteUsers.invite': 'Einladen',
         'inviteUsers.loading': 'Benutzer werden geladen...',
         'inviteUsers.empty': 'Keine Benutzer zum Einladen verfügbar',

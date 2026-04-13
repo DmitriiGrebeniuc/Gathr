@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState, type UIEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type UIEvent } from 'react';
 import { motion } from 'motion/react';
+import { Check, Palette } from 'lucide-react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   ACTIVITY_TYPES,
   type ActivityType,
@@ -45,6 +47,7 @@ export function HomeScreen({
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
   const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
   const [isLaunchOverlayVisible, setIsLaunchOverlayVisible] = useState(() => {
     if (typeof window === 'undefined') {
       return false;
@@ -61,8 +64,10 @@ export function HomeScreen({
   const [serverOffset, setServerOffset] = useState(0);
   const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const themePickerRef = useRef<HTMLDivElement | null>(null);
 
   const { language, translate } = useLanguage();
+  const { themeMode, setThemeMode, systemTheme } = useTheme();
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -477,6 +482,30 @@ export function HomeScreen({
     );
   }, [availableCities, selectedCity, translate]);
 
+  const themeOptions = useMemo(
+    () => [
+      {
+        value: 'system' as const,
+        label: translate('appearance.system'),
+        hint:
+          systemTheme === 'dark'
+            ? translate('appearance.currentSystemDark')
+            : translate('appearance.currentSystemLight'),
+      },
+      {
+        value: 'dark' as const,
+        label: translate('appearance.dark'),
+        hint: null,
+      },
+      {
+        value: 'light' as const,
+        label: translate('appearance.light'),
+        hint: null,
+      },
+    ],
+    [systemTheme, translate]
+  );
+
   const sortedEvents = useMemo(() => {
     const result = [...filteredEvents];
 
@@ -611,6 +640,24 @@ export function HomeScreen({
     fetchEvents(true);
   }, [language]);
 
+  useEffect(() => {
+    if (!isThemePickerOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!themePickerRef.current?.contains(event.target as Node)) {
+        setIsThemePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+    };
+  }, [isThemePickerOpen]);
+
   return (
     <div className="h-full flex flex-col bg-background">
       <motion.div
@@ -637,25 +684,107 @@ export function HomeScreen({
           Gathr
         </motion.h1>
 
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          animate={{
-            width: isHeaderCompact ? 36 : 40,
-            height: isHeaderCompact ? 36 : 40,
-          }}
-          transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-          onClick={() => onNavigate('profile')}
-          className="rounded-full flex items-center justify-center border shrink-0"
-          style={{
-            backgroundColor: 'var(--primary)',
-            borderColor: 'var(--accent-border)',
-            boxShadow: 'var(--accent-outline-soft)',
-            color: 'var(--foreground-strong)',
-          }}
-          title={currentUserName}
-        >
-          <span className={isHeaderCompact ? 'text-xs' : 'text-sm'}>{getInitials(currentUserName)}</span>
-        </motion.button>
+        <div ref={themePickerRef} className="relative flex items-center gap-2 shrink-0">
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            animate={{
+              width: isHeaderCompact ? 36 : 40,
+              height: isHeaderCompact ? 36 : 40,
+            }}
+            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+            onClick={() => setIsThemePickerOpen((prev) => !prev)}
+            className="rounded-full flex items-center justify-center border shrink-0"
+            style={{
+              backgroundColor: isThemePickerOpen ? 'var(--accent-soft)' : 'var(--primary)',
+              borderColor: isThemePickerOpen ? 'var(--accent-border-strong)' : 'var(--border)',
+              boxShadow: isThemePickerOpen ? 'var(--accent-outline-soft)' : 'none',
+              color: isThemePickerOpen ? 'var(--accent)' : 'var(--foreground-strong)',
+            }}
+            title={translate('profile.appearance')}
+          >
+            <Palette size={isHeaderCompact ? 16 : 18} strokeWidth={2} />
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            animate={{
+              width: isHeaderCompact ? 36 : 40,
+              height: isHeaderCompact ? 36 : 40,
+            }}
+            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+            onClick={() => onNavigate('profile')}
+            className="rounded-full flex items-center justify-center border shrink-0"
+            style={{
+              backgroundColor: 'var(--primary)',
+              borderColor: 'var(--accent-border)',
+              boxShadow: 'var(--accent-outline-soft)',
+              color: 'var(--foreground-strong)',
+            }}
+            title={currentUserName}
+          >
+            <span className={isHeaderCompact ? 'text-xs' : 'text-sm'}>
+              {getInitials(currentUserName)}
+            </span>
+          </motion.button>
+
+          {isThemePickerOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.16 }}
+              className="absolute right-0 top-full mt-2 w-56 rounded-2xl border p-2"
+              style={{
+                backgroundColor: 'var(--surface-overlay)',
+                borderColor: 'var(--border-subtle)',
+                boxShadow: '0 16px 32px rgba(0, 0, 0, 0.18)',
+              }}
+            >
+              <div className="space-y-1">
+                {themeOptions.map((option) => {
+                  const isActive = themeMode === option.value;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setThemeMode(option.value);
+                        setIsThemePickerOpen(false);
+                      }}
+                      className="w-full rounded-xl px-3 py-2 text-left transition-all"
+                      style={{
+                        backgroundColor: isActive
+                          ? 'var(--accent-soft-muted)'
+                          : 'transparent',
+                        color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm">{option.label}</p>
+                          {option.hint && (
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              {option.hint}
+                            </p>
+                          )}
+                        </div>
+
+                        <span
+                          className="shrink-0"
+                          style={{
+                            color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
+                          }}
+                        >
+                          {isActive ? <Check size={16} strokeWidth={2.25} /> : null}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </div>
       </motion.div>
 
       <div className="flex border-b border-border">

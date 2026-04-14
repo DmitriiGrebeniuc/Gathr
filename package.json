@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "seed:test-users": "node --env-file=.env scripts/seed-test-users.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.0",

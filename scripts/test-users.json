@@ -1,0 +1,50 @@
+[
+  {
+    "email": "gathr.seed.1@example.com",
+    "password": "TestUser123!",
+    "name": "Alex",
+    "role": "organizer"
+  },
+  {
+    "email": "gathr.seed.2@example.com",
+    "password": "TestUser123!",
+    "name": "Maria",
+    "role": "organizer"
+  },
+  {
+    "email": "gathr.seed.3@example.com",
+    "password": "TestUser123!",
+    "name": "Nikita",
+    "role": "organizer"
+  },
+  {
+    "email": "gathr.seed.4@example.com",
+    "password": "TestUser123!",
+    "name": "Elena",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.5@example.com",
+    "password": "TestUser123!",
+    "name": "Denis",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.6@example.com",
+    "password": "TestUser123!",
+    "name": "Andrei",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.7@example.com",
+    "password": "TestUser123!",
+    "name": "Cristina",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.8@example.com",
+    "password": "TestUser123!",
+    "name": "Victor",
+    "role": "user"
+  }
+]

@@ -300,4 +300,17 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  input,
+  textarea,
+  select {
+    color: var(--foreground);
+    caret-color: var(--foreground-strong);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+  }
 }

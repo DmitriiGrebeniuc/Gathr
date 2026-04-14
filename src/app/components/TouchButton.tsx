@@ -21,13 +21,13 @@ export function TouchButton({
       border: 'none',
     },
     secondary: {
-      backgroundColor: 'var(--primary)',
-      color: 'var(--destructive-foreground)',
-      border: 'none',
+      backgroundColor: 'var(--surface-strong)',
+      color: 'var(--foreground-strong)',
+      border: '1px solid var(--border)',
     },
     ghost: {
       backgroundColor: 'transparent',
-      color: 'var(--destructive-foreground)',
+      color: 'var(--foreground-strong)',
       border: '1px solid var(--border)',
     },
     danger: {

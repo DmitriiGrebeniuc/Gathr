@@ -125,7 +125,7 @@ export function ResetPasswordScreen({
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-                                style={{ backgroundColor: '#1A1A1A' }}
+                                style={{ backgroundColor: 'var(--card)' }}
                             />
                         </motion.div>
 
@@ -143,7 +143,7 @@ export function ResetPasswordScreen({
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
-                                style={{ backgroundColor: '#1A1A1A' }}
+                                style={{ backgroundColor: 'var(--card)' }}
                             />
                         </motion.div>
 

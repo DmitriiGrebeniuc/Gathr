@@ -173,7 +173,7 @@ export function EditProfileScreen({
                 style={{
                   borderColor: 'var(--border)',
                   backgroundColor: 'var(--card)',
-                  color: 'var(--destructive-foreground)',
+                  color: 'var(--foreground)',
                 }}
               />
             </div>

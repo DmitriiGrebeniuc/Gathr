@@ -9,6 +9,8 @@ export type LegalDocument = {
   sections: LegalDocumentSection[];
 };
 
+export const CURRENT_LEGAL_VERSION = '14.04.2026';
+
 export const TERMS_OF_SERVICE: LegalDocument = {
   lastUpdated: '14.04.2026',
   intro: [

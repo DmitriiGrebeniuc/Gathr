@@ -25,6 +25,7 @@ import { LanguageScreen } from './components/LanguageScreen';
 import { AppearanceScreen } from './components/AppearanceScreen';
 import { TermsScreen } from './components/TermsScreen';
 import { PrivacyScreen } from './components/PrivacyScreen';
+import { LegalConsentScreen } from './components/LegalConsentScreen';
 import { FeedbackHost } from './components/FeedbackHost';
 import { useLanguage } from './context/LanguageContext';
 import { InviteUsersScreen } from './components/InviteUsersScreen';
@@ -36,6 +37,7 @@ import {
   isClearPostLoginIntentPayload,
   isLoginNavigationPayload,
 } from './auth/postLoginIntent';
+import { CURRENT_LEGAL_VERSION } from './constants/legalDocuments';
 
 type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
 
@@ -97,6 +99,12 @@ type CurrentProfileAccess = {
   plan?: string | null;
   has_unlimited_access?: boolean | null;
   is_banned?: boolean | null;
+};
+
+type CurrentLegalConsent = {
+  accepted_terms_at?: string | null;
+  accepted_privacy_at?: string | null;
+  accepted_legal_version?: string | null;
 };
 
 export default function App() {
@@ -205,11 +213,23 @@ export default function App() {
 
   const syncProfileFromAuthUser = async (user: User) => {
     const fallbackName = getPreferredProfileName(user);
+    const acceptedTermsAt =
+      typeof user.user_metadata?.accepted_terms_at === 'string'
+        ? user.user_metadata.accepted_terms_at
+        : null;
+    const acceptedPrivacyAt =
+      typeof user.user_metadata?.accepted_privacy_at === 'string'
+        ? user.user_metadata.accepted_privacy_at
+        : null;
+    const acceptedLegalVersion =
+      typeof user.user_metadata?.accepted_legal_version === 'string'
+        ? user.user_metadata.accepted_legal_version
+        : null;
 
     try {
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, name')
+        .select('id, name, accepted_terms_at, accepted_privacy_at, accepted_legal_version')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -222,6 +242,9 @@ export default function App() {
         const { error: insertError } = await supabase.from('profiles').insert({
           id: user.id,
           name: fallbackName,
+          accepted_terms_at: acceptedTermsAt,
+          accepted_privacy_at: acceptedPrivacyAt,
+          accepted_legal_version: acceptedLegalVersion,
         });
 
         if (
@@ -236,13 +259,59 @@ export default function App() {
       }
 
       if (!existingProfile.name?.trim() && fallbackName) {
+        const updatePayload: Record<string, string | null> = {
+          name: fallbackName,
+        };
+
+        if (!existingProfile.accepted_terms_at && acceptedTermsAt) {
+          updatePayload.accepted_terms_at = acceptedTermsAt;
+        }
+
+        if (!existingProfile.accepted_privacy_at && acceptedPrivacyAt) {
+          updatePayload.accepted_privacy_at = acceptedPrivacyAt;
+        }
+
+        if (!existingProfile.accepted_legal_version && acceptedLegalVersion) {
+          updatePayload.accepted_legal_version = acceptedLegalVersion;
+        }
+
         const { error: updateError } = await supabase
           .from('profiles')
-          .update({ name: fallbackName })
+          .update(updatePayload)
           .eq('id', user.id);
 
         if (updateError) {
           console.error('Failed to enrich profile name after auth:', updateError);
+        }
+        return;
+      }
+
+      if (
+        (!existingProfile.accepted_terms_at && acceptedTermsAt) ||
+        (!existingProfile.accepted_privacy_at && acceptedPrivacyAt) ||
+        (!existingProfile.accepted_legal_version && acceptedLegalVersion)
+      ) {
+        const updatePayload: Record<string, string | null> = {};
+
+        if (!existingProfile.accepted_terms_at && acceptedTermsAt) {
+          updatePayload.accepted_terms_at = acceptedTermsAt;
+        }
+
+        if (!existingProfile.accepted_privacy_at && acceptedPrivacyAt) {
+          updatePayload.accepted_privacy_at = acceptedPrivacyAt;
+        }
+
+        if (!existingProfile.accepted_legal_version && acceptedLegalVersion) {
+          updatePayload.accepted_legal_version = acceptedLegalVersion;
+        }
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update(updatePayload)
+          .eq('id', user.id);
+
+        if (updateError) {
+          console.error('Failed to enrich legal consent after auth:', updateError);
         }
       }
     } catch (error) {
@@ -266,6 +335,38 @@ export default function App() {
     }
   };
 
+  const getCurrentLegalConsent = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('accepted_terms_at, accepted_privacy_at, accepted_legal_version')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Failed to load current legal consent:', error);
+        return null;
+      }
+
+      return (data as CurrentLegalConsent | null) ?? null;
+    } catch (error) {
+      console.error('Unexpected current legal consent error:', error);
+      return null;
+    }
+  };
+
+  const hasAcceptedCurrentLegal = (consent: CurrentLegalConsent | null) => {
+    if (!consent) {
+      return false;
+    }
+
+    return Boolean(
+      consent.accepted_terms_at &&
+        consent.accepted_privacy_at &&
+        consent.accepted_legal_version === CURRENT_LEGAL_VERSION
+    );
+  };
+
   const applySignedInNavigation = async (user: User) => {
     await syncProfileFromAuthUser(user);
 
@@ -273,6 +374,15 @@ export default function App() {
 
     if (profileAccess?.is_banned) {
       await redirectBlockedAccountToWelcome();
+      return;
+    }
+
+    const legalConsent = await getCurrentLegalConsent(user.id);
+
+    if (!hasAcceptedCurrentLegal(legalConsent)) {
+      setDirection('forward');
+      setCurrentScreen('legal-consent');
+      setHistory(['legal-consent']);
       return;
     }
 
@@ -321,6 +431,42 @@ export default function App() {
     } catch (error) {
       console.error('Unexpected Google OAuth sign-in error:', error);
       feedback.error(translate('login.googleFailed'));
+    }
+  };
+
+  const handleLegalConsentAccepted = async () => {
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        console.error('Failed to get user after legal consent:', error);
+        setCurrentScreen('welcome');
+        setHistory(['welcome']);
+        return;
+      }
+
+      await applySignedInNavigation(user);
+    } catch (error) {
+      console.error('Unexpected legal consent completion error:', error);
+      feedback.error(translate('legal.consentSaveFailed'));
+    }
+  };
+
+  const handleLegalConsentLogout = async () => {
+    clearAuthRedirectState();
+    setSelectedEvent(null);
+    setDirection('back');
+    setCurrentScreen('welcome');
+    setHistory(['welcome']);
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Failed to sign out from legal consent screen:', error);
+      feedback.error(translate('profile.logoutFailed'));
     }
   };
 
@@ -560,6 +706,7 @@ export default function App() {
       'appearance',
       'terms',
       'privacy',
+      'legal-consent',
       'event-details',
       'participants',
       'reset-password',
@@ -671,6 +818,13 @@ export default function App() {
                 <PrivacyScreen
                   onNavigate={handleNavigate}
                   backTarget={selectedEvent?.backTarget || 'signup'}
+                />
+              )}
+              {currentScreen === 'legal-consent' && (
+                <LegalConsentScreen
+                  onNavigate={handleNavigate}
+                  onAccepted={handleLegalConsentAccepted}
+                  onLogout={handleLegalConsentLogout}
                 />
               )}
               {currentScreen === 'reset-password' && (

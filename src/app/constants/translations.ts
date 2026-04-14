@@ -46,6 +46,11 @@ type TranslationKey =
     | 'legal.privacyLink'
     | 'legal.and'
     | 'legal.lastUpdated'
+    | 'legal.consentTitle'
+    | 'legal.consentDescription'
+    | 'legal.continue'
+    | 'legal.savingConsent'
+    | 'legal.consentSaveFailed'
     | 'login.back'
     | 'login.title'
     | 'login.google'
@@ -527,6 +532,12 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'legal.privacyLink': 'Privacy Policy',
         'legal.and': 'and',
         'legal.lastUpdated': 'Last updated',
+        'legal.consentTitle': 'Before you continue',
+        'legal.consentDescription':
+            'To continue using Gathr, please confirm that you have read and accepted the Terms of Service and Privacy Policy.',
+        'legal.continue': 'Continue',
+        'legal.savingConsent': 'Saving...',
+        'legal.consentSaveFailed': 'Failed to save legal consent',
 
         'login.back': 'Back',
         'login.title': 'Welcome back',
@@ -1054,6 +1065,12 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'legal.privacyLink': 'Политику конфиденциальности',
         'legal.and': 'и',
         'legal.lastUpdated': 'Обновлено',
+        'legal.consentTitle': 'Перед продолжением',
+        'legal.consentDescription':
+            'Чтобы продолжить пользоваться Gathr, подтвердите, что вы ознакомились и принимаете Условия использования и Политику конфиденциальности.',
+        'legal.continue': 'Продолжить',
+        'legal.savingConsent': 'Сохранение...',
+        'legal.consentSaveFailed': 'Не удалось сохранить юридическое согласие',
 
         'login.back': 'Назад',
         'login.title': 'С возвращением',
@@ -1556,6 +1573,12 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'legal.privacyLink': 'Politica de confidențialitate',
         'legal.and': 'și',
         'legal.lastUpdated': 'Ultima actualizare',
+        'legal.consentTitle': 'Înainte să continui',
+        'legal.consentDescription':
+            'Pentru a continua să folosești Gathr, confirmă că ai citit și accepți Termenii de utilizare și Politica de confidențialitate.',
+        'legal.continue': 'Continuă',
+        'legal.savingConsent': 'Se salvează...',
+        'legal.consentSaveFailed': 'Nu s-a putut salva consimțământul legal',
 
         'login.back': 'Înapoi',
         'login.title': 'Bine ai revenit',
@@ -2063,6 +2086,12 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'legal.privacyLink': 'Політику конфіденційності',
         'legal.and': 'та',
         'legal.lastUpdated': 'Оновлено',
+        'legal.consentTitle': 'Перш ніж продовжити',
+        'legal.consentDescription':
+            'Щоб продовжити користуватися Gathr, підтвердіть, що ви ознайомилися й погоджуєтеся з Умовами використання та Політикою конфіденційності.',
+        'legal.continue': 'Продовжити',
+        'legal.savingConsent': 'Збереження...',
+        'legal.consentSaveFailed': 'Не вдалося зберегти юридичну згоду',
 
         'login.back': 'Назад',
         'login.title': 'З поверненням',
@@ -2571,6 +2600,12 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'legal.privacyLink': 'Datenschutzerklärung',
         'legal.and': 'und',
         'legal.lastUpdated': 'Zuletzt aktualisiert',
+        'legal.consentTitle': 'Bevor du fortfährst',
+        'legal.consentDescription':
+            'Um Gathr weiter zu nutzen, bestätige bitte, dass du die Nutzungsbedingungen und die Datenschutzerklärung gelesen hast und akzeptierst.',
+        'legal.continue': 'Fortfahren',
+        'legal.savingConsent': 'Wird gespeichert...',
+        'legal.consentSaveFailed': 'Die rechtliche Zustimmung konnte nicht gespeichert werden',
 
         'login.back': 'Zurück',
         'login.title': 'Willkommen zurück',

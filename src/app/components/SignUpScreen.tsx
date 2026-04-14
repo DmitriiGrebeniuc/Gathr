@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
 import { Check } from 'lucide-react';
+import { CURRENT_LEGAL_VERSION } from '../constants/legalDocuments';
 
 export function SignUpScreen({
   onNavigate,
@@ -50,6 +51,9 @@ export function SignUpScreen({
         options: {
           data: {
             name: name.trim(),
+            accepted_terms_at: new Date().toISOString(),
+            accepted_privacy_at: new Date().toISOString(),
+            accepted_legal_version: CURRENT_LEGAL_VERSION,
           },
         },
       });

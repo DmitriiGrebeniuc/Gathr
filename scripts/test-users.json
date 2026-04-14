@@ -2,7 +2,7 @@
   {
     "email": "gathr.seed.1@example.com",
     "password": "TestUser123!",
-    "name": "Alex",
+    "name": "Alex V",
     "role": "organizer"
   },
   {
@@ -20,7 +20,7 @@
   {
     "email": "gathr.seed.4@example.com",
     "password": "TestUser123!",
-    "name": "Elena",
+    "name": "｡◕｡𝓝𝓪𝓽𝓪𝓵𝓲𝓪｡◕｡",
     "role": "user"
   },
   {
@@ -38,13 +38,13 @@
   {
     "email": "gathr.seed.7@example.com",
     "password": "TestUser123!",
-    "name": "Cristina",
+    "name": "Natalya Govorova",
     "role": "user"
   },
   {
     "email": "gathr.seed.8@example.com",
     "password": "TestUser123!",
-    "name": "Victor",
+    "name": "Victor Zolotoi",
     "role": "user"
   }
 ]

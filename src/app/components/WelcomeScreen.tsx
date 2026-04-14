@@ -283,6 +283,28 @@ export function WelcomeScreen({
             >
               {translate('welcome.signup')}
             </button>
+
+            <div className="pt-2 text-center text-xs text-muted-foreground">
+              <button
+                type="button"
+                onClick={() => onNavigate('terms', { backTarget: 'welcome' })}
+                className="transition-opacity hover:opacity-80"
+                style={{ color: 'var(--accent)' }}
+                disabled={googleLoading}
+              >
+                {translate('legal.termsLink')}
+              </button>
+              <span className="mx-2 text-muted-foreground">•</span>
+              <button
+                type="button"
+                onClick={() => onNavigate('privacy', { backTarget: 'welcome' })}
+                className="transition-opacity hover:opacity-80"
+                style={{ color: 'var(--accent)' }}
+                disabled={googleLoading}
+              >
+                {translate('legal.privacyLink')}
+              </button>
+            </div>
           </>
         ) : null}
       </motion.div>

@@ -5,15 +5,17 @@ import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
+import { Check } from 'lucide-react';
 
 export function SignUpScreen({
   onNavigate,
 }: {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
 }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { translate } = useLanguage();
@@ -31,6 +33,11 @@ export function SignUpScreen({
 
     if (!password.trim()) {
       feedback.warning(translate('signup.enterPassword'));
+      return;
+    }
+
+    if (!acceptedLegal) {
+      feedback.warning(translate('legal.mustAcceptTerms'));
       return;
     }
 
@@ -141,6 +148,66 @@ export function SignUpScreen({
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{ backgroundColor: 'var(--card)' }}
               />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="rounded-xl border p-4"
+              style={{
+                backgroundColor: 'var(--card)',
+                borderColor: acceptedLegal ? 'var(--accent-border-muted)' : 'var(--border)',
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAcceptedLegal((prev) => !prev)}
+                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border"
+                  style={{
+                    backgroundColor: acceptedLegal ? 'var(--accent-soft)' : 'transparent',
+                    borderColor: acceptedLegal ? 'var(--accent-border-strong)' : 'var(--border)',
+                    color: acceptedLegal ? 'var(--accent)' : 'transparent',
+                  }}
+                  disabled={loading}
+                  aria-pressed={acceptedLegal}
+                >
+                  {acceptedLegal ? <Check size={14} strokeWidth={2.5} /> : null}
+                </button>
+
+                <div className="text-sm leading-6 text-muted-foreground">
+                  <button
+                    type="button"
+                    onClick={() => setAcceptedLegal((prev) => !prev)}
+                    className="text-left"
+                    disabled={loading}
+                  >
+                    {translate('legal.acceptTermsLabel')}
+                  </button>{' '}
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('terms', { backTarget: 'signup' })}
+                    className="text-accent underline underline-offset-2"
+                    style={{ color: 'var(--accent)' }}
+                    disabled={loading}
+                  >
+                    {translate('legal.termsLink')}
+                  </button>{' '}
+                  {translate('legal.and')}{' '}
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('privacy', { backTarget: 'signup' })}
+                    className="text-accent underline underline-offset-2"
+                    style={{ color: 'var(--accent)' }}
+                    disabled={loading}
+                  >
+                    {translate('legal.privacyLink')}
+                  </button>
+                  {' '}
+                  {translate('legal.and')} {translate('legal.acceptTermsSuffix')}.
+                </div>
+              </div>
             </motion.div>
 
             <motion.div

@@ -23,6 +23,8 @@ import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { supabase } from '../lib/supabase';
 import { LanguageScreen } from './components/LanguageScreen';
 import { AppearanceScreen } from './components/AppearanceScreen';
+import { TermsScreen } from './components/TermsScreen';
+import { PrivacyScreen } from './components/PrivacyScreen';
 import { FeedbackHost } from './components/FeedbackHost';
 import { useLanguage } from './context/LanguageContext';
 import { InviteUsersScreen } from './components/InviteUsersScreen';
@@ -556,6 +558,8 @@ export default function App() {
       'admin',
       'language',
       'appearance',
+      'terms',
+      'privacy',
       'event-details',
       'participants',
       'reset-password',
@@ -657,6 +661,18 @@ export default function App() {
                 />
               )}
               {currentScreen === 'signup' && <SignUpScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'terms' && (
+                <TermsScreen
+                  onNavigate={handleNavigate}
+                  backTarget={selectedEvent?.backTarget || 'signup'}
+                />
+              )}
+              {currentScreen === 'privacy' && (
+                <PrivacyScreen
+                  onNavigate={handleNavigate}
+                  backTarget={selectedEvent?.backTarget || 'signup'}
+                />
+              )}
               {currentScreen === 'reset-password' && (
                 <ResetPasswordScreen onNavigate={handleNavigate} />
               )}

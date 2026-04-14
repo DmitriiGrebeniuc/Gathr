@@ -1,0 +1,66 @@
+﻿
+Gathr - Terms of Service
+Last updated: 14.04.2026
+Welcome to Gathr. These Terms of Service govern your access to and use of the Gathr website, app, and related services.
+By accessing or using Gathr, you agree to these Terms. If you do not agree, do not use the service.
+About Gathr
+Gathr is a platform that helps users discover, create, join, share, and manage local events and micro-meetups.
+Gathr is currently operated by Dmitrii Grebeniuc, based in the Republic of Moldova.
+Contact: support@gathr-app.site
+Eligibility
+You may use Gathr only if you are legally able to enter into a binding agreement under applicable law.
+Gathr is not intended for children under the age of 13. By using the service, you represent that you meet the minimum age requirement applicable in your jurisdiction.
+User Accounts
+To access certain features, you may need to create an account.
+You are responsible for:
+providing accurate information
+keeping your login credentials secure
+all activity that occurs under your account
+You must not impersonate another person or create an account using false or misleading information.
+User Content and Events
+Users may create profiles, events, descriptions, invitations, and other content through the service.
+You retain ownership of the content you create, but by submitting content to Gathr, you grant Gathr a non-exclusive, worldwide, royalty-free license to host, display, process, reproduce, and distribute such content as necessary to operate, improve, and provide the service.
+You are solely responsible for the content you post and for your interactions with other users.
+Acceptable Use
+You agree not to:
+use Gathr for unlawful purposes
+post false, deceptive, abusive, threatening, hateful, or harmful content
+harass, spam, or manipulate other users
+infringe intellectual property, privacy, or other legal rights
+attempt to disrupt, damage, reverse engineer, or gain unauthorized access to the service
+misuse invitations, events, notifications, moderation tools, or platform functionality
+Moderation and Enforcement
+Gathr reserves the right to monitor, moderate, remove content, limit features, suspend accounts, or ban users where necessary to protect the platform, its users, or legal compliance.
+This includes the right to remove events, restrict participation, deny access, or terminate accounts for violations of these Terms, harmful behavior, abuse, fraud, or safety concerns.
+Events and Offline Interactions
+Gathr only provides a platform for users to create, discover, and join events.
+Gathr does not verify the identity, intentions, conduct, or reliability of users, and does not organize, supervise, or control offline meetings or interactions.
+Participation in any event, meeting, or contact with other users is entirely at your own risk. You are solely responsible for your safety, decisions, conduct, and interactions before, during, and after any event.
+To the maximum extent permitted by law, Gathr is not responsible for the behavior of users, for the legality or safety of events, or for any loss, harm, injury, damage, dispute, or incident arising out of offline interactions or attendance at events.
+Availability of Service
+Gathr may change, suspend, or discontinue any part of the service at any time, with or without notice.
+We do not guarantee uninterrupted availability, error-free operation, or compatibility with all devices, browsers, or networks.
+Future Paid Features
+Gathr may introduce paid plans, subscriptions, premium features, or other monetized functionality in the future, including a Pro plan.
+At this time, no payment processing or monetary transactions are provided through the service unless explicitly stated otherwise.
+If paid features are introduced later, additional terms may apply.
+Intellectual Property
+The Gathr name, branding, interface, and service-related materials, excluding user content, are owned by or licensed to Gathr and are protected by applicable intellectual property laws.
+You may not copy, distribute, modify, or exploit the service or its branding except as permitted by law or by written permission.
+Privacy
+Your use of Gathr is also governed by the Privacy Policy.
+Termination
+You may stop using Gathr at any time.
+Gathr may suspend, restrict, or terminate your access at any time if you violate these Terms, create risk for the platform or other users, or where moderation or legal enforcement requires it.
+Disclaimer
+Gathr is provided on an "as is" and "as available" basis.
+To the maximum extent permitted by law, Gathr disclaims warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, and non-infringement.
+Limitation of Liability
+To the maximum extent permitted by law, Gathr shall not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of data, profits, goodwill, or business opportunities arising from your use of or inability to use the service.
+Changes to These Terms
+We may update these Terms from time to time. The updated version will be posted with a new "Last updated" date. Continued use of the service after changes become effective means you accept the updated Terms.
+Governing Law
+These Terms shall be governed by the laws of the Republic of Moldova, unless otherwise required by applicable mandatory consumer protection law.
+Contact
+If you have questions about these Terms, contact:
+support@gathr-app.site

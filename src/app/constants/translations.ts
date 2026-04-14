@@ -37,6 +37,15 @@ type TranslationKey =
     | 'welcome.google'
     | 'welcome.login'
     | 'welcome.signup'
+    | 'legal.termsTitle'
+    | 'legal.privacyTitle'
+    | 'legal.acceptTermsLabel'
+    | 'legal.acceptTermsSuffix'
+    | 'legal.mustAcceptTerms'
+    | 'legal.termsLink'
+    | 'legal.privacyLink'
+    | 'legal.and'
+    | 'legal.lastUpdated'
     | 'login.back'
     | 'login.title'
     | 'login.google'
@@ -506,6 +515,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'welcome.google': 'Continue with Google',
         'welcome.login': 'Continue with email',
         'welcome.signup': 'Create account with email',
+        'legal.termsTitle': 'Terms of Service',
+        'legal.privacyTitle': 'Privacy Policy',
+        'legal.acceptTermsLabel':
+            'By registering, I accept the',
+        'legal.acceptTermsSuffix':
+            'confirm that I am at least 13 years old or that I have reached the minimum age allowed by applicable law',
+        'legal.mustAcceptTerms':
+            'You need to accept the Terms of Service and Privacy Policy before registration',
+        'legal.termsLink': 'Terms of Service',
+        'legal.privacyLink': 'Privacy Policy',
+        'legal.and': 'and',
+        'legal.lastUpdated': 'Last updated',
 
         'login.back': 'Back',
         'login.title': 'Welcome back',
@@ -1021,6 +1042,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'welcome.google': 'Продолжить через Google',
         'welcome.login': 'Войти по email',
         'welcome.signup': 'Создать аккаунт по email',
+        'legal.termsTitle': 'Условия использования',
+        'legal.privacyTitle': 'Политика конфиденциальности',
+        'legal.acceptTermsLabel':
+            'Регистрируясь, я принимаю',
+        'legal.acceptTermsSuffix':
+            'подтверждаю, что мне не менее 13 лет или что я достиг минимального возраста, разрешенного применимым законодательством',
+        'legal.mustAcceptTerms':
+            'Перед регистрацией нужно принять Условия использования и Политику конфиденциальности',
+        'legal.termsLink': 'Условия использования',
+        'legal.privacyLink': 'Политику конфиденциальности',
+        'legal.and': 'и',
+        'legal.lastUpdated': 'Обновлено',
 
         'login.back': 'Назад',
         'login.title': 'С возвращением',
@@ -1195,6 +1228,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'admin.deleteEventFailed': 'Не удалось удалить событие',
         'admin.deleteEventUnexpectedError': 'Произошла непредвиденная ошибка при удалении события',
         'admin.pageOverview': 'Обзор',
+        'admin.pageEvents': 'События',
         'admin.pageUsers': '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0438',
         'admin.pageSupport': '\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430',
         'admin.usersTitle': 'Пользователи',
@@ -1510,6 +1544,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'welcome.google': 'Continuă cu Google',
         'welcome.login': 'Continuă cu email',
         'welcome.signup': 'Creează cont cu email',
+        'legal.termsTitle': 'Termeni de utilizare',
+        'legal.privacyTitle': 'Politica de confidențialitate',
+        'legal.acceptTermsLabel':
+            'Prin înregistrare, accept',
+        'legal.acceptTermsSuffix':
+            'confirm că am cel puțin 13 ani sau că am atins vârsta minimă permisă de legea aplicabilă',
+        'legal.mustAcceptTerms':
+            'Trebuie să accepți Termenii de utilizare și Politica de confidențialitate înainte de înregistrare',
+        'legal.termsLink': 'Termenii de utilizare',
+        'legal.privacyLink': 'Politica de confidențialitate',
+        'legal.and': 'și',
+        'legal.lastUpdated': 'Ultima actualizare',
 
         'login.back': 'Înapoi',
         'login.title': 'Bine ai revenit',
@@ -2005,6 +2051,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'welcome.google': 'Продовжити через Google',
         'welcome.login': 'Увійти через email',
         'welcome.signup': 'Створити акаунт через email',
+        'legal.termsTitle': 'Умови використання',
+        'legal.privacyTitle': 'Політика конфіденційності',
+        'legal.acceptTermsLabel':
+            'Реєструючись, я приймаю',
+        'legal.acceptTermsSuffix':
+            'підтверджую, що мені щонайменше 13 років або що я досяг мінімального віку, дозволеного застосовним законодавством',
+        'legal.mustAcceptTerms':
+            'Перед реєстрацією потрібно прийняти Умови використання та Політику конфіденційності',
+        'legal.termsLink': 'Умови використання',
+        'legal.privacyLink': 'Політику конфіденційності',
+        'legal.and': 'та',
+        'legal.lastUpdated': 'Оновлено',
 
         'login.back': 'Назад',
         'login.title': 'З поверненням',
@@ -2501,6 +2559,18 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'welcome.google': 'Mit Google fortfahren',
         'welcome.login': 'Mit E-Mail fortfahren',
         'welcome.signup': 'Konto mit E-Mail erstellen',
+        'legal.termsTitle': 'Nutzungsbedingungen',
+        'legal.privacyTitle': 'Datenschutzerklärung',
+        'legal.acceptTermsLabel':
+            'Mit der Registrierung akzeptiere ich die',
+        'legal.acceptTermsSuffix':
+            'bestätige, dass ich mindestens 13 Jahre alt bin oder das nach geltendem Recht zulässige Mindestalter erreicht habe',
+        'legal.mustAcceptTerms':
+            'Vor der Registrierung musst du die Nutzungsbedingungen und die Datenschutzerklärung akzeptieren',
+        'legal.termsLink': 'Nutzungsbedingungen',
+        'legal.privacyLink': 'Datenschutzerklärung',
+        'legal.and': 'und',
+        'legal.lastUpdated': 'Zuletzt aktualisiert',
 
         'login.back': 'Zurück',
         'login.title': 'Willkommen zurück',

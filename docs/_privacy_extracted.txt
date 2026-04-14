@@ -1,0 +1,104 @@
+﻿
+Gathr - Privacy Policy
+Last updated: 14.04.2026
+This Privacy Policy explains how Gathr collects, uses, stores, transfers, and protects personal data when you use the Gathr website, app, and related services.
+If you use Gathr, you agree to the practices described in this Privacy Policy.
+Who operates Gathr
+Gathr is currently operated by Dmitrii Grebeniuc, based in the Republic of Moldova.
+Contact: support@gathr-app.site
+Data We Collect
+Depending on how you use Gathr, we may collect:
+Account and profile data:
+name or display name
+email address
+authentication-related account identifiers
+language preferences
+profile settings
+Event-related data:
+events you create
+event descriptions
+date, time, location, city, and related event details
+participation records
+invitations and invitation responses
+Usage and technical data:
+device/browser information
+logs
+session and authentication events
+app interaction data necessary to operate, secure, and improve the service
+Support and communication data:
+support requests
+messages you send through support forms
+related administrative handling data
+Moderation and safety data:
+account role
+access entitlements
+moderation status such as bans or restrictions where applicable
+How We Use Data
+We use personal data to:
+provide and operate Gathr
+authenticate users and manage accounts
+enable event creation, participation, sharing, invitations, and notifications
+personalize language and app settings
+maintain safety, moderation, and abuse prevention
+provide support and respond to requests
+improve product functionality, reliability, and user experience
+comply with legal obligations and enforce our Terms
+Legal Basis
+Where applicable, we process data based on:
+your consent
+performance of a service you request
+legitimate interests in operating, securing, moderating, and improving Gathr
+compliance with legal obligations
+Sharing of Data
+We do not sell personal data.
+We may share data with service providers and infrastructure tools used to operate Gathr, including hosting, authentication, database, email, support, and related technical providers, only to the extent reasonably necessary to run the service.
+We may also disclose information:
+when required by law
+to protect rights, safety, and security
+in connection with moderation, fraud prevention, or abuse investigations
+in connection with a future transfer, restructuring, or sale of the service
+International and Cross-Border Data Transfers
+Gathr may use third-party providers and infrastructure located outside the Republic of Moldova. As a result, personal data may be processed or stored in other jurisdictions, including jurisdictions in the European Union and the United States.
+By using Gathr, you understand that your data may be transferred to and processed in countries outside Moldova, subject to reasonable safeguards and operational necessity.
+User Content Visibility
+Certain content you create in Gathr may be visible to other users depending on the feature, including:
+your display name
+event content
+participation in events
+invitations or related event interactions where relevant
+Please avoid posting sensitive personal data in public or user-visible areas.
+Data Retention
+We retain personal data only as long as reasonably necessary for:
+providing the service
+support and moderation
+security and abuse prevention
+legal compliance
+legitimate operational needs
+Retention periods may vary depending on the type of data and applicable legal requirements.
+Your Rights
+Subject to applicable law, including the legislation of the Republic of Moldova on personal data protection, you may have the right to:
+request access to your personal data
+request correction or updating of inaccurate data
+request deletion of data where appropriate
+object to certain processing
+request restriction of processing in certain cases
+seek legal protection of your rights
+To make a request, contact support@gathr-app.site.
+Account Deletion and Access Requests
+You may request account-related or privacy-related support by contacting support@gathr-app.site.
+At this stage, some account and profile management operations may be handled manually or through available in-app functionality.
+We may retain certain records where necessary for legal, security, moderation, abuse-prevention, or operational reasons.
+Security
+We use reasonable technical and organizational measures to protect personal data. However, no method of transmission or storage is completely secure, and we cannot guarantee absolute security.
+Children's Privacy
+Gathr is not intended for children under 13, and we do not knowingly collect personal data from children under 13.
+If you believe a child has provided personal data in violation of this policy, contact support@gathr-app.site.
+Future Paid Features
+Gathr may introduce paid features, subscriptions, premium access, or Pro plans in the future.
+If payment processing is added later, this Privacy Policy may be updated to reflect the handling of billing and transaction-related data.
+At this time, no payment processing is provided through the service unless explicitly stated otherwise.
+Changes to This Policy
+We may update this Privacy Policy from time to time. The updated version will be posted with a new "Last updated" date. Continued use of Gathr after changes become effective means you accept the updated policy.
+Contact
+If you have questions about this Privacy Policy or about your personal data, contact:
+support@gathr-app.site

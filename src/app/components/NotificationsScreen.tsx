@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { LoadingLogo } from './LoadingLogo';
 import { feedback } from '../lib/feedback';
+import { fetchPublicProfileNameMap } from '../lib/publicData';
 
 type EventItem = {
   id: string;
@@ -222,12 +223,7 @@ export function NotificationsScreen({
       if (notifyNewParticipants && myEventIds.length > 0) {
         const { data: joins, error: joinsError } = await supabase
           .from('participants')
-          .select(`
-            event_id,
-            user_id,
-            created_at,
-            profiles(name)
-          `)
+          .select('event_id, user_id, created_at')
           .in('event_id', myEventIds)
           .neq('user_id', user.id);
 
@@ -235,6 +231,9 @@ export function NotificationsScreen({
           console.error('Ошибка загрузки join notifications:', joinsError);
         } else {
           const groupedJoins = new Map<string, any[]>();
+          const nameMap = await fetchPublicProfileNameMap(
+            ((joins || []) as any[]).map((joinRow: any) => joinRow.user_id)
+          );
 
           (joins || []).forEach((joinRow: any) => {
             const eventId = joinRow.event_id;
@@ -271,13 +270,9 @@ export function NotificationsScreen({
 
               const latestJoin = sortedJoins[0];
 
-              const names = sortedJoins.map((joinRow: any) => {
-                const profileData = Array.isArray(joinRow.profiles)
-                  ? joinRow.profiles[0]
-                  : joinRow.profiles;
-
-                return profileData?.name || translate('notifications.someone');
-              });
+              const names = sortedJoins.map(
+                (joinRow: any) => nameMap[joinRow.user_id] || translate('notifications.someone')
+              );
 
               let message = '';
 
@@ -341,9 +336,6 @@ export function NotificationsScreen({
         date_time,
         location,
         creator_id
-      ),
-      inviter:profiles!event_invitations_inviter_id_fkey (
-        name
       )
     `)
           .eq('invitee_id', user.id)
@@ -353,21 +345,22 @@ export function NotificationsScreen({
         if (invitationsError) {
           console.error('Ошибка загрузки invitations:', invitationsError);
         } else {
+          const inviterNameMap = await fetchPublicProfileNameMap(
+            ((invitations || []) as any[]).map((invitation: any) => invitation.inviter_id)
+          );
+
           inviteNotifications = (invitations || [])
             .map((invitation: any) => {
               const eventData = Array.isArray(invitation.events)
                 ? invitation.events[0]
                 : invitation.events;
 
-              const inviterData = Array.isArray(invitation.inviter)
-                ? invitation.inviter[0]
-                : invitation.inviter;
-
               if (!eventData?.id) {
                 return null;
               }
 
-              const inviterName = inviterData?.name || translate('notifications.someone');
+              const inviterName =
+                inviterNameMap[invitation.inviter_id] || translate('notifications.someone');
 
               return {
                 id: `invite-${invitation.id}`,
@@ -718,3 +711,6 @@ export function NotificationsScreen({
     </div>
   );
 }
+
+
+

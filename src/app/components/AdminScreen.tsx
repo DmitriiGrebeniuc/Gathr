@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
 import { feedback } from '../lib/feedback';
+import { fetchPublicProfileNameMap } from '../lib/publicData';
 
 type SummaryValue = number | null;
 type AdminPage = 'overview' | 'events' | 'users' | 'support';
@@ -216,9 +217,7 @@ export function AdminScreen({
             .select(`
               id,
               created_at,
-              inviter:profiles!event_invitations_inviter_id_fkey (
-                name
-              ),
+              inviter_id,
               events (
                 title
               )
@@ -292,22 +291,14 @@ export function AdminScreen({
             );
           }
 
-          let creatorNameMap: Record<string, string> = {};
-
-          if (creatorIds.length > 0) {
-            const creatorProfilesResult = await supabase
-              .from('profiles')
-              .select('id, name')
-              .in('id', creatorIds);
-
-            if (!creatorProfilesResult.error) {
-              ((creatorProfilesResult.data as { id: string; name: string | null }[] | null) || []).forEach(
-                (profile) => {
-                  creatorNameMap[profile.id] = profile.name || translate('common.unknown');
-                }
-              );
-            }
-          }
+          const creatorNameMapRaw =
+            creatorIds.length > 0 ? await fetchPublicProfileNameMap(creatorIds) : {};
+          const creatorNameMap = Object.fromEntries(
+            Object.entries(creatorNameMapRaw).map(([id, name]) => [
+              id,
+              name || translate('common.unknown'),
+            ])
+          );
 
           const normalizedModerationEvents: AdminModerationEvent[] = baseEvents.map((event) => ({
             id: event.id,
@@ -341,13 +332,13 @@ export function AdminScreen({
           latestPendingInvitationsResult.status === 'fulfilled' &&
           !latestPendingInvitationsResult.value.error
         ) {
-          const normalizedInvitations = (
-            (latestPendingInvitationsResult.value.data as any[] | null) || []
-          ).map((invitation: any) => {
-            const inviterData = Array.isArray(invitation.inviter)
-              ? invitation.inviter[0]
-              : invitation.inviter;
+          const invitationRows =
+            (latestPendingInvitationsResult.value.data as any[] | null) || [];
+          const inviterNameMap = await fetchPublicProfileNameMap(
+            invitationRows.map((invitation: any) => invitation.inviter_id)
+          );
 
+          const normalizedInvitations = invitationRows.map((invitation: any) => {
             const eventData = Array.isArray(invitation.events)
               ? invitation.events[0]
               : invitation.events;
@@ -355,7 +346,8 @@ export function AdminScreen({
             return {
               id: invitation.id,
               created_at: invitation.created_at ?? null,
-              inviterName: inviterData?.name ?? null,
+              inviterName:
+                inviterNameMap[invitation.inviter_id] || translate('common.unknown'),
               eventTitle: eventData?.title ?? null,
             };
           });
@@ -1642,3 +1634,4 @@ export function AdminScreen({
     </div>
   );
 }
+

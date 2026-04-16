@@ -7,6 +7,12 @@ import { useLanguage } from '../context/LanguageContext';
 import { EventLocationMap } from './EventLocationMap';
 import { buildJoinEventLoginPayload } from '../auth/postLoginIntent';
 import { feedback } from '../lib/feedback';
+import {
+  fetchMyProfileAccessSummary,
+  fetchParticipantCounts,
+  fetchParticipantIdentityRows,
+  fetchPublicProfileNameMap,
+} from '../lib/publicData';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -45,6 +51,8 @@ export function EventDetailsScreen({
   const [sharing, setSharing] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
+  const [participantCount, setParticipantCount] = useState(event?.participantCount || 0);
+  const [canViewParticipantIdentities, setCanViewParticipantIdentities] = useState(false);
 
   const autoJoinAttemptedRef = useRef(false);
 
@@ -136,22 +144,28 @@ export function EventDetailsScreen({
   const loadParticipants = async () => {
     if (!eventData.id) return;
 
-    const { data, error } = await supabase
-      .from('participants')
-      .select(`
-        user_id,
-        event_id,
-        profiles(name)
-      `)
-      .eq('event_id', eventData.id);
+    try {
+      const countsMap = await fetchParticipantCounts([eventData.id]);
+      setParticipantCount(countsMap[eventData.id] || 0);
 
-    if (error) {
-      console.error('Ошибка загрузки участников:', error);
+      if (!canViewParticipantIdentities) {
+        setParticipants([]);
+        return;
+      }
+
+      const participantRows = await fetchParticipantIdentityRows(eventData.id);
+      const nameMap = await fetchPublicProfileNameMap(participantRows.map((row) => row.user_id));
+
+      setParticipants(
+        participantRows.map((row) => ({
+          ...row,
+          publicName: nameMap[row.user_id] || translate('common.user'),
+        }))
+      );
+    } catch (error) {
+      console.error('Unexpected participant load error:', error);
       setParticipants([]);
-      return;
     }
-
-    setParticipants(data || []);
   };
 
   const loadEventState = async () => {
@@ -165,14 +179,20 @@ export function EventDetailsScreen({
         setCurrentUserId(null);
         setHasJoined(false);
         setIsCreator(false);
+        setCanViewParticipantIdentities(false);
         return;
       }
 
+      const myAccess = await fetchMyProfileAccessSummary();
+      const isAdmin = myAccess?.role === 'admin';
+
       setCurrentUserId(user.id);
-      setIsCreator(eventData.creator_id === user.id);
+      const creator = eventData.creator_id === user.id;
+      setIsCreator(creator);
 
       if (!eventData.id) {
         setHasJoined(false);
+        setCanViewParticipantIdentities(creator || isAdmin);
         return;
       }
 
@@ -186,19 +206,25 @@ export function EventDetailsScreen({
       if (error) {
         console.error('Ошибка проверки участия:', error);
         setHasJoined(false);
+        setCanViewParticipantIdentities(creator || isAdmin);
       } else {
-        setHasJoined(!!data);
+        const joined = !!data;
+        setHasJoined(joined);
+        setCanViewParticipantIdentities(creator || joined || isAdmin);
       }
     } catch (error) {
       console.error('Unexpected event state error:', error);
       setHasJoined(false);
       setIsCreator(false);
+      setCanViewParticipantIdentities(false);
     }
   };
 
   useEffect(() => {
     setEventData(event || defaultEvent);
     setResolvedBackTarget(event?.backTarget || 'home');
+    setParticipantCount(event?.participantCount || 0);
+    setCanViewParticipantIdentities(!!event?.canViewParticipantIdentities);
     autoJoinAttemptedRef.current = false;
   }, [event, defaultEvent]);
 
@@ -248,7 +274,7 @@ export function EventDetailsScreen({
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(eventsChannel);
     };
-  }, [eventData.id, eventData.creator_id]);
+  }, [eventData.id, eventData.creator_id, canViewParticipantIdentities]);
 
   const handleShare = async () => {
     if (!eventData.id || !eventShareUrl) {
@@ -628,30 +654,30 @@ export function EventDetailsScreen({
                     ...eventData,
                     backTarget,
                     currentUserId,
+                    participantCount,
+                    canViewParticipantIdentities,
                   })
                 }
                 className="text-sm text-muted-foreground mb-3 hover:opacity-80 active:opacity-60 transition-opacity"
               >
-                {translate('details.participants')} ({participants.length})
+                {translate('details.participants')} ({participantCount})
               </button>
 
-              {participants.length > 0 ? (
+              {canViewParticipantIdentities && participants.length > 0 ? (
                 <button
                   onClick={() =>
                     onNavigate('participants', {
                       ...eventData,
                       backTarget,
                       currentUserId,
+                      participantCount,
+                      canViewParticipantIdentities,
                     })
                   }
                   className="flex items-center -space-x-2 hover:opacity-90 active:opacity-70 transition-opacity"
                 >
                   {participants.slice(0, 4).map((participant: any, idx: number) => {
-                    const profileData = Array.isArray(participant.profiles)
-                      ? participant.profiles[0]
-                      : participant.profiles;
-
-                    const name = profileData?.name || 'User';
+                    const name = participant.publicName || translate('common.user');
                     const isCurrentUser = currentUserId === participant.user_id;
                     const isEventCreator = eventData.creator_id === participant.user_id;
 
@@ -699,7 +725,7 @@ export function EventDetailsScreen({
                     );
                   })}
 
-                  {participants.length > 4 && (
+                  {participantCount > 4 && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -707,10 +733,17 @@ export function EventDetailsScreen({
                       className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2 border-background"
                       style={{ backgroundColor: 'var(--secondary)' }}
                     >
-                      +{participants.length - 4}
+                      +{participantCount - 4}
                     </motion.div>
                   )}
                 </button>
+              ) : participantCount > 0 ? (
+                <div
+                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
+                  style={{ backgroundColor: 'var(--card)' }}
+                >
+                  {translate('details.participantsRestricted')}
+                </div>
               ) : (
                 <div
                   className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"
@@ -817,3 +850,5 @@ export function EventDetailsScreen({
     </SwipeableScreen>
   );
 }
+
+

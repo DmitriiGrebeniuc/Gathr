@@ -69,7 +69,7 @@ export function InviteUsersScreen({
             setCurrentUserId(user.id);
 
             const { data: allProfiles, error: profilesError } = await supabase
-                .from('profiles')
+                .from('public_profiles')
                 .select('id, name')
                 .order('name', { ascending: true });
 

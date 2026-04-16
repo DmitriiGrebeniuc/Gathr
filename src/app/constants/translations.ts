@@ -378,6 +378,7 @@ type TranslationKey =
     | 'details.locationNotSpecified'
     | 'details.participants'
     | 'details.noParticipants'
+    | 'details.participantsRestricted'
     | 'details.you'
     | 'details.creator'
     | 'details.leaveEvent'
@@ -415,6 +416,7 @@ type TranslationKey =
     | 'participants.title'
     | 'participants.loading'
     | 'participants.noParticipants'
+    | 'participants.identitiesRestricted'
     | 'participants.eventFallback'
     | 'participants.participant'
     | 'participants.participants'
@@ -884,6 +886,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.locationNotSpecified': 'Location not specified',
         'details.participants': 'Participants',
         'details.noParticipants': 'No participants yet',
+        'details.participantsRestricted':
+            'Only the participant count is available until you join this event.',
         'details.you': 'You',
         'details.creator': 'Creator',
         'details.leaveEvent': 'Leave Event',
@@ -923,6 +927,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'participants.title': 'Participants',
         'participants.loading': 'Loading participants...',
         'participants.noParticipants': 'No participants yet',
+        'participants.identitiesRestricted':
+            'Participant identities are visible only to the creator, participants, or admins.',
         'participants.eventFallback': 'Event',
         'participants.participant': 'participant',
         'participants.participants': 'participants',
@@ -1392,6 +1398,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.locationNotSpecified': 'Локация не указана',
         'details.participants': 'Участники',
         'details.noParticipants': 'Пока нет участников',
+        'details.participantsRestricted':
+            'Сейчас доступно только количество участников. Имена откроются после вступления в событие.',
         'details.you': 'Ты',
         'details.creator': 'Создатель',
         'details.leaveEvent': 'Покинуть событие',
@@ -1431,6 +1439,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'participants.title': 'Участники',
         'participants.loading': 'Загрузка участников...',
         'participants.noParticipants': 'Пока нет участников',
+        'participants.identitiesRestricted':
+            'Имена участников видны только создателю события, участникам или администраторам.',
         'participants.eventFallback': 'Событие',
         'participants.participant': 'участник',
         'participants.participants': 'участников',
@@ -1904,6 +1914,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.locationNotSpecified': 'Locația nu este specificată',
         'details.participants': 'Participanți',
         'details.noParticipants': 'Încă nu sunt participanți',
+        'details.participantsRestricted':
+            'Deocamdată este disponibil doar numărul participanților. Numele devin vizibile după ce te alături evenimentului.',
         'details.you': 'Tu',
         'details.creator': 'Creator',
         'details.leaveEvent': 'Părăsește evenimentul',
@@ -1943,6 +1955,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'participants.title': 'Participanți',
         'participants.loading': 'Se încarcă participanții...',
         'participants.noParticipants': 'Încă nu sunt participanți',
+        'participants.identitiesRestricted':
+            'Identitățile participanților sunt vizibile doar creatorului, participanților sau administratorilor.',
         'participants.eventFallback': 'Eveniment',
         'participants.participant': 'participant',
         'participants.participants': 'participanți',
@@ -2419,6 +2433,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.locationNotSpecified': 'Локація не вказана',
         'details.participants': 'Учасники',
         'details.noParticipants': 'Поки немає учасників',
+        'details.participantsRestricted':
+            'Зараз доступна лише кількість учасників. Імена відкриються після приєднання до події.',
         'details.you': 'Ти',
         'details.creator': 'Створювач',
         'details.leaveEvent': 'Покинути подію',
@@ -2458,6 +2474,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'participants.title': 'Учасники',
         'participants.loading': 'Завантаження учасників...',
         'participants.noParticipants': 'Поки немає учасників',
+        'participants.identitiesRestricted':
+            'Імена учасників бачать лише автор події, учасники або адміністратори.',
         'participants.eventFallback': 'Подія',
         'participants.participant': 'учасник',
         'participants.participants': 'учасників',
@@ -2941,6 +2959,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.locationNotSpecified': 'Ort nicht angegeben',
         'details.participants': 'Teilnehmer',
         'details.noParticipants': 'Noch keine Teilnehmer',
+        'details.participantsRestricted':
+            'Derzeit ist nur die Teilnehmerzahl sichtbar. Namen werden sichtbar, sobald du dem Event beitrittst.',
         'details.you': 'Du',
         'details.creator': 'Ersteller',
         'details.leaveEvent': 'Event verlassen',
@@ -2980,6 +3000,8 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'participants.title': 'Teilnehmer',
         'participants.loading': 'Teilnehmer werden geladen...',
         'participants.noParticipants': 'Noch keine Teilnehmer',
+        'participants.identitiesRestricted':
+            'Teilnehmernamen sind nur für den Ersteller, Teilnehmer oder Admins sichtbar.',
         'participants.eventFallback': 'Event',
         'participants.participant': 'Teilnehmer',
         'participants.participants': 'Teilnehmer',

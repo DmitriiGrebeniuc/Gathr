@@ -12,6 +12,11 @@ import {
 } from '../constants/activityTypes';
 import { LoadingLogo } from './LoadingLogo';
 import { normalizeCityName } from '../lib/locationCity';
+import {
+  fetchJoinedEventIdsForUser,
+  fetchParticipantCounts,
+  fetchPublicProfileNameMap,
+} from '../lib/publicData';
 
 type EventItem = {
   id: string;
@@ -111,32 +116,11 @@ export function HomeScreen({
 
   const refreshParticipantCounts = async () => {
     try {
-      const { data: participantsData, error } = await supabase
-        .from('participants')
-        .select('event_id, user_id');
-
-      if (error) {
-        console.error('Ошибка загрузки участников для счетчика:', error);
-        return;
-      }
-
-      const countsMap: Record<string, number> = {};
-      const joinedIds = new Set<string>();
-
-      (participantsData || []).forEach((participant: any) => {
-        const eventId = participant.event_id;
-
-        if (!eventId) return;
-
-        countsMap[eventId] = (countsMap[eventId] || 0) + 1;
-
-        if (participant.user_id === currentUserId) {
-          joinedIds.add(eventId);
-        }
-      });
-
-      setJoinedEventIds(Array.from(joinedIds));
-
+      const [countsMap, nextJoinedEventIds] = await Promise.all([
+        fetchParticipantCounts(events.map((event) => event.id)),
+        fetchJoinedEventIdsForUser(currentUserId),
+      ]);
+      setJoinedEventIds(nextJoinedEventIds);
       setEvents((prevEvents) =>
         prevEvents.map((event) => ({
           ...event,
@@ -208,65 +192,17 @@ export function HomeScreen({
         )
       );
 
-      let creatorNameMap: Record<string, string> = {};
+      const [creatorNameMapRaw, countsMap, nextJoinedEventIds] = await Promise.all([
+        fetchPublicProfileNameMap(creatorIds),
+        fetchParticipantCounts((eventsData || []).map((event: any) => event.id)),
+        fetchJoinedEventIdsForUser(userId),
+      ]);
 
-      if (creatorIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, name')
-          .in('id', creatorIds);
+      const creatorNameMap = Object.fromEntries(
+        Object.entries(creatorNameMapRaw).map(([id, name]) => [id, name || translate('common.unknown')])
+      );
 
-        if (profilesError) {
-          console.error('Ошибка загрузки профилей создателей:', profilesError);
-        } else {
-          (profilesData || []).forEach((profile: any) => {
-            if (!profile?.id) return;
-            creatorNameMap[profile.id] = profile.name || translate('common.unknown');
-          });
-        }
-      }
-
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('participants')
-        .select('event_id, user_id');
-
-      if (participantsError) {
-        console.error('Ошибка загрузки участников для счетчика:', participantsError);
-
-        const fallbackEvents: EventItem[] = (eventsData || []).map((event: any) => ({
-          id: event.id,
-          title: event.title,
-          description: event.description,
-          date_time: event.date_time,
-          location: event.location,
-          creator_id: event.creator_id,
-          creatorName: event.creator_id
-            ? creatorNameMap[event.creator_id] || translate('common.unknown')
-            : translate('common.unknown'),
-          activity_type: (event.activity_type || 'other') as ActivityType,
-          participantCount: 0,
-        }));
-
-        setEvents(fallbackEvents);
-        return;
-      }
-
-      const countsMap: Record<string, number> = {};
-      const joinedIds = new Set<string>();
-
-      (participantsData || []).forEach((participant: any) => {
-        const eventId = participant.event_id;
-
-        if (!eventId) return;
-
-        countsMap[eventId] = (countsMap[eventId] || 0) + 1;
-
-        if (participant.user_id === userId) {
-          joinedIds.add(eventId);
-        }
-      });
-
-      setJoinedEventIds(Array.from(joinedIds));
+      setJoinedEventIds(nextJoinedEventIds);
 
       const mappedEvents: EventItem[] = (eventsData || []).map((event: any) => ({
         id: event.id,
@@ -327,42 +263,14 @@ export function HomeScreen({
         )
       );
 
-      let creatorNameMap: Record<string, string> = {};
+      const [creatorNameMapRaw, countsMap] = await Promise.all([
+        fetchPublicProfileNameMap(creatorIds),
+        fetchParticipantCounts((moreEventsData || []).map((event: any) => event.id)),
+      ]);
 
-      if (creatorIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, name')
-          .in('id', creatorIds);
-
-        if (profilesError) {
-          console.error('Ошибка загрузки профилей создателей при догрузке:', profilesError);
-        } else {
-          (profilesData || []).forEach((profile: any) => {
-            if (!profile?.id) return;
-            creatorNameMap[profile.id] = profile.name || translate('common.unknown');
-          });
-        }
-      }
-
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('participants')
-        .select('event_id, user_id');
-
-      if (participantsError) {
-        console.error('Ошибка загрузки участников при догрузке:', participantsError);
-        return;
-      }
-
-      const countsMap: Record<string, number> = {};
-
-      (participantsData || []).forEach((participant: any) => {
-        const eventId = participant.event_id;
-
-        if (!eventId) return;
-
-        countsMap[eventId] = (countsMap[eventId] || 0) + 1;
-      });
+      const creatorNameMap = Object.fromEntries(
+        Object.entries(creatorNameMapRaw).map(([id, name]) => [id, name || translate('common.unknown')])
+      );
 
       const mappedMoreEvents: EventItem[] = (moreEventsData || []).map((event: any) => ({
         id: event.id,
@@ -1245,3 +1153,6 @@ export function HomeScreen({
     </div>
   );
 }
+
+
+

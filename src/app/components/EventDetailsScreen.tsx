@@ -671,7 +671,8 @@ export function EventDetailsScreen({
                 {translate('details.participants')} ({participantCount})
               </button>
 
-              {!participantAccessResolved ? (
+              {!participantAccessResolved ||
+              (canViewParticipantIdentities && participantCount > 0 && participants.length === 0) ? (
                 <div
                   className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
                   style={{ backgroundColor: 'var(--card)' }}
@@ -752,7 +753,7 @@ export function EventDetailsScreen({
                     </motion.div>
                   )}
                 </button>
-              ) : participantCount > 0 ? (
+              ) : !canViewParticipantIdentities && participantCount > 0 ? (
                 <div
                   className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
                   style={{ backgroundColor: 'var(--card)' }}

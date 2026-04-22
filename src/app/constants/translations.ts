@@ -1332,7 +1332,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
 
         'home.discover': 'События',
         'home.joined': 'Участвую',
-        'home.myEvents': 'Созданные мной',
+        'home.myEvents': 'Созданные',
         'home.all': 'Все',
         'home.allCities': 'Все города',
         'home.cityFilterLabel': 'Город',

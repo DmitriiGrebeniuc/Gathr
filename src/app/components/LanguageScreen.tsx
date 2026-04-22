@@ -53,7 +53,9 @@ export function LanguageScreen({
                 {translate('language.selectedLanguage')}
               </p>
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{currentLanguage.emoji}</span>
+                <span className="min-w-6 text-sm font-semibold tracking-wide">
+                  {currentLanguage.shortLabel}
+                </span>
                 <span>{currentLanguage.label}</span>
               </div>
             </div>
@@ -78,7 +80,9 @@ export function LanguageScreen({
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{item.emoji}</span>
+                        <span className="min-w-6 text-sm font-semibold tracking-wide">
+                          {item.shortLabel}
+                        </span>
                         <span>{item.label}</span>
                       </div>
 

@@ -1,9 +1,9 @@
 export const LANGUAGES = [
-  { value: 'ru', label: 'Русский', emoji: '🇷🇺' },
-  { value: 'en', label: 'English', emoji: '🇬🇧' },
-  { value: 'ro', label: 'Română', emoji: '🇷🇴' },
-  { value: 'uk', label: 'Українська', emoji: '🇺🇦' },
-  { value: 'de', label: 'Deutsch', emoji: '🇩🇪' },
+  { value: 'ru', label: 'Русский', emoji: '🇷🇺', shortLabel: 'RU' },
+  { value: 'en', label: 'English', emoji: '🇬🇧', shortLabel: 'EN' },
+  { value: 'ro', label: 'Română', emoji: '🇷🇴', shortLabel: 'RO' },
+  { value: 'uk', label: 'Українська', emoji: '🇺🇦', shortLabel: 'UA' },
+  { value: 'de', label: 'Deutsch', emoji: '🇩🇪', shortLabel: 'DE' },
 ] as const;
 
 export type LanguageCode = (typeof LANGUAGES)[number]['value'];

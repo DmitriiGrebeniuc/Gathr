@@ -4,12 +4,12 @@
 
 Gathr uses Supabase (PostgreSQL) as its primary data storage layer.
 
-This document reflects the schema that can be observed from the frontend code in this repository.
-It does not assert database constraints or RLS rules unless they are directly visible in the project files.
+This document reflects the frontend contract after the RLS/profile split migration.
 
 Current core entities used by the client:
 - `auth.users`
 - `profiles`
+- `public_profiles`
 - `events`
 - `participants`
 - `notification_settings`
@@ -38,26 +38,56 @@ Observed usage:
 
 ### Table: `profiles`
 
-Represents user profile data and entitlement state used by the client.
+Private profile and entitlement state. The frontend must not use this table as
+the source for other users' public display names.
 
 ### Observed fields
 
 - `id`
 - `name`
+- `role`
 - `plan`
 - `has_unlimited_access`
+- `is_banned`
+- `accepted_terms_at`
+- `accepted_privacy_at`
+- `accepted_legal_version`
+
+### Usage
+
+- edit current profile name
+- read current user's own access state
+- read and update current user's legal consent
+- resolve client-side event and invitation limits
+
+---
+
+## 4. Public Profiles
+
+### Table: `public_profiles`
+
+Public profile projection synchronized from `profiles`.
+
+### Observed fields
+
+- `id`
+- `name`
+- `created_at`
+- `updated_at`
 
 ### Usage
 
 - display user names
 - resolve creator names for events
 - resolve participant names
-- edit current profile name
-- resolve client-side event and invitation limits
+- resolve invite candidates
+
+Client code should read foreign/public names from `public_profiles`, not
+`profiles`.
 
 ---
 
-## 4. Events
+## 5. Events
 
 ### Table: `events`
 
@@ -75,6 +105,7 @@ Core entity representing an event.
 - `location_lng`
 - `activity_type`
 - `creator_id`
+- `visibility`
 
 ### Usage
 
@@ -88,7 +119,7 @@ Core entity representing an event.
 
 ---
 
-## 5. Participants
+## 6. Participants
 
 ### Table: `participants`
 
@@ -105,13 +136,17 @@ Represents the relationship between users and events.
 
 - track event membership
 - build joined events list
-- calculate participant count
+- calculate participant count through `get_visible_event_participant_counts`
 - render participant lists
 - generate join notifications
 
+Participant identities are only loaded when the current user is the event
+creator, a participant, or an admin. Public/anonymous screens should use counts
+without direct participant identity reads.
+
 ---
 
-## 6. Notification Settings
+## 7. Notification Settings
 
 ### Table: `notification_settings`
 
@@ -132,7 +167,7 @@ If no row exists:
 
 ---
 
-## 7. Support Requests
+## 8. Support Requests
 
 ### Table: `support_requests`
 
@@ -150,7 +185,7 @@ Stores user-submitted support messages.
 
 ---
 
-## 8. Event Invitations
+## 9. Event Invitations
 
 ### Table: `event_invitations`
 
@@ -181,7 +216,7 @@ Stores invitations sent by event creators to other users.
 
 ---
 
-## 9. Relationships
+## 10. Relationships
 
 Observed client-side relationship model:
 
@@ -202,7 +237,7 @@ Observed client-side relationship model:
 
 ---
 
-## 10. Realtime-Relevant Tables
+## 11. Realtime-Relevant Tables
 
 Supabase realtime is used on the following tables:
 
@@ -218,7 +253,18 @@ Supabase realtime is used on the following tables:
 
 ---
 
-## 11. Verification Boundaries
+## 12. RPC Contract Used By The Frontend
+
+- `get_my_profile_access()` returns the current user's profile/access summary.
+- `get_visible_event_participant_counts(target_event_ids uuid[])` returns safe participant counts.
+- `admin_list_profiles()` returns admin profile rows with names from `public_profiles`.
+- `admin_set_user_ban_state(...)` returns the updated admin profile row.
+- `admin_update_profile_access(...)` returns the updated admin profile row.
+- `admin_list_support_requests()` returns support requests with `user_name` from `public_profiles`.
+
+---
+
+## 13. Verification Boundaries
 
 The repository frontend confirms table usage and observed fields.
 
@@ -232,10 +278,11 @@ Those backend details should be documented from migrations, SQL dumps, or Supaba
 
 ---
 
-## 12. Summary
+## 14. Summary
 
 The current client-observed schema is centered on:
 - profiles
+- public profiles
 - events
 - participants
 - notification settings

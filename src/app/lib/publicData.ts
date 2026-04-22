@@ -32,6 +32,8 @@ export async function fetchPublicProfileNameMap(
   }, {});
 }
 
+// Counts are intentionally loaded through RPC so public/anonymous views do not
+// need direct access to participant identities.
 export async function fetchParticipantCounts(
   eventIds: Array<string | null | undefined>
 ): Promise<Record<string, number>> {
@@ -96,6 +98,8 @@ export async function fetchJoinedEventIdsForUser(userId: string | null): Promise
     .filter((eventId): eventId is string => typeof eventId === 'string' && eventId.trim().length > 0));
 }
 
+// Caller must only use this when the current user is allowed to see identities:
+// event creator, event participant, or admin. RLS is still the final guard.
 export async function fetchParticipantIdentityRows(
   eventId: string
 ): Promise<Array<{ event_id: string; user_id: string }>> {

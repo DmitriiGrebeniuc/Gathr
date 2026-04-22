@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
 import { feedback } from '../lib/feedback';
-import { fetchPublicProfileNameMap } from '../lib/publicData';
+import { fetchParticipantCounts, fetchPublicProfileNameMap } from '../lib/publicData';
 
 type SummaryValue = number | null;
 type AdminPage = 'overview' | 'events' | 'users' | 'support';
@@ -274,22 +274,9 @@ export function AdminScreen({
             new Set(baseEvents.map((event) => event.creator_id).filter(Boolean))
           ) as string[];
 
-          const participantCountsResult = await supabase.from('participants').select('event_id');
-
-          const participantCountsMap: Record<string, number> = {};
-
-          if (!participantCountsResult.error) {
-            ((participantCountsResult.data as { event_id: string | null }[] | null) || []).forEach(
-              (participant) => {
-                if (!participant.event_id) {
-                  return;
-                }
-
-                participantCountsMap[participant.event_id] =
-                  (participantCountsMap[participant.event_id] || 0) + 1;
-              }
-            );
-          }
+          const participantCountsMap = await fetchParticipantCounts(
+            baseEvents.map((event) => event.id)
+          );
 
           const creatorNameMapRaw =
             creatorIds.length > 0 ? await fetchPublicProfileNameMap(creatorIds) : {};
@@ -318,10 +305,9 @@ export function AdminScreen({
 
           setModerationEvents(normalizedModerationEvents);
           setModerationUnavailable(
-            !!participantCountsResult.error ||
-              (creatorIds.length > 0 &&
-                Object.keys(creatorNameMap).length === 0 &&
-                baseEvents.some((event) => !!event.creator_id))
+            creatorIds.length > 0 &&
+              Object.keys(creatorNameMap).length === 0 &&
+              baseEvents.some((event) => !!event.creator_id)
           );
         } else {
           setModerationEvents([]);
@@ -625,17 +611,6 @@ export function AdminScreen({
 
       if (invitationsError) {
         console.error('Admin delete event invitations error:', invitationsError);
-        feedback.error(translate('admin.deleteEventFailed'));
-        return;
-      }
-
-      const { error: participantsError } = await supabase
-        .from('participants')
-        .delete()
-        .eq('event_id', event.id);
-
-      if (participantsError) {
-        console.error('Admin delete participants error:', participantsError);
         feedback.error(translate('admin.deleteEventFailed'));
         return;
       }

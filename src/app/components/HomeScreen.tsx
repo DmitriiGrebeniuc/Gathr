@@ -13,11 +13,11 @@ import {
 import { LoadingLogo } from './LoadingLogo';
 import { normalizeCityName } from '../lib/locationCity';
 import {
+  fetchMyProfileAccessSummary,
   fetchJoinedEventIdsForUser,
   fetchParticipantCounts,
   fetchPublicProfileNameMap,
 } from '../lib/publicData';
-
 type EventItem = {
   id: string;
   title: string;
@@ -144,25 +144,15 @@ export function HomeScreen({
       } = await supabase.auth.getUser();
 
       if (userError) {
-        console.error('Ошибка получения пользователя:', userError);
+        console.error('Failed to load current user:', userError);
       }
 
       const userId = user?.id ?? null;
       setCurrentUserId(userId);
 
       if (userId) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', userId)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error('Ошибка загрузки профиля пользователя:', profileError);
-          setCurrentUserName(translate('common.user'));
-        } else {
-          setCurrentUserName(profileData?.name || translate('common.user'));
-        }
+        const profileData = await fetchMyProfileAccessSummary();
+        setCurrentUserName(profileData?.name || translate('common.user'));
       } else {
         setCurrentUserName(translate('common.user'));
       }
@@ -174,7 +164,7 @@ export function HomeScreen({
         .range(0, SERVER_BATCH_SIZE - 1);
 
       if (eventsError) {
-        console.error('Ошибка загрузки событий:', eventsError);
+        console.error('Failed to load events:', eventsError);
         setEvents([]);
         setServerOffset(0);
         setHasMoreServerEvents(false);
@@ -251,7 +241,7 @@ export function HomeScreen({
         .range(from, to);
 
       if (moreEventsError) {
-        console.error('Ошибка догрузки событий:', moreEventsError);
+        console.error('Failed to load more events:', moreEventsError);
         return;
       }
 
@@ -1153,6 +1143,4 @@ export function HomeScreen({
     </div>
   );
 }
-
-
 

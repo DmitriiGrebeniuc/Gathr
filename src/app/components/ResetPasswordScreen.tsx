@@ -5,6 +5,7 @@ import { TouchButton } from './TouchButton';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
+import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 
 export function ResetPasswordScreen({
     onNavigate,
@@ -123,7 +124,10 @@ export function ResetPasswordScreen({
                                 type="password"
                                 placeholder={translate('resetPassword.newPasswordPlaceholder')}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) =>
+                                    setPassword(limitText(e.target.value, INPUT_LIMITS.password))
+                                }
+                                maxLength={INPUT_LIMITS.password}
                                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                                 style={{ backgroundColor: 'var(--card)' }}
                             />
@@ -141,7 +145,12 @@ export function ResetPasswordScreen({
                                 type="password"
                                 placeholder={translate('resetPassword.confirmPasswordPlaceholder')}
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                onChange={(e) =>
+                                    setConfirmPassword(
+                                        limitText(e.target.value, INPUT_LIMITS.password)
+                                    )
+                                }
+                                maxLength={INPUT_LIMITS.password}
                                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                                 style={{ backgroundColor: 'var(--card)' }}
                             />

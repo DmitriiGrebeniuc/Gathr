@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LoadScriptNext } from '@react-google-maps/api';
 import { useLanguage } from '../context/LanguageContext';
 import { extractCityFromAddressComponents } from '../lib/locationCity';
+import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 
 const GOOGLE_LIBRARIES: ('places')[] = ['places'];
 
@@ -55,7 +56,7 @@ function PlainLocationInput({
       placeholder={placeholder}
       value={value.address}
       onChange={(e) => {
-        const nextAddress = e.target.value;
+        const nextAddress = limitText(e.target.value, INPUT_LIMITS.eventLocation);
 
         if (!nextAddress.trim()) {
           onChange(EMPTY_LOCATION);
@@ -72,6 +73,7 @@ function PlainLocationInput({
         });
       }}
       disabled={disabled}
+      maxLength={INPUT_LIMITS.eventLocation}
       autoComplete="off"
       className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
       style={{
@@ -120,7 +122,10 @@ function GoogleAutocompleteInput({
     autocompleteRef.current.addListener('place_changed', () => {
       const place = autocompleteRef.current?.getPlace?.();
 
-      const address = place?.formatted_address || inputRef.current?.value || '';
+      const address = limitText(
+        place?.formatted_address || inputRef.current?.value || '',
+        INPUT_LIMITS.eventLocation
+      );
       const placeId = place?.place_id || null;
       const lat =
         typeof place?.geometry?.location?.lat === 'function'
@@ -149,15 +154,16 @@ function GoogleAutocompleteInput({
   }, [onChange]);
 
   const handleManualChange = (nextAddress: string) => {
-    setInputValue(nextAddress);
+    const limitedAddress = limitText(nextAddress, INPUT_LIMITS.eventLocation);
+    setInputValue(limitedAddress);
 
-    if (!nextAddress.trim()) {
+    if (!limitedAddress.trim()) {
       onChange(EMPTY_LOCATION);
       return;
     }
 
     onChange({
-      address: nextAddress,
+      address: limitedAddress,
       placeId: null,
       lat: null,
       lng: null,
@@ -174,6 +180,7 @@ function GoogleAutocompleteInput({
       value={inputValue}
       onChange={(e) => handleManualChange(e.target.value)}
       disabled={disabled}
+      maxLength={INPUT_LIMITS.eventLocation}
       autoComplete="off"
       className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
       style={{

@@ -12,6 +12,7 @@ import {
 } from '../constants/activityTypes';
 import { LoadingLogo } from './LoadingLogo';
 import { normalizeCityName } from '../lib/locationCity';
+import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 import {
   fetchMyProfileAccessSummary,
   fetchJoinedEventIdsForUser,
@@ -986,7 +987,10 @@ export function HomeScreen({
                 <input
                   type="text"
                   value={citySearchQuery}
-                  onChange={(event) => setCitySearchQuery(event.target.value)}
+                  onChange={(event) =>
+                    setCitySearchQuery(limitText(event.target.value, INPUT_LIMITS.search))
+                  }
+                  maxLength={INPUT_LIMITS.search}
                   placeholder={translate('home.citySearchPlaceholder')}
                   autoComplete="off"
                   className="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"

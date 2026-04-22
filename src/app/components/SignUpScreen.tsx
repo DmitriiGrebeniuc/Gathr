@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
 import { Check } from 'lucide-react';
 import { CURRENT_LEGAL_VERSION } from '../constants/legalDocuments';
+import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 
 export function SignUpScreen({
   onNavigate,
@@ -22,17 +23,21 @@ export function SignUpScreen({
   const { translate } = useLanguage();
 
   const handleSignUp = async () => {
-    if (!name.trim()) {
+    const nextName = trimAndLimitText(name, INPUT_LIMITS.profileName);
+    const nextEmail = trimAndLimitText(email, INPUT_LIMITS.email);
+    const nextPassword = limitText(password.trim(), INPUT_LIMITS.password);
+
+    if (!nextName) {
       feedback.warning(translate('signup.enterName'));
       return;
     }
 
-    if (!email.trim()) {
+    if (!nextEmail) {
       feedback.warning(translate('signup.enterEmail'));
       return;
     }
 
-    if (!password.trim()) {
+    if (!nextPassword) {
       feedback.warning(translate('signup.enterPassword'));
       return;
     }
@@ -46,11 +51,11 @@ export function SignUpScreen({
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password: password.trim(),
+        email: nextEmail,
+        password: nextPassword,
         options: {
           data: {
-            name: name.trim(),
+            name: nextName,
             accepted_terms_at: new Date().toISOString(),
             accepted_privacy_at: new Date().toISOString(),
             accepted_legal_version: CURRENT_LEGAL_VERSION,
@@ -112,7 +117,8 @@ export function SignUpScreen({
                 type="text"
                 placeholder={translate('signup.namePlaceholder')}
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(limitText(e.target.value, INPUT_LIMITS.profileName))}
+                maxLength={INPUT_LIMITS.profileName}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{ backgroundColor: 'var(--card)' }}
               />
@@ -130,7 +136,8 @@ export function SignUpScreen({
                 type="email"
                 placeholder={translate('signup.emailPlaceholder')}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(limitText(e.target.value, INPUT_LIMITS.email))}
+                maxLength={INPUT_LIMITS.email}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{ backgroundColor: 'var(--card)' }}
               />
@@ -148,7 +155,8 @@ export function SignUpScreen({
                 type="password"
                 placeholder={translate('signup.passwordPlaceholder')}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => setPassword(limitText(e.target.value, INPUT_LIMITS.password))}
+                maxLength={INPUT_LIMITS.password}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{ backgroundColor: 'var(--card)' }}
               />

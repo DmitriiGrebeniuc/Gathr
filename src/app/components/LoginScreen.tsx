@@ -6,6 +6,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
+import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 
 export function LoginScreen({
   onNavigate,
@@ -39,12 +40,15 @@ export function LoginScreen({
   };
 
   const handleLogin = async () => {
-    if (!email.trim()) {
+    const nextEmail = trimAndLimitText(email, INPUT_LIMITS.email);
+    const nextPassword = limitText(password.trim(), INPUT_LIMITS.password);
+
+    if (!nextEmail) {
       feedback.warning(translate('login.enterEmail'));
       return;
     }
 
-    if (!password.trim()) {
+    if (!nextPassword) {
       feedback.warning(translate('login.enterPassword'));
       return;
     }
@@ -53,8 +57,8 @@ export function LoginScreen({
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
+        email: nextEmail,
+        password: nextPassword,
       });
 
       if (error) {
@@ -78,7 +82,9 @@ export function LoginScreen({
   };
 
   const handleForgotPassword = async () => {
-    if (!email.trim()) {
+    const nextEmail = trimAndLimitText(email, INPUT_LIMITS.email);
+
+    if (!nextEmail) {
       feedback.warning(translate('login.enterEmail'));
       return;
     }
@@ -86,7 +92,7 @@ export function LoginScreen({
     setResetLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      const { error } = await supabase.auth.resetPasswordForEmail(nextEmail, {
         redirectTo: 'https://gathr-app.site',
       });
 
@@ -175,7 +181,8 @@ export function LoginScreen({
                 type="email"
                 placeholder={translate('login.emailPlaceholder')}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(limitText(e.target.value, INPUT_LIMITS.email))}
+                maxLength={INPUT_LIMITS.email}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{ backgroundColor: 'var(--card)' }}
               />
@@ -193,7 +200,8 @@ export function LoginScreen({
                 type="password"
                 placeholder={translate('login.passwordPlaceholder')}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => setPassword(limitText(e.target.value, INPUT_LIMITS.password))}
+                maxLength={INPUT_LIMITS.password}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                 style={{ backgroundColor: 'var(--card)' }}
               />

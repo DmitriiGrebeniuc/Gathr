@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
 import { EventLocationMap } from './EventLocationMap';
 import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
+import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 import { feedback } from '../lib/feedback';
 import { createEventWithCreator } from '../lib/publicData';
 
@@ -79,7 +80,11 @@ export function CreateEventScreen({
   };
 
   const handleCreateEvent = async () => {
-    if (!title.trim()) {
+    const nextTitle = trimAndLimitText(title, INPUT_LIMITS.eventTitle);
+    const nextDescription = trimAndLimitText(description, INPUT_LIMITS.eventDescription);
+    const nextLocation = trimAndLimitText(location.address, INPUT_LIMITS.eventLocation);
+
+    if (!nextTitle) {
       feedback.warning(translate('create.enterTitle'));
       return;
     }
@@ -164,10 +169,10 @@ export function CreateEventScreen({
       }
 
       const { data: createdEvent, error } = await createEventWithCreator({
-        title: title.trim(),
-        description: description.trim() || null,
+        title: nextTitle,
+        description: nextDescription || null,
         dateTime: dateTime.toISOString(),
-        location: location.address.trim() || null,
+        location: nextLocation || null,
         locationPlaceId: location.placeId,
         locationLat: location.lat,
         locationLng: location.lng,
@@ -245,7 +250,8 @@ export function CreateEventScreen({
               type="text"
               placeholder={translate('create.eventTitlePlaceholder')}
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(limitText(e.target.value, INPUT_LIMITS.eventTitle))}
+              maxLength={INPUT_LIMITS.eventTitle}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
               style={{
                 backgroundColor: 'var(--card)',
@@ -302,7 +308,10 @@ export function CreateEventScreen({
               placeholder={translate('create.descriptionPlaceholder')}
               rows={4}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) =>
+                setDescription(limitText(e.target.value, INPUT_LIMITS.eventDescription))
+              }
+              maxLength={INPUT_LIMITS.eventDescription}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors resize-none"
               style={{
                 backgroundColor: 'var(--card)',

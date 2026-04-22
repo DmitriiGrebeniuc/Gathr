@@ -6,6 +6,7 @@ import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../const
 import { useLanguage } from '../context/LanguageContext';
 import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
 import { EventLocationMap } from './EventLocationMap';
+import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 import { feedback } from '../lib/feedback';
 
 export function EditEventScreen({
@@ -106,7 +107,11 @@ export function EditEventScreen({
       return;
     }
 
-    if (!title.trim()) {
+    const nextTitle = trimAndLimitText(title, INPUT_LIMITS.eventTitle);
+    const nextDescription = trimAndLimitText(description, INPUT_LIMITS.eventDescription);
+    const nextLocation = trimAndLimitText(location.address, INPUT_LIMITS.eventLocation);
+
+    if (!nextTitle) {
       feedback.warning(translate('edit.enterTitle'));
       return;
     }
@@ -146,10 +151,10 @@ export function EditEventScreen({
       const { data: updatedEvent, error } = await supabase
         .from('events')
         .update({
-          title: title.trim(),
-          description: description.trim() || null,
+          title: nextTitle,
+          description: nextDescription || null,
           date_time: dateTime.toISOString(),
-          location: location.address.trim() || null,
+          location: nextLocation || null,
           location_place_id: location.placeId,
           location_lat: location.lat,
           location_lng: location.lng,
@@ -224,7 +229,8 @@ export function EditEventScreen({
               type="text"
               placeholder={translate('edit.eventTitlePlaceholder')}
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(limitText(e.target.value, INPUT_LIMITS.eventTitle))}
+              maxLength={INPUT_LIMITS.eventTitle}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
               style={{
                 backgroundColor: 'var(--card)',
@@ -281,7 +287,10 @@ export function EditEventScreen({
               placeholder={translate('edit.descriptionPlaceholder')}
               rows={4}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) =>
+                setDescription(limitText(e.target.value, INPUT_LIMITS.eventDescription))
+              }
+              maxLength={INPUT_LIMITS.eventDescription}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors resize-none"
               style={{
                 backgroundColor: 'var(--card)',

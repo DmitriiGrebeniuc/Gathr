@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
+import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 
 export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const { translate } = useLanguage();
@@ -13,12 +14,15 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
   const [sending, setSending] = useState(false);
 
   const handleSubmit = async () => {
-    if (!subject.trim()) {
+    const nextSubject = trimAndLimitText(subject, INPUT_LIMITS.supportSubject);
+    const nextMessage = trimAndLimitText(message, INPUT_LIMITS.supportMessage);
+
+    if (!nextSubject) {
       feedback.warning(translate('support.enterSubject'));
       return;
     }
 
-    if (!message.trim()) {
+    if (!nextMessage) {
       feedback.warning(translate('support.enterMessage'));
       return;
     }
@@ -40,8 +44,8 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
       const { error } = await supabase.from('support_requests').insert([
         {
           user_id: user.id,
-          subject: subject.trim(),
-          message: message.trim(),
+          subject: nextSubject,
+          message: nextMessage,
         },
       ]);
 
@@ -98,7 +102,10 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
                   type="text"
                   placeholder={translate('support.subjectPlaceholder')}
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  onChange={(e) =>
+                    setSubject(limitText(e.target.value, INPUT_LIMITS.supportSubject))
+                  }
+                  maxLength={INPUT_LIMITS.supportSubject}
                   className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                   style={{
                     backgroundColor: 'var(--surface-strong)',
@@ -116,7 +123,10 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
                   rows={6}
                   placeholder={translate('support.messagePlaceholder')}
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) =>
+                    setMessage(limitText(e.target.value, INPUT_LIMITS.supportMessage))
+                  }
+                  maxLength={INPUT_LIMITS.supportMessage}
                   className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors resize-none"
                   style={{
                     backgroundColor: 'var(--surface-strong)',

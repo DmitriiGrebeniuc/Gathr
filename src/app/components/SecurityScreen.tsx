@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
+import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 
 export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const { translate } = useLanguage();
@@ -93,7 +94,10 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
                   type="password"
                   placeholder={translate('security.newPasswordPlaceholder')}
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={(e) =>
+                    setNewPassword(limitText(e.target.value, INPUT_LIMITS.password))
+                  }
+                  maxLength={INPUT_LIMITS.password}
                   className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                   style={{
                     backgroundColor: 'var(--surface-strong)',
@@ -111,7 +115,10 @@ export function SecurityScreen({ onNavigate }: { onNavigate: (screen: string) =>
                   type="password"
                   placeholder={translate('security.confirmPasswordPlaceholder')}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) =>
+                    setConfirmPassword(limitText(e.target.value, INPUT_LIMITS.password))
+                  }
+                  maxLength={INPUT_LIMITS.password}
                   className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors"
                   style={{
                     backgroundColor: 'var(--surface-strong)',

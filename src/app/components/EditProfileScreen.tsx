@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
 import { fetchMyProfileAccessSummary, updateMyProfileName } from '../lib/publicData';
+import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 
 export function EditProfileScreen({
   onNavigate,
@@ -53,7 +54,7 @@ export function EditProfileScreen({
   }, []);
 
   const getInitials = () => {
-    const trimmedName = name.trim();
+    const trimmedName = trimAndLimitText(name, INPUT_LIMITS.profileName);
 
     if (trimmedName) {
       const parts = trimmedName.split(' ').filter(Boolean).slice(0, 2);
@@ -152,7 +153,8 @@ export function EditProfileScreen({
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(limitText(e.target.value, INPUT_LIMITS.profileName))}
+                maxLength={INPUT_LIMITS.profileName}
                 disabled={loading || saving}
                 className="w-full px-4 py-3 rounded-xl border transition-all outline-none focus:border-accent"
                 style={{

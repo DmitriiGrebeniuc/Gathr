@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
 import { feedback } from '../lib/feedback';
 import { fetchParticipantCounts, fetchPublicProfileNameMap } from '../lib/publicData';
+import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 
 type SummaryValue = number | null;
 type AdminPage = 'overview' | 'events' | 'users' | 'support';
@@ -1048,7 +1049,8 @@ export function AdminScreen({
               type="text"
               placeholder={translate('admin.creatorFilterPlaceholder')}
               value={creatorFilter}
-              onChange={(e) => setCreatorFilter(e.target.value)}
+              onChange={(e) => setCreatorFilter(limitText(e.target.value, INPUT_LIMITS.search))}
+              maxLength={INPUT_LIMITS.search}
               className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
               style={{
                 backgroundColor: 'var(--surface-strong)',
@@ -1275,7 +1277,8 @@ export function AdminScreen({
                 type="text"
                 placeholder={translate('admin.userSearchPlaceholder')}
                 value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
+                onChange={(e) => setUserSearch(limitText(e.target.value, INPUT_LIMITS.search))}
+                maxLength={INPUT_LIMITS.search}
                 className="w-full px-4 py-3 rounded-xl bg-card border border-border focus:border-accent outline-none transition-colors mb-4"
                 style={{
                   backgroundColor: 'var(--surface-strong)',

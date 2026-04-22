@@ -482,6 +482,31 @@ export function AdminScreen({
     loadAdminOverview();
   }, [language]);
 
+  useEffect(() => {
+    if (activePage !== 'support') {
+      return;
+    }
+
+    const supportRequestsChannel = supabase
+      .channel('admin-support-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'support_requests',
+        },
+        async () => {
+          await loadAdminOverview();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(supportRequestsChannel);
+    };
+  }, [activePage, language]);
+
   const formatDate = (dateString?: string | null) => {
     if (!dateString) {
       return translate('admin.notAvailable');

@@ -9,11 +9,15 @@ import { fetchParticipantCounts, fetchPublicProfileNameMap } from '../lib/public
 type SummaryValue = number | null;
 type AdminPage = 'overview' | 'events' | 'users' | 'support';
 type SupportRequestStatus = 'new' | 'in_progress' | 'resolved';
+type SupportStatusFilter = 'all' | SupportRequestStatus;
+
+const ADMIN_EVENTS_PAGE_SIZE = 10;
 
 type EventPreview = {
   id: string;
   title: string;
   date_time: string | null;
+  created_at?: string | null;
   location: string | null;
 };
 
@@ -22,6 +26,7 @@ type AdminModerationEvent = {
   title: string;
   description: string | null;
   date_time: string | null;
+  created_at: string | null;
   location: string | null;
   location_lat: number | null;
   location_lng: number | null;
@@ -104,16 +109,20 @@ const adminSegmentedStyle = {
 
 export function AdminScreen({
   onNavigate,
+  initialPage,
+  initialSupportStatus,
 }: {
   onNavigate: (
     screen: string,
     data?: any,
     customDirection?: 'forward' | 'back' | 'up' | 'down'
   ) => void;
+  initialPage?: AdminPage;
+  initialSupportStatus?: SupportStatusFilter;
 }) {
   const { language, translate } = useLanguage();
   const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
-  const [activePage, setActivePage] = useState<AdminPage>('overview');
+  const [activePage, setActivePage] = useState<AdminPage>(initialPage || 'overview');
   const [summary, setSummary] = useState<AdminSummary>(INITIAL_SUMMARY);
   const [latestEvents, setLatestEvents] = useState<EventPreview[]>([]);
   const [moderationEvents, setModerationEvents] = useState<AdminModerationEvent[]>([]);
@@ -127,6 +136,11 @@ export function AdminScreen({
     []
   );
   const [supportRequests, setSupportRequests] = useState<SupportRequestPreview[]>([]);
+  const [supportStatusFilter, setSupportStatusFilter] = useState<SupportStatusFilter>(
+    initialSupportStatus || 'all'
+  );
+  const [visibleModerationEventsCount, setVisibleModerationEventsCount] =
+    useState(ADMIN_EVENTS_PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [eventsUnavailable, setEventsUnavailable] = useState(false);
   const [moderationUnavailable, setModerationUnavailable] = useState(false);
@@ -154,6 +168,18 @@ export function AdminScreen({
 
     return date.getTime() < Date.now();
   };
+
+  useEffect(() => {
+    if (initialPage) {
+      setActivePage(initialPage);
+    }
+  }, [initialPage]);
+
+  useEffect(() => {
+    if (initialSupportStatus) {
+      setSupportStatusFilter(initialSupportStatus);
+    }
+  }, [initialSupportStatus]);
 
   const normalizeSupportStatus = (value: unknown): SupportRequestStatus => {
     if (value === 'in_progress' || value === 'resolved') {
@@ -203,15 +229,15 @@ export function AdminScreen({
           supabase.from('support_requests').select('*', { count: 'exact', head: true }),
           supabase
             .from('events')
-            .select('id, title, date_time, location')
-            .order('date_time', { ascending: false })
+            .select('id, title, date_time, created_at, location')
+            .order('created_at', { ascending: false })
             .limit(5),
           supabase
             .from('events')
             .select(
-              'id, title, description, date_time, location, location_lat, location_lng, creator_id, activity_type'
+              'id, title, description, date_time, created_at, location, location_lat, location_lng, creator_id, activity_type'
             )
-            .order('date_time', { ascending: false }),
+            .order('created_at', { ascending: false }),
           supabase
             .from('event_invitations')
             .select(`
@@ -292,6 +318,7 @@ export function AdminScreen({
             title: event.title || translate('common.event'),
             description: event.description ?? null,
             date_time: event.date_time ?? null,
+            created_at: event.created_at ?? null,
             location: event.location ?? null,
             location_lat: typeof event.location_lat === 'number' ? event.location_lat : null,
             location_lng: typeof event.location_lng === 'number' ? event.location_lng : null,
@@ -565,6 +592,29 @@ export function AdminScreen({
 
     return matchesTime && matchesCreator && matchesActivity;
   });
+
+  const visibleModerationEvents = filteredModerationEvents.slice(
+    0,
+    visibleModerationEventsCount
+  );
+  const canLoadMoreModerationEvents =
+    visibleModerationEventsCount < filteredModerationEvents.length;
+
+  useEffect(() => {
+    setVisibleModerationEventsCount(ADMIN_EVENTS_PAGE_SIZE);
+  }, [activityFilter, creatorFilter, timeFilter]);
+
+  const supportStatusFilters: Array<{ key: SupportStatusFilter; label: string }> = [
+    { key: 'all', label: translate('home.all') },
+    { key: 'new', label: translate('admin.supportStatusNew') },
+    { key: 'in_progress', label: translate('admin.supportStatusInProgress') },
+    { key: 'resolved', label: translate('admin.supportStatusResolved') },
+  ];
+
+  const filteredSupportRequests =
+    supportStatusFilter === 'all'
+      ? supportRequests
+      : supportRequests.filter((request) => request.status === supportStatusFilter);
 
   const handleViewEventDetails = (event: AdminModerationEvent) => {
     onNavigate(
@@ -859,19 +909,6 @@ export function AdminScreen({
             })}
           </div>
 
-          <div
-            className="rounded-xl border p-5"
-            style={{
-              borderColor: 'var(--accent-border-muted)',
-              backgroundColor: 'var(--card)',
-            }}
-          >
-            <h3 className="mb-2">{translate('admin.enabledTitle')}</h3>
-            <p className="text-sm text-muted-foreground">
-              {translate('admin.enabledDescription')}
-            </p>
-          </div>
-
           {activePage === 'overview' && (
             <>
               <div className="grid grid-cols-2 gap-3">
@@ -1048,7 +1085,7 @@ export function AdminScreen({
 
             {!loading && !moderationUnavailable && filteredModerationEvents.length > 0 && (
               <div className="space-y-3">
-                {filteredModerationEvents.map((event) => {
+                {visibleModerationEvents.map((event) => {
                   const activityMeta = getActivityTypeMeta(event.activity_type || 'other', language);
 
                   return (
@@ -1129,6 +1166,22 @@ export function AdminScreen({
                     </div>
                   );
                 })}
+                {canLoadMoreModerationEvents && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleModerationEventsCount((prev) => prev + ADMIN_EVENTS_PAGE_SIZE)
+                    }
+                    className="w-full rounded-lg px-4 py-3 text-sm transition-opacity"
+                    style={{
+                      backgroundColor: 'var(--surface-interactive)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--accent)',
+                    }}
+                  >
+                    {translate('home.loadMore')}
+                  </button>
+                )}
               </div>
             )}
             </div>
@@ -1457,6 +1510,33 @@ export function AdminScreen({
                 <h3>{translate('admin.supportPageTitle')}</h3>
               </div>
 
+              <div
+                className="rounded-xl border p-1 grid grid-cols-4 gap-1 mb-4"
+                style={adminSegmentedStyle}
+              >
+                {supportStatusFilters.map((filter) => {
+                  const isActive = supportStatusFilter === filter.key;
+
+                  return (
+                    <button
+                      key={filter.key}
+                      type="button"
+                      onClick={() => setSupportStatusFilter(filter.key)}
+                      className="rounded-lg px-2 py-2 text-[11px] transition-colors"
+                      style={{
+                        backgroundColor: isActive ? 'var(--accent-soft)' : 'transparent',
+                        border: isActive
+                          ? '1px solid var(--accent-border)'
+                          : '1px solid transparent',
+                        color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
+                      }}
+                    >
+                      {filter.label}
+                    </button>
+                  );
+                })}
+              </div>
+
               {loading && (
                 <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
               )}
@@ -1467,15 +1547,15 @@ export function AdminScreen({
                 </p>
               )}
 
-              {!loading && !supportUnavailable && supportRequests.length === 0 && (
+              {!loading && !supportUnavailable && filteredSupportRequests.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   {translate('admin.noSupportRequests')}
                 </p>
               )}
 
-              {!loading && !supportUnavailable && supportRequests.length > 0 && (
+              {!loading && !supportUnavailable && filteredSupportRequests.length > 0 && (
                 <div className="space-y-3">
-                  {supportRequests.map((request) => (
+                  {filteredSupportRequests.map((request) => (
                     (() => {
                       const statusMeta = getSupportStatusMeta(request.status);
                       const isUpdating = updatingSupportRequestId === request.id;

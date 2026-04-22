@@ -871,7 +871,27 @@ export default function App() {
               )}
               {currentScreen === 'security' && <SecurityScreen onNavigate={handleNavigate} />}
               {currentScreen === 'support' && <SupportScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'admin' && <AdminScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'admin' && (
+                <AdminScreen
+                  onNavigate={handleNavigate}
+                  initialPage={
+                    selectedEvent?.adminPage === 'support' ||
+                    selectedEvent?.adminPage === 'events' ||
+                    selectedEvent?.adminPage === 'users' ||
+                    selectedEvent?.adminPage === 'overview'
+                      ? selectedEvent.adminPage
+                      : undefined
+                  }
+                  initialSupportStatus={
+                    selectedEvent?.supportStatus === 'new' ||
+                    selectedEvent?.supportStatus === 'in_progress' ||
+                    selectedEvent?.supportStatus === 'resolved' ||
+                    selectedEvent?.supportStatus === 'all'
+                      ? selectedEvent.supportStatus
+                      : undefined
+                  }
+                />
+              )}
               {currentScreen === 'language' && (
                 <LanguageScreen onNavigate={handleNavigate} />
               )}

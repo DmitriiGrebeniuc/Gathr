@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type UIEvent } from 'react';
 import { motion } from 'motion/react';
-import { Check, Palette } from 'lucide-react';
+import { Check, LifeBuoy, Palette } from 'lucide-react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
@@ -64,6 +64,8 @@ export function HomeScreen({
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>('User');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [openSupportTicketCount, setOpenSupportTicketCount] = useState(0);
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(LOCAL_BATCH_SIZE);
   const [serverOffset, setServerOffset] = useState(0);
@@ -124,6 +126,24 @@ export function HomeScreen({
     return date.getTime() < Date.now();
   };
 
+  const refreshOpenSupportTicketCount = async () => {
+    try {
+      const { data, error } = await supabase.rpc('admin_list_support_requests');
+
+      if (error) {
+        console.error('Failed to load admin support ticket count:', error);
+        setOpenSupportTicketCount(0);
+        return;
+      }
+
+      const rows = (data as Array<{ status?: string | null }> | null) || [];
+      setOpenSupportTicketCount(rows.filter((row) => row.status === 'new').length);
+    } catch (error) {
+      console.error('Unexpected admin support ticket count error:', error);
+      setOpenSupportTicketCount(0);
+    }
+  };
+
   const refreshParticipantCounts = async () => {
     try {
       const eventIds = eventsRef.current.map((event) => event.id);
@@ -167,8 +187,18 @@ export function HomeScreen({
       if (userId) {
         const profileData = await fetchMyProfileAccessSummary();
         setCurrentUserName(profileData?.name || translate('common.user'));
+        const nextIsAdmin = profileData?.role === 'admin';
+        setIsAdmin(nextIsAdmin);
+
+        if (nextIsAdmin) {
+          await refreshOpenSupportTicketCount();
+        } else {
+          setOpenSupportTicketCount(0);
+        }
       } else {
         setCurrentUserName(translate('common.user'));
+        setIsAdmin(false);
+        setOpenSupportTicketCount(0);
       }
 
       const { data: eventsData, error: eventsError } = await supabase
@@ -539,11 +569,29 @@ export function HomeScreen({
       )
       .subscribe();
 
+    const supportRequestsChannel = supabase
+      .channel('home-admin-support-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'support_requests',
+        },
+        async () => {
+          if (isAdmin) {
+            await refreshOpenSupportTicketCount();
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(eventsChannel);
       supabase.removeChannel(participantsChannel);
+      supabase.removeChannel(supportRequestsChannel);
     };
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     setVisibleCount(LOCAL_BATCH_SIZE);
@@ -654,6 +702,48 @@ export function HomeScreen({
           >
             <Palette size={isHeaderCompact ? 16 : 18} strokeWidth={2} />
           </motion.button>
+
+          {isAdmin && (
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              animate={{
+                width: isHeaderCompact ? 36 : 40,
+                height: isHeaderCompact ? 36 : 40,
+              }}
+              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+              onClick={() =>
+                onNavigate('admin', {
+                  adminPage: 'support',
+                  supportStatus: 'new',
+                })
+              }
+              className="relative rounded-full flex items-center justify-center border shrink-0"
+              style={{
+                backgroundColor:
+                  openSupportTicketCount > 0 ? 'var(--accent-soft)' : 'var(--primary)',
+                borderColor:
+                  openSupportTicketCount > 0 ? 'var(--accent-border-strong)' : 'var(--border)',
+                color:
+                  openSupportTicketCount > 0 ? 'var(--accent)' : 'var(--foreground-strong)',
+              }}
+              title={translate('admin.supportRequests')}
+              aria-label={translate('admin.supportRequests')}
+            >
+              <LifeBuoy size={isHeaderCompact ? 16 : 18} strokeWidth={2} />
+              {openSupportTicketCount > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 min-w-5 h-5 rounded-full px-1 flex items-center justify-center text-[10px] border"
+                  style={{
+                    backgroundColor: 'var(--accent)',
+                    borderColor: 'var(--background)',
+                    color: 'var(--accent-foreground)',
+                  }}
+                >
+                  {openSupportTicketCount > 99 ? '99+' : openSupportTicketCount}
+                </span>
+              )}
+            </motion.button>
+          )}
 
           <motion.button
             whileTap={{ scale: 0.92 }}

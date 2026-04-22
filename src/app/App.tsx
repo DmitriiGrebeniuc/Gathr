@@ -803,6 +803,7 @@ export default function App() {
                 <LoginScreen
                   onNavigate={handleNavigate}
                   onGoogleLogin={handleGoogleLogin}
+                  onAuthenticated={applySignedInNavigation}
                   backTarget={loginContext?.backScreen || 'welcome'}
                   backData={loginContext?.backData}
                 />

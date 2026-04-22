@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
@@ -9,11 +10,13 @@ import { feedback } from '../lib/feedback';
 export function LoginScreen({
   onNavigate,
   onGoogleLogin,
+  onAuthenticated,
   backTarget = 'welcome',
   backData,
 }: {
   onNavigate: (screen: string, data?: any) => void;
   onGoogleLogin: () => Promise<void>;
+  onAuthenticated: (user: User) => Promise<void>;
   backTarget?: string;
   backData?: any;
 }) {
@@ -49,7 +52,7 @@ export function LoginScreen({
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -59,6 +62,10 @@ export function LoginScreen({
         feedback.error(error.message || translate('login.failed'));
         setLoading(false);
         return;
+      }
+
+      if (data.user) {
+        await onAuthenticated(data.user);
       }
 
       return;

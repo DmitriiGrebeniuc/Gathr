@@ -1,5 +1,19 @@
 import { supabase } from '../../lib/supabase';
 
+export type CreateEventWithCreatorInput = {
+  title: string;
+  description: string | null;
+  dateTime: string;
+  location: string | null;
+  locationPlaceId: string | null;
+  locationLat: number | null;
+  locationLng: number | null;
+  city: string | null;
+  cityNormalized: string | null;
+  activityType: string;
+  visibility?: 'public' | 'private';
+};
+
 export async function fetchPublicProfileNameMap(
   ids: Array<string | null | undefined>
 ): Promise<Record<string, string>> {
@@ -150,5 +164,45 @@ export async function fetchMyProfileAccessSummary(): Promise<{
     plan: typeof row.plan === 'string' ? row.plan : null,
     has_unlimited_access:
       typeof row.has_unlimited_access === 'boolean' ? row.has_unlimited_access : null,
+  };
+}
+
+export async function updateMyProfileName(newName: string): Promise<{
+  data: { id: string; name: string | null } | null;
+  error: unknown;
+}> {
+  const { data, error } = await supabase
+    .rpc('update_my_profile_name', {
+      new_name: newName,
+    })
+    .maybeSingle();
+
+  return {
+    data: (data as { id: string; name: string | null } | null) || null,
+    error,
+  };
+}
+
+export async function createEventWithCreator(input: CreateEventWithCreatorInput): Promise<{
+  data: Record<string, any> | null;
+  error: unknown;
+}> {
+  const { data, error } = await supabase.rpc('create_event_with_creator', {
+    new_title: input.title,
+    new_description: input.description,
+    new_date_time: input.dateTime,
+    new_location: input.location,
+    new_location_place_id: input.locationPlaceId,
+    new_location_lat: input.locationLat,
+    new_location_lng: input.locationLng,
+    new_city: input.city,
+    new_city_normalized: input.cityNormalized,
+    new_activity_type: input.activityType,
+    new_visibility: input.visibility ?? 'public',
+  });
+
+  return {
+    data: (data as Record<string, any> | null) || null,
+    error,
   };
 }

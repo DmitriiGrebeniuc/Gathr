@@ -8,6 +8,7 @@ import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete
 import { EventLocationMap } from './EventLocationMap';
 import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
 import { feedback } from '../lib/feedback';
+import { createEventWithCreator } from '../lib/publicData';
 
 type MyProfileAccess = {
   id: string;
@@ -162,25 +163,19 @@ export function CreateEventScreen({
         }
       }
 
-      const { data: createdEvent, error } = await supabase
-        .from('events')
-        .insert([
-          {
-            title: title.trim(),
-            description: description.trim() || null,
-            date_time: dateTime.toISOString(),
-            location: location.address.trim() || null,
-            location_place_id: location.placeId,
-            location_lat: location.lat,
-            location_lng: location.lng,
-            city: location.city,
-            city_normalized: location.cityNormalized,
-            activity_type: activityType,
-            creator_id: user.id,
-          },
-        ])
-        .select()
-        .single();
+      const { data: createdEvent, error } = await createEventWithCreator({
+        title: title.trim(),
+        description: description.trim() || null,
+        dateTime: dateTime.toISOString(),
+        location: location.address.trim() || null,
+        locationPlaceId: location.placeId,
+        locationLat: location.lat,
+        locationLng: location.lng,
+        city: location.city,
+        cityNormalized: location.cityNormalized,
+        activityType,
+        visibility: 'public',
+      });
 
       if (error) {
         console.error('Ошибка создания события:', error);
@@ -189,16 +184,8 @@ export function CreateEventScreen({
         return;
       }
 
-      const { error: participantError } = await supabase.from('participants').insert([
-        {
-          user_id: user.id,
-          event_id: createdEvent.id,
-        },
-      ]);
-
-      if (participantError) {
-        console.error('Ошибка добавления создателя в participants:', participantError);
-        feedback.error(translate('create.creatorParticipantFailed'));
+      if (!createdEvent) {
+        feedback.error(translate('create.failed'));
         setLoading(false);
         return;
       }

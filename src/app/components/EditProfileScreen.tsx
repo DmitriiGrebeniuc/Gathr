@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
+import { fetchMyProfileAccessSummary, updateMyProfileName } from '../lib/publicData';
 
 export function EditProfileScreen({
   onNavigate,
@@ -36,18 +37,7 @@ export function EditProfileScreen({
         setUserId(user.id);
         setEmail(user.email ?? '');
 
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error('Ошибка загрузки профиля:', profileError);
-          setName('');
-          return;
-        }
-
+        const profile = await fetchMyProfileAccessSummary();
         setName(profile?.name ?? '');
       } catch (error) {
         console.error('Unexpected edit profile load error:', error);
@@ -106,12 +96,7 @@ export function EditProfileScreen({
     setSaving(true);
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
-          name: trimmedName,
-        });
+      const { error } = await updateMyProfileName(trimmedName);
 
       if (error) {
         console.error('Ошибка обновления профиля:', error);

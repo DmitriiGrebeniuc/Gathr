@@ -53,6 +53,7 @@ export function EventDetailsScreen({
   const [participants, setParticipants] = useState<any[]>([]);
   const [participantCount, setParticipantCount] = useState(event?.participantCount || 0);
   const [canViewParticipantIdentities, setCanViewParticipantIdentities] = useState(false);
+  const [participantAccessResolved, setParticipantAccessResolved] = useState(false);
 
   const autoJoinAttemptedRef = useRef(false);
 
@@ -180,6 +181,7 @@ export function EventDetailsScreen({
         setHasJoined(false);
         setIsCreator(false);
         setCanViewParticipantIdentities(false);
+        setParticipantAccessResolved(true);
         return;
       }
 
@@ -193,6 +195,7 @@ export function EventDetailsScreen({
       if (!eventData.id) {
         setHasJoined(false);
         setCanViewParticipantIdentities(creator || isAdmin);
+        setParticipantAccessResolved(true);
         return;
       }
 
@@ -212,11 +215,13 @@ export function EventDetailsScreen({
         setHasJoined(joined);
         setCanViewParticipantIdentities(creator || joined || isAdmin);
       }
+      setParticipantAccessResolved(true);
     } catch (error) {
       console.error('Unexpected event state error:', error);
       setHasJoined(false);
       setIsCreator(false);
       setCanViewParticipantIdentities(false);
+      setParticipantAccessResolved(true);
     }
   };
 
@@ -225,6 +230,7 @@ export function EventDetailsScreen({
     setResolvedBackTarget(event?.backTarget || 'home');
     setParticipantCount(event?.participantCount || 0);
     setCanViewParticipantIdentities(!!event?.canViewParticipantIdentities);
+    setParticipantAccessResolved(false);
     autoJoinAttemptedRef.current = false;
   }, [event, defaultEvent]);
 
@@ -352,6 +358,8 @@ export function EventDetailsScreen({
     }
 
     setHasJoined(true);
+    setCanViewParticipantIdentities(true);
+    setParticipantAccessResolved(true);
     await loadParticipants();
     return true;
   };
@@ -663,7 +671,14 @@ export function EventDetailsScreen({
                 {translate('details.participants')} ({participantCount})
               </button>
 
-              {canViewParticipantIdentities && participants.length > 0 ? (
+              {!participantAccessResolved ? (
+                <div
+                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
+                  style={{ backgroundColor: 'var(--card)' }}
+                >
+                  {translate('common.loading')}
+                </div>
+              ) : canViewParticipantIdentities && participants.length > 0 ? (
                 <button
                   onClick={() =>
                     onNavigate('participants', {

@@ -70,9 +70,19 @@ export function HomeScreen({
   const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const themePickerRef = useRef<HTMLDivElement | null>(null);
+  const eventsRef = useRef<EventItem[]>([]);
+  const currentUserIdRef = useRef<string | null>(null);
 
   const { language, translate } = useLanguage();
   const { themeMode, setThemeMode, systemTheme, effectiveTheme } = useTheme();
+
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
+
+  useEffect(() => {
+    currentUserIdRef.current = currentUserId;
+  }, [currentUserId]);
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -116,15 +126,19 @@ export function HomeScreen({
 
   const refreshParticipantCounts = async () => {
     try {
+      const eventIds = eventsRef.current.map((event) => event.id);
       const [countsMap, nextJoinedEventIds] = await Promise.all([
-        fetchParticipantCounts(events.map((event) => event.id)),
-        fetchJoinedEventIdsForUser(currentUserId),
+        fetchParticipantCounts(eventIds),
+        fetchJoinedEventIdsForUser(currentUserIdRef.current),
       ]);
       setJoinedEventIds(nextJoinedEventIds);
       setEvents((prevEvents) =>
         prevEvents.map((event) => ({
           ...event,
-          participantCount: countsMap[event.id] || 0,
+          participantCount:
+            Object.prototype.hasOwnProperty.call(countsMap, event.id)
+              ? countsMap[event.id]
+              : event.participantCount,
         }))
       );
     } catch (error) {
@@ -506,7 +520,21 @@ export function HomeScreen({
           table: 'participants',
         },
         async () => {
-          await refreshParticipantCounts();
+          const [countsMap, nextJoinedEventIds] = await Promise.all([
+            fetchParticipantCounts(eventsRef.current.map((event) => event.id)),
+            fetchJoinedEventIdsForUser(currentUserIdRef.current),
+          ]);
+
+          setJoinedEventIds(nextJoinedEventIds);
+          setEvents((prevEvents) =>
+            prevEvents.map((event) => ({
+              ...event,
+              participantCount:
+                Object.prototype.hasOwnProperty.call(countsMap, event.id)
+                  ? countsMap[event.id]
+                  : event.participantCount,
+            }))
+          );
         }
       )
       .subscribe();
@@ -515,7 +543,7 @@ export function HomeScreen({
       supabase.removeChannel(eventsChannel);
       supabase.removeChannel(participantsChannel);
     };
-  }, [currentUserId, language]);
+  }, []);
 
   useEffect(() => {
     setVisibleCount(LOCAL_BATCH_SIZE);

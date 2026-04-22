@@ -127,9 +127,14 @@ export default function App() {
   );
   const isRecoveryModeRef = useRef(false);
   const handledSharedEventRef = useRef(false);
+  const currentScreenRef = useRef(currentScreen);
 
   const { translate } = useLanguage();
   const isMobileViewport = window.innerWidth < 768;
+
+  useEffect(() => {
+    currentScreenRef.current = currentScreen;
+  }, [currentScreen]);
 
   const persistAuthRedirectState = (
     nextPendingAfterAuth: PostLoginIntent | null,
@@ -638,6 +643,15 @@ export default function App() {
       }
 
       if (session?.user) {
+        const shouldApplySignedInNavigation =
+          event === 'SIGNED_IN' &&
+          (pendingAfterAuthRef.current ||
+            ['welcome', 'login', 'signup', 'legal-consent'].includes(currentScreenRef.current));
+
+        if (!shouldApplySignedInNavigation) {
+          return;
+        }
+
         void applySignedInNavigation(session.user);
       } else {
         if (pendingAfterAuthRef.current) {

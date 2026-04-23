@@ -3153,6 +3153,259 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
     },
 };
 
+const localizedClosedEventOverrides: Partial<
+    Record<LanguageCode, Partial<Record<TranslationKey, string>>>
+> = {
+    ru: {
+        'home.closedBadge': 'Закрытое',
+        'home.closedDateHidden': 'Дата и время откроются после одобрения',
+        'home.closedLocationHidden': 'Локация откроется после одобрения',
+        'create.joinModeTitle': 'Режим вступления',
+        'create.joinModeOpen': 'Открытый',
+        'create.joinModeOpenDescription': 'Любой пользователь может сразу присоединиться.',
+        'create.joinModeRequest': 'По заявке',
+        'create.joinModeRequestDescription': 'Сначала пользователь должен отправить заявку.',
+        'create.requestModeProOnly': 'Режим по заявке доступен только на тарифе Pro.',
+        'edit.joinModeTitle': 'Режим вступления',
+        'edit.joinModeOpen': 'Открытый',
+        'edit.joinModeOpenDescription': 'Любой пользователь может сразу присоединиться.',
+        'edit.joinModeRequest': 'По заявке',
+        'edit.joinModeRequestDescription': 'Сначала пользователь должен отправить заявку.',
+        'edit.requestModeProOnly': 'Режим по заявке доступен только на тарифе Pro.',
+        'details.closedBadge': 'Закрытое',
+        'details.closedTitle': 'Доступ по заявке',
+        'details.closedDescription':
+            'Дата, локация и карта откроются после того, как создатель одобрит вашу заявку.',
+        'details.closedDateHidden': 'Скрыто до одобрения',
+        'details.closedLocationHidden': 'Скрыто до одобрения',
+        'details.closedMapHidden': 'Карта откроется после одобрения вашей заявки.',
+        'details.joinRequestButton': 'Подать заявку',
+        'details.joinRequestSubmitting': 'Отправка...',
+        'details.joinRequestSubmit': 'Отправить заявку',
+        'details.joinRequestSubmitted': 'Заявка отправлена',
+        'details.joinRequestSubmitFailed': 'Не удалось отправить заявку',
+        'details.joinRequestSubmitUnexpectedError':
+            'Произошла ошибка при отправке заявки',
+        'details.joinRequestMessageLabel': 'Сообщение',
+        'details.joinRequestMessagePlaceholder':
+            'Напишите короткое сообщение для создателя',
+        'details.joinRequestStatusPending': 'На рассмотрении',
+        'details.joinRequestStatusApproved': 'Одобрено',
+        'details.joinRequestStatusRejected': 'Отклонено',
+        'details.joinRequestPendingDescription':
+            'Ваша заявка ожидает рассмотрения.',
+        'details.joinRequestApprovedDescription':
+            'Ваша заявка одобрена. Теперь вам доступны детали события.',
+        'details.joinRequestRejectedDescription':
+            'Создатель отклонил вашу заявку.',
+        'details.joinRequestsTitle': 'Заявки на вступление',
+        'details.joinRequestsButton': 'Заявки',
+        'details.joinRequestsEmpty': 'Заявок пока нет',
+        'details.joinRequestNoMessage': 'Без сообщения',
+        'details.joinRequestApprove': 'Принять',
+        'details.joinRequestReject': 'Отклонить',
+        'details.joinRequestReviewFailed': 'Не удалось обновить заявку',
+        'details.joinRequestReviewUnexpectedError':
+            'Произошла ошибка при обновлении заявки',
+        'details.joinRequestApproved': 'Заявка одобрена',
+        'details.joinRequestRejected': 'Заявка отклонена',
+    },
+    ro: {
+        'home.closedBadge': 'Închis',
+        'home.closedDateHidden': 'Data și ora se deschid după aprobare',
+        'home.closedLocationHidden': 'Locația se deschide după aprobare',
+        'create.joinModeTitle': 'Mod de acces',
+        'create.joinModeOpen': 'Deschis',
+        'create.joinModeOpenDescription':
+            'Oricine se poate alătura imediat.',
+        'create.joinModeRequest': 'Cu cerere',
+        'create.joinModeRequestDescription':
+            'Utilizatorii trebuie mai întâi să trimită o cerere.',
+        'create.requestModeProOnly':
+            'Modul cu cerere este disponibil doar pe planul Pro.',
+        'edit.joinModeTitle': 'Mod de acces',
+        'edit.joinModeOpen': 'Deschis',
+        'edit.joinModeOpenDescription':
+            'Oricine se poate alătura imediat.',
+        'edit.joinModeRequest': 'Cu cerere',
+        'edit.joinModeRequestDescription':
+            'Utilizatorii trebuie mai întâi să trimită o cerere.',
+        'edit.requestModeProOnly':
+            'Modul cu cerere este disponibil doar pe planul Pro.',
+        'details.closedBadge': 'Închis',
+        'details.closedTitle': 'Acces prin cerere',
+        'details.closedDescription':
+            'Data, locația și harta se deschid după ce creatorul îți aprobă cererea.',
+        'details.closedDateHidden': 'Ascuns până la aprobare',
+        'details.closedLocationHidden': 'Ascuns până la aprobare',
+        'details.closedMapHidden':
+            'Harta se deschide după aprobarea cererii tale.',
+        'details.joinRequestButton': 'Trimite cerere',
+        'details.joinRequestSubmitting': 'Se trimite...',
+        'details.joinRequestSubmit': 'Trimite cererea',
+        'details.joinRequestSubmitted': 'Cererea a fost trimisă',
+        'details.joinRequestSubmitFailed':
+            'Cererea nu a putut fi trimisă',
+        'details.joinRequestSubmitUnexpectedError':
+            'A apărut o eroare la trimiterea cererii',
+        'details.joinRequestMessageLabel': 'Mesaj',
+        'details.joinRequestMessagePlaceholder':
+            'Scrie un mesaj scurt pentru creator',
+        'details.joinRequestStatusPending': 'În așteptare',
+        'details.joinRequestStatusApproved': 'Aprobată',
+        'details.joinRequestStatusRejected': 'Respinsă',
+        'details.joinRequestPendingDescription':
+            'Cererea ta este în curs de verificare.',
+        'details.joinRequestApprovedDescription':
+            'Cererea ta a fost aprobată. Acum ai acces la detaliile evenimentului.',
+        'details.joinRequestRejectedDescription':
+            'Creatorul ți-a respins cererea.',
+        'details.joinRequestsTitle': 'Cereri de participare',
+        'details.joinRequestsButton': 'Cereri',
+        'details.joinRequestsEmpty': 'Nu există cereri încă',
+        'details.joinRequestNoMessage': 'Fără mesaj',
+        'details.joinRequestApprove': 'Aprobă',
+        'details.joinRequestReject': 'Respinge',
+        'details.joinRequestReviewFailed':
+            'Cererea nu a putut fi actualizată',
+        'details.joinRequestReviewUnexpectedError':
+            'A apărut o eroare la actualizarea cererii',
+        'details.joinRequestApproved': 'Cerere aprobată',
+        'details.joinRequestRejected': 'Cerere respinsă',
+    },
+    uk: {
+        'home.closedBadge': 'Закрита',
+        'home.closedDateHidden': 'Дата й час відкриються після схвалення',
+        'home.closedLocationHidden': 'Локація відкриється після схвалення',
+        'create.joinModeTitle': 'Режим вступу',
+        'create.joinModeOpen': 'Відкритий',
+        'create.joinModeOpenDescription':
+            'Будь-хто може приєднатися одразу.',
+        'create.joinModeRequest': 'За заявкою',
+        'create.joinModeRequestDescription':
+            'Спочатку користувач має надіслати заявку.',
+        'create.requestModeProOnly':
+            'Режим за заявкою доступний лише на тарифі Pro.',
+        'edit.joinModeTitle': 'Режим вступу',
+        'edit.joinModeOpen': 'Відкритий',
+        'edit.joinModeOpenDescription':
+            'Будь-хто може приєднатися одразу.',
+        'edit.joinModeRequest': 'За заявкою',
+        'edit.joinModeRequestDescription':
+            'Спочатку користувач має надіслати заявку.',
+        'edit.requestModeProOnly':
+            'Режим за заявкою доступний лише на тарифі Pro.',
+        'details.closedBadge': 'Закрита',
+        'details.closedTitle': 'Доступ за заявкою',
+        'details.closedDescription':
+            'Дата, локація й карта відкриються після того, як творець схвалить вашу заявку.',
+        'details.closedDateHidden': 'Приховано до схвалення',
+        'details.closedLocationHidden': 'Приховано до схвалення',
+        'details.closedMapHidden':
+            'Карта відкриється після схвалення вашої заявки.',
+        'details.joinRequestButton': 'Подати заявку',
+        'details.joinRequestSubmitting': 'Надсилання...',
+        'details.joinRequestSubmit': 'Надіслати заявку',
+        'details.joinRequestSubmitted': 'Заявку надіслано',
+        'details.joinRequestSubmitFailed': 'Не вдалося надіслати заявку',
+        'details.joinRequestSubmitUnexpectedError':
+            'Сталася помилка під час надсилання заявки',
+        'details.joinRequestMessageLabel': 'Повідомлення',
+        'details.joinRequestMessagePlaceholder':
+            'Напишіть коротке повідомлення для творця',
+        'details.joinRequestStatusPending': 'Очікує',
+        'details.joinRequestStatusApproved': 'Схвалено',
+        'details.joinRequestStatusRejected': 'Відхилено',
+        'details.joinRequestPendingDescription':
+            'Ваша заявка очікує на розгляд.',
+        'details.joinRequestApprovedDescription':
+            'Вашу заявку схвалено. Тепер вам доступні деталі події.',
+        'details.joinRequestRejectedDescription':
+            'Творець відхилив вашу заявку.',
+        'details.joinRequestsTitle': 'Заявки на вступ',
+        'details.joinRequestsButton': 'Заявки',
+        'details.joinRequestsEmpty': 'Заявок поки немає',
+        'details.joinRequestNoMessage': 'Без повідомлення',
+        'details.joinRequestApprove': 'Схвалити',
+        'details.joinRequestReject': 'Відхилити',
+        'details.joinRequestReviewFailed':
+            'Не вдалося оновити заявку',
+        'details.joinRequestReviewUnexpectedError':
+            'Сталася помилка під час оновлення заявки',
+        'details.joinRequestApproved': 'Заявку схвалено',
+        'details.joinRequestRejected': 'Заявку відхилено',
+    },
+    de: {
+        'home.closedBadge': 'Geschlossen',
+        'home.closedDateHidden': 'Datum und Uhrzeit werden nach der Freigabe sichtbar',
+        'home.closedLocationHidden': 'Der Ort wird nach der Freigabe sichtbar',
+        'create.joinModeTitle': 'Beitrittsmodus',
+        'create.joinModeOpen': 'Offen',
+        'create.joinModeOpenDescription':
+            'Jeder kann sofort beitreten.',
+        'create.joinModeRequest': 'Auf Anfrage',
+        'create.joinModeRequestDescription':
+            'Nutzer mГјssen zuerst eine Anfrage senden.',
+        'create.requestModeProOnly':
+            'Der Anfragemodus ist nur im Pro-Tarif verfГјgbar.',
+        'edit.joinModeTitle': 'Beitrittsmodus',
+        'edit.joinModeOpen': 'Offen',
+        'edit.joinModeOpenDescription':
+            'Jeder kann sofort beitreten.',
+        'edit.joinModeRequest': 'Auf Anfrage',
+        'edit.joinModeRequestDescription':
+            'Nutzer mГјssen zuerst eine Anfrage senden.',
+        'edit.requestModeProOnly':
+            'Der Anfragemodus ist nur im Pro-Tarif verfГјgbar.',
+        'details.closedBadge': 'Geschlossen',
+        'details.closedTitle': 'Zugang auf Anfrage',
+        'details.closedDescription':
+            'Datum, Ort und Karte werden sichtbar, sobald der Ersteller deine Anfrage freigibt.',
+        'details.closedDateHidden': 'Bis zur Freigabe verborgen',
+        'details.closedLocationHidden': 'Bis zur Freigabe verborgen',
+        'details.closedMapHidden':
+            'Die Karte wird sichtbar, sobald deine Anfrage freigegeben wurde.',
+        'details.joinRequestButton': 'Zugang anfragen',
+        'details.joinRequestSubmitting': 'Wird gesendet...',
+        'details.joinRequestSubmit': 'Anfrage senden',
+        'details.joinRequestSubmitted': 'Anfrage gesendet',
+        'details.joinRequestSubmitFailed':
+            'Die Anfrage konnte nicht gesendet werden',
+        'details.joinRequestSubmitUnexpectedError':
+            'Beim Senden der Anfrage ist ein Fehler aufgetreten',
+        'details.joinRequestMessageLabel': 'Nachricht',
+        'details.joinRequestMessagePlaceholder':
+            'Schreibe eine kurze Nachricht an den Ersteller',
+        'details.joinRequestStatusPending': 'Ausstehend',
+        'details.joinRequestStatusApproved': 'Freigegeben',
+        'details.joinRequestStatusRejected': 'Abgelehnt',
+        'details.joinRequestPendingDescription':
+            'Deine Anfrage wird gerade geprüft.',
+        'details.joinRequestApprovedDescription':
+            'Deine Anfrage wurde freigegeben. Du hast jetzt Zugriff auf die Eventdetails.',
+        'details.joinRequestRejectedDescription':
+            'Deine Anfrage wurde vom Ersteller abgelehnt.',
+        'details.joinRequestsTitle': 'Beitrittsanfragen',
+        'details.joinRequestsButton': 'Anfragen',
+        'details.joinRequestsEmpty': 'Noch keine Anfragen',
+        'details.joinRequestNoMessage': 'Keine Nachricht',
+        'details.joinRequestApprove': 'Freigeben',
+        'details.joinRequestReject': 'Ablehnen',
+        'details.joinRequestReviewFailed':
+            'Die Anfrage konnte nicht aktualisiert werden',
+        'details.joinRequestReviewUnexpectedError':
+            'Beim Aktualisieren der Anfrage ist ein Fehler aufgetreten',
+        'details.joinRequestApproved': 'Anfrage freigegeben',
+        'details.joinRequestRejected': 'Anfrage abgelehnt',
+    },
+};
+
 export const t = (language: LanguageCode, key: TranslationKey) => {
-    return translations[language][key] || translations.en[key] || key;
+    return (
+        localizedClosedEventOverrides[language]?.[key] ||
+        translations[language][key] ||
+        localizedClosedEventOverrides.en?.[key] ||
+        translations.en[key] ||
+        key
+    );
 };

@@ -33,15 +33,16 @@ function toIsoLocal(daysFromNow, hour, minute = 0) {
 
 const curatedEvents = [
   {
-    title: 'Кофе после работы',
+    title: 'Кофе, мемы и пять минут выдохнуть',
     description:
-      'Буду брать кофе после работы в центре. Если кто-то тоже хочет ненадолго выбраться и поболтать, присоединяйтесь.',
-    activity_type: 'coffee',
-    date_time: toIsoLocal(1, 18, 30),
-    location: 'Strada 31 August 1989 117, Chișinău, Moldova',
-    location_place_id: 'seed-31-august-117',
-    location_lat: 47.0241,
-    location_lng: 28.8375,
+      'После работы залетаем на быстрый кофе без формальностей. Можно просто прийти, переключиться с дел и поболтать обо всём подряд.',
+    activity_type: 'food_drinks',
+    join_mode: 'open',
+    date_time: toIsoLocal(1, 18, 45),
+    location: 'Strada Alexei Șciusev 86, Chișinău, Moldova',
+    location_place_id: 'seed-sciusev-86',
+    location_lat: 47.02434,
+    location_lng: 28.82124,
     city: 'Chișinău',
     city_normalized: 'chisinau',
     creatorEmail: 'gathr.seed.1@example.com',
@@ -52,13 +53,14 @@ const curatedEvents = [
     ],
   },
   {
-    title: 'Прогулка у Valea Morilor',
+    title: 'Закат, плейлист и прогулка без спешки',
     description:
-      'Хочу вечером пройтись вокруг озера без спешки. Можно просто подойти на круг или даже на полчаса.',
-    activity_type: 'walk',
-    date_time: toIsoLocal(1, 20, 0),
+      'Идем гулять ближе к вечеру, берем любимые треки в наушники и просто выходим из режима “дом-работа-дом”.',
+    activity_type: 'outdoors',
+    join_mode: 'open',
+    date_time: toIsoLocal(1, 20, 10),
     location: 'Valea Morilor, Chișinău, Moldova',
-    location_place_id: 'seed-valea-morilor',
+    location_place_id: 'seed-valea-morilor-2',
     location_lat: 47.0142,
     location_lng: 28.8198,
     city: 'Chișinău',
@@ -67,18 +69,20 @@ const curatedEvents = [
     participantEmails: [
       'gathr.seed.1@example.com',
       'gathr.seed.5@example.com',
+      'gathr.seed.7@example.com',
     ],
   },
   {
-    title: 'Небольшая встреча в кафе',
+    title: 'Мини-брейншторм для своих и новых людей',
     description:
-      'Собираемся спокойно посидеть в кафе, познакомиться и пообщаться без какого-то формального плана.',
-    activity_type: 'networking',
-    date_time: toIsoLocal(2, 19, 15),
-    location: 'Strada Alexei Șciusev 62, Chișinău, Moldova',
-    location_place_id: 'seed-sciusev-62',
-    location_lat: 47.0218,
-    location_lng: 28.8249,
+      'Собираемся обсудить идеи, маленькие проекты, пет-фичи и всё, что давно хотелось кому-то показать. Без пафоса и питчей.',
+    activity_type: 'tech',
+    join_mode: 'open',
+    date_time: toIsoLocal(2, 19, 30),
+    location: 'Piața Marii Adunări Naționale 1, Chișinău, Moldova',
+    location_place_id: 'seed-pman-tech',
+    location_lat: 47.0245,
+    location_lng: 28.8323,
     city: 'Chișinău',
     city_normalized: 'chisinau',
     creatorEmail: 'gathr.seed.3@example.com',
@@ -90,13 +94,14 @@ const curatedEvents = [
     ],
   },
   {
-    title: 'Днём обсудить языки и учебу',
+    title: 'Языковой спот: English + румынский вживую',
     description:
-      'Если кто-то сейчас тоже в теме языков, учебы или полезных материалов, можно встретиться и спокойно это обсудить.',
-    activity_type: 'education',
+      'Без учебника и без стресса: знакомимся, говорим, тупим, смеемся и пробуем вытащить живую практику из обычного общения.',
+    activity_type: 'study',
+    join_mode: 'open',
     date_time: toIsoLocal(3, 12, 30),
     location: 'Strada Mitropolit Gavriil Bănulescu-Bodoni 61, Chișinău, Moldova',
-    location_place_id: 'seed-bodoni-61',
+    location_place_id: 'seed-bodoni-study',
     location_lat: 47.0282,
     location_lng: 28.8357,
     city: 'Chișinău',
@@ -104,134 +109,37 @@ const curatedEvents = [
     creatorEmail: 'gathr.seed.2@example.com',
     participantEmails: [
       'gathr.seed.1@example.com',
-      'gathr.seed.7@example.com',
-    ],
-  },
-  {
-    title: 'Кофе в центре ближе к вечеру',
-    description:
-      'Буду в центре ближе к вечеру. Если кто-то тоже там будет, можно быстро пересечься на кофе.',
-    activity_type: 'coffee',
-    date_time: toIsoLocal(3, 18, 40),
-    location: 'Piața Marii Adunări Naționale 1, Chișinău, Moldova',
-    location_place_id: 'seed-pman-1',
-    location_lat: 47.0245,
-    location_lng: 28.8323,
-    city: 'Chișinău',
-    city_normalized: 'chisinau',
-    creatorEmail: 'gathr.seed.1@example.com',
-    participantEmails: [
-      'gathr.seed.4@example.com',
-      'gathr.seed.5@example.com',
       'gathr.seed.6@example.com',
     ],
   },
   {
-    title: 'Мини-футбол на Ботанике',
+    title: 'Локальный afterwork для тех, кто устал от чатов',
     description:
-      'Собираемся поиграть вечером без жёсткого уровня. Главное прийти, остальное уже решим на месте.',
-    activity_type: 'sport',
-    date_time: toIsoLocal(3, 20, 20),
-    location: 'Bd. Dacia 45, Chișinău, Moldova',
-    location_place_id: 'seed-dacia-45',
-    location_lat: 46.9897,
-    location_lng: 28.8573,
-    city: 'Chișinău',
-    city_normalized: 'chisinau',
-    creatorEmail: 'gathr.seed.3@example.com',
-    participantEmails: [
-      'gathr.seed.2@example.com',
-      'gathr.seed.5@example.com',
-      'gathr.seed.6@example.com',
-      'gathr.seed.8@example.com',
-      'gathr.seed.7@example.com',
-    ],
-  },
-  {
-    title: 'Настолки после работы',
-    description:
-      'Хочу собраться на простые настолки без сложных правил. Подходит и тем, кто просто хочет спокойно посидеть в компании.',
-    activity_type: 'games',
-    date_time: toIsoLocal(5, 17, 45),
-    location: 'Strada Vlaicu Pârcălab 45, Chișinău, Moldova',
-    location_place_id: 'seed-parcalab-45',
-    location_lat: 47.0226,
-    location_lng: 28.8351,
-    city: 'Chișinău',
-    city_normalized: 'chisinau',
-    creatorEmail: 'gathr.seed.1@example.com',
-    participantEmails: [
-      'gathr.seed.2@example.com',
-      'gathr.seed.4@example.com',
-    ],
-  },
-  {
-    title: 'Прогулка по Дендрарию',
-    description:
-      'Вечером хочу пройтись по Дендрарию. Формат максимально простой, можно присоединиться хоть на часть маршрута.',
-    activity_type: 'walk',
-    date_time: toIsoLocal(5, 19, 20),
-    location: 'Parcul Dendrariu, Chișinău, Moldova',
-    location_place_id: 'seed-dendrarium',
-    location_lat: 47.031,
-    location_lng: 28.8012,
-    city: 'Chișinău',
-    city_normalized: 'chisinau',
-    creatorEmail: 'gathr.seed.2@example.com',
-    participantEmails: [
-      'gathr.seed.1@example.com',
-      'gathr.seed.5@example.com',
-      'gathr.seed.6@example.com',
-      'gathr.seed.7@example.com',
-    ],
-  },
-  {
-    title: 'Кофе и разговоры про проекты',
-    description:
-      'Если кому-то интересно поговорить про приложения, идеи, работу или просто что-то своё, можно собраться днём на кофе.',
+      'Небольшая живая встреча после работы. Формат камерный: без толпы, без “а чем ты занимаешься?” в первые десять секунд.',
     activity_type: 'networking',
-    date_time: toIsoLocal(6, 13, 0),
-    location: 'Strada Pușkin 24, Chișinău, Moldova',
-    location_place_id: 'seed-puskin-24',
-    location_lat: 47.0287,
-    location_lng: 28.8354,
-    city: 'Chișinău',
-    city_normalized: 'chisinau',
-    creatorEmail: 'gathr.seed.3@example.com',
-    participantEmails: [
-      'gathr.seed.1@example.com',
-      'gathr.seed.2@example.com',
-      'gathr.seed.4@example.com',
-    ],
-  },
-  {
-    title: 'Вечерняя прогулка в Valea Trandafirilor',
-    description:
-      'Кто хочет просто выйти прогуляться вечером и немного отвлечься, можно встретиться в парке.',
-    activity_type: 'walk',
-    date_time: toIsoLocal(6, 18, 10),
-    location: 'Parcul Valea Trandafirilor, Chișinău, Moldova',
-    location_place_id: 'seed-valea-trandafirilor',
-    location_lat: 46.998,
-    location_lng: 28.8494,
+    join_mode: 'request',
+    date_time: toIsoLocal(3, 19, 0),
+    location: 'Strada Eugeniu Coca 37, Chișinău, Moldova',
+    location_place_id: 'seed-eugen-coca',
+    location_lat: 47.01861,
+    location_lng: 28.80187,
     city: 'Chișinău',
     city_normalized: 'chisinau',
     creatorEmail: 'gathr.seed.1@example.com',
     participantEmails: [
       'gathr.seed.4@example.com',
-      'gathr.seed.6@example.com',
-      'gathr.seed.7@example.com',
-      'gathr.seed.8@example.com',
+      'gathr.seed.5@example.com',
     ],
   },
   {
-    title: 'Футбол вечером для своих',
+    title: 'Мячик без токсика',
     description:
-      'Собираемся своим кругом, но новые люди тоже ок. Играем без лишнего напряжения, просто ради движения и настроения.',
-    activity_type: 'sport',
-    date_time: toIsoLocal(6, 20, 30),
+      'Вечером играем в футбол в легком темпе: без жести, без разборов, просто задвигаться и поймать настроение.',
+    activity_type: 'sports',
+    join_mode: 'open',
+    date_time: toIsoLocal(3, 20, 15),
     location: 'Strada Grenoble 191, Chișinău, Moldova',
-    location_place_id: 'seed-grenoble-191',
+    location_place_id: 'seed-grenoble-sports',
     location_lat: 46.9756,
     location_lng: 28.8579,
     city: 'Chișinău',
@@ -245,13 +153,94 @@ const curatedEvents = [
     ],
   },
   {
-    title: 'Небольшая встреча в выходной',
+    title: 'Настолки + чай + “еще одну катку”',
     description:
-      'Хочу в выходной ненадолго выбраться из дома и пообщаться. Если тоже хочется живого контакта без сложного плана, приходите.',
+      'Собираем маленькую компанию на настолки без суперсложных правил. Можно прийти даже если давно не играл и просто хочешь живого вечера.',
+    activity_type: 'entertainment',
+    join_mode: 'open',
+    date_time: toIsoLocal(5, 17, 50),
+    location: 'Strada Vlaicu Pârcălab 45, Chișinău, Moldova',
+    location_place_id: 'seed-parcalab-games',
+    location_lat: 47.0226,
+    location_lng: 28.8351,
+    city: 'Chișinău',
+    city_normalized: 'chisinau',
+    creatorEmail: 'gathr.seed.1@example.com',
+    participantEmails: [
+      'gathr.seed.2@example.com',
+      'gathr.seed.4@example.com',
+      'gathr.seed.7@example.com',
+    ],
+  },
+  {
+    title: 'Тихий пикник и нормальные разговоры',
+    description:
+      'Хочется собраться без шума и случайной суеты. Берем снеки, плед и делаем простой уличный вечер для своего круга и новых лиц.',
+    activity_type: 'outdoors',
+    join_mode: 'request',
+    date_time: toIsoLocal(5, 18, 40),
+    location: 'Parcul Dendrariu, Chișinău, Moldova',
+    location_place_id: 'seed-dendrarium-picnic',
+    location_lat: 47.031,
+    location_lng: 28.8012,
+    city: 'Chișinău',
+    city_normalized: 'chisinau',
+    creatorEmail: 'gathr.seed.2@example.com',
+    participantEmails: [
+      'gathr.seed.1@example.com',
+      'gathr.seed.6@example.com',
+    ],
+  },
+  {
+    title: 'Кофе и разбор карьерных качелей',
+    description:
+      'Если хочется выговориться про работу, смену направления, выгорание или просто свериться с людьми — приходите, формат очень человеческий.',
     activity_type: 'networking',
-    date_time: toIsoLocal(7, 17, 20),
+    join_mode: 'open',
+    date_time: toIsoLocal(6, 13, 10),
+    location: 'Strada Pușkin 24, Chișinău, Moldova',
+    location_place_id: 'seed-puskin-career',
+    location_lat: 47.0287,
+    location_lng: 28.8354,
+    city: 'Chișinău',
+    city_normalized: 'chisinau',
+    creatorEmail: 'gathr.seed.3@example.com',
+    participantEmails: [
+      'gathr.seed.1@example.com',
+      'gathr.seed.2@example.com',
+      'gathr.seed.4@example.com',
+    ],
+  },
+  {
+    title: 'Пятничный вайб на свежем воздухе',
+    description:
+      'Встречаемся в парке, чтобы просто сменить картинку, пройтись, поболтать и не откладывать жизнь “на потом”.',
+    activity_type: 'outdoors',
+    join_mode: 'open',
+    date_time: toIsoLocal(6, 18, 20),
+    location: 'Parcul Valea Trandafirilor, Chișinău, Moldova',
+    location_place_id: 'seed-valea-trandafirilor-vibe',
+    location_lat: 46.998,
+    location_lng: 28.8494,
+    city: 'Chișinău',
+    city_normalized: 'chisinau',
+    creatorEmail: 'gathr.seed.1@example.com',
+    participantEmails: [
+      'gathr.seed.4@example.com',
+      'gathr.seed.6@example.com',
+      'gathr.seed.7@example.com',
+      'gathr.seed.8@example.com',
+    ],
+  },
+  {
+    title: 'Кино, попкорн и без спойлеров',
+    description:
+      'Небольшой сбор на совместный кино-план. Можно сначала пересечься, решить сеанс на месте и потом уже двигаться дальше вместе.',
+    activity_type: 'entertainment',
+    join_mode: 'open',
+    date_time: toIsoLocal(7, 19, 10),
     location: 'Strada Arborilor 21, Chișinău, Moldova',
-    location_place_id: 'seed-arborilor-21',
+    location_place_id: 'seed-arborilor-cinema',
     location_lat: 46.9901,
     location_lng: 28.8458,
     city: 'Chișinău',
@@ -262,6 +251,25 @@ const curatedEvents = [
       'gathr.seed.4@example.com',
       'gathr.seed.5@example.com',
       'gathr.seed.8@example.com',
+    ],
+  },
+  {
+    title: 'Вечер для тех, кто делает что-то свое',
+    description:
+      'Маленькая встреча для людей с личными идеями, микро-проектами и странными задумками, которые хочется обсудить без кринжа.',
+    activity_type: 'tech',
+    join_mode: 'request',
+    date_time: toIsoLocal(7, 20, 0),
+    location: 'Boulevardul Ștefan cel Mare și Sfînt 124, Chișinău, Moldova',
+    location_place_id: 'seed-stefan-tech',
+    location_lat: 47.02664,
+    location_lng: 28.81332,
+    city: 'Chișinău',
+    city_normalized: 'chisinau',
+    creatorEmail: 'gathr.seed.3@example.com',
+    participantEmails: [
+      'gathr.seed.2@example.com',
+      'gathr.seed.7@example.com',
     ],
   },
 ]
@@ -329,15 +337,12 @@ async function createEvent(event, creatorId) {
     .insert({
       title: event.title,
       description: event.description,
-      date_time: event.date_time,
-      location: event.location,
       activity_type: event.activity_type,
       creator_id: creatorId,
-      location_place_id: event.location_place_id,
-      location_lat: event.location_lat,
-      location_lng: event.location_lng,
       city: event.city,
       city_normalized: event.city_normalized,
+      visibility: 'public',
+      join_mode: event.join_mode ?? 'open',
     })
     .select()
     .single()
@@ -347,6 +352,21 @@ async function createEvent(event, creatorId) {
   }
 
   return data
+}
+
+async function createEventPrivateDetails(eventId, event) {
+  const { error } = await supabase.from('event_private_details').insert({
+    event_id: eventId,
+    date_time: event.date_time,
+    location: event.location,
+    location_place_id: event.location_place_id,
+    location_lat: event.location_lat,
+    location_lng: event.location_lng,
+  })
+
+  if (error) {
+    throw error
+  }
 }
 
 async function addParticipants(eventId, userIds) {
@@ -387,10 +407,11 @@ async function main() {
     const uniqueParticipantIds = [...new Set(participantIds)]
 
     const createdEvent = await createEvent(event, creator.id)
+    await createEventPrivateDetails(createdEvent.id, event)
     await addParticipants(createdEvent.id, uniqueParticipantIds)
 
     console.log(
-      `OK: ${event.title} | ${event.date_time} | participants=${uniqueParticipantIds.length}`
+      `OK: ${event.title} | join_mode=${event.join_mode} | ${event.date_time} | participants=${uniqueParticipantIds.length}`
     )
   }
 

@@ -24,6 +24,7 @@ type EventItem = {
   id: string;
   title: string;
   description?: string | null;
+  created_at?: string | null;
   date_time?: string | null;
   location?: string | null;
   location_lat?: number | null;
@@ -129,6 +130,22 @@ export function HomeScreen({
     }
 
     return date.getTime() < Date.now();
+  };
+
+  const getEventSortTime = (event: EventItem) => {
+    const primaryTime = event.date_time ? new Date(event.date_time).getTime() : Number.NaN;
+
+    if (!Number.isNaN(primaryTime)) {
+      return primaryTime;
+    }
+
+    const fallbackTime = event.created_at ? new Date(event.created_at).getTime() : Number.NaN;
+
+    if (!Number.isNaN(fallbackTime)) {
+      return fallbackTime;
+    }
+
+    return 0;
   };
 
   const refreshOpenSupportTicketCount = async () => {
@@ -254,6 +271,7 @@ export function HomeScreen({
           id: event.id,
           title: event.title,
           description: event.description,
+          created_at: event.created_at ?? null,
           date_time: privateDetails?.date_time ?? event.date_time ?? null,
           location: privateDetails?.location ?? event.location ?? null,
           location_lat:
@@ -343,6 +361,7 @@ export function HomeScreen({
           id: event.id,
           title: event.title,
           description: event.description,
+          created_at: event.created_at ?? null,
           date_time: privateDetails?.date_time ?? event.date_time ?? null,
           location: privateDetails?.location ?? event.location ?? null,
           location_lat:
@@ -523,8 +542,8 @@ export function HomeScreen({
     const result = [...filteredEvents];
 
     result.sort((a, b) => {
-      const aTime = a.date_time ? new Date(a.date_time).getTime() : Number.MAX_SAFE_INTEGER;
-      const bTime = b.date_time ? new Date(b.date_time).getTime() : Number.MAX_SAFE_INTEGER;
+      const aTime = getEventSortTime(a);
+      const bTime = getEventSortTime(b);
 
       if (activeTab === 'my') {
         return bTime - aTime;

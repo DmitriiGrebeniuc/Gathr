@@ -62,6 +62,7 @@ export function EventDetailsScreen({
   const [participantCount, setParticipantCount] = useState(event?.participantCount || 0);
   const [canViewParticipantIdentities, setCanViewParticipantIdentities] = useState(false);
   const [participantAccessResolved, setParticipantAccessResolved] = useState(false);
+  const [participantListResolved, setParticipantListResolved] = useState(false);
   const [eventStateResolved, setEventStateResolved] = useState(false);
   const [privateDetails, setPrivateDetails] = useState<EventPrivateDetails | null>(null);
   const [myJoinRequest, setMyJoinRequest] = useState<EventJoinRequest | null>(null);
@@ -208,15 +209,18 @@ export function EventDetailsScreen({
 
   const loadParticipants = async () => {
     if (!eventData.id) {
+      setParticipantListResolved(true);
       return;
     }
 
     try {
+      setParticipantListResolved(false);
       const countsMap = await fetchParticipantCounts([eventData.id]);
       setParticipantCount(countsMap[eventData.id] || 0);
 
       if (!canViewParticipantIdentities) {
         setParticipants([]);
+        setParticipantListResolved(true);
         return;
       }
 
@@ -229,9 +233,11 @@ export function EventDetailsScreen({
           publicName: nameMap[row.user_id] || translate('common.user'),
         }))
       );
+      setParticipantListResolved(true);
     } catch (error) {
       console.error('Unexpected participant load error:', error);
       setParticipants([]);
+      setParticipantListResolved(true);
     }
   };
 
@@ -338,6 +344,7 @@ export function EventDetailsScreen({
     setParticipantCount(event?.participantCount || 0);
     setCanViewParticipantIdentities(!!event?.canViewParticipantIdentities);
     setParticipantAccessResolved(false);
+    setParticipantListResolved(false);
     setEventStateResolved(false);
     setPrivateDetails(null);
     setMyJoinRequest(null);
@@ -970,7 +977,7 @@ export function EventDetailsScreen({
               </button>
 
               {!participantAccessResolved ||
-              (canViewParticipantIdentities && participantCount > 0 && participants.length === 0) ? (
+              (canViewParticipantIdentities && !participantListResolved) ? (
                 <div
                   className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
                   style={{ backgroundColor: 'var(--card)' }}

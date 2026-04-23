@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
+import { motion, useDragControls, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { TouchButton } from './TouchButton';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
@@ -27,6 +27,7 @@ export function CreateEventScreen({
 }) {
   const y = useMotionValue(0);
   const opacity = useTransform(y, [0, 200], [1, 0.5]);
+  const dragControls = useDragControls();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -207,6 +208,8 @@ export function CreateEventScreen({
   return (
     <motion.div
       drag="y"
+      dragControls={dragControls}
+      dragListener={false}
       dragDirectionLock
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={{ top: 0, bottom: 0.22 }}
@@ -230,7 +233,10 @@ export function CreateEventScreen({
       </div>
 
       <div className="w-full flex justify-center pt-2 pb-1">
-        <div className="w-10 h-1 rounded-full bg-border"></div>
+        <div
+          className="w-10 h-1 rounded-full bg-border cursor-grab active:cursor-grabbing"
+          onPointerDown={(event) => dragControls.start(event)}
+        ></div>
       </div>
 
       <div

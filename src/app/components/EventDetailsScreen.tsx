@@ -207,8 +207,12 @@ export function EventDetailsScreen({
     });
   };
 
-  const loadParticipants = async () => {
+  const loadParticipants = async (
+    canViewIdentitiesOverride = canViewParticipantIdentities
+  ) => {
     if (!eventData.id) {
+      setParticipants([]);
+      setParticipantCount(0);
       setParticipantListResolved(true);
       return;
     }
@@ -218,7 +222,7 @@ export function EventDetailsScreen({
       const countsMap = await fetchParticipantCounts([eventData.id]);
       setParticipantCount(countsMap[eventData.id] || 0);
 
-      if (!canViewParticipantIdentities) {
+      if (!canViewIdentitiesOverride) {
         setParticipants([]);
         setParticipantListResolved(true);
         return;
@@ -323,6 +327,7 @@ export function EventDetailsScreen({
       setMyJoinRequest(nextMyJoinRequest);
       setPendingJoinRequestsCount(nextPendingJoinRequestsCount);
       setParticipantAccessResolved(true);
+      await loadParticipants(canViewIdentities);
       setEventStateResolved(true);
     } catch (error) {
       console.error('Unexpected event state error:', error);
@@ -359,7 +364,6 @@ export function EventDetailsScreen({
 
   useEffect(() => {
     void loadEventState();
-    void loadParticipants();
 
     if (!eventData.id) return;
 
@@ -373,7 +377,6 @@ export function EventDetailsScreen({
           table: 'participants',
         },
         async () => {
-          await loadParticipants();
           await loadEventState();
         }
       )
@@ -1058,6 +1061,13 @@ export function EventDetailsScreen({
                     </motion.div>
                   )}
                 </button>
+              ) : canViewParticipantIdentities && participantCount > 0 ? (
+                <div
+                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
+                  style={{ backgroundColor: 'var(--card)' }}
+                >
+                  {translate('common.loading')}
+                </div>
               ) : !canViewParticipantIdentities && participantCount > 0 ? (
                 <div
                   className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"

@@ -238,6 +238,19 @@ export function ParticipantsScreen({
 
             {!loading &&
               !accessRestricted &&
+              participantCount > 0 &&
+              participants.length === 0 && (
+                <div
+                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
+                  style={{ backgroundColor: 'var(--card)' }}
+                >
+                  {translate('common.loading')}
+                </div>
+              )}
+
+            {!loading &&
+              !accessRestricted &&
+              participants.length > 0 &&
               participants.map((participant, idx) => {
                 const name = participant.publicName || translate('common.user');
                 const isCurrentUser = currentUserId === participant.user_id;

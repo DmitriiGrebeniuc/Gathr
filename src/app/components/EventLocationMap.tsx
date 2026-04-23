@@ -237,7 +237,7 @@ export function EventLocationMap({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-disable-swipe-back="true">
       <LoadScriptNext googleMapsApiKey={apiKey} libraries={GOOGLE_LIBRARIES}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}

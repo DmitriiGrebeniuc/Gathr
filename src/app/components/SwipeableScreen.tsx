@@ -69,16 +69,18 @@ export function SwipeableScreen({
   };
 
   return (
-    <div
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={() => {
-        gestureRef.current = null;
-      }}
-      className="h-full w-full overflow-x-hidden"
-      style={{ touchAction: 'pan-y' }}
-    >
-      {children}
+    <div className="relative h-full w-full overflow-x-hidden">
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={() => {
+          gestureRef.current = null;
+        }}
+        className="absolute left-0 top-0 z-20 h-full"
+        style={{ width: '32px', touchAction: 'pan-y' }}
+      />
+
+      <div className="h-full w-full">{children}</div>
     </div>
   );
 }

@@ -286,6 +286,45 @@ export async function fetchEventPrivateDetails(
   return (data as EventPrivateDetails | null) ?? null;
 }
 
+export async function fetchAccessibleEventPrivateDetailsMap(
+  eventIds: Array<string | null | undefined>
+): Promise<Record<string, EventPrivateDetails>> {
+  const uniqueEventIds = Array.from(
+    new Set(
+      eventIds.filter(
+        (eventId): eventId is string =>
+          typeof eventId === 'string' && eventId.trim().length > 0
+      )
+    )
+  );
+
+  if (uniqueEventIds.length === 0) {
+    return {};
+  }
+
+  const { data, error } = await supabase
+    .from('event_private_details')
+    .select(
+      'event_id, date_time, location, location_place_id, location_lat, location_lng'
+    )
+    .in('event_id', uniqueEventIds);
+
+  if (error) {
+    console.error('Failed to load accessible event private details:', error);
+    return {};
+  }
+
+  return (
+    (data as EventPrivateDetails[] | null) || []
+  ).reduce<Record<string, EventPrivateDetails>>((acc, row) => {
+    if (row?.event_id) {
+      acc[row.event_id] = row;
+    }
+
+    return acc;
+  }, {});
+}
+
 export async function fetchMyEventJoinRequest(
   eventId: string | null | undefined
 ): Promise<EventJoinRequest | null> {

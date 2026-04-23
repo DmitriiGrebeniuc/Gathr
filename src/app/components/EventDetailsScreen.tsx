@@ -62,6 +62,7 @@ export function EventDetailsScreen({
   const [participantCount, setParticipantCount] = useState(event?.participantCount || 0);
   const [canViewParticipantIdentities, setCanViewParticipantIdentities] = useState(false);
   const [participantAccessResolved, setParticipantAccessResolved] = useState(false);
+  const [eventStateResolved, setEventStateResolved] = useState(false);
   const [privateDetails, setPrivateDetails] = useState<EventPrivateDetails | null>(null);
   const [myJoinRequest, setMyJoinRequest] = useState<EventJoinRequest | null>(null);
   const [showJoinRequestComposer, setShowJoinRequestComposer] = useState(false);
@@ -75,22 +76,26 @@ export function EventDetailsScreen({
   const pendingAuthAction = event?.authAction || null;
   const joinMode = (eventData.join_mode || 'open') as 'open' | 'request';
   const canViewClosedDetails = joinMode !== 'request' || isCreator || hasJoined || isAdmin;
+  const isClosedAccessResolving = joinMode === 'request' && !eventStateResolved;
+  const shouldShowClosedRestrictedState =
+    joinMode === 'request' && eventStateResolved && !canViewClosedDetails;
+  const shouldShowPrivateFieldsLoading =
+    !eventStateResolved &&
+    (!!eventData.id || joinMode === 'request') &&
+    (joinMode === 'request' ||
+      !eventData.date_time ||
+      !eventData.location ||
+      privateDetails !== null);
 
-  const displayedDateTime =
-    joinMode === 'request' && canViewClosedDetails
-      ? privateDetails?.date_time || eventData.date_time
-      : eventData.date_time;
-  const displayedLocation =
-    joinMode === 'request' && canViewClosedDetails
-      ? privateDetails?.location || eventData.location
-      : eventData.location;
+  const displayedDateTime = privateDetails?.date_time ?? eventData.date_time;
+  const displayedLocation = privateDetails?.location ?? eventData.location;
   const displayedLocationLat =
-    joinMode === 'request' && canViewClosedDetails
-      ? privateDetails?.location_lat
+    typeof privateDetails?.location_lat === 'number'
+      ? privateDetails.location_lat
       : eventData.location_lat;
   const displayedLocationLng =
-    joinMode === 'request' && canViewClosedDetails
-      ? privateDetails?.location_lng
+    typeof privateDetails?.location_lng === 'number'
+      ? privateDetails.location_lng
       : eventData.location_lng;
 
   const eventDate = displayedDateTime ? new Date(displayedDateTime) : null;
@@ -175,7 +180,30 @@ export function EventDetailsScreen({
       return;
     }
 
-    setEventData(data || event || defaultEvent);
+    if (!data) {
+      setEventData(event || defaultEvent);
+      return;
+    }
+
+    setEventData({
+      ...(event || {}),
+      ...data,
+      date_time: data.date_time ?? event?.date_time ?? null,
+      location: data.location ?? event?.location ?? null,
+      location_lat:
+        typeof data.location_lat === 'number'
+          ? data.location_lat
+          : typeof event?.location_lat === 'number'
+            ? event.location_lat
+            : null,
+      location_lng:
+        typeof data.location_lng === 'number'
+          ? data.location_lng
+          : typeof event?.location_lng === 'number'
+            ? event.location_lng
+            : null,
+      join_mode: data.join_mode ?? event?.join_mode ?? 'open',
+    });
   };
 
   const loadParticipants = async () => {
@@ -208,6 +236,8 @@ export function EventDetailsScreen({
   };
 
   const loadEventState = async () => {
+    setEventStateResolved(false);
+
     try {
       const {
         data: { user },
@@ -224,6 +254,7 @@ export function EventDetailsScreen({
         setPrivateDetails(null);
         setMyJoinRequest(null);
         setPendingJoinRequestsCount(0);
+        setEventStateResolved(true);
         return;
       }
 
@@ -243,6 +274,7 @@ export function EventDetailsScreen({
         setPrivateDetails(null);
         setMyJoinRequest(null);
         setPendingJoinRequestsCount(0);
+        setEventStateResolved(true);
         return;
       }
 
@@ -259,33 +291,28 @@ export function EventDetailsScreen({
 
       const joined = !!data;
       const canViewIdentities = creator || joined || nextIsAdmin;
+      const canViewPrivateDetails = creator || joined || nextIsAdmin;
+      const nextPrivateDetails = canViewPrivateDetails
+        ? await fetchEventPrivateDetails(eventData.id)
+        : null;
+      const nextMyJoinRequest =
+        joinMode === 'request' && !creator && !joined && !nextIsAdmin
+          ? await fetchMyEventJoinRequest(eventData.id)
+          : null;
+      const nextPendingJoinRequestsCount =
+        joinMode === 'request' && (creator || nextIsAdmin)
+          ? (
+              await fetchCreatorEventJoinRequests(eventData.id)
+            ).filter((request) => request.status === 'pending').length
+          : 0;
 
       setHasJoined(joined);
       setCanViewParticipantIdentities(canViewIdentities);
+      setPrivateDetails(nextPrivateDetails);
+      setMyJoinRequest(nextMyJoinRequest);
+      setPendingJoinRequestsCount(nextPendingJoinRequestsCount);
       setParticipantAccessResolved(true);
-
-      if (joinMode === 'request' && (creator || joined || nextIsAdmin)) {
-        const privateDetailsData = await fetchEventPrivateDetails(eventData.id);
-        setPrivateDetails(privateDetailsData);
-      } else {
-        setPrivateDetails(null);
-      }
-
-      if (joinMode === 'request' && !creator && !joined && !nextIsAdmin) {
-        const joinRequest = await fetchMyEventJoinRequest(eventData.id);
-        setMyJoinRequest(joinRequest);
-      } else {
-        setMyJoinRequest(null);
-      }
-
-      if (joinMode === 'request' && (creator || nextIsAdmin)) {
-        const requests = await fetchCreatorEventJoinRequests(eventData.id);
-        setPendingJoinRequestsCount(
-          requests.filter((request) => request.status === 'pending').length
-        );
-      } else {
-        setPendingJoinRequestsCount(0);
-      }
+      setEventStateResolved(true);
     } catch (error) {
       console.error('Unexpected event state error:', error);
       setHasJoined(false);
@@ -296,6 +323,7 @@ export function EventDetailsScreen({
       setPrivateDetails(null);
       setMyJoinRequest(null);
       setPendingJoinRequestsCount(0);
+      setEventStateResolved(true);
     }
   };
 
@@ -305,6 +333,7 @@ export function EventDetailsScreen({
     setParticipantCount(event?.participantCount || 0);
     setCanViewParticipantIdentities(!!event?.canViewParticipantIdentities);
     setParticipantAccessResolved(false);
+    setEventStateResolved(false);
     setPrivateDetails(null);
     setMyJoinRequest(null);
     setShowJoinRequestComposer(false);
@@ -798,7 +827,21 @@ export function EventDetailsScreen({
               </p>
             </motion.div>
 
-            {joinMode === 'request' && !canViewClosedDetails && (
+            {isClosedAccessResolving && (
+              <div
+                className="rounded-2xl border px-4 py-4"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--accent-border-muted)',
+                }}
+              >
+                <p className="text-sm text-muted-foreground">
+                  {translate('common.loading')}
+                </p>
+              </div>
+            )}
+
+            {shouldShowClosedRestrictedState && (
               <div
                 className="rounded-2xl border px-4 py-4"
                 style={{
@@ -829,7 +872,9 @@ export function EventDetailsScreen({
                 <div>
                   <p className="text-sm text-muted-foreground">{translate('details.dateTime')}</p>
                   <p>
-                    {joinMode === 'request' && !canViewClosedDetails
+                    {shouldShowPrivateFieldsLoading
+                      ? translate('common.loading')
+                      : shouldShowClosedRestrictedState
                       ? translate('details.closedDateHidden')
                       : formatDate(displayedDateTime)}
                   </p>
@@ -852,7 +897,9 @@ export function EventDetailsScreen({
                   <div>
                     <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
                     <p>
-                      {joinMode === 'request' && !canViewClosedDetails
+                      {shouldShowPrivateFieldsLoading
+                        ? translate('common.loading')
+                        : shouldShowClosedRestrictedState
                         ? translate('details.closedLocationHidden')
                         : displayedLocation || translate('details.locationNotSpecified')}
                     </p>
@@ -871,7 +918,14 @@ export function EventDetailsScreen({
                   </div>
                 </div>
 
-                {joinMode === 'request' && !canViewClosedDetails ? (
+                {shouldShowPrivateFieldsLoading ? (
+                  <div
+                    className="rounded-2xl border px-4 py-4 text-sm text-muted-foreground"
+                    style={{ backgroundColor: 'var(--card)' }}
+                  >
+                    {translate('common.loading')}
+                  </div>
+                ) : shouldShowClosedRestrictedState ? (
                   <div
                     className="rounded-2xl border px-4 py-4 text-sm text-muted-foreground"
                     style={{ backgroundColor: 'var(--card)' }}
@@ -1061,7 +1115,7 @@ export function EventDetailsScreen({
           transition={{ delay: 0.3 }}
           className="p-6 border-t border-border space-y-3"
         >
-          {!isCreator && (
+          {!isCreator && !isClosedAccessResolving && (
             <div className="grid grid-cols-2 gap-3">
               <TouchButton
                 variant="ghost"
@@ -1113,7 +1167,7 @@ export function EventDetailsScreen({
             </div>
           )}
 
-          {isCreator && joinMode === 'request' && (
+          {isCreator && joinMode === 'request' && !isClosedAccessResolving && (
             <div className="grid grid-cols-2 gap-3">
               <TouchButton
                 variant="ghost"
@@ -1135,7 +1189,7 @@ export function EventDetailsScreen({
             </div>
           )}
 
-          {isCreator && joinMode !== 'request' && (
+          {isCreator && joinMode !== 'request' && !isClosedAccessResolving && (
             <div className="grid grid-cols-2 gap-3">
               <TouchButton
                 variant="ghost"

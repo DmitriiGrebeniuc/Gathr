@@ -4,7 +4,11 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
 import { feedback } from '../lib/feedback';
-import { fetchParticipantCounts, fetchPublicProfileNameMap } from '../lib/publicData';
+import {
+  fetchAccessibleEventPrivateDetailsMap,
+  fetchParticipantCounts,
+  fetchPublicProfileNameMap,
+} from '../lib/publicData';
 import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 
 type SummaryValue = number | null;
@@ -34,6 +38,7 @@ type AdminModerationEvent = {
   creator_id: string | null;
   creatorName: string | null;
   activity_type: ActivityType | null;
+  join_mode?: 'open' | 'request' | null;
   participantCount: number;
 };
 
@@ -219,8 +224,8 @@ export function AdminScreen({
 
           supabase.from('events').select('*', { count: 'exact', head: true }),
           supabase
-            .from('events')
-            .select('*', { count: 'exact', head: true })
+            .from('event_private_details')
+            .select('event_id', { count: 'exact', head: true })
             .gte('date_time', nowIso),
           supabase.from('participants').select('*', { count: 'exact', head: true }),
           supabase
@@ -230,13 +235,13 @@ export function AdminScreen({
           supabase.from('support_requests').select('*', { count: 'exact', head: true }),
           supabase
             .from('events')
-            .select('id, title, date_time, created_at, location')
+            .select('id, title, created_at')
             .order('created_at', { ascending: false })
             .limit(5),
           supabase
             .from('events')
             .select(
-              'id, title, description, date_time, created_at, location, location_lat, location_lng, creator_id, activity_type'
+              'id, title, description, created_at, creator_id, activity_type, join_mode'
             )
             .order('created_at', { ascending: false }),
           supabase
@@ -288,7 +293,18 @@ export function AdminScreen({
         });
 
         if (latestEventsResult.status === 'fulfilled' && !latestEventsResult.value.error) {
-          setLatestEvents((latestEventsResult.value.data as EventPreview[] | null) || []);
+          const baseLatestEvents = (latestEventsResult.value.data as EventPreview[] | null) || [];
+          const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
+            baseLatestEvents.map((event) => event.id)
+          );
+
+          setLatestEvents(
+            baseLatestEvents.map((event) => ({
+              ...event,
+              date_time: privateDetailsMap[event.id]?.date_time ?? event.date_time ?? null,
+              location: privateDetailsMap[event.id]?.location ?? event.location ?? null,
+            }))
+          );
           setEventsUnavailable(false);
         } else {
           setLatestEvents([]);
@@ -300,6 +316,9 @@ export function AdminScreen({
           const creatorIds = Array.from(
             new Set(baseEvents.map((event) => event.creator_id).filter(Boolean))
           ) as string[];
+          const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
+            baseEvents.map((event) => event.id)
+          );
 
           const participantCountsMap = await fetchParticipantCounts(
             baseEvents.map((event) => event.id)
@@ -318,16 +337,27 @@ export function AdminScreen({
             id: event.id,
             title: event.title || translate('common.event'),
             description: event.description ?? null,
-            date_time: event.date_time ?? null,
+            date_time: privateDetailsMap[event.id]?.date_time ?? event.date_time ?? null,
             created_at: event.created_at ?? null,
-            location: event.location ?? null,
-            location_lat: typeof event.location_lat === 'number' ? event.location_lat : null,
-            location_lng: typeof event.location_lng === 'number' ? event.location_lng : null,
+            location: privateDetailsMap[event.id]?.location ?? event.location ?? null,
+            location_lat:
+              typeof privateDetailsMap[event.id]?.location_lat === 'number'
+                ? privateDetailsMap[event.id]!.location_lat
+                : typeof event.location_lat === 'number'
+                  ? event.location_lat
+                  : null,
+            location_lng:
+              typeof privateDetailsMap[event.id]?.location_lng === 'number'
+                ? privateDetailsMap[event.id]!.location_lng
+                : typeof event.location_lng === 'number'
+                  ? event.location_lng
+                  : null,
             creator_id: event.creator_id ?? null,
             creatorName: event.creator_id
               ? creatorNameMap[event.creator_id] || translate('common.unknown')
               : translate('common.unknown'),
             activity_type: (event.activity_type || 'other') as ActivityType,
+            join_mode: (event.join_mode || 'open') as 'open' | 'request',
             participantCount: participantCountsMap[event.id] || 0,
           }));
 

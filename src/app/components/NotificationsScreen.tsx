@@ -3,7 +3,10 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { LoadingLogo } from './LoadingLogo';
 import { feedback } from '../lib/feedback';
-import { fetchPublicProfileNameMap } from '../lib/publicData';
+import {
+  fetchAccessibleEventPrivateDetailsMap,
+  fetchPublicProfileNameMap,
+} from '../lib/publicData';
 
 type EventItem = {
   id: string;
@@ -188,22 +191,48 @@ export function NotificationsScreen({
           .from('events')
           .select('*')
           .in('id', eventIds)
-          .gte('date_time', now.toISOString())
-          .lte('date_time', next24h.toISOString())
-          .order('date_time', { ascending: true });
+          .order('created_at', { ascending: true });
 
         if (eventsError) {
           console.error('Ошибка загрузки upcoming events:', eventsError);
         } else {
-          upcomingNotifications = (events || []).map((event: EventItem) => ({
-            id: `upcoming-${event.id}`,
-            type: 'upcoming',
-            message: buildUpcomingMessage(event),
-            time: formatRelativeTime(event.date_time),
-            event,
-            sortDate: event.date_time || null,
-            sortPriority: 2,
-          }));
+          const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
+            ((events || []) as EventItem[]).map((event) => event.id)
+          );
+
+          upcomingNotifications = ((events || []) as EventItem[])
+            .map((event) => {
+              const mergedEvent: EventItem = {
+                ...event,
+                date_time: privateDetailsMap[event.id]?.date_time ?? event.date_time ?? null,
+                location: privateDetailsMap[event.id]?.location ?? event.location ?? null,
+              };
+
+              const eventDate = mergedEvent.date_time
+                ? new Date(mergedEvent.date_time)
+                : null;
+
+              const isUpcoming =
+                eventDate !== null &&
+                !Number.isNaN(eventDate.getTime()) &&
+                eventDate.getTime() >= now.getTime() &&
+                eventDate.getTime() <= next24h.getTime();
+
+              if (!isUpcoming) {
+                return null;
+              }
+
+              return {
+                id: `upcoming-${event.id}`,
+                type: 'upcoming',
+                message: buildUpcomingMessage(mergedEvent),
+                time: formatRelativeTime(mergedEvent.date_time),
+                event: mergedEvent,
+                sortDate: mergedEvent.date_time || null,
+                sortPriority: 2,
+              };
+            })
+            .filter(Boolean) as NotificationItem[];
         }
       }
 
@@ -217,6 +246,12 @@ export function NotificationsScreen({
       }
 
       const myEventIds = (myEvents || []).map((e: any) => e.id);
+      const myEventPrivateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(myEventIds);
+      const mergedMyEvents: EventItem[] = ((myEvents || []) as EventItem[]).map((event) => ({
+        ...event,
+        date_time: myEventPrivateDetailsMap[event.id]?.date_time ?? event.date_time ?? null,
+        location: myEventPrivateDetailsMap[event.id]?.location ?? event.location ?? null,
+      }));
 
       let joinNotifications: NotificationItem[] = [];
 
@@ -247,7 +282,7 @@ export function NotificationsScreen({
 
           joinNotifications = Array.from(groupedJoins.entries())
             .map(([eventId, eventJoins]) => {
-              const relatedEvent = (myEvents || []).find((e: any) => e.id === eventId);
+              const relatedEvent = mergedMyEvents.find((e: any) => e.id === eventId);
 
               const eventDate = relatedEvent?.date_time
                 ? new Date(relatedEvent.date_time)

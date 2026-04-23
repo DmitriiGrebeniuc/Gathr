@@ -14,6 +14,7 @@ import { LoadingLogo } from './LoadingLogo';
 import { normalizeCityName } from '../lib/locationCity';
 import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 import {
+  fetchAccessibleEventPrivateDetailsMap,
   fetchMyProfileAccessSummary,
   fetchJoinedEventIdsForUser,
   fetchParticipantCounts,
@@ -25,6 +26,8 @@ type EventItem = {
   description?: string | null;
   date_time?: string | null;
   location?: string | null;
+  location_lat?: number | null;
+  location_lng?: number | null;
   city?: string | null;
   city_normalized?: string | null;
   creator_id?: string | null;
@@ -234,28 +237,50 @@ export function HomeScreen({
         fetchJoinedEventIdsForUser(userId),
       ]);
 
+      const privateDetailsMap = userId
+        ? await fetchAccessibleEventPrivateDetailsMap(
+            (eventsData || []).map((event: any) => event.id)
+          )
+        : {};
+
       const creatorNameMap = Object.fromEntries(
         Object.entries(creatorNameMapRaw).map(([id, name]) => [id, name || translate('common.unknown')])
       );
 
       setJoinedEventIds(nextJoinedEventIds);
 
-      const mappedEvents: EventItem[] = (eventsData || []).map((event: any) => ({
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        date_time: event.date_time,
-        location: event.location,
-        city: event.city,
-        city_normalized: event.city_normalized,
-        creator_id: event.creator_id,
-        creatorName: event.creator_id
-          ? creatorNameMap[event.creator_id] || translate('common.unknown')
-          : translate('common.unknown'),
-        activity_type: (event.activity_type || 'other') as ActivityType,
-        join_mode: (event.join_mode || 'open') as 'open' | 'request',
-        participantCount: countsMap[event.id] || 0,
-      }));
+      const mappedEvents: EventItem[] = (eventsData || []).map((event: any) => {
+        const privateDetails = privateDetailsMap[event.id];
+
+        return {
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          date_time: privateDetails?.date_time ?? event.date_time ?? null,
+          location: privateDetails?.location ?? event.location ?? null,
+          location_lat:
+            typeof privateDetails?.location_lat === 'number'
+              ? privateDetails.location_lat
+              : typeof event.location_lat === 'number'
+                ? event.location_lat
+                : null,
+          location_lng:
+            typeof privateDetails?.location_lng === 'number'
+              ? privateDetails.location_lng
+              : typeof event.location_lng === 'number'
+                ? event.location_lng
+                : null,
+          city: event.city,
+          city_normalized: event.city_normalized,
+          creator_id: event.creator_id,
+          creatorName: event.creator_id
+            ? creatorNameMap[event.creator_id] || translate('common.unknown')
+            : translate('common.unknown'),
+          activity_type: (event.activity_type || 'other') as ActivityType,
+          join_mode: (event.join_mode || 'open') as 'open' | 'request',
+          participantCount: countsMap[event.id] || 0,
+        };
+      });
 
       setEvents(mappedEvents);
     } catch (error) {
@@ -305,26 +330,48 @@ export function HomeScreen({
         fetchParticipantCounts((moreEventsData || []).map((event: any) => event.id)),
       ]);
 
+      const privateDetailsMap = currentUserIdRef.current
+        ? await fetchAccessibleEventPrivateDetailsMap(
+            (moreEventsData || []).map((event: any) => event.id)
+          )
+        : {};
+
       const creatorNameMap = Object.fromEntries(
         Object.entries(creatorNameMapRaw).map(([id, name]) => [id, name || translate('common.unknown')])
       );
 
-      const mappedMoreEvents: EventItem[] = (moreEventsData || []).map((event: any) => ({
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        date_time: event.date_time,
-        location: event.location,
-        city: event.city,
-        city_normalized: event.city_normalized,
-        creator_id: event.creator_id,
-        creatorName: event.creator_id
-          ? creatorNameMap[event.creator_id] || translate('common.unknown')
-          : translate('common.unknown'),
-        activity_type: (event.activity_type || 'other') as ActivityType,
-        join_mode: (event.join_mode || 'open') as 'open' | 'request',
-        participantCount: countsMap[event.id] || 0,
-      }));
+      const mappedMoreEvents: EventItem[] = (moreEventsData || []).map((event: any) => {
+        const privateDetails = privateDetailsMap[event.id];
+
+        return {
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          date_time: privateDetails?.date_time ?? event.date_time ?? null,
+          location: privateDetails?.location ?? event.location ?? null,
+          location_lat:
+            typeof privateDetails?.location_lat === 'number'
+              ? privateDetails.location_lat
+              : typeof event.location_lat === 'number'
+                ? event.location_lat
+                : null,
+          location_lng:
+            typeof privateDetails?.location_lng === 'number'
+              ? privateDetails.location_lng
+              : typeof event.location_lng === 'number'
+                ? event.location_lng
+                : null,
+          city: event.city,
+          city_normalized: event.city_normalized,
+          creator_id: event.creator_id,
+          creatorName: event.creator_id
+            ? creatorNameMap[event.creator_id] || translate('common.unknown')
+            : translate('common.unknown'),
+          activity_type: (event.activity_type || 'other') as ActivityType,
+          join_mode: (event.join_mode || 'open') as 'open' | 'request',
+          participantCount: countsMap[event.id] || 0,
+        };
+      });
 
       setEvents((prevEvents) => {
         const existingIds = new Set(prevEvents.map((event) => event.id));
@@ -479,13 +526,16 @@ export function HomeScreen({
   const sortedEvents = useMemo(() => {
     const result = [...filteredEvents];
 
-    if (activeTab === 'my') {
-      result.sort((a, b) => {
-        const aTime = a.date_time ? new Date(a.date_time).getTime() : 0;
-        const bTime = b.date_time ? new Date(b.date_time).getTime() : 0;
+    result.sort((a, b) => {
+      const aTime = a.date_time ? new Date(a.date_time).getTime() : Number.MAX_SAFE_INTEGER;
+      const bTime = b.date_time ? new Date(b.date_time).getTime() : Number.MAX_SAFE_INTEGER;
+
+      if (activeTab === 'my') {
         return bTime - aTime;
-      });
-    }
+      }
+
+      return aTime - bTime;
+    });
 
     return result;
   }, [filteredEvents, activeTab]);
@@ -1100,7 +1150,8 @@ export function HomeScreen({
             const canViewClosedPreview =
               !isRequestMode ||
               event.creator_id === currentUserId ||
-              joinedEventIds.includes(event.id);
+              joinedEventIds.includes(event.id) ||
+              isAdmin;
             const dateLabel = isRequestMode && !canViewClosedPreview
               ? translate('home.closedDateHidden')
               : formatEventDate(event.date_time);

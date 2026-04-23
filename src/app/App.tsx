@@ -40,6 +40,11 @@ import {
 import { CURRENT_LEGAL_VERSION } from './constants/legalDocuments';
 
 type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
+type ScreenName = string;
+type NavigationEntry = {
+  screen: ScreenName;
+  data?: any;
+};
 
 type LoginContext = {
   backScreen: string;
@@ -109,10 +114,10 @@ type CurrentLegalConsent = {
 
 export default function App() {
   const initialAuthRedirectState = readStoredAuthRedirectState();
-  const [currentScreen, setCurrentScreen] = useState('welcome');
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [navigationStack, setNavigationStack] = useState<NavigationEntry[]>([
+    { screen: 'welcome' },
+  ]);
   const [direction, setDirection] = useState<NavigationDirection>('forward');
-  const [history, setHistory] = useState<string[]>(['welcome']);
   const [authChecked, setAuthChecked] = useState(false);
 
   const [pendingAfterAuth, setPendingAfterAuth] = useState<PostLoginIntent | null>(
@@ -127,14 +132,110 @@ export default function App() {
   );
   const isRecoveryModeRef = useRef(false);
   const handledSharedEventRef = useRef(false);
-  const currentScreenRef = useRef(currentScreen);
+  const currentScreenRef = useRef('welcome');
+  const navigationStackRef = useRef<NavigationEntry[]>([{ screen: 'welcome' }]);
+  const skipNextPopStateRef = useRef(false);
 
   const { translate } = useLanguage();
   const isMobileViewport = window.innerWidth < 768;
 
+  const currentEntry = navigationStack[navigationStack.length - 1] ?? { screen: 'welcome' };
+  const currentScreen = currentEntry.screen;
+  const selectedEvent = currentEntry.data ?? null;
+
   useEffect(() => {
     currentScreenRef.current = currentScreen;
-  }, [currentScreen]);
+    navigationStackRef.current = navigationStack;
+  }, [currentScreen, navigationStack]);
+
+  const syncBrowserState = (mode: 'push' | 'replace') => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const state = {
+      gathrNavigation: true,
+      depth: navigationStackRef.current.length,
+      screen: navigationStackRef.current[navigationStackRef.current.length - 1]?.screen || 'welcome',
+    };
+
+    if (mode === 'push') {
+      window.history.pushState(state, '');
+      return;
+    }
+
+    window.history.replaceState(state, '');
+  };
+
+  const replaceNavigation = (
+    entries: NavigationEntry[],
+    nextDirection: NavigationDirection = 'forward',
+    browserMode: 'push' | 'replace' = 'replace'
+  ) => {
+    setDirection(nextDirection);
+    navigationStackRef.current = entries;
+    setNavigationStack(entries);
+    syncBrowserState(browserMode);
+  };
+
+  const resetNavigation = (
+    screen: ScreenName,
+    data?: any,
+    nextDirection: NavigationDirection = 'forward'
+  ) => {
+    replaceNavigation([{ screen, data }], nextDirection, 'replace');
+  };
+
+  const goBack = (fallbackScreen = 'home', fallbackData?: any) => {
+    const stack = navigationStackRef.current;
+
+    if (stack.length > 1) {
+      const nextStack = stack.slice(0, -1);
+      setDirection('back');
+      navigationStackRef.current = nextStack;
+      setNavigationStack(nextStack);
+
+      if (typeof window !== 'undefined' && window.history.state?.gathrNavigation) {
+        skipNextPopStateRef.current = true;
+        window.history.back();
+      }
+
+      return;
+    }
+
+    resetNavigation(fallbackScreen, fallbackData, 'back');
+  };
+
+  const goBackToScreen = (targetScreen: ScreenName, data?: any) => {
+    const stack = navigationStackRef.current;
+    const targetIndex = stack.map((entry) => entry.screen).lastIndexOf(targetScreen);
+
+    if (targetIndex === -1) {
+      resetNavigation(targetScreen, data, 'back');
+      return;
+    }
+
+    const nextStack = stack.slice(0, targetIndex + 1);
+    if (data !== undefined) {
+      nextStack[targetIndex] = {
+        ...nextStack[targetIndex],
+        data,
+      };
+    }
+
+    setDirection('back');
+    navigationStackRef.current = nextStack;
+    setNavigationStack(nextStack);
+
+    const stepsBack = stack.length - nextStack.length;
+    if (typeof window !== 'undefined' && stepsBack > 0 && window.history.state?.gathrNavigation) {
+      skipNextPopStateRef.current = true;
+      window.history.go(-stepsBack);
+      return;
+    }
+
+    syncBrowserState('replace');
+  };
 
   const persistAuthRedirectState = (
     nextPendingAfterAuth: PostLoginIntent | null,
@@ -174,10 +275,7 @@ export default function App() {
 
   const redirectBlockedAccountToWelcome = async () => {
     clearAuthRedirectState();
-    setSelectedEvent(null);
-    setCurrentScreen('welcome');
-    setHistory(['welcome']);
-    setDirection('back');
+    resetNavigation('welcome', null, 'back');
 
     const { error } = await supabase.auth.signOut();
 
@@ -385,25 +483,23 @@ export default function App() {
     const legalConsent = await getCurrentLegalConsent(user.id);
 
     if (!hasAcceptedCurrentLegal(legalConsent)) {
-      setDirection('forward');
-      setCurrentScreen('legal-consent');
-      setHistory(['legal-consent']);
+      resetNavigation('legal-consent', null, 'forward');
       return;
     }
 
     if (pendingAfterAuthRef.current) {
       const pending = pendingAfterAuthRef.current;
 
-      setDirection('forward');
-      setCurrentScreen(pending.returnTo.screen);
-      setHistory([pending.returnTo.screen]);
-
-      if (pending.returnTo.data) {
-        setSelectedEvent({
-          ...pending.returnTo.data,
-          authAction: pending.action || null,
-        });
-      }
+      resetNavigation(
+        pending.returnTo.screen,
+        pending.returnTo.data
+          ? {
+              ...pending.returnTo.data,
+              authAction: pending.action || null,
+            }
+          : null,
+        'forward'
+      );
 
       clearAuthRedirectState();
       return;
@@ -415,9 +511,7 @@ export default function App() {
       return;
     }
 
-    setCurrentScreen('home');
-    setHistory(['home']);
-    setDirection('forward');
+    resetNavigation('home', null, 'forward');
   };
 
   const handleGoogleLogin = async () => {
@@ -448,8 +542,7 @@ export default function App() {
 
       if (error || !user) {
         console.error('Failed to get user after legal consent:', error);
-        setCurrentScreen('welcome');
-        setHistory(['welcome']);
+        resetNavigation('welcome', null, 'back');
         return;
       }
 
@@ -462,10 +555,7 @@ export default function App() {
 
   const handleLegalConsentLogout = async () => {
     clearAuthRedirectState();
-    setSelectedEvent(null);
-    setDirection('back');
-    setCurrentScreen('welcome');
-    setHistory(['welcome']);
+    resetNavigation('welcome', null, 'back');
 
     const { error } = await supabase.auth.signOut();
 
@@ -518,6 +608,41 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    syncBrowserState('replace');
+
+    const handlePopState = () => {
+      if (skipNextPopStateRef.current) {
+        skipNextPopStateRef.current = false;
+        return;
+      }
+
+      const stack = navigationStackRef.current;
+
+      if (stack.length > 1) {
+        const nextStack = stack.slice(0, -1);
+        setDirection('back');
+        navigationStackRef.current = nextStack;
+        setNavigationStack(nextStack);
+        return;
+      }
+
+      if (currentScreenRef.current !== 'home' && currentScreenRef.current !== 'welcome') {
+        resetNavigation('home', null, 'back');
+        syncBrowserState('push');
+        return;
+      }
+
+      syncBrowserState('push');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
     const href = window.location.href;
     const pathname = window.location.pathname;
 
@@ -548,13 +673,14 @@ export default function App() {
       }
 
       handledSharedEventRef.current = true;
-      setSelectedEvent({
-        ...sharedEvent,
-        backTarget: 'home',
-      });
-      setCurrentScreen('event-details');
-      setHistory(['event-details']);
-      setDirection('forward');
+      resetNavigation(
+        'event-details',
+        {
+          ...sharedEvent,
+          backTarget: 'home',
+        },
+        'forward'
+      );
 
       return true;
     };
@@ -569,15 +695,13 @@ export default function App() {
 
           if (sessionError) {
             console.error('Ошибка установки recovery session:', sessionError);
-            setCurrentScreen('welcome');
-            setHistory(['welcome']);
+            resetNavigation('welcome', null, 'back');
             setAuthChecked(true);
             return;
           }
 
           isRecoveryModeRef.current = true;
-          setCurrentScreen('reset-password');
-          setHistory(['reset-password']);
+          resetNavigation('reset-password', null, 'forward');
           setAuthChecked(true);
           return;
         }
@@ -596,18 +720,15 @@ export default function App() {
 
         if (error) {
           console.error('Ошибка получения сессии:', error);
-          setCurrentScreen('welcome');
-          setHistory(['welcome']);
+          resetNavigation('welcome', null, 'back');
         } else if (session?.user) {
           await applySignedInNavigation(session.user);
         } else {
-          setCurrentScreen('welcome');
-          setHistory(['welcome']);
+          resetNavigation('welcome', null, 'back');
         }
       } catch (error) {
         console.error('Unexpected session check error:', error);
-        setCurrentScreen('welcome');
-        setHistory(['welcome']);
+        resetNavigation('welcome', null, 'back');
       } finally {
         setAuthChecked(true);
       }
@@ -620,9 +741,7 @@ export default function App() {
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         isRecoveryModeRef.current = true;
-        setCurrentScreen('reset-password');
-        setHistory(['reset-password']);
-        setDirection('forward');
+        resetNavigation('reset-password', null, 'forward');
         return;
       }
 
@@ -632,9 +751,7 @@ export default function App() {
         window.location.href.includes('access_token=')
       ) {
         isRecoveryModeRef.current = true;
-        setCurrentScreen('reset-password');
-        setHistory(['reset-password']);
-        setDirection('forward');
+        resetNavigation('reset-password', null, 'forward');
         return;
       }
 
@@ -665,9 +782,7 @@ export default function App() {
         }
 
         clearAuthRedirectState();
-        setCurrentScreen('welcome');
-        setHistory(['welcome']);
-        setDirection('back');
+        resetNavigation('welcome', null, 'back');
       }
     });
 
@@ -705,9 +820,10 @@ export default function App() {
       clearAuthRedirectState();
     }
 
-    if (data && !isLoginNavigationPayload(data) && !isClearPostLoginIntentPayload(data)) {
-      setSelectedEvent(data);
-    }
+    const nextData =
+      data && !isLoginNavigationPayload(data) && !isClearPostLoginIntentPayload(data)
+        ? data
+        : undefined;
 
     const mainScreens = ['home', 'notifications', 'profile'];
     const detailScreens = [
@@ -729,9 +845,11 @@ export default function App() {
     const modalScreens = ['create-event'];
 
     let navDirection: NavigationDirection = customDirection || 'forward';
+    const stack = navigationStackRef.current;
+    const targetIndex = stack.map((entry) => entry.screen).lastIndexOf(screen);
 
     if (!customDirection) {
-      if (history.includes(screen) && history.indexOf(screen) < history.length - 1) {
+      if (targetIndex !== -1 && targetIndex < stack.length - 1) {
         navDirection = 'back';
       } else if (modalScreens.includes(screen)) {
         navDirection = 'up';
@@ -744,22 +862,26 @@ export default function App() {
       }
     }
 
-    setDirection(navDirection);
-    setCurrentScreen(screen);
-
     if (navDirection === 'back') {
-      setHistory((prev) => {
-        const lastIndex = prev.lastIndexOf(screen);
-
-        if (lastIndex === -1) {
-          return prev;
-        }
-
-        return prev.slice(0, lastIndex + 1);
-      });
-    } else {
-      setHistory((prev) => [...prev, screen]);
+      goBackToScreen(screen, nextData);
+      return;
     }
+
+    if (mainScreens.includes(screen)) {
+      resetNavigation(screen, nextData, navDirection);
+      return;
+    }
+
+    if (screen === currentScreen) {
+      replaceNavigation(
+        [...stack.slice(0, -1), { screen, data: nextData ?? selectedEvent }],
+        navDirection,
+        'replace'
+      );
+      return;
+    }
+
+    replaceNavigation([...stack, { screen, data: nextData }], navDirection, 'push');
   };
 
   const showBottomNav = ['home', 'notifications', 'profile'].includes(currentScreen);

@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { TouchButton } from './TouchButton';
+import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { LoadingCard, LoadingLine } from './LoadingState';
 import {
   fetchCreatorEventJoinRequests,
   reviewEventJoinRequest,
@@ -21,6 +23,7 @@ export function EventJoinRequestsScreen({
   const [requests, setRequests] = useState<CreatorEventJoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingRequestId, setUpdatingRequestId] = useState<string | null>(null);
+  const [requestsResolved, setRequestsResolved] = useState(false);
 
   const parentBackTarget = event?.backTarget || 'event-details';
 
@@ -37,6 +40,7 @@ export function EventJoinRequestsScreen({
     }
 
     setLoading(true);
+    setRequestsResolved(false);
 
     try {
       const nextRequests = await fetchCreatorEventJoinRequests(event.id);
@@ -46,11 +50,34 @@ export function EventJoinRequestsScreen({
       setRequests([]);
     } finally {
       setLoading(false);
+      setRequestsResolved(true);
     }
   };
 
   useEffect(() => {
     void loadRequests();
+
+    if (!event?.id) return;
+
+    const channel = supabase
+      .channel(`event-join-requests-${event.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_join_requests',
+          filter: `event_id=eq.${event.id}`,
+        },
+        async () => {
+          await loadRequests();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [event?.id]);
 
   const handleReview = async (
@@ -175,12 +202,14 @@ export function EventJoinRequestsScreen({
             </div>
 
             {loading && (
-              <div className="text-sm text-muted-foreground">
-                {translate('common.loading')}
+              <div className="space-y-3">
+                <LoadingCard lines={['32%', '48%']} />
+                <LoadingCard lines={['40%', '24%', '100%', '72%']} />
+                <LoadingCard lines={['44%', '24%', '100%', '72%']} />
               </div>
             )}
 
-            {!loading && requests.length === 0 && (
+            {!loading && requestsResolved && requests.length === 0 && (
               <div
                 className="rounded-2xl border px-4 py-4 text-sm text-muted-foreground"
                 style={{ backgroundColor: 'var(--card)' }}
@@ -232,9 +261,7 @@ export function EventJoinRequestsScreen({
                           onClick={() => handleReview(request.id, 'approved')}
                           disabled={isUpdating}
                         >
-                          {isUpdating
-                            ? translate('common.loading')
-                            : translate('details.joinRequestApprove')}
+                          {isUpdating ? <LoadingLine width="4.5rem" height="0.75rem" /> : translate('details.joinRequestApprove')}
                         </TouchButton>
 
                         <TouchButton
@@ -242,9 +269,7 @@ export function EventJoinRequestsScreen({
                           onClick={() => handleReview(request.id, 'rejected')}
                           disabled={isUpdating}
                         >
-                          {isUpdating
-                            ? translate('common.loading')
-                            : translate('details.joinRequestReject')}
+                          {isUpdating ? <LoadingLine width="4.5rem" height="0.75rem" /> : translate('details.joinRequestReject')}
                         </TouchButton>
                       </div>
                     )}

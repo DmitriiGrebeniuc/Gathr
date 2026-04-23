@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { LoadingAvatarStrip, LoadingCard } from './LoadingState';
 import {
   fetchMyProfileAccessSummary,
   fetchParticipantCounts,
@@ -29,6 +30,7 @@ export function ParticipantsScreen({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
   const [accessRestricted, setAccessRestricted] = useState(false);
+  const [rowsResolved, setRowsResolved] = useState(false);
 
   const { translate } = useLanguage();
 
@@ -44,6 +46,7 @@ export function ParticipantsScreen({
     }
 
     try {
+      setRowsResolved(false);
       const {
         data: { user },
         error: userError,
@@ -60,6 +63,7 @@ export function ParticipantsScreen({
       if (userError || !resolvedUserId) {
         setParticipants([]);
         setAccessRestricted(true);
+        setRowsResolved(true);
         return;
       }
 
@@ -84,6 +88,7 @@ export function ParticipantsScreen({
       if (!canViewIdentities) {
         setParticipants([]);
         setAccessRestricted(true);
+        setRowsResolved(true);
         return;
       }
 
@@ -97,11 +102,13 @@ export function ParticipantsScreen({
         }))
       );
       setAccessRestricted(false);
+      setRowsResolved(true);
     } catch (error) {
       console.error('Unexpected participants load error:', error);
       setParticipants([]);
       setCurrentUserId(null);
       setAccessRestricted(true);
+      setRowsResolved(true);
     } finally {
       setLoading(false);
     }
@@ -121,6 +128,7 @@ export function ParticipantsScreen({
           event: '*',
           schema: 'public',
           table: 'participants',
+          filter: `event_id=eq.${event.id}`,
         },
         async () => {
           await loadParticipants();
@@ -213,8 +221,15 @@ export function ParticipantsScreen({
             </div>
 
             {loading && (
-              <div className="text-sm text-muted-foreground">
-                {translate('participants.loading')}
+              <div className="space-y-3">
+                <LoadingCard lines={['36%', '54%']} />
+                <div
+                  className="rounded-2xl border px-4 py-4 space-y-3"
+                  style={{ backgroundColor: 'var(--card)' }}
+                >
+                  <LoadingAvatarStrip count={3} />
+                  <LoadingCard className="border-0 p-0 shadow-none" lines={['72%', '58%']} />
+                </div>
               </div>
             )}
 
@@ -239,12 +254,12 @@ export function ParticipantsScreen({
             {!loading &&
               !accessRestricted &&
               participantCount > 0 &&
-              participants.length === 0 && (
+              !rowsResolved && (
                 <div
-                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
+                  className="rounded-2xl border px-4 py-4 space-y-3"
                   style={{ backgroundColor: 'var(--card)' }}
                 >
-                  {translate('common.loading')}
+                  <LoadingAvatarStrip count={3} />
                 </div>
               )}
 

@@ -7,6 +7,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { EventLocationMap } from './EventLocationMap';
 import { buildJoinEventLoginPayload } from '../auth/postLoginIntent';
 import { feedback } from '../lib/feedback';
+import { LoadingAvatarStrip, LoadingCard, LoadingLine } from './LoadingState';
 import {
   createEventJoinRequest,
   fetchCreatorEventJoinRequests,
@@ -72,6 +73,9 @@ export function EventDetailsScreen({
   const [pendingJoinRequestsCount, setPendingJoinRequestsCount] = useState(0);
 
   const autoJoinAttemptedRef = useRef(false);
+  const eventLoadRequestRef = useRef(0);
+  const participantLoadRequestRef = useRef(0);
+  const eventStateLoadRequestRef = useRef(0);
 
   const backTarget = event?.backTarget || 'home';
   const pendingAuthAction = event?.authAction || null;
@@ -163,54 +167,69 @@ export function EventDetailsScreen({
     return lines.join('\n');
   };
 
-  const loadEvent = async () => {
-    if (!event?.id) {
+  const loadEvent = async (eventIdOverride?: string | null) => {
+    const requestedEventId = eventIdOverride ?? event?.id ?? null;
+
+    if (!requestedEventId) {
       setEventData(event || defaultEvent);
-      return;
+      return null;
     }
+
+    const requestId = ++eventLoadRequestRef.current;
 
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .eq('id', event.id)
+      .eq('id', requestedEventId)
       .maybeSingle();
 
     if (error) {
       console.error('Failed to load event details:', error);
       setEventData(event || defaultEvent);
-      return;
+      return null;
     }
 
     if (!data) {
       setEventData(event || defaultEvent);
-      return;
+      return null;
     }
 
-    setEventData({
-      ...(event || {}),
-      ...data,
-      date_time: data.date_time ?? event?.date_time ?? null,
-      location: data.location ?? event?.location ?? null,
-      location_lat:
-        typeof data.location_lat === 'number'
-          ? data.location_lat
-          : typeof event?.location_lat === 'number'
-            ? event.location_lat
-            : null,
-      location_lng:
-        typeof data.location_lng === 'number'
-          ? data.location_lng
-          : typeof event?.location_lng === 'number'
-            ? event.location_lng
-            : null,
-      join_mode: data.join_mode ?? event?.join_mode ?? 'open',
+    if (requestId !== eventLoadRequestRef.current) {
+      return data;
+    }
+
+    setEventData((prev: any) => {
+      const baseEvent = prev?.id === requestedEventId ? prev : event || defaultEvent;
+
+      return {
+        ...baseEvent,
+        ...data,
+        date_time: data.date_time ?? baseEvent?.date_time ?? null,
+        location: data.location ?? baseEvent?.location ?? null,
+        location_lat:
+          typeof data.location_lat === 'number'
+            ? data.location_lat
+            : typeof baseEvent?.location_lat === 'number'
+              ? baseEvent.location_lat
+              : null,
+        location_lng:
+          typeof data.location_lng === 'number'
+            ? data.location_lng
+            : typeof baseEvent?.location_lng === 'number'
+              ? baseEvent.location_lng
+              : null,
+        join_mode: data.join_mode ?? baseEvent?.join_mode ?? 'open',
+      };
     });
+
+    return data;
   };
 
   const loadParticipants = async (
+    eventIdOverride = eventData.id,
     canViewIdentitiesOverride = canViewParticipantIdentities
   ) => {
-    if (!eventData.id) {
+    if (!eventIdOverride) {
       setParticipants([]);
       setParticipantCount(0);
       setParticipantListResolved(true);
@@ -218,9 +237,15 @@ export function EventDetailsScreen({
     }
 
     try {
+      const requestId = ++participantLoadRequestRef.current;
       setParticipantListResolved(false);
-      const countsMap = await fetchParticipantCounts([eventData.id]);
-      setParticipantCount(countsMap[eventData.id] || 0);
+      const countsMap = await fetchParticipantCounts([eventIdOverride]);
+
+      if (requestId !== participantLoadRequestRef.current) {
+        return;
+      }
+
+      setParticipantCount(countsMap[eventIdOverride] || 0);
 
       if (!canViewIdentitiesOverride) {
         setParticipants([]);
@@ -228,8 +253,12 @@ export function EventDetailsScreen({
         return;
       }
 
-      const participantRows = await fetchParticipantIdentityRows(eventData.id);
+      const participantRows = await fetchParticipantIdentityRows(eventIdOverride);
       const nameMap = await fetchPublicProfileNameMap(participantRows.map((row) => row.user_id));
+
+      if (requestId !== participantLoadRequestRef.current) {
+        return;
+      }
 
       setParticipants(
         participantRows.map((row) => ({
@@ -245,10 +274,17 @@ export function EventDetailsScreen({
     }
   };
 
-  const loadEventState = async () => {
+  const loadEventState = async (
+    eventIdOverride = eventData.id,
+    joinModeOverride: 'open' | 'request' = (eventData.join_mode || 'open') as
+      | 'open'
+      | 'request',
+    creatorIdOverride: string | null = eventData.creator_id ?? null
+  ) => {
     setEventStateResolved(false);
 
     try {
+      const requestId = ++eventStateLoadRequestRef.current;
       const {
         data: { user },
         error: userError,
@@ -261,11 +297,21 @@ export function EventDetailsScreen({
         setIsAdmin(false);
         setCanViewParticipantIdentities(false);
         setParticipantAccessResolved(true);
-        setPrivateDetails(
-          joinMode === 'open' && eventData.id
-            ? await fetchEventPrivateDetails(eventData.id)
-            : null
-        );
+        const nextPrivateDetails =
+          joinModeOverride === 'open' && eventIdOverride
+            ? await fetchEventPrivateDetails(eventIdOverride)
+            : null;
+
+        if (requestId !== eventStateLoadRequestRef.current) {
+          return;
+        }
+
+        await loadParticipants(eventIdOverride, false);
+        if (requestId !== eventStateLoadRequestRef.current) {
+          return;
+        }
+
+        setPrivateDetails(nextPrivateDetails);
         setMyJoinRequest(null);
         setPendingJoinRequestsCount(0);
         setEventStateResolved(true);
@@ -278,10 +324,10 @@ export function EventDetailsScreen({
       setCurrentUserId(user.id);
       setIsAdmin(nextIsAdmin);
 
-      const creator = eventData.creator_id === user.id;
+      const creator = creatorIdOverride === user.id;
       setIsCreator(creator);
 
-      if (!eventData.id) {
+      if (!eventIdOverride) {
         setHasJoined(false);
         setCanViewParticipantIdentities(creator || nextIsAdmin);
         setParticipantAccessResolved(true);
@@ -296,7 +342,7 @@ export function EventDetailsScreen({
         .from('participants')
         .select('id')
         .eq('user_id', user.id)
-        .eq('event_id', eventData.id)
+        .eq('event_id', eventIdOverride)
         .maybeSingle();
 
       if (error) {
@@ -306,20 +352,24 @@ export function EventDetailsScreen({
       const joined = !!data;
       const canViewIdentities = creator || joined || nextIsAdmin;
       const canViewPrivateDetails =
-        joinMode === 'open' || creator || joined || nextIsAdmin;
+        joinModeOverride === 'open' || creator || joined || nextIsAdmin;
       const nextPrivateDetails = canViewPrivateDetails
-        ? await fetchEventPrivateDetails(eventData.id)
+        ? await fetchEventPrivateDetails(eventIdOverride)
         : null;
       const nextMyJoinRequest =
-        joinMode === 'request' && !creator && !joined && !nextIsAdmin
-          ? await fetchMyEventJoinRequest(eventData.id)
+        joinModeOverride === 'request' && !creator && !joined && !nextIsAdmin
+          ? await fetchMyEventJoinRequest(eventIdOverride)
           : null;
       const nextPendingJoinRequestsCount =
-        joinMode === 'request' && (creator || nextIsAdmin)
+        joinModeOverride === 'request' && (creator || nextIsAdmin)
           ? (
-              await fetchCreatorEventJoinRequests(eventData.id)
+              await fetchCreatorEventJoinRequests(eventIdOverride)
             ).filter((request) => request.status === 'pending').length
           : 0;
+
+      if (requestId !== eventStateLoadRequestRef.current) {
+        return;
+      }
 
       setHasJoined(joined);
       setCanViewParticipantIdentities(canViewIdentities);
@@ -327,7 +377,10 @@ export function EventDetailsScreen({
       setMyJoinRequest(nextMyJoinRequest);
       setPendingJoinRequestsCount(nextPendingJoinRequestsCount);
       setParticipantAccessResolved(true);
-      await loadParticipants(canViewIdentities);
+      await loadParticipants(eventIdOverride, canViewIdentities);
+      if (requestId !== eventStateLoadRequestRef.current) {
+        return;
+      }
       setEventStateResolved(true);
     } catch (error) {
       console.error('Unexpected event state error:', error);
@@ -359,12 +412,21 @@ export function EventDetailsScreen({
   }, [event, defaultEvent]);
 
   useEffect(() => {
-    void loadEvent();
+    const hydrateEvent = async () => {
+      const loadedEvent = await loadEvent(event?.id);
+      const resolvedEvent = loadedEvent || event;
+
+      await loadEventState(
+        resolvedEvent?.id ?? null,
+        (resolvedEvent?.join_mode ?? 'open') as 'open' | 'request',
+        resolvedEvent?.creator_id ?? null
+      );
+    };
+
+    void hydrateEvent();
   }, [event?.id]);
 
   useEffect(() => {
-    void loadEventState();
-
     if (!eventData.id) return;
 
     const participantsChannel = supabase
@@ -375,9 +437,14 @@ export function EventDetailsScreen({
           event: '*',
           schema: 'public',
           table: 'participants',
+          filter: `event_id=eq.${eventData.id}`,
         },
         async () => {
-          await loadEventState();
+          await loadEventState(
+            eventData.id,
+            (eventData.join_mode || 'open') as 'open' | 'request',
+            eventData.creator_id ?? null
+          );
         }
       )
       .subscribe();
@@ -393,8 +460,14 @@ export function EventDetailsScreen({
           filter: `id=eq.${eventData.id}`,
         },
         async () => {
-          await loadEvent();
-          await loadEventState();
+          const loadedEvent = await loadEvent(eventData.id);
+          const resolvedEvent = loadedEvent || eventData;
+
+          await loadEventState(
+            resolvedEvent.id,
+            (resolvedEvent.join_mode || 'open') as 'open' | 'request',
+            resolvedEvent.creator_id ?? null
+          );
         }
       )
       .subscribe();
@@ -403,7 +476,7 @@ export function EventDetailsScreen({
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(eventsChannel);
     };
-  }, [eventData.id, eventData.creator_id, joinMode, canViewParticipantIdentities]);
+  }, [eventData.id, eventData.creator_id, eventData.join_mode]);
 
   const handleShare = async () => {
     if (!eventData.id || !eventShareUrl) {
@@ -483,8 +556,11 @@ export function EventDetailsScreen({
     setHasJoined(true);
     setCanViewParticipantIdentities(true);
     setParticipantAccessResolved(true);
-    await loadEventState();
-    await loadParticipants();
+    await loadEventState(
+      eventData.id,
+      (eventData.join_mode || 'open') as 'open' | 'request',
+      eventData.creator_id ?? null
+    );
     return true;
   };
 
@@ -641,8 +717,11 @@ export function EventDetailsScreen({
       }
 
       setHasJoined(false);
-      await loadEventState();
-      await loadParticipants();
+      await loadEventState(
+        eventData.id,
+        (eventData.join_mode || 'open') as 'open' | 'request',
+        eventData.creator_id ?? null
+      );
     } catch (error) {
       console.error('Unexpected leave error:', error);
       feedback.error(translate('details.leaveUnexpectedError'));
@@ -843,17 +922,7 @@ export function EventDetailsScreen({
             </motion.div>
 
             {isClosedAccessResolving && (
-              <div
-                className="rounded-2xl border px-4 py-4"
-                style={{
-                  backgroundColor: 'var(--card)',
-                  borderColor: 'var(--accent-border-muted)',
-                }}
-              >
-                <p className="text-sm text-muted-foreground">
-                  {translate('common.loading')}
-                </p>
-              </div>
+              <LoadingCard lines={['42%', '88%', '72%']} />
             )}
 
             {shouldShowClosedRestrictedState && (
@@ -888,11 +957,17 @@ export function EventDetailsScreen({
                   <p className="text-sm text-muted-foreground">{translate('details.dateTime')}</p>
                   <p>
                     {shouldShowPrivateFieldsLoading
-                      ? translate('common.loading')
+                      ? ''
                       : shouldShowClosedRestrictedState
                       ? translate('details.closedDateHidden')
                       : formatDate(displayedDateTime)}
                   </p>
+                  {shouldShowPrivateFieldsLoading && (
+                    <div className="mt-2 space-y-2">
+                      <LoadingLine width="7rem" />
+                      <LoadingLine width="5rem" />
+                    </div>
+                  )}
                 </div>
               </motion.div>
 
@@ -913,11 +988,17 @@ export function EventDetailsScreen({
                     <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
                     <p>
                       {shouldShowPrivateFieldsLoading
-                        ? translate('common.loading')
+                        ? ''
                         : shouldShowClosedRestrictedState
                         ? translate('details.closedLocationHidden')
                         : displayedLocation || translate('details.locationNotSpecified')}
                     </p>
+                    {shouldShowPrivateFieldsLoading && (
+                      <div className="mt-2 space-y-2">
+                        <LoadingLine width="9rem" />
+                        <LoadingLine width="12rem" />
+                      </div>
+                    )}
 
                     {googleMapsUrl && isNativeApp && canViewClosedDetails && (
                       <a
@@ -934,12 +1015,7 @@ export function EventDetailsScreen({
                 </div>
 
                 {shouldShowPrivateFieldsLoading ? (
-                  <div
-                    className="rounded-2xl border px-4 py-4 text-sm text-muted-foreground"
-                    style={{ backgroundColor: 'var(--card)' }}
-                  >
-                    {translate('common.loading')}
-                  </div>
+                  <LoadingCard className="min-h-[10rem]" lines={['100%', '100%', '90%']} />
                 ) : shouldShowClosedRestrictedState ? (
                   <div
                     className="rounded-2xl border px-4 py-4 text-sm text-muted-foreground"
@@ -982,10 +1058,14 @@ export function EventDetailsScreen({
               {!participantAccessResolved ||
               (canViewParticipantIdentities && !participantListResolved) ? (
                 <div
-                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
+                  className="rounded-2xl border px-4 py-4 space-y-3"
                   style={{ backgroundColor: 'var(--card)' }}
                 >
-                  {translate('common.loading')}
+                  <LoadingAvatarStrip />
+                  <div className="space-y-2">
+                    <LoadingLine width="66%" />
+                    <LoadingLine width="48%" />
+                  </div>
                 </div>
               ) : canViewParticipantIdentities && participants.length > 0 ? (
                 <button
@@ -1063,10 +1143,10 @@ export function EventDetailsScreen({
                 </button>
               ) : canViewParticipantIdentities && participantCount > 0 ? (
                 <div
-                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
+                  className="rounded-2xl border px-4 py-4 space-y-3"
                   style={{ backgroundColor: 'var(--card)' }}
                 >
-                  {translate('common.loading')}
+                  <LoadingAvatarStrip />
                 </div>
               ) : !canViewParticipantIdentities && participantCount > 0 ? (
                 <div

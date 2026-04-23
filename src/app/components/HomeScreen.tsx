@@ -13,6 +13,7 @@ import {
 import { LoadingLogo } from './LoadingLogo';
 import { normalizeCityName } from '../lib/locationCity';
 import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
+import { LoadingCard, LoadingLine } from './LoadingState';
 import {
   fetchAccessibleEventPrivateDetailsMap,
   fetchMyProfileAccessSummary,
@@ -1123,8 +1124,17 @@ export function HomeScreen({
           onScroll={handleContentScroll}
         >
           {shouldShowInitialLoader && (
-            <div className="flex justify-center py-8">
-              <LoadingLogo size={52} label={translate('common.loading')} />
+            <div className="space-y-3 py-1">
+              <div className="flex justify-center py-4">
+                <LoadingLogo size={52} label={translate('common.loading')} />
+              </div>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <LoadingCard
+                  key={index}
+                  className="rounded-xl"
+                  lines={['42%', '26%', '68%', '84%', '55%']}
+                />
+              ))}
             </div>
           )}
 
@@ -1283,7 +1293,14 @@ export function HomeScreen({
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               }}
             >
-              {loadingMore ? translate('home.loading') : translate('home.loadMore')}
+              {loadingMore ? (
+                <div className="flex items-center justify-center gap-3">
+                  <LoadingLine width="4rem" height="0.75rem" />
+                  <LoadingLine width="3rem" height="0.75rem" />
+                </div>
+              ) : (
+                translate('home.loadMore')
+              )}
             </motion.button>
           )}
         </div>

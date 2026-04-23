@@ -251,7 +251,11 @@ export function EventDetailsScreen({
         setIsAdmin(false);
         setCanViewParticipantIdentities(false);
         setParticipantAccessResolved(true);
-        setPrivateDetails(null);
+        setPrivateDetails(
+          joinMode === 'open' && eventData.id
+            ? await fetchEventPrivateDetails(eventData.id)
+            : null
+        );
         setMyJoinRequest(null);
         setPendingJoinRequestsCount(0);
         setEventStateResolved(true);
@@ -291,7 +295,8 @@ export function EventDetailsScreen({
 
       const joined = !!data;
       const canViewIdentities = creator || joined || nextIsAdmin;
-      const canViewPrivateDetails = creator || joined || nextIsAdmin;
+      const canViewPrivateDetails =
+        joinMode === 'open' || creator || joined || nextIsAdmin;
       const nextPrivateDetails = canViewPrivateDetails
         ? await fetchEventPrivateDetails(eventData.id)
         : null;

@@ -380,6 +380,18 @@ export function NotificationsScreen({
         if (invitationsError) {
           console.error('Ошибка загрузки invitations:', invitationsError);
         } else {
+          const invitationEventIds = ((invitations || []) as any[])
+            .map((invitation: any) => {
+              const eventData = Array.isArray(invitation.events)
+                ? invitation.events[0]
+                : invitation.events;
+
+              return eventData?.id || null;
+            })
+            .filter((eventId: string | null): eventId is string => !!eventId);
+
+          const invitationPrivateDetailsMap =
+            await fetchAccessibleEventPrivateDetailsMap(invitationEventIds);
           const inviterNameMap = await fetchPublicProfileNameMap(
             ((invitations || []) as any[]).map((invitation: any) => invitation.inviter_id)
           );
@@ -408,8 +420,12 @@ export function NotificationsScreen({
                   id: eventData.id,
                   title: eventData.title,
                   description: eventData.description,
-                  date_time: eventData.date_time,
-                  location: eventData.location,
+                  date_time:
+                    invitationPrivateDetailsMap[eventData.id]?.date_time ??
+                    eventData.date_time,
+                  location:
+                    invitationPrivateDetailsMap[eventData.id]?.location ??
+                    eventData.location,
                   creator_id: eventData.creator_id,
                 },
                 sortDate: invitation.created_at || null,

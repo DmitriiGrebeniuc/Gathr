@@ -209,7 +209,7 @@ export function HomeScreen({
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select('*')
-        .order('date_time', { ascending: true })
+        .order('created_at', { ascending: false })
         .range(0, SERVER_BATCH_SIZE - 1);
 
       if (eventsError) {
@@ -237,11 +237,9 @@ export function HomeScreen({
         fetchJoinedEventIdsForUser(userId),
       ]);
 
-      const privateDetailsMap = userId
-        ? await fetchAccessibleEventPrivateDetailsMap(
-            (eventsData || []).map((event: any) => event.id)
-          )
-        : {};
+      const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
+        (eventsData || []).map((event: any) => event.id)
+      );
 
       const creatorNameMap = Object.fromEntries(
         Object.entries(creatorNameMapRaw).map(([id, name]) => [id, name || translate('common.unknown')])
@@ -309,7 +307,7 @@ export function HomeScreen({
       const { data: moreEventsData, error: moreEventsError } = await supabase
         .from('events')
         .select('*')
-        .order('date_time', { ascending: true })
+        .order('created_at', { ascending: false })
         .range(from, to);
 
       if (moreEventsError) {
@@ -330,11 +328,9 @@ export function HomeScreen({
         fetchParticipantCounts((moreEventsData || []).map((event: any) => event.id)),
       ]);
 
-      const privateDetailsMap = currentUserIdRef.current
-        ? await fetchAccessibleEventPrivateDetailsMap(
-            (moreEventsData || []).map((event: any) => event.id)
-          )
-        : {};
+      const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
+        (moreEventsData || []).map((event: any) => event.id)
+      );
 
       const creatorNameMap = Object.fromEntries(
         Object.entries(creatorNameMapRaw).map(([id, name]) => [id, name || translate('common.unknown')])

@@ -8,11 +8,18 @@ import { EventLocationMap } from './EventLocationMap';
 import { buildJoinEventLoginPayload } from '../auth/postLoginIntent';
 import { feedback } from '../lib/feedback';
 import {
+  createEventJoinRequest,
+  fetchCreatorEventJoinRequests,
+  fetchEventPrivateDetails,
+  fetchMyEventJoinRequest,
   fetchMyProfileAccessSummary,
   fetchParticipantCounts,
   fetchParticipantIdentityRows,
   fetchPublicProfileNameMap,
+  type EventJoinRequest,
+  type EventPrivateDetails,
 } from '../lib/publicData';
+import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -35,6 +42,7 @@ export function EventDetailsScreen({
       date_time: new Date().toISOString(),
       location: translate('details.fallbackLocation'),
       creator_id: null,
+      join_mode: 'open' as const,
     }),
     [translate]
   );
@@ -43,9 +51,9 @@ export function EventDetailsScreen({
   const [resolvedBackTarget, setResolvedBackTarget] = useState(
     event?.backTarget || 'home'
   );
-
   const [hasJoined, setHasJoined] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [sharing, setSharing] = useState(false);
@@ -54,19 +62,44 @@ export function EventDetailsScreen({
   const [participantCount, setParticipantCount] = useState(event?.participantCount || 0);
   const [canViewParticipantIdentities, setCanViewParticipantIdentities] = useState(false);
   const [participantAccessResolved, setParticipantAccessResolved] = useState(false);
+  const [privateDetails, setPrivateDetails] = useState<EventPrivateDetails | null>(null);
+  const [myJoinRequest, setMyJoinRequest] = useState<EventJoinRequest | null>(null);
+  const [showJoinRequestComposer, setShowJoinRequestComposer] = useState(false);
+  const [joinRequestMessage, setJoinRequestMessage] = useState('');
+  const [submittingJoinRequest, setSubmittingJoinRequest] = useState(false);
+  const [pendingJoinRequestsCount, setPendingJoinRequestsCount] = useState(0);
 
   const autoJoinAttemptedRef = useRef(false);
 
   const backTarget = event?.backTarget || 'home';
   const pendingAuthAction = event?.authAction || null;
+  const joinMode = (eventData.join_mode || 'open') as 'open' | 'request';
+  const canViewClosedDetails = joinMode !== 'request' || isCreator || hasJoined || isAdmin;
 
-  const eventDate = eventData.date_time ? new Date(eventData.date_time) : null;
+  const displayedDateTime =
+    joinMode === 'request' && canViewClosedDetails
+      ? privateDetails?.date_time || eventData.date_time
+      : eventData.date_time;
+  const displayedLocation =
+    joinMode === 'request' && canViewClosedDetails
+      ? privateDetails?.location || eventData.location
+      : eventData.location;
+  const displayedLocationLat =
+    joinMode === 'request' && canViewClosedDetails
+      ? privateDetails?.location_lat
+      : eventData.location_lat;
+  const displayedLocationLng =
+    joinMode === 'request' && canViewClosedDetails
+      ? privateDetails?.location_lng
+      : eventData.location_lng;
+
+  const eventDate = displayedDateTime ? new Date(displayedDateTime) : null;
   const isPastEvent =
     eventDate !== null &&
     !Number.isNaN(eventDate.getTime()) &&
     eventDate.getTime() < Date.now();
 
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string | null) => {
     if (!dateString) return translate('common.dateNotSpecified');
 
     const date = new Date(dateString);
@@ -79,16 +112,16 @@ export function EventDetailsScreen({
   };
 
   const hasLocationCoordinates =
-    typeof eventData.location_lat === 'number' &&
-    typeof eventData.location_lng === 'number';
+    typeof displayedLocationLat === 'number' &&
+    typeof displayedLocationLng === 'number';
 
   const isNativeApp =
     typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.();
 
   const googleMapsUrl = hasLocationCoordinates
-    ? `https://www.google.com/maps?q=${eventData.location_lat},${eventData.location_lng}`
-    : eventData.location
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventData.location)}`
+    ? `https://www.google.com/maps?q=${displayedLocationLat},${displayedLocationLng}`
+    : displayedLocation
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayedLocation)}`
       : null;
 
   const eventShareUrl =
@@ -101,8 +134,16 @@ export function EventDetailsScreen({
       translate('details.shareInviteLine'),
       '',
       `${translate('details.shareLabelEvent')} ${eventData.title || translate('common.event')}`,
-      `${translate('details.shareLabelDate')} ${formatDate(eventData.date_time)}`,
-      `${translate('details.shareLabelLocation')} ${eventData.location || translate('details.locationNotSpecified')}`,
+      `${translate('details.shareLabelDate')} ${
+        canViewClosedDetails
+          ? formatDate(displayedDateTime)
+          : translate('details.closedDateHidden')
+      }`,
+      `${translate('details.shareLabelLocation')} ${
+        canViewClosedDetails
+          ? displayedLocation || translate('details.locationNotSpecified')
+          : translate('details.closedLocationHidden')
+      }`,
     ];
 
     if (eventData.description) {
@@ -129,21 +170,18 @@ export function EventDetailsScreen({
       .maybeSingle();
 
     if (error) {
-      console.error('Ошибка загрузки события:', error);
+      console.error('Failed to load event details:', error);
       setEventData(event || defaultEvent);
       return;
     }
 
-    if (!data) {
-      setEventData(event || defaultEvent);
-      return;
-    }
-
-    setEventData(data);
+    setEventData(data || event || defaultEvent);
   };
 
   const loadParticipants = async () => {
-    if (!eventData.id) return;
+    if (!eventData.id) {
+      return;
+    }
 
     try {
       const countsMap = await fetchParticipantCounts([eventData.id]);
@@ -180,22 +218,31 @@ export function EventDetailsScreen({
         setCurrentUserId(null);
         setHasJoined(false);
         setIsCreator(false);
+        setIsAdmin(false);
         setCanViewParticipantIdentities(false);
         setParticipantAccessResolved(true);
+        setPrivateDetails(null);
+        setMyJoinRequest(null);
+        setPendingJoinRequestsCount(0);
         return;
       }
 
       const myAccess = await fetchMyProfileAccessSummary();
-      const isAdmin = myAccess?.role === 'admin';
+      const nextIsAdmin = myAccess?.role === 'admin';
 
       setCurrentUserId(user.id);
+      setIsAdmin(nextIsAdmin);
+
       const creator = eventData.creator_id === user.id;
       setIsCreator(creator);
 
       if (!eventData.id) {
         setHasJoined(false);
-        setCanViewParticipantIdentities(creator || isAdmin);
+        setCanViewParticipantIdentities(creator || nextIsAdmin);
         setParticipantAccessResolved(true);
+        setPrivateDetails(null);
+        setMyJoinRequest(null);
+        setPendingJoinRequestsCount(0);
         return;
       }
 
@@ -207,21 +254,48 @@ export function EventDetailsScreen({
         .maybeSingle();
 
       if (error) {
-        console.error('Ошибка проверки участия:', error);
-        setHasJoined(false);
-        setCanViewParticipantIdentities(creator || isAdmin);
-      } else {
-        const joined = !!data;
-        setHasJoined(joined);
-        setCanViewParticipantIdentities(creator || joined || isAdmin);
+        console.error('Failed to check participant membership:', error);
       }
+
+      const joined = !!data;
+      const canViewIdentities = creator || joined || nextIsAdmin;
+
+      setHasJoined(joined);
+      setCanViewParticipantIdentities(canViewIdentities);
       setParticipantAccessResolved(true);
+
+      if (joinMode === 'request' && (creator || joined || nextIsAdmin)) {
+        const privateDetailsData = await fetchEventPrivateDetails(eventData.id);
+        setPrivateDetails(privateDetailsData);
+      } else {
+        setPrivateDetails(null);
+      }
+
+      if (joinMode === 'request' && !creator && !joined && !nextIsAdmin) {
+        const joinRequest = await fetchMyEventJoinRequest(eventData.id);
+        setMyJoinRequest(joinRequest);
+      } else {
+        setMyJoinRequest(null);
+      }
+
+      if (joinMode === 'request' && (creator || nextIsAdmin)) {
+        const requests = await fetchCreatorEventJoinRequests(eventData.id);
+        setPendingJoinRequestsCount(
+          requests.filter((request) => request.status === 'pending').length
+        );
+      } else {
+        setPendingJoinRequestsCount(0);
+      }
     } catch (error) {
       console.error('Unexpected event state error:', error);
       setHasJoined(false);
       setIsCreator(false);
+      setIsAdmin(false);
       setCanViewParticipantIdentities(false);
       setParticipantAccessResolved(true);
+      setPrivateDetails(null);
+      setMyJoinRequest(null);
+      setPendingJoinRequestsCount(0);
     }
   };
 
@@ -231,16 +305,20 @@ export function EventDetailsScreen({
     setParticipantCount(event?.participantCount || 0);
     setCanViewParticipantIdentities(!!event?.canViewParticipantIdentities);
     setParticipantAccessResolved(false);
+    setPrivateDetails(null);
+    setMyJoinRequest(null);
+    setShowJoinRequestComposer(false);
+    setJoinRequestMessage('');
     autoJoinAttemptedRef.current = false;
   }, [event, defaultEvent]);
 
   useEffect(() => {
-    loadEvent();
+    void loadEvent();
   }, [event?.id]);
 
   useEffect(() => {
-    loadEventState();
-    loadParticipants();
+    void loadEventState();
+    void loadParticipants();
 
     if (!eventData.id) return;
 
@@ -272,6 +350,7 @@ export function EventDetailsScreen({
         },
         async () => {
           await loadEvent();
+          await loadEventState();
         }
       )
       .subscribe();
@@ -280,7 +359,7 @@ export function EventDetailsScreen({
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(eventsChannel);
     };
-  }, [eventData.id, eventData.creator_id, canViewParticipantIdentities]);
+  }, [eventData.id, eventData.creator_id, joinMode, canViewParticipantIdentities]);
 
   const handleShare = async () => {
     if (!eventData.id || !eventShareUrl) {
@@ -352,7 +431,7 @@ export function EventDetailsScreen({
     ]);
 
     if (error) {
-      console.error('Ошибка присоединения:', error);
+      console.error('Join event failed:', error);
       feedback.error(translate('details.joinFailed'));
       return false;
     }
@@ -360,6 +439,7 @@ export function EventDetailsScreen({
     setHasJoined(true);
     setCanViewParticipantIdentities(true);
     setParticipantAccessResolved(true);
+    await loadEventState();
     await loadParticipants();
     return true;
   };
@@ -382,7 +462,7 @@ export function EventDetailsScreen({
         return;
       }
 
-      if (hasJoined || loadingAction) {
+      if (hasJoined || loadingAction || joinMode !== 'open') {
         return;
       }
 
@@ -400,8 +480,8 @@ export function EventDetailsScreen({
       }
     };
 
-    autoJoinAfterAuth();
-  }, [pendingAuthAction, currentUserId, eventData.id, hasJoined]);
+    void autoJoinAfterAuth();
+  }, [pendingAuthAction, currentUserId, eventData.id, hasJoined, joinMode]);
 
   const handleJoin = async () => {
     if (!currentUserId) {
@@ -426,6 +506,69 @@ export function EventDetailsScreen({
     }
   };
 
+  const handleOpenJoinRequestComposer = () => {
+    if (!currentUserId) {
+      const detailPayload = {
+        ...eventData,
+        backTarget: resolvedBackTarget,
+      };
+
+      onNavigate(
+        'login',
+        {
+          returnToAfterAuth: {
+            screen: 'event-details',
+            data: detailPayload,
+          },
+          actionAfterAuth: null,
+          backScreen: 'event-details',
+          backData: detailPayload,
+        },
+        'forward'
+      );
+      return;
+    }
+
+    setShowJoinRequestComposer((prev) => !prev);
+  };
+
+  const handleSubmitJoinRequest = async () => {
+    if (!eventData.id) {
+      feedback.error(translate('details.eventNotResolved'));
+      return;
+    }
+
+    setSubmittingJoinRequest(true);
+
+    try {
+      const nextMessage = trimAndLimitText(
+        joinRequestMessage,
+        INPUT_LIMITS.eventJoinRequestMessage
+      );
+
+      const { data, error } = await createEventJoinRequest(
+        eventData.id,
+        nextMessage || null
+      );
+
+      if (error) {
+        console.error('Failed to create join request:', error);
+        feedback.error(translate('details.joinRequestSubmitFailed'));
+        return;
+      }
+
+      setMyJoinRequest(data);
+      setJoinRequestMessage('');
+      setShowJoinRequestComposer(false);
+      feedback.success(translate('details.joinRequestSubmitted'));
+    } catch (error) {
+      console.error('Unexpected join request submit error:', error);
+      feedback.error(translate('details.joinRequestSubmitUnexpectedError'));
+    } finally {
+      setSubmittingJoinRequest(false);
+    }
+  };
+
   const handleLeave = async () => {
     if (!currentUserId) {
       feedback.warning(translate('details.loginRequired'));
@@ -447,13 +590,14 @@ export function EventDetailsScreen({
         .eq('event_id', eventData.id);
 
       if (error) {
-        console.error('Ошибка выхода из события:', error);
+        console.error('Leave event failed:', error);
         feedback.error(translate('details.leaveFailed'));
         setLoadingAction(false);
         return;
       }
 
       setHasJoined(false);
+      await loadEventState();
       await loadParticipants();
     } catch (error) {
       console.error('Unexpected leave error:', error);
@@ -500,7 +644,7 @@ export function EventDetailsScreen({
         .eq('event_id', eventData.id);
 
       if (participantsError) {
-        console.error('Ошибка удаления участников события:', participantsError);
+        console.error('Failed to delete event participants:', participantsError);
         feedback.error(translate('details.deleteParticipantsFailed'));
         setLoadingDelete(false);
         return;
@@ -513,7 +657,7 @@ export function EventDetailsScreen({
         .eq('creator_id', currentUserId);
 
       if (eventError) {
-        console.error('Ошибка удаления события:', eventError);
+        console.error('Failed to delete event:', eventError);
         feedback.error(translate('details.deleteFailed'));
         setLoadingDelete(false);
         return;
@@ -544,6 +688,57 @@ export function EventDetailsScreen({
     );
   };
 
+  const handleOpenJoinRequests = () => {
+    if (!eventData.id) {
+      feedback.error(translate('details.eventNotResolved'));
+      return;
+    }
+
+    onNavigate(
+      'event-join-requests',
+      {
+        ...eventData,
+        backTarget: resolvedBackTarget,
+      },
+      'forward'
+    );
+  };
+
+  const renderJoinRequestStatus = () => {
+    if (!myJoinRequest) {
+      return null;
+    }
+
+    const statusKey =
+      myJoinRequest.status === 'approved'
+        ? 'details.joinRequestStatusApproved'
+        : myJoinRequest.status === 'rejected'
+          ? 'details.joinRequestStatusRejected'
+          : 'details.joinRequestStatusPending';
+
+    const descriptionKey =
+      myJoinRequest.status === 'approved'
+        ? 'details.joinRequestApprovedDescription'
+        : myJoinRequest.status === 'rejected'
+          ? 'details.joinRequestRejectedDescription'
+          : 'details.joinRequestPendingDescription';
+
+    return (
+      <div
+        className="rounded-2xl border px-4 py-4"
+        style={{
+          backgroundColor: 'var(--card)',
+          borderColor: 'var(--accent-border-muted)',
+        }}
+      >
+        <p style={{ color: 'var(--accent)' }}>{translate(statusKey as any)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {translate(descriptionKey as any)}
+        </p>
+      </div>
+    );
+  };
+
   return (
     <SwipeableScreen onSwipeBack={() => onNavigate(resolvedBackTarget)}>
       <div className="h-full flex flex-col bg-background">
@@ -569,7 +764,21 @@ export function EventDetailsScreen({
               transition={{ delay: 0.1 }}
             >
               <div className="flex items-start justify-between gap-3 mb-3">
-                <h1>{eventData.title}</h1>
+                <div>
+                  <h1>{eventData.title}</h1>
+                  {joinMode === 'request' && (
+                    <span
+                      className="mt-2 inline-flex text-[10px] px-2 py-1 rounded-full border"
+                      style={{
+                        borderColor: 'var(--accent-border-strong)',
+                        color: 'var(--accent)',
+                        backgroundColor: 'var(--accent-soft-muted)',
+                      }}
+                    >
+                      {translate('details.closedBadge')}
+                    </span>
+                  )}
+                </div>
 
                 {isPastEvent && (
                   <span
@@ -589,6 +798,21 @@ export function EventDetailsScreen({
               </p>
             </motion.div>
 
+            {joinMode === 'request' && !canViewClosedDetails && (
+              <div
+                className="rounded-2xl border px-4 py-4"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--accent-border-muted)',
+                }}
+              >
+                <p style={{ color: 'var(--accent)' }}>{translate('details.closedTitle')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {translate('details.closedDescription')}
+                </p>
+              </div>
+            )}
+
             <div className="space-y-4">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -604,7 +828,11 @@ export function EventDetailsScreen({
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">{translate('details.dateTime')}</p>
-                  <p>{formatDate(eventData.date_time)}</p>
+                  <p>
+                    {joinMode === 'request' && !canViewClosedDetails
+                      ? translate('details.closedDateHidden')
+                      : formatDate(displayedDateTime)}
+                  </p>
                 </div>
               </motion.div>
 
@@ -623,9 +851,13 @@ export function EventDetailsScreen({
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
-                    <p>{eventData.location || translate('details.locationNotSpecified')}</p>
+                    <p>
+                      {joinMode === 'request' && !canViewClosedDetails
+                        ? translate('details.closedLocationHidden')
+                        : displayedLocation || translate('details.locationNotSpecified')}
+                    </p>
 
-                    {googleMapsUrl && isNativeApp && (
+                    {googleMapsUrl && isNativeApp && canViewClosedDetails && (
                       <a
                         href={googleMapsUrl}
                         target="_blank"
@@ -633,21 +865,28 @@ export function EventDetailsScreen({
                         className="inline-block mt-2 text-sm"
                         style={{ color: 'var(--accent)' }}
                       >
-                        Открыть в Google Maps
+                        Open in Google Maps
                       </a>
                     )}
                   </div>
                 </div>
 
-                {hasLocationCoordinates && (
+                {joinMode === 'request' && !canViewClosedDetails ? (
+                  <div
+                    className="rounded-2xl border px-4 py-4 text-sm text-muted-foreground"
+                    style={{ backgroundColor: 'var(--card)' }}
+                  >
+                    {translate('details.closedMapHidden')}
+                  </div>
+                ) : hasLocationCoordinates ? (
                   <div className="mt-3 -mx-6 sm:mx-0">
                     <EventLocationMap
-                      lat={eventData.location_lat}
-                      lng={eventData.location_lng}
+                      lat={displayedLocationLat}
+                      lng={displayedLocationLng}
                       height={256}
                     />
                   </div>
-                )}
+                ) : null}
               </motion.div>
             </div>
 
@@ -769,6 +1008,50 @@ export function EventDetailsScreen({
                 </div>
               )}
             </motion.div>
+
+            {renderJoinRequestStatus()}
+
+            {showJoinRequestComposer && (
+              <div
+                className="rounded-2xl border px-4 py-4 space-y-3"
+                style={{ backgroundColor: 'var(--card)' }}
+              >
+                <label className="block text-sm text-muted-foreground">
+                  {translate('details.joinRequestMessageLabel')}
+                </label>
+                <textarea
+                  rows={3}
+                  value={joinRequestMessage}
+                  onChange={(event) =>
+                    setJoinRequestMessage(
+                      limitText(event.target.value, INPUT_LIMITS.eventJoinRequestMessage)
+                    )
+                  }
+                  maxLength={INPUT_LIMITS.eventJoinRequestMessage}
+                  placeholder={translate('details.joinRequestMessagePlaceholder')}
+                  className="w-full rounded-xl border px-3 py-3 text-sm outline-none resize-none transition-colors"
+                  style={{
+                    backgroundColor: 'var(--surface-strong)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--foreground-strong)',
+                  }}
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {joinRequestMessage.length}/{INPUT_LIMITS.eventJoinRequestMessage}
+                  </span>
+                  <TouchButton
+                    variant="primary"
+                    onClick={handleSubmitJoinRequest}
+                    disabled={submittingJoinRequest}
+                  >
+                    {submittingJoinRequest
+                      ? translate('details.joinRequestSubmitting')
+                      : translate('details.joinRequestSubmit')}
+                  </TouchButton>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -779,92 +1062,123 @@ export function EventDetailsScreen({
           className="p-6 border-t border-border space-y-3"
         >
           {!isCreator && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <TouchButton
-                  variant="ghost"
-                  onClick={handleShare}
-                  disabled={sharing || loadingAction || loadingDelete || !eventData.id}
-                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-                >
-                  {sharing ? translate('details.sharing') : translate('details.shareEvent')}
-                </TouchButton>
+            <div className="grid grid-cols-2 gap-3">
+              <TouchButton
+                variant="ghost"
+                onClick={handleShare}
+                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+              >
+                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
+              </TouchButton>
 
-                {hasJoined ? (
-                  <TouchButton
-                    variant="danger"
-                    onClick={handleLeave}
-                    disabled={loadingAction || loadingDelete}
-                  >
-                    {loadingAction ? translate('details.leaving') : translate('details.leaveEvent')}
-                  </TouchButton>
-                ) : !isPastEvent ? (
-                  <TouchButton
-                    variant="primary"
-                    onClick={handleJoin}
-                    disabled={loadingAction || loadingDelete}
-                  >
-                    {loadingAction ? translate('details.joining') : translate('details.joinEvent')}
-                  </TouchButton>
-                ) : (
-                  <div
-                    className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border flex items-center justify-center"
-                    style={{ backgroundColor: 'var(--card)' }}
-                  >
-                    {translate('details.eventEnded')}
-                  </div>
-                )}
-              </div>
-            </>
+              {hasJoined ? (
+                <TouchButton
+                  variant="danger"
+                  onClick={handleLeave}
+                  disabled={loadingAction || loadingDelete}
+                >
+                  {loadingAction ? translate('details.leaving') : translate('details.leaveEvent')}
+                </TouchButton>
+              ) : joinMode === 'request' ? (
+                <TouchButton
+                  variant="primary"
+                  onClick={handleOpenJoinRequestComposer}
+                  disabled={
+                    loadingAction ||
+                    loadingDelete ||
+                    submittingJoinRequest ||
+                    !!myJoinRequest ||
+                    isPastEvent
+                  }
+                >
+                  {translate('details.joinRequestButton')}
+                </TouchButton>
+              ) : !isPastEvent ? (
+                <TouchButton
+                  variant="primary"
+                  onClick={handleJoin}
+                  disabled={loadingAction || loadingDelete}
+                >
+                  {loadingAction ? translate('details.joining') : translate('details.joinEvent')}
+                </TouchButton>
+              ) : (
+                <div
+                  className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border flex items-center justify-center"
+                  style={{ backgroundColor: 'var(--card)' }}
+                >
+                  {translate('details.eventEnded')}
+                </div>
+              )}
+            </div>
+          )}
+
+          {isCreator && joinMode === 'request' && (
+            <div className="grid grid-cols-2 gap-3">
+              <TouchButton
+                variant="ghost"
+                onClick={handleShare}
+                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+              >
+                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
+              </TouchButton>
+
+              <TouchButton
+                variant="ghost"
+                onClick={handleOpenJoinRequests}
+                disabled={loadingAction || loadingDelete || !eventData.id}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+              >
+                {`${translate('details.joinRequestsButton')} (${pendingJoinRequestsCount})`}
+              </TouchButton>
+            </div>
+          )}
+
+          {isCreator && joinMode !== 'request' && (
+            <div className="grid grid-cols-2 gap-3">
+              <TouchButton
+                variant="ghost"
+                onClick={handleShare}
+                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+              >
+                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
+              </TouchButton>
+
+              <TouchButton
+                variant="ghost"
+                onClick={handleOpenInvite}
+                disabled={loadingAction || loadingDelete || !eventData.id}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+              >
+                {translate('inviteUsers.invite')}
+              </TouchButton>
+            </div>
           )}
 
           {isCreator && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <TouchButton
-                  variant="ghost"
-                  onClick={handleShare}
-                  disabled={sharing || loadingAction || loadingDelete || !eventData.id}
-                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-                >
-                  {sharing ? translate('details.sharing') : translate('details.shareEvent')}
-                </TouchButton>
+            <div className="grid grid-cols-2 gap-3">
+              <TouchButton
+                variant="ghost"
+                onClick={() => onNavigate('edit-event', eventData)}
+                disabled={loadingDelete || loadingAction}
+                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
+              >
+                {translate('details.editEvent')}
+              </TouchButton>
 
-                <TouchButton
-                  variant="ghost"
-                  onClick={handleOpenInvite}
-                  disabled={loadingAction || loadingDelete || !eventData.id}
-                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-                >
-                  {translate('inviteUsers.invite')}
-                </TouchButton>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <TouchButton
-                  variant="ghost"
-                  onClick={() => onNavigate('edit-event', eventData)}
-                  disabled={loadingDelete || loadingAction}
-                  style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-                >
-                  {translate('details.editEvent')}
-                </TouchButton>
-
-                <TouchButton
-                  variant="danger"
-                  onClick={handleDeleteEvent}
-                  disabled={loadingDelete || loadingAction}
-                >
-                  {loadingDelete ? translate('details.deleting') : translate('details.deleteEvent')}
-                </TouchButton>
-              </div>
-            </>
+              <TouchButton
+                variant="danger"
+                onClick={handleDeleteEvent}
+                disabled={loadingDelete || loadingAction}
+              >
+                {loadingDelete ? translate('details.deleting') : translate('details.deleteEvent')}
+              </TouchButton>
+            </div>
           )}
-
         </motion.div>
       </div>
     </SwipeableScreen>
   );
 }
-
-

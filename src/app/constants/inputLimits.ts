@@ -5,6 +5,7 @@ export const INPUT_LIMITS = {
   eventTitle: 100,
   eventDescription: 1000,
   eventLocation: 220,
+  eventJoinRequestMessage: 80,
   supportSubject: 120,
   supportMessage: 2000,
   search: 80,

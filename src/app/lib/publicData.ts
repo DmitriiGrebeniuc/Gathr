@@ -12,6 +12,37 @@ export type CreateEventWithCreatorInput = {
   cityNormalized: string | null;
   activityType: string;
   visibility?: 'public' | 'private';
+  joinMode?: 'open' | 'request';
+};
+
+export type UpdateEventWithCreatorInput = CreateEventWithCreatorInput & {
+  eventId: string;
+};
+
+export type EventPrivateDetails = {
+  event_id: string;
+  date_time: string | null;
+  location: string | null;
+  location_place_id: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
+};
+
+export type EventJoinRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export type EventJoinRequest = {
+  id: string;
+  event_id: string;
+  requester_id: string;
+  message: string | null;
+  status: EventJoinRequestStatus;
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+};
+
+export type CreatorEventJoinRequest = EventJoinRequest & {
+  requester_name: string | null;
 };
 
 export async function fetchPublicProfileNameMap(
@@ -199,10 +230,138 @@ export async function createEventWithCreator(input: CreateEventWithCreatorInput)
     new_city_normalized: input.cityNormalized,
     new_activity_type: input.activityType,
     new_visibility: input.visibility ?? 'public',
+    new_join_mode: input.joinMode ?? 'open',
   });
 
   return {
     data: (data as Record<string, any> | null) || null,
+    error,
+  };
+}
+
+export async function updateEventWithCreator(input: UpdateEventWithCreatorInput): Promise<{
+  data: Record<string, any> | null;
+  error: unknown;
+}> {
+  const { data, error } = await supabase.rpc('update_event_with_creator', {
+    target_event_id: input.eventId,
+    new_title: input.title,
+    new_description: input.description,
+    new_date_time: input.dateTime,
+    new_location: input.location,
+    new_location_place_id: input.locationPlaceId,
+    new_location_lat: input.locationLat,
+    new_location_lng: input.locationLng,
+    new_city: input.city,
+    new_city_normalized: input.cityNormalized,
+    new_activity_type: input.activityType,
+    new_visibility: input.visibility ?? 'public',
+    new_join_mode: input.joinMode ?? 'open',
+  });
+
+  return {
+    data: (data as Record<string, any> | null) || null,
+    error,
+  };
+}
+
+export async function fetchEventPrivateDetails(
+  eventId: string | null | undefined
+): Promise<EventPrivateDetails | null> {
+  if (!eventId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .rpc('get_event_private_details', {
+      target_event_id: eventId,
+    })
+    .maybeSingle();
+
+  if (error) {
+    console.error(`Failed to load private details for event ${eventId}:`, error);
+    return null;
+  }
+
+  return (data as EventPrivateDetails | null) ?? null;
+}
+
+export async function fetchMyEventJoinRequest(
+  eventId: string | null | undefined
+): Promise<EventJoinRequest | null> {
+  if (!eventId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .rpc('get_my_event_join_request', {
+      target_event_id: eventId,
+    })
+    .maybeSingle();
+
+  if (error) {
+    console.error(`Failed to load my join request for event ${eventId}:`, error);
+    return null;
+  }
+
+  return (data as EventJoinRequest | null) ?? null;
+}
+
+export async function createEventJoinRequest(
+  eventId: string,
+  message: string | null
+): Promise<{
+  data: EventJoinRequest | null;
+  error: unknown;
+}> {
+  const { data, error } = await supabase
+    .rpc('create_event_join_request', {
+      target_event_id: eventId,
+      request_message: message,
+    })
+    .maybeSingle();
+
+  return {
+    data: (data as EventJoinRequest | null) ?? null,
+    error,
+  };
+}
+
+export async function fetchCreatorEventJoinRequests(
+  eventId: string | null | undefined
+): Promise<CreatorEventJoinRequest[]> {
+  if (!eventId) {
+    return [];
+  }
+
+  const { data, error } = await supabase.rpc('creator_list_event_join_requests', {
+    target_event_id: eventId,
+  });
+
+  if (error) {
+    console.error(`Failed to load creator join requests for event ${eventId}:`, error);
+    return [];
+  }
+
+  return ((data as CreatorEventJoinRequest[] | null) || []);
+}
+
+export async function reviewEventJoinRequest(
+  requestId: string,
+  nextStatus: Extract<EventJoinRequestStatus, 'approved' | 'rejected'>
+): Promise<{
+  data: EventJoinRequest | null;
+  error: unknown;
+}> {
+  const { data, error } = await supabase
+    .rpc('review_event_join_request', {
+      target_request_id: requestId,
+      next_status: nextStatus,
+    })
+    .maybeSingle();
+
+  return {
+    data: (data as EventJoinRequest | null) ?? null,
     error,
   };
 }

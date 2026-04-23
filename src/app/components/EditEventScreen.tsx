@@ -1,6 +1,6 @@
 import { motion, useDragControls, useMotionValue, useTransform, PanInfo } from 'motion/react';
-import { TouchButton } from './TouchButton';
 import { useEffect, useState } from 'react';
+import { TouchButton } from './TouchButton';
 import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,6 +8,12 @@ import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete
 import { EventLocationMap } from './EventLocationMap';
 import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 import { feedback } from '../lib/feedback';
+import {
+  fetchEventPrivateDetails,
+  fetchMyProfileAccessSummary,
+  updateEventWithCreator,
+} from '../lib/publicData';
+import { hasUnlimitedAccess } from '../constants/planLimits';
 
 export function EditEventScreen({
   onNavigate,
@@ -33,39 +39,70 @@ export function EditEventScreen({
     cityNormalized: null,
   });
   const [activityType, setActivityType] = useState<ActivityType>('other');
+  const [joinMode, setJoinMode] = useState<'open' | 'request'>('open');
   const [loading, setLoading] = useState(false);
+  const [canUseRequestJoinMode, setCanUseRequestJoinMode] = useState(false);
 
   const { language, translate } = useLanguage();
 
   useEffect(() => {
-    if (!event) return;
-
-    setTitle(event.title || '');
-    setDescription(event.description || '');
-    setLocation({
-      address: event.location || '',
-      placeId: event.location_place_id || null,
-      lat: typeof event.location_lat === 'number' ? event.location_lat : null,
-      lng: typeof event.location_lng === 'number' ? event.location_lng : null,
-      city: event.city || null,
-      cityNormalized: event.city_normalized || null,
-    });
-    setActivityType((event.activity_type || 'other') as ActivityType);
-
-    if (event.date_time) {
-      const eventDate = new Date(event.date_time);
-
-      if (!Number.isNaN(eventDate.getTime())) {
-        const year = eventDate.getFullYear();
-        const month = String(eventDate.getMonth() + 1).padStart(2, '0');
-        const day = String(eventDate.getDate()).padStart(2, '0');
-        const hours = String(eventDate.getHours()).padStart(2, '0');
-        const minutes = String(eventDate.getMinutes()).padStart(2, '0');
-
-        setDate(`${year}-${month}-${day}`);
-        setTime(`${hours}:${minutes}`);
+    const loadEventState = async () => {
+      if (!event) {
+        return;
       }
-    }
+
+      setTitle(event.title || '');
+      setDescription(event.description || '');
+      setActivityType((event.activity_type || 'other') as ActivityType);
+      setJoinMode((event.join_mode || 'open') as 'open' | 'request');
+
+      const [privateDetails, myAccess] = await Promise.all([
+        fetchEventPrivateDetails(event.id),
+        fetchMyProfileAccessSummary(),
+      ]);
+
+      setCanUseRequestJoinMode(
+        myAccess?.plan === 'pro' || hasUnlimitedAccess(myAccess?.has_unlimited_access)
+      );
+
+      const sourceDateTime = privateDetails?.date_time || event.date_time || null;
+
+      setLocation({
+        address: privateDetails?.location || event.location || '',
+        placeId: privateDetails?.location_place_id || event.location_place_id || null,
+        lat:
+          typeof privateDetails?.location_lat === 'number'
+            ? privateDetails.location_lat
+            : typeof event.location_lat === 'number'
+              ? event.location_lat
+              : null,
+        lng:
+          typeof privateDetails?.location_lng === 'number'
+            ? privateDetails.location_lng
+            : typeof event.location_lng === 'number'
+              ? event.location_lng
+              : null,
+        city: event.city || null,
+        cityNormalized: event.city_normalized || null,
+      });
+
+      if (sourceDateTime) {
+        const eventDate = new Date(sourceDateTime);
+
+        if (!Number.isNaN(eventDate.getTime())) {
+          const year = eventDate.getFullYear();
+          const month = String(eventDate.getMonth() + 1).padStart(2, '0');
+          const day = String(eventDate.getDate()).padStart(2, '0');
+          const hours = String(eventDate.getHours()).padStart(2, '0');
+          const minutes = String(eventDate.getMinutes()).padStart(2, '0');
+
+          setDate(`${year}-${month}-${day}`);
+          setTime(`${hours}:${minutes}`);
+        }
+      }
+    };
+
+    void loadEventState();
   }, [event]);
 
   const handleDragEnd = (
@@ -127,6 +164,11 @@ export function EditEventScreen({
       return;
     }
 
+    if (joinMode === 'request' && !canUseRequestJoinMode) {
+      feedback.warning(translate('edit.requestModeProOnly'));
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -149,33 +191,30 @@ export function EditEventScreen({
         return;
       }
 
-      const { data: updatedEvent, error } = await supabase
-        .from('events')
-        .update({
-          title: nextTitle,
-          description: nextDescription || null,
-          date_time: dateTime.toISOString(),
-          location: nextLocation || null,
-          location_place_id: location.placeId,
-          location_lat: location.lat,
-          location_lng: location.lng,
-          city: location.city,
-          city_normalized: location.cityNormalized,
-          activity_type: activityType,
-        })
-        .eq('id', event.id)
-        .eq('creator_id', user.id)
-        .select()
-        .single();
+      const { data: updatedEvent, error } = await updateEventWithCreator({
+        eventId: event.id,
+        title: nextTitle,
+        description: nextDescription || null,
+        dateTime: dateTime.toISOString(),
+        location: nextLocation || null,
+        locationPlaceId: location.placeId,
+        locationLat: location.lat,
+        locationLng: location.lng,
+        city: location.city,
+        cityNormalized: location.cityNormalized,
+        activityType,
+        visibility: (event.visibility || 'public') as 'public' | 'private',
+        joinMode,
+      });
 
       if (error) {
-        console.error('Ошибка обновления события:', error);
+        console.error('Failed to update event:', error);
         feedback.error(translate('edit.failed'));
         setLoading(false);
         return;
       }
 
-      onNavigate('event-details', updatedEvent);
+      onNavigate('event-details', updatedEvent || event);
     } catch (error) {
       console.error('Unexpected update error:', error);
       feedback.error(translate('edit.unexpectedError'));
@@ -284,6 +323,64 @@ export function EditEventScreen({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.14 }}
+          >
+            <label className="block mb-2 text-sm text-muted-foreground">
+              {translate('edit.joinModeTitle')}
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setJoinMode('open')}
+                className="px-4 py-3 rounded-xl border text-left transition-all"
+                style={{
+                  backgroundColor: joinMode === 'open' ? 'var(--accent-soft)' : 'var(--card)',
+                  borderColor:
+                    joinMode === 'open' ? 'var(--accent-border-strong)' : 'var(--border)',
+                  color: joinMode === 'open' ? 'var(--accent)' : 'var(--foreground-strong)',
+                }}
+              >
+                <p>{translate('edit.joinModeOpen')}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {translate('edit.joinModeOpenDescription')}
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (canUseRequestJoinMode) {
+                    setJoinMode('request');
+                  }
+                }}
+                disabled={!canUseRequestJoinMode}
+                className="px-4 py-3 rounded-xl border text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: joinMode === 'request' ? 'var(--accent-soft)' : 'var(--card)',
+                  borderColor:
+                    joinMode === 'request' ? 'var(--accent-border-strong)' : 'var(--border)',
+                  color: joinMode === 'request' ? 'var(--accent)' : 'var(--foreground-strong)',
+                }}
+                title={!canUseRequestJoinMode ? translate('edit.requestModeProOnly') : undefined}
+              >
+                <p>{translate('edit.joinModeRequest')}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {translate('edit.joinModeRequestDescription')}
+                </p>
+              </button>
+            </div>
+
+            {!canUseRequestJoinMode && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {translate('edit.requestModeProOnly')}
+              </p>
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
             <label className="block mb-2 text-sm text-muted-foreground">
@@ -326,7 +423,6 @@ export function EditEventScreen({
                 }}
               />
             </div>
-
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
                 {translate('edit.time')}

@@ -1,7 +1,7 @@
 import { motion, useDragControls, useMotionValue, useTransform, PanInfo } from 'motion/react';
-import { TouchButton } from './TouchButton';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { TouchButton } from './TouchButton';
 import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../constants/activityTypes';
 import { useLanguage } from '../context/LanguageContext';
 import { LocationAutocomplete, type LocationValue } from './LocationAutocomplete';
@@ -9,7 +9,7 @@ import { EventLocationMap } from './EventLocationMap';
 import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
 import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 import { feedback } from '../lib/feedback';
-import { createEventWithCreator } from '../lib/publicData';
+import { createEventWithCreator, fetchMyProfileAccessSummary } from '../lib/publicData';
 
 type MyProfileAccess = {
   id: string;
@@ -18,7 +18,6 @@ type MyProfileAccess = {
   plan: string;
   has_unlimited_access: boolean;
 };
-
 
 export function CreateEventScreen({
   onNavigate,
@@ -42,9 +41,23 @@ export function CreateEventScreen({
     cityNormalized: null,
   });
   const [activityType, setActivityType] = useState<ActivityType>('other');
+  const [joinMode, setJoinMode] = useState<'open' | 'request'>('open');
   const [loading, setLoading] = useState(false);
+  const [profileAccess, setProfileAccess] = useState<MyProfileAccess | null>(null);
 
   const { language, translate } = useLanguage();
+
+  const canUseRequestJoinMode =
+    profileAccess?.plan === 'pro' || hasUnlimitedAccess(profileAccess?.has_unlimited_access);
+
+  useEffect(() => {
+    const loadProfileAccess = async () => {
+      const profileData = (await fetchMyProfileAccessSummary()) as MyProfileAccess | null;
+      setProfileAccess(profileData);
+    };
+
+    void loadProfileAccess();
+  }, []);
 
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -128,16 +141,10 @@ export function CreateEventScreen({
         return;
       }
 
-      const { data: rawProfileData, error: profileError } = await supabase
-        .rpc('get_my_profile_access')
-        .maybeSingle();
+      const profileData = (await fetchMyProfileAccessSummary()) as MyProfileAccess | null;
 
-      const profileData = rawProfileData as MyProfileAccess | null;
-
-
-
-      if (profileError) {
-        console.error('Ошибка загрузки профиля для проверки лимитов:', profileError);
+      if (!profileData) {
+        console.error('Failed to load current profile access for create event limits.');
         feedback.error(translate('create.failed'));
         setLoading(false);
         return;
@@ -147,26 +154,51 @@ export function CreateEventScreen({
       const limits = getPlanLimits(profileData?.plan);
 
       if (!isUnlimited) {
-        const { count: activeEventsCount, error: activeEventsError } = await supabase
+        const { data: ownEvents, error: ownEventsError } = await supabase
           .from('events')
-          .select('*', { count: 'exact', head: true })
-          .eq('creator_id', user.id)
-          .gte('date_time', new Date().toISOString());
+          .select('id')
+          .eq('creator_id', user.id);
 
-        if (activeEventsError) {
-          console.error('Ошибка проверки лимита активных событий:', activeEventsError);
+        if (ownEventsError) {
+          console.error('Failed to load creator events for active-event limits:', ownEventsError);
           feedback.error(translate('create.failed'));
           setLoading(false);
           return;
         }
 
-        if ((activeEventsCount ?? 0) >= limits.activeEvents) {
+        const ownEventIds = ((ownEvents as Array<{ id: string }> | null) || []).map((row) => row.id);
+        let activeEventsCount = 0;
+
+        if (ownEventIds.length > 0) {
+          const { count: privateDetailsCount, error: activeEventsError } = await supabase
+            .from('event_private_details')
+            .select('event_id', { count: 'exact', head: true })
+            .in('event_id', ownEventIds)
+            .gte('date_time', new Date().toISOString());
+
+          if (activeEventsError) {
+            console.error('Failed to count active private event details:', activeEventsError);
+            feedback.error(translate('create.failed'));
+            setLoading(false);
+            return;
+          }
+
+          activeEventsCount = privateDetailsCount ?? 0;
+        }
+
+        if (activeEventsCount >= limits.activeEvents) {
           feedback.warning(
             `${translate('create.activeEventsLimitReached')} ${translate('create.activeEventsLimitReachedPro')}`
           );
           setLoading(false);
           return;
         }
+      }
+
+      if (joinMode === 'request' && !canUseRequestJoinMode) {
+        feedback.warning(translate('create.requestModeProOnly'));
+        setLoading(false);
+        return;
       }
 
       const { data: createdEvent, error } = await createEventWithCreator({
@@ -181,10 +213,11 @@ export function CreateEventScreen({
         cityNormalized: location.cityNormalized,
         activityType,
         visibility: 'public',
+        joinMode,
       });
 
       if (error) {
-        console.error('Ошибка создания события:', error);
+        console.error('Failed to create event:', error);
         feedback.error(translate('create.failed'));
         setLoading(false);
         return;
@@ -300,6 +333,64 @@ export function CreateEventScreen({
                 );
               })}
             </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.14 }}
+          >
+            <label className="block mb-2 text-sm text-muted-foreground">
+              {translate('create.joinModeTitle')}
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setJoinMode('open')}
+                className="px-4 py-3 rounded-xl border text-left transition-all"
+                style={{
+                  backgroundColor: joinMode === 'open' ? 'var(--accent-soft)' : 'var(--card)',
+                  borderColor:
+                    joinMode === 'open' ? 'var(--accent-border-strong)' : 'var(--border)',
+                  color: joinMode === 'open' ? 'var(--accent)' : 'var(--foreground-strong)',
+                }}
+              >
+                <p>{translate('create.joinModeOpen')}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {translate('create.joinModeOpenDescription')}
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (canUseRequestJoinMode) {
+                    setJoinMode('request');
+                  }
+                }}
+                disabled={!canUseRequestJoinMode}
+                className="px-4 py-3 rounded-xl border text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: joinMode === 'request' ? 'var(--accent-soft)' : 'var(--card)',
+                  borderColor:
+                    joinMode === 'request' ? 'var(--accent-border-strong)' : 'var(--border)',
+                  color: joinMode === 'request' ? 'var(--accent)' : 'var(--foreground-strong)',
+                }}
+                title={!canUseRequestJoinMode ? translate('create.requestModeProOnly') : undefined}
+              >
+                <p>{translate('create.joinModeRequest')}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {translate('create.joinModeRequestDescription')}
+                </p>
+              </button>
+            </div>
+
+            {!canUseRequestJoinMode && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {translate('create.requestModeProOnly')}
+              </p>
+            )}
           </motion.div>
 
           <motion.div

@@ -336,6 +336,9 @@ type TranslationKey =
     | 'home.createFirstEvent'
     | 'home.joinedWillAppear'
     | 'home.noEventsFromOthers'
+    | 'home.closedBadge'
+    | 'home.closedDateHidden'
+    | 'home.closedLocationHidden'
     | 'home.launchOverlayTitle'
     | 'home.launchOverlayText'
     | 'home.launchOverlayButton'
@@ -350,6 +353,12 @@ type TranslationKey =
     | 'create.time'
     | 'create.location'
     | 'create.locationPlaceholder'
+    | 'create.joinModeTitle'
+    | 'create.joinModeOpen'
+    | 'create.joinModeOpenDescription'
+    | 'create.joinModeRequest'
+    | 'create.joinModeRequestDescription'
+    | 'create.requestModeProOnly'
     | 'create.locationApiKeyMissing'
     | 'create.createButton'
     | 'create.creating'
@@ -368,6 +377,12 @@ type TranslationKey =
     | 'edit.time'
     | 'edit.location'
     | 'edit.locationPlaceholder'
+    | 'edit.joinModeTitle'
+    | 'edit.joinModeOpen'
+    | 'edit.joinModeOpenDescription'
+    | 'edit.joinModeRequest'
+    | 'edit.joinModeRequestDescription'
+    | 'edit.requestModeProOnly'
     | 'edit.saveButton'
     | 'edit.saving'
     | 'details.back'
@@ -412,6 +427,36 @@ type TranslationKey =
     | 'details.deleteParticipantsFailed'
     | 'details.deleteFailed'
     | 'details.deleteUnexpectedError'
+    | 'details.closedBadge'
+    | 'details.closedTitle'
+    | 'details.closedDescription'
+    | 'details.closedDateHidden'
+    | 'details.closedLocationHidden'
+    | 'details.closedMapHidden'
+    | 'details.joinRequestButton'
+    | 'details.joinRequestSubmitting'
+    | 'details.joinRequestSubmit'
+    | 'details.joinRequestSubmitted'
+    | 'details.joinRequestSubmitFailed'
+    | 'details.joinRequestSubmitUnexpectedError'
+    | 'details.joinRequestMessageLabel'
+    | 'details.joinRequestMessagePlaceholder'
+    | 'details.joinRequestStatusPending'
+    | 'details.joinRequestStatusApproved'
+    | 'details.joinRequestStatusRejected'
+    | 'details.joinRequestPendingDescription'
+    | 'details.joinRequestApprovedDescription'
+    | 'details.joinRequestRejectedDescription'
+    | 'details.joinRequestsTitle'
+    | 'details.joinRequestsButton'
+    | 'details.joinRequestsEmpty'
+    | 'details.joinRequestNoMessage'
+    | 'details.joinRequestApprove'
+    | 'details.joinRequestReject'
+    | 'details.joinRequestReviewFailed'
+    | 'details.joinRequestReviewUnexpectedError'
+    | 'details.joinRequestApproved'
+    | 'details.joinRequestRejected'
     | 'participants.back'
     | 'participants.title'
     | 'participants.loading'
@@ -480,7 +525,7 @@ type TranslationKey =
     | 'inviteUsers.invitesPerEventLimitReachedPro'
     | 'create.pastDateTime';
 
-const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
+const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>> = {
     en: {
         'common.user': 'User',
         'common.unknown': 'Unknown',
@@ -841,6 +886,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'home.createFirstEvent': 'Create your first event by tapping the + button.',
         'home.joinedWillAppear': 'Events you join will appear here.',
         'home.noEventsFromOthers': 'There are no events from other users yet.',
+        'home.closedBadge': 'Closed',
+        'home.closedDateHidden': 'Date and time open after approval',
+        'home.closedLocationHidden': 'Location opens after approval',
         'home.launchOverlayTitle': 'You are among the first Gathr users',
         'home.launchOverlayText':
             'Gathr has just launched. Real events, activity, and honest feedback matter the most right now. Create meetups, join them, and help us make the app stronger.',
@@ -857,6 +905,12 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'create.time': 'Time',
         'create.location': 'Location',
         'create.locationPlaceholder': 'Where will it happen?',
+        'create.joinModeTitle': 'Join mode',
+        'create.joinModeOpen': 'Open',
+        'create.joinModeOpenDescription': 'Anyone can join right away.',
+        'create.joinModeRequest': 'Request',
+        'create.joinModeRequestDescription': 'People must send a request first.',
+        'create.requestModeProOnly': 'Request mode is available only on the Pro plan.',
         'create.locationApiKeyMissing': 'Google Maps API key is missing. Address suggestions are unavailable.',
         'create.createButton': 'Create Event',
         'create.creating': 'Creating...',
@@ -875,6 +929,12 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'edit.time': 'Time',
         'edit.location': 'Location',
         'edit.locationPlaceholder': 'Where will it happen?',
+        'edit.joinModeTitle': 'Join mode',
+        'edit.joinModeOpen': 'Open',
+        'edit.joinModeOpenDescription': 'Anyone can join right away.',
+        'edit.joinModeRequest': 'Request',
+        'edit.joinModeRequestDescription': 'People must send a request first.',
+        'edit.requestModeProOnly': 'Request mode is available only on the Pro plan.',
         'edit.saveButton': 'Save Changes',
         'edit.saving': 'Saving...',
 
@@ -922,6 +982,36 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
         'details.deleteParticipantsFailed': 'Could not remove event participants',
         'details.deleteFailed': 'Could not delete the event',
         'details.deleteUnexpectedError': 'Something went wrong while deleting the event',
+        'details.closedBadge': 'Closed',
+        'details.closedTitle': 'Access by request',
+        'details.closedDescription': 'Date, location, and map open after the creator approves your request.',
+        'details.closedDateHidden': 'Hidden until approval',
+        'details.closedLocationHidden': 'Hidden until approval',
+        'details.closedMapHidden': 'Map opens after your request is approved.',
+        'details.joinRequestButton': 'Request Access',
+        'details.joinRequestSubmitting': 'Sending...',
+        'details.joinRequestSubmit': 'Send Request',
+        'details.joinRequestSubmitted': 'Request sent',
+        'details.joinRequestSubmitFailed': 'Could not send the request',
+        'details.joinRequestSubmitUnexpectedError': 'Something went wrong while sending the request',
+        'details.joinRequestMessageLabel': 'Message',
+        'details.joinRequestMessagePlaceholder': 'Write a short message for the creator',
+        'details.joinRequestStatusPending': 'Pending',
+        'details.joinRequestStatusApproved': 'Approved',
+        'details.joinRequestStatusRejected': 'Rejected',
+        'details.joinRequestPendingDescription': 'Your request is pending review.',
+        'details.joinRequestApprovedDescription': 'Your request was approved. You now have access to event details.',
+        'details.joinRequestRejectedDescription': 'Your request was declined by the creator.',
+        'details.joinRequestsTitle': 'Join Requests',
+        'details.joinRequestsButton': 'Requests',
+        'details.joinRequestsEmpty': 'No requests yet',
+        'details.joinRequestNoMessage': 'No message',
+        'details.joinRequestApprove': 'Approve',
+        'details.joinRequestReject': 'Reject',
+        'details.joinRequestReviewFailed': 'Could not update the request',
+        'details.joinRequestReviewUnexpectedError': 'Something went wrong while updating the request',
+        'details.joinRequestApproved': 'Request approved',
+        'details.joinRequestRejected': 'Request rejected',
 
         'participants.back': 'Back',
         'participants.title': 'Participants',

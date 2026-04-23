@@ -30,6 +30,7 @@ type EventItem = {
   creator_id?: string | null;
   creatorName?: string | null;
   activity_type?: ActivityType | null;
+  join_mode?: 'open' | 'request' | null;
   participantCount: number;
 };
 
@@ -252,6 +253,7 @@ export function HomeScreen({
           ? creatorNameMap[event.creator_id] || translate('common.unknown')
           : translate('common.unknown'),
         activity_type: (event.activity_type || 'other') as ActivityType,
+        join_mode: (event.join_mode || 'open') as 'open' | 'request',
         participantCount: countsMap[event.id] || 0,
       }));
 
@@ -320,6 +322,7 @@ export function HomeScreen({
           ? creatorNameMap[event.creator_id] || translate('common.unknown')
           : translate('common.unknown'),
         activity_type: (event.activity_type || 'other') as ActivityType,
+        join_mode: (event.join_mode || 'open') as 'open' | 'request',
         participantCount: countsMap[event.id] || 0,
       }));
 
@@ -1093,6 +1096,17 @@ export function HomeScreen({
           {visibleEvents.map((event, index) => {
             const past = isPastEvent(event.date_time);
             const activityMeta = getActivityTypeMeta(event.activity_type, language);
+            const isRequestMode = event.join_mode === 'request';
+            const canViewClosedPreview =
+              !isRequestMode ||
+              event.creator_id === currentUserId ||
+              joinedEventIds.includes(event.id);
+            const dateLabel = isRequestMode && !canViewClosedPreview
+              ? translate('home.closedDateHidden')
+              : formatEventDate(event.date_time);
+            const locationLabel = isRequestMode && !canViewClosedPreview
+              ? translate('home.closedLocationHidden')
+              : event.location || translate('details.locationNotSpecified');
 
             return (
               <motion.div
@@ -1113,6 +1127,7 @@ export function HomeScreen({
                 className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
                 style={{
                   backgroundColor: 'var(--card)',
+                  borderColor: isRequestMode ? 'var(--accent-border-strong)' : 'var(--border)',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                   opacity: past ? 0.72 : 1,
                 }}
@@ -1120,18 +1135,33 @@ export function HomeScreen({
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <h3>{event.title}</h3>
 
-                  {past && (
-                    <span
-                      className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
-                      style={{
-                        borderColor: 'var(--accent-border-muted)',
-                        color: 'var(--accent)',
-                        backgroundColor: 'var(--accent-soft-muted)',
-                      }}
-                    >
-                      {translate('home.past')}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isRequestMode && (
+                      <span
+                        className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                        style={{
+                          borderColor: 'var(--accent-border-strong)',
+                          color: 'var(--accent)',
+                          backgroundColor: 'var(--accent-soft-muted)',
+                        }}
+                      >
+                        {translate('home.closedBadge')}
+                      </span>
+                    )}
+
+                    {past && (
+                      <span
+                        className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                        style={{
+                          borderColor: 'var(--accent-border-muted)',
+                          color: 'var(--accent)',
+                          backgroundColor: 'var(--accent-soft-muted)',
+                        }}
+                      >
+                        {translate('home.past')}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mb-2">
@@ -1149,11 +1179,11 @@ export function HomeScreen({
                 </div>
 
                 <p className="text-sm text-muted-foreground mb-2">
-                  {formatEventDate(event.date_time)}
+                  {dateLabel}
                 </p>
 
                 <p className="text-sm text-muted-foreground mb-3">
-                  {event.location || translate('details.locationNotSpecified')}
+                  {locationLabel}
                 </p>
 
                 <div className="flex items-center justify-between gap-3">

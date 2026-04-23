@@ -29,6 +29,7 @@ import { LegalConsentScreen } from './components/LegalConsentScreen';
 import { FeedbackHost } from './components/FeedbackHost';
 import { useLanguage } from './context/LanguageContext';
 import { InviteUsersScreen } from './components/InviteUsersScreen';
+import { EventJoinRequestsScreen } from './components/EventJoinRequestsScreen';
 import { feedback } from './lib/feedback';
 import { getSharedEventIdFromPath } from './auth/sharedEventPath';
 import { loadSharedEventById } from './auth/loadSharedEvent';
@@ -839,6 +840,7 @@ export default function App() {
       'legal-consent',
       'event-details',
       'participants',
+      'event-join-requests',
       'reset-password',
       'invite-users',
     ];
@@ -977,6 +979,9 @@ export default function App() {
               )}
               {currentScreen === 'participants' && (
                 <ParticipantsScreen onNavigate={handleNavigate} event={selectedEvent} />
+              )}
+              {currentScreen === 'event-join-requests' && (
+                <EventJoinRequestsScreen onNavigate={handleNavigate} event={selectedEvent} />
               )}
               {currentScreen === 'invite-users' && (
                 <InviteUsersScreen onNavigate={handleNavigate} event={selectedEvent} />

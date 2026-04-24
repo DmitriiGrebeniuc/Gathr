@@ -106,6 +106,8 @@ type TranslationKey =
     | 'notificationSettings.newParticipantsDescription'
     | 'notificationSettings.eventInvitations'
     | 'notificationSettings.eventInvitationsDescription'
+    | 'notificationSettings.eventJoinRequests'
+    | 'notificationSettings.eventJoinRequestsDescription'
     | 'security.title'
     | 'security.cardTitle'
     | 'security.cardDescription'
@@ -161,6 +163,8 @@ type TranslationKey =
     | 'notifications.joinedYourEvent'
     | 'notifications.and'
     | 'notifications.others'
+    | 'notifications.requestIconLabel'
+    | 'notifications.requestedToJoinYourEvent'
     | 'notifications.inviteIconLabel'
     | 'notifications.invitedYouToEvent'
     | 'notifications.acceptInvite'
@@ -649,6 +653,8 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notificationSettings.newParticipantsDescription': 'When someone joins your event',
         'notificationSettings.eventInvitations': 'Event Invitations',
         'notificationSettings.eventInvitationsDescription': 'When someone invites you to an event',
+        'notificationSettings.eventJoinRequests': 'Join Requests',
+        'notificationSettings.eventJoinRequestsDescription': 'When someone requests to join your closed event',
 
         'security.title': 'Privacy & Security',
         'security.cardTitle': 'Security settings',
@@ -707,6 +713,8 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.joinedYourEvent': '{names} joined your event {title}',
         'notifications.and': 'and',
         'notifications.others': 'others',
+        'notifications.requestIconLabel': 'Join request',
+        'notifications.requestedToJoinYourEvent': '{name} requested to join your event {title}',
         'notifications.inviteIconLabel': 'Event invitation',
         'notifications.invitedYouToEvent': '{name} invited you to {title}',
         'notifications.acceptInvite': 'Accept',
@@ -3167,6 +3175,10 @@ const localizedClosedEventOverrides: Partial<
     Record<LanguageCode, Partial<Record<TranslationKey, string>>>
 > = {
     ru: {
+        'notificationSettings.eventJoinRequests': '\u0417\u0430\u044f\u0432\u043a\u0438 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435',
+        'notificationSettings.eventJoinRequestsDescription': '\u041a\u043e\u0433\u0434\u0430 \u043a\u0442\u043e-\u0442\u043e \u043f\u043e\u0434\u0430\u0451\u0442 \u0437\u0430\u044f\u0432\u043a\u0443 \u0432 \u0432\u0430\u0448\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u043e\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435',
+        'notifications.requestIconLabel': '\u0417\u0430\u044f\u0432\u043a\u0430 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435',
+        'notifications.requestedToJoinYourEvent': '{name} \u043e\u0442\u043f\u0440\u0430\u0432\u0438\u043b \u0437\u0430\u044f\u0432\u043a\u0443 \u0432 \u0432\u0430\u0448\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435 {title}',
         'home.searchButton': '\u041f\u043e\u0438\u0441\u043a',
         'home.searchPlaceholder': '\u0418\u0441\u043a\u0430\u0442\u044c \u0441\u043e\u0431\u044b\u0442\u0438\u044f',
         'home.visited': '\u041f\u043e\u0441\u0435\u0449\u0451\u043d\u043d\u044b\u0435',
@@ -3226,6 +3238,10 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявка отклонена',
     },
     ro: {
+        'notificationSettings.eventJoinRequests': 'Cereri de participare',
+        'notificationSettings.eventJoinRequestsDescription': 'Când cineva cere să intre în evenimentul tău închis',
+        'notifications.requestIconLabel': 'Cerere de participare',
+        'notifications.requestedToJoinYourEvent': '{name} a cerut să intre în evenimentul tău {title}',
         'home.searchButton': 'Caută',
         'home.searchPlaceholder': 'Caută evenimente',
         'home.visited': 'Participate',
@@ -3294,6 +3310,10 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Cerere respinsă',
     },
     uk: {
+        'notificationSettings.eventJoinRequests': '\u0417\u0430\u044f\u0432\u043a\u0438 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f',
+        'notificationSettings.eventJoinRequestsDescription': '\u041a\u043e\u043b\u0438 \u0445\u0442\u043e\u0441\u044c \u043f\u043e\u0434\u0430\u0454 \u0437\u0430\u044f\u0432\u043a\u0443 \u0434\u043e \u0432\u0430\u0448\u043e\u0457 \u0437\u0430\u043a\u0440\u0438\u0442\u043e\u0457 \u043f\u043e\u0434\u0456\u0457',
+        'notifications.requestIconLabel': '\u0417\u0430\u044f\u0432\u043a\u0430 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f',
+        'notifications.requestedToJoinYourEvent': '{name} \u043f\u043e\u0434\u0430\u0432 \u0437\u0430\u044f\u0432\u043a\u0443 \u0434\u043e \u0432\u0430\u0448\u043e\u0457 \u043f\u043e\u0434\u0456\u0457 {title}',
         'home.searchButton': '\u041f\u043e\u0448\u0443\u043a',
         'home.searchPlaceholder': '\u0428\u0443\u043a\u0430\u0442\u0438 \u043f\u043e\u0434\u0456\u0457',
         'home.visited': '\u0412\u0456\u0434\u0432\u0456\u0434\u0430\u043d\u0456',
@@ -3361,6 +3381,10 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявку відхилено',
     },
     de: {
+        'notificationSettings.eventJoinRequests': 'Beitrittsanfragen',
+        'notificationSettings.eventJoinRequestsDescription': 'Wenn jemand deinem geschlossenen Event beitreten möchte',
+        'notifications.requestIconLabel': 'Beitrittsanfrage',
+        'notifications.requestedToJoinYourEvent': '{name} möchte deinem Event {title} beitreten',
         'home.searchButton': 'Suche',
         'home.searchPlaceholder': 'Events suchen',
         'home.visited': 'Besucht',

@@ -20,7 +20,7 @@ type EventItem = {
 
 type NotificationItem = {
   id: string;
-  type: 'upcoming' | 'join' | 'invite';
+  type: 'upcoming' | 'join' | 'invite' | 'request';
   message: string;
   time: string;
   event: EventItem;
@@ -134,6 +134,20 @@ export function NotificationsScreen({
     return translate('notifications.upcomingDefault').replaceAll('{title}', event.title);
   };
 
+  const getNotificationIconLabel = (type: NotificationItem['type']) => {
+    if (type === 'upcoming') return translate('notifications.upcomingIconLabel');
+    if (type === 'join') return translate('notifications.joinIconLabel');
+    if (type === 'invite') return translate('notifications.inviteIconLabel');
+    return translate('notifications.requestIconLabel');
+  };
+
+  const getNotificationIcon = (type: NotificationItem['type']) => {
+    if (type === 'upcoming') return 'вЏ°';
+    if (type === 'join') return 'рџ‘‹';
+    if (type === 'invite') return 'вњ‰пёЏ';
+    return 'рџ“©';
+  };
+
   const fetchNotifications = async (showLoader = true) => {
     if (showLoader) {
       setLoading(true);
@@ -156,7 +170,7 @@ export function NotificationsScreen({
 
       const { data: notificationSettings, error: notificationSettingsError } = await supabase
         .from('notification_settings')
-        .select('notify_upcoming_events, notify_new_participants, notify_event_invitations')
+        .select('notify_upcoming_events, notify_new_participants, notify_event_invitations, notify_event_join_requests')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -167,6 +181,7 @@ export function NotificationsScreen({
       const notifyUpcomingEvents = notificationSettings?.notify_upcoming_events ?? true;
       const notifyNewParticipants = notificationSettings?.notify_new_participants ?? true;
       const notifyEventInvitations = notificationSettings?.notify_event_invitations ?? true;
+      const notifyEventJoinRequests = notificationSettings?.notify_event_join_requests ?? true;
 
       const now = new Date();
       const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -353,6 +368,50 @@ export function NotificationsScreen({
         }
       }
 
+      let requestNotifications: NotificationItem[] = [];
+
+      if (notifyEventJoinRequests && myEventIds.length > 0) {
+        const { data: joinRequests, error: joinRequestsError } = await supabase
+          .from('event_join_requests')
+          .select('id, event_id, requester_id, message, status, created_at')
+          .in('event_id', myEventIds)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false });
+
+        if (joinRequestsError) {
+          console.error('Failed to load join request notifications:', joinRequestsError);
+        } else {
+          const requesterNameMap = await fetchPublicProfileNameMap(
+            ((joinRequests || []) as any[]).map((requestRow: any) => requestRow.requester_id)
+          );
+
+          requestNotifications = ((joinRequests || []) as any[])
+            .map((requestRow: any) => {
+              const relatedEvent = mergedMyEvents.find((event) => event.id === requestRow.event_id);
+
+              if (!relatedEvent) {
+                return null;
+              }
+
+              const requesterName =
+                requesterNameMap[requestRow.requester_id] || translate('notifications.someone');
+
+              return {
+                id: `request-${requestRow.id}`,
+                type: 'request' as const,
+                message: translate('notifications.requestedToJoinYourEvent')
+                  .replaceAll('{name}', requesterName)
+                  .replaceAll('{title}', relatedEvent.title || translate('common.event')),
+                time: formatPastTime(requestRow.created_at),
+                event: relatedEvent,
+                sortDate: requestRow.created_at || null,
+                sortPriority: 0,
+              };
+            })
+            .filter(Boolean) as NotificationItem[];
+        }
+      }
+
       let inviteNotifications: NotificationItem[] = [];
 
       if (notifyEventInvitations) {
@@ -439,6 +498,7 @@ export function NotificationsScreen({
       }
 
       const mergedNotifications = [
+        ...requestNotifications,
         ...inviteNotifications,
         ...joinNotifications,
         ...upcomingNotifications,
@@ -456,7 +516,7 @@ export function NotificationsScreen({
         const aTime = a.sortDate ? new Date(a.sortDate).getTime() : 0;
         const bTime = b.sortDate ? new Date(b.sortDate).getTime() : 0;
 
-        if (a.type === 'join' || a.type === 'invite') {
+        if (a.type === 'join' || a.type === 'invite' || a.type === 'request') {
           return bTime - aTime;
         }
 
@@ -625,10 +685,26 @@ export function NotificationsScreen({
       )
       .subscribe();
 
+    const joinRequestsChannel = supabase
+      .channel('notifications-event-join-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_join_requests',
+        },
+        async () => {
+          await fetchNotifications(false);
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(eventsChannel);
       supabase.removeChannel(invitationsChannel);
+      supabase.removeChannel(joinRequestsChannel);
     };
   }, []);
 
@@ -690,23 +766,20 @@ export function NotificationsScreen({
                 key={notification.id}
                 onClick={() =>
                   onNavigate &&
-                  onNavigate('event-details', {
-                    ...notification.event,
-                    backTarget: 'notifications',
-                  })
+                  onNavigate(
+                    notification.type === 'request' ? 'event-join-requests' : 'event-details',
+                    {
+                      ...notification.event,
+                      backTarget: 'notifications',
+                    }
+                  )
                 }
                 className="px-6 py-4 border-b border-border flex items-start gap-3 hover:bg-card/50 transition-colors cursor-pointer active:opacity-70"
               >
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
                   style={{ backgroundColor: 'var(--primary)' }}
-                  title={
-                    notification.type === 'upcoming'
-                      ? translate('notifications.upcomingIconLabel')
-                      : notification.type === 'join'
-                        ? translate('notifications.joinIconLabel')
-                        : translate('notifications.inviteIconLabel')
-                  }
+                  title={getNotificationIconLabel(notification.type)}
                 >
                   <span className="text-sm">
                     {notification.type === 'upcoming'

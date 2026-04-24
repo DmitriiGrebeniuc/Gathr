@@ -7,18 +7,21 @@ type NotificationSettings = {
   notify_upcoming_events: boolean;
   notify_new_participants: boolean;
   notify_event_invitations: boolean;
+  notify_event_join_requests: boolean;
 };
 
 type NotificationSettingKey =
   | 'notify_upcoming_events'
   | 'notify_new_participants'
-  | 'notify_event_invitations';
+  | 'notify_event_invitations'
+  | 'notify_event_join_requests';
 
 export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen: string) => void }) {
   const [settings, setSettings] = useState<NotificationSettings>({
     notify_upcoming_events: true,
     notify_new_participants: true,
     notify_event_invitations: true,
+    notify_event_join_requests: true,
   });
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<NotificationSettingKey | null>(null);
@@ -43,7 +46,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
       const { data, error } = await supabase
         .from('notification_settings')
         .select(
-          'notify_upcoming_events, notify_new_participants, notify_event_invitations'
+          'notify_upcoming_events, notify_new_participants, notify_event_invitations, notify_event_join_requests'
         )
         .eq('user_id', user.id)
         .maybeSingle();
@@ -59,6 +62,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
           notify_upcoming_events: data.notify_upcoming_events ?? true,
           notify_new_participants: data.notify_new_participants ?? true,
           notify_event_invitations: data.notify_event_invitations ?? true,
+          notify_event_join_requests: data.notify_event_join_requests ?? true,
         });
       }
     } catch (error) {
@@ -103,6 +107,7 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
             notify_upcoming_events: nextSettings.notify_upcoming_events,
             notify_new_participants: nextSettings.notify_new_participants,
             notify_event_invitations: nextSettings.notify_event_invitations,
+            notify_event_join_requests: nextSettings.notify_event_join_requests,
             updated_at: new Date().toISOString(),
           },
           {
@@ -213,6 +218,20 @@ export function NotificationSettingsScreen({ onNavigate }: { onNavigate: (screen
                     checked={settings.notify_event_invitations}
                     disabled={savingKey === 'notify_event_invitations'}
                     onChange={(value) => updateSetting('notify_event_invitations', value)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between py-3 gap-4">
+                  <div>
+                    <p className="mb-1">{translate('notificationSettings.eventJoinRequests')}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {translate('notificationSettings.eventJoinRequestsDescription')}
+                    </p>
+                  </div>
+                  <ToggleSwitch
+                    checked={settings.notify_event_join_requests}
+                    disabled={savingKey === 'notify_event_join_requests'}
+                    onChange={(value) => updateSetting('notify_event_join_requests', value)}
                   />
                 </div>
               </div>

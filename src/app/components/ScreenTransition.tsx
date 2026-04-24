@@ -9,24 +9,24 @@ interface ScreenTransitionProps {
 export function ScreenTransition({ children, direction = 'forward' }: ScreenTransitionProps) {
   const variants = {
     forward: {
-      initial: { x: '14%', opacity: 1 },
-      animate: { x: 0, opacity: 1 },
-      exit: { x: '-4%', opacity: 1 },
+      initial: { x: '7%', opacity: 0.84, scale: 0.992, filter: 'blur(3px)' },
+      animate: { x: 0, opacity: 1, scale: 1, filter: 'blur(0px)' },
+      exit: { x: '-3.5%', opacity: 0.94, scale: 0.996, filter: 'blur(1.5px)' },
     },
     back: {
-      initial: { x: '-4%', opacity: 1 },
-      animate: { x: 0, opacity: 1 },
-      exit: { x: '14%', opacity: 1 },
+      initial: { x: '-5%', opacity: 0.84, scale: 0.992, filter: 'blur(3px)' },
+      animate: { x: 0, opacity: 1, scale: 1, filter: 'blur(0px)' },
+      exit: { x: '6%', opacity: 0.94, scale: 0.996, filter: 'blur(1.5px)' },
     },
     up: {
-      initial: { y: '14%', opacity: 1 },
-      animate: { y: 0, opacity: 1 },
-      exit: { y: '10%', opacity: 1 },
+      initial: { y: '5%', opacity: 0.84, scale: 0.992, filter: 'blur(3px)' },
+      animate: { y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' },
+      exit: { y: '3%', opacity: 0.94, scale: 0.996, filter: 'blur(1.5px)' },
     },
     down: {
-      initial: { y: '-6%', opacity: 1 },
-      animate: { y: 0, opacity: 1 },
-      exit: { y: '10%', opacity: 1 },
+      initial: { y: '-4%', opacity: 0.84, scale: 0.992, filter: 'blur(3px)' },
+      animate: { y: 0, opacity: 1, scale: 1, filter: 'blur(0px)' },
+      exit: { y: '4%', opacity: 0.94, scale: 0.996, filter: 'blur(1.5px)' },
     },
   };
 
@@ -38,10 +38,8 @@ export function ScreenTransition({ children, direction = 'forward' }: ScreenTran
       animate={selectedVariant.animate}
       exit={selectedVariant.exit}
       transition={{
-        type: 'spring',
-        stiffness: 360,
-        damping: 38,
-        mass: 0.82,
+        duration: 0.34,
+        ease: [0.22, 1, 0.36, 1],
       }}
       className="absolute inset-0 bg-background overflow-x-hidden"
     >

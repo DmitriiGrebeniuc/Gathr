@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type UIEvent } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { Check, LifeBuoy, Palette } from 'lucide-react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
@@ -1123,20 +1123,53 @@ export function HomeScreen({
           style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
           onScroll={handleContentScroll}
         >
-          {shouldShowInitialLoader && (
-            <div className="space-y-3 py-1">
-              <div className="flex justify-center py-4">
-                <LoadingLogo size={52} label={translate('common.loading')} />
-              </div>
-              {Array.from({ length: 3 }).map((_, index) => (
-                <LoadingCard
-                  key={index}
-                  className="rounded-xl"
-                  lines={['42%', '26%', '68%', '84%', '55%']}
-                />
-              ))}
-            </div>
-          )}
+          <motion.div layout transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}>
+            <AnimatePresence initial={false} mode="popLayout">
+              {shouldShowInitialLoader && (
+                <motion.div
+                  key="home-initial-loader"
+                  layout
+                  initial={{ opacity: 0, y: 14, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -12, scale: 0.992 }}
+                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                  className="space-y-3 py-1"
+                >
+                  <motion.div
+                    layout
+                    className="flex justify-center py-4"
+                    transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.94 }}
+                      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <LoadingLogo size={52} label={translate('common.loading')} />
+                    </motion.div>
+                  </motion.div>
+
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <motion.div
+                      key={`home-skeleton-${index}`}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{
+                        duration: 0.28,
+                        delay: index * 0.04,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                    >
+                      <LoadingCard className="rounded-xl" lines={['42%', '26%', '68%', '84%', '55%']} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
           {shouldShowEmptyState && (
             <div
@@ -1168,118 +1201,124 @@ export function HomeScreen({
             </div>
           )}
 
-          {visibleEvents.map((event, index) => {
-            const past = isPastEvent(event.date_time);
-            const activityMeta = getActivityTypeMeta(event.activity_type, language);
-            const isRequestMode = event.join_mode === 'request';
-            const canViewClosedPreview =
-              !isRequestMode ||
-              event.creator_id === currentUserId ||
-              joinedEventIds.includes(event.id) ||
-              isAdmin;
-            const dateLabel = isRequestMode && !canViewClosedPreview
-              ? translate('home.closedDateHidden')
-              : formatEventDate(event.date_time);
-            const locationLabel = isRequestMode && !canViewClosedPreview
-              ? translate('home.closedLocationHidden')
-              : event.location || translate('details.locationNotSpecified');
+          <AnimatePresence initial={false} mode="popLayout">
+            {visibleEvents.map((event, index) => {
+              const past = isPastEvent(event.date_time);
+              const activityMeta = getActivityTypeMeta(event.activity_type, language);
+              const isRequestMode = event.join_mode === 'request';
+              const canViewClosedPreview =
+                !isRequestMode ||
+                event.creator_id === currentUserId ||
+                joinedEventIds.includes(event.id) ||
+                isAdmin;
+              const dateLabel = isRequestMode && !canViewClosedPreview
+                ? translate('home.closedDateHidden')
+                : formatEventDate(event.date_time);
+              const locationLabel = isRequestMode && !canViewClosedPreview
+                ? translate('home.closedLocationHidden')
+                : event.location || translate('details.locationNotSpecified');
 
-            return (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: Math.min(index, 8) * 0.03,
-                  duration: 0.18,
-                }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() =>
-                  onNavigate('event-details', {
-                    ...event,
-                    backTarget: 'home',
-                  })
-                }
-                className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
-                style={{
-                  backgroundColor: 'var(--card)',
-                  borderColor: isRequestMode ? 'var(--accent-border-strong)' : 'var(--border)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                  opacity: past ? 0.72 : 1,
-                }}
-              >
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <h3>{event.title}</h3>
+              return (
+                <motion.div
+                  key={event.id}
+                  layout
+                  initial={{ opacity: 0, y: 18, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -12, scale: 0.992 }}
+                  transition={{
+                    layout: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+                    opacity: { duration: 0.28, delay: Math.min(index, 8) * 0.035 },
+                    y: { duration: 0.34, delay: Math.min(index, 8) * 0.035, ease: [0.22, 1, 0.36, 1] },
+                    scale: { duration: 0.34, delay: Math.min(index, 8) * 0.035, ease: [0.22, 1, 0.36, 1] },
+                  }}
+                  whileTap={{ scale: 0.985 }}
+                  onClick={() =>
+                    onNavigate('event-details', {
+                      ...event,
+                      backTarget: 'home',
+                    })
+                  }
+                  className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
+                  style={{
+                    backgroundColor: 'var(--card)',
+                    borderColor: isRequestMode ? 'var(--accent-border-strong)' : 'var(--border)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    opacity: past ? 0.72 : 1,
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h3>{event.title}</h3>
 
-                  <div className="flex items-center gap-2">
-                    {isRequestMode && (
-                      <span
-                        className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
-                        style={{
-                          borderColor: 'var(--accent-border-strong)',
-                          color: 'var(--accent)',
-                          backgroundColor: 'var(--accent-soft-muted)',
-                        }}
-                      >
-                        {translate('home.closedBadge')}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {isRequestMode && (
+                        <span
+                          className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                          style={{
+                            borderColor: 'var(--accent-border-strong)',
+                            color: 'var(--accent)',
+                            backgroundColor: 'var(--accent-soft-muted)',
+                          }}
+                        >
+                          {translate('home.closedBadge')}
+                        </span>
+                      )}
 
-                    {past && (
-                      <span
-                        className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
-                        style={{
-                          borderColor: 'var(--accent-border-muted)',
-                          color: 'var(--accent)',
-                          backgroundColor: 'var(--accent-soft-muted)',
-                        }}
-                      >
-                        {translate('home.past')}
-                      </span>
-                    )}
+                      {past && (
+                        <span
+                          className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+                          style={{
+                            borderColor: 'var(--accent-border-muted)',
+                            color: 'var(--accent)',
+                            backgroundColor: 'var(--accent-soft-muted)',
+                          }}
+                        >
+                          {translate('home.past')}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="mb-2">
-                  <span
-                    className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border"
-                    style={{
-                      borderColor: 'rgba(212, 175, 55, 0.22)',
-                      color: 'var(--accent)',
-                      backgroundColor: 'rgba(212, 175, 55, 0.06)',
-                    }}
-                  >
-                    <span>{activityMeta.emoji}</span>
-                    <span>{activityMeta.label}</span>
-                  </span>
-                </div>
+                  <div className="mb-2">
+                    <span
+                      className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border"
+                      style={{
+                        borderColor: 'rgba(212, 175, 55, 0.22)',
+                        color: 'var(--accent)',
+                        backgroundColor: 'rgba(212, 175, 55, 0.06)',
+                      }}
+                    >
+                      <span>{activityMeta.emoji}</span>
+                      <span>{activityMeta.label}</span>
+                    </span>
+                  </div>
 
-                <p className="text-sm text-muted-foreground mb-2">
-                  {dateLabel}
-                </p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {dateLabel}
+                  </p>
 
-                <p className="text-sm text-muted-foreground mb-3">
-                  {locationLabel}
-                </p>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {locationLabel}
+                  </p>
 
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs text-muted-foreground">
-                    {translate('home.createdBy')}{' '}
-                    {event.creator_id === currentUserId
-                      ? translate('home.you')
-                      : event.creatorName || translate('common.unknown')}
-                  </span>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      {translate('home.createdBy')}{' '}
+                      {event.creator_id === currentUserId
+                        ? translate('home.you')
+                        : event.creatorName || translate('common.unknown')}
+                    </span>
 
-                  <span className="text-xs text-muted-foreground">
-                    {event.participantCount}{' '}
-                    {event.participantCount === 1
-                      ? translate('home.participant')
-                      : translate('home.participants')}
-                  </span>
-                </div>
-              </motion.div>
-            );
-          })}
+                    <span className="text-xs text-muted-foreground">
+                      {event.participantCount}{' '}
+                      {event.participantCount === 1
+                        ? translate('home.participant')
+                        : translate('home.participants')}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
           {shouldShowLoadMore && (
             <motion.button

@@ -14,13 +14,13 @@ export function LoadingLogo({
     <div className="flex flex-col items-center justify-center gap-3">
       <motion.div
         animate={{
-          scale: [1, 1.04, 1],
-          opacity: [0.88, 1, 0.88],
+          scale: [0.985, 1.035, 0.985],
+          opacity: [0.78, 1, 0.78],
         }}
         transition={{
-          duration: 1.6,
+          duration: 1.9,
           repeat: Infinity,
-          ease: 'easeInOut',
+          ease: [0.22, 1, 0.36, 1],
         }}
         className="relative rounded-full flex items-center justify-center"
         style={{
@@ -35,7 +35,7 @@ export function LoadingLogo({
         <motion.div
           animate={{ rotate: 360 }}
           transition={{
-            duration: 3.2,
+            duration: 2.8,
             repeat: Infinity,
             ease: 'linear',
           }}

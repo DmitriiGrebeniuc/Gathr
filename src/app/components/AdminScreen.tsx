@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
 import { feedback } from '../lib/feedback';
+import { LoadingCard } from './LoadingState';
 import {
   fetchAccessibleEventPrivateDetailsMap,
   fetchParticipantCounts,
@@ -112,6 +113,16 @@ const adminSegmentedStyle = {
   borderColor: 'var(--border-subtle)',
   backgroundColor: 'var(--surface-overlay)',
 } as const;
+
+const adminLoadingStack = (count = 2) =>
+  Array.from({ length: count }, (_, index) => (
+    <LoadingCard
+      key={`admin-loading-${index}`}
+      lines={index === 0 ? 3 : 2}
+      className="rounded-lg border"
+      style={adminNestedCardStyle}
+    />
+  ));
 
 export function AdminScreen({
   onNavigate,
@@ -993,9 +1004,7 @@ export function AdminScreen({
               </span>
             </div>
 
-            {loading && (
-              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
-            )}
+            {loading && <div className="space-y-3">{adminLoadingStack(2)}</div>}
 
             {!loading && eventsUnavailable && (
               <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
@@ -1128,9 +1137,7 @@ export function AdminScreen({
               })}
             </div>
 
-            {loading && (
-              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
-            )}
+            {loading && <div className="space-y-3">{adminLoadingStack(3)}</div>}
 
             {!loading && moderationUnavailable && (
               <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
@@ -1256,9 +1263,7 @@ export function AdminScreen({
               </span>
             </div>
 
-            {loading && (
-              <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
-            )}
+            {loading && <div className="space-y-3">{adminLoadingStack(2)}</div>}
 
             {!loading && invitationsUnavailable && (
               <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
@@ -1316,9 +1321,7 @@ export function AdminScreen({
                 }}
               />
 
-              {loading && (
-                <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
-              )}
+              {loading && <div className="space-y-3">{adminLoadingStack(3)}</div>}
 
               {!loading && usersUnavailable && (
                 <p className="text-sm text-muted-foreground">{translate('admin.unavailable')}</p>
@@ -1595,9 +1598,7 @@ export function AdminScreen({
                 })}
               </div>
 
-              {loading && (
-                <p className="text-sm text-muted-foreground">{translate('common.loading')}</p>
-              )}
+              {loading && <div className="space-y-3">{adminLoadingStack(3)}</div>}
 
               {!loading && supportUnavailable && (
                 <p className="text-sm text-muted-foreground">

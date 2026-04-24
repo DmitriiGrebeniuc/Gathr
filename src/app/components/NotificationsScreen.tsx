@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { LoadingLogo } from './LoadingLogo';
 import { feedback } from '../lib/feedback';
+import { LoadingCard, LoadingLine } from './LoadingState';
 import {
   fetchAccessibleEventPrivateDetailsMap,
   fetchPublicProfileNameMap,
@@ -642,14 +643,22 @@ export function NotificationsScreen({
         style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
       >
         {loading && (
-          <div className="px-6 py-10 flex items-center justify-center">
-            <LoadingLogo size={52} label={translate('common.loadingNotifications')} />
+          <div className="px-6 py-8 space-y-3">
+            <div className="flex items-center justify-center py-2">
+              <LoadingLogo size={52} label={translate('common.loadingNotifications')} />
+            </div>
+            <LoadingCard lines={['56%', '84%', '34%']} />
+            <LoadingCard lines={['62%', '78%', '30%']} />
+            <LoadingCard lines={['48%', '88%', '28%']} />
           </div>
         )}
 
         {!loading && refreshing && (
           <div className="px-6 pt-3">
-            <p className="text-xs text-muted-foreground">{translate('common.loading')}</p>
+            <div className="flex items-center gap-2">
+              <LoadingLine width="3.5rem" height="0.625rem" />
+              <LoadingLine width="2.25rem" height="0.625rem" />
+            </div>
           </div>
         )}
 

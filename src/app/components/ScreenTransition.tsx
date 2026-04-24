@@ -9,24 +9,24 @@ interface ScreenTransitionProps {
 export function ScreenTransition({ children, direction = 'forward' }: ScreenTransitionProps) {
   const variants = {
     forward: {
-      initial: { x: '100%', opacity: 0 },
+      initial: { x: '14%', opacity: 1 },
       animate: { x: 0, opacity: 1 },
-      exit: { x: '-2%', opacity: 0 },
+      exit: { x: '-4%', opacity: 1 },
     },
     back: {
-      initial: { x: '-2%', opacity: 0 },
+      initial: { x: '-4%', opacity: 1 },
       animate: { x: 0, opacity: 1 },
-      exit: { x: '100%', opacity: 0 },
+      exit: { x: '14%', opacity: 1 },
     },
     up: {
-      initial: { y: '100%', opacity: 0 },
+      initial: { y: '14%', opacity: 1 },
       animate: { y: 0, opacity: 1 },
-      exit: { y: '100%', opacity: 0 },
+      exit: { y: '10%', opacity: 1 },
     },
     down: {
-      initial: { y: '-100%', opacity: 0 },
+      initial: { y: '-6%', opacity: 1 },
       animate: { y: 0, opacity: 1 },
-      exit: { y: '100%', opacity: 0 },
+      exit: { y: '10%', opacity: 1 },
     },
   };
 
@@ -39,9 +39,9 @@ export function ScreenTransition({ children, direction = 'forward' }: ScreenTran
       exit={selectedVariant.exit}
       transition={{
         type: 'spring',
-        stiffness: 300,
-        damping: 36,
-        mass: 0.9,
+        stiffness: 360,
+        damping: 38,
+        mass: 0.82,
       }}
       className="absolute inset-0 bg-background overflow-x-hidden"
     >

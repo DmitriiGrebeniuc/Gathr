@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
+import { LoadingLine } from './LoadingState';
 
 type CurrentUser = {
   id: string;
@@ -152,13 +153,13 @@ export function ProfileScreen({
               className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
               style={{ backgroundColor: 'var(--primary)' }}
             >
-              <span className="text-3xl">{loading ? '..' : getInitials()}</span>
+              <span className="text-3xl">{loading ? '••' : getInitials()}</span>
             </div>
 
             {loading ? (
               <div className="w-full flex flex-col items-center gap-2">
-                <div className="h-6 w-32 rounded-full" style={{ backgroundColor: 'var(--card)' }} />
-                <div className="h-4 w-44 rounded-full" style={{ backgroundColor: 'var(--card)' }} />
+                <LoadingLine width="8rem" height="1.5rem" rounded="9999px" />
+                <LoadingLine width="11rem" height="1rem" rounded="9999px" />
               </div>
             ) : (
               <>

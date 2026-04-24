@@ -81,6 +81,15 @@ export function EventDetailsScreen({
   const pendingAuthAction = event?.authAction || null;
   const joinMode = (eventData.join_mode || 'open') as 'open' | 'request';
   const canViewClosedDetails = joinMode !== 'request' || isCreator || hasJoined || isAdmin;
+  const hasVisiblePrivatePreview =
+    !!eventData.date_time ||
+    !!eventData.location ||
+    typeof eventData.location_lat === 'number' ||
+    typeof eventData.location_lng === 'number' ||
+    !!privateDetails?.date_time ||
+    !!privateDetails?.location ||
+    typeof privateDetails?.location_lat === 'number' ||
+    typeof privateDetails?.location_lng === 'number';
   const isClosedAccessResolving = joinMode === 'request' && !eventStateResolved;
   const shouldShowClosedRestrictedState =
     joinMode === 'request' && eventStateResolved && !canViewClosedDetails;
@@ -103,15 +112,6 @@ export function EventDetailsScreen({
     typeof privateDetails?.location_lng === 'number'
       ? privateDetails.location_lng
       : eventData.location_lng;
-  const hasVisiblePrivatePreview =
-    !!eventData.date_time ||
-    !!eventData.location ||
-    typeof eventData.location_lat === 'number' ||
-    typeof eventData.location_lng === 'number' ||
-    !!privateDetails?.date_time ||
-    !!privateDetails?.location ||
-    typeof privateDetails?.location_lat === 'number' ||
-    typeof privateDetails?.location_lng === 'number';
 
   const eventDate = displayedDateTime ? new Date(displayedDateTime) : null;
   const isPastEvent =

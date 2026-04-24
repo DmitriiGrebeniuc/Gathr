@@ -16,6 +16,7 @@ import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 import { LoadingCard, LoadingLine } from './LoadingState';
 import {
   fetchAccessibleEventPrivateDetailsMap,
+  fetchEventFeedSortRanks,
   fetchMyProfileAccessSummary,
   fetchJoinedEventIdsForUser,
   fetchParticipantCounts,
@@ -26,6 +27,7 @@ type EventItem = {
   title: string;
   description?: string | null;
   created_at?: string | null;
+  sort_rank?: number | null;
   date_time?: string | null;
   location?: string | null;
   location_lat?: number | null;
@@ -142,6 +144,10 @@ export function HomeScreen({
   };
 
   const getEventSortTime = (event: EventItem) => {
+    if (typeof event.sort_rank === 'number' && Number.isFinite(event.sort_rank)) {
+      return event.sort_rank;
+    }
+
     const primaryTime = event.date_time ? new Date(event.date_time).getTime() : Number.NaN;
 
     if (!Number.isNaN(primaryTime)) {
@@ -257,10 +263,11 @@ export function HomeScreen({
         )
       );
 
-      const [creatorNameMapRaw, countsMap, nextJoinedEventIds] = await Promise.all([
+      const [creatorNameMapRaw, countsMap, nextJoinedEventIds, sortRanksMap] = await Promise.all([
         fetchPublicProfileNameMap(creatorIds),
         fetchParticipantCounts((eventsData || []).map((event: any) => event.id)),
         fetchJoinedEventIdsForUser(userId),
+        fetchEventFeedSortRanks((eventsData || []).map((event: any) => event.id)),
       ]);
 
       const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
@@ -281,6 +288,7 @@ export function HomeScreen({
           title: event.title,
           description: event.description,
           created_at: event.created_at ?? null,
+          sort_rank: sortRanksMap[event.id] ?? null,
           date_time: privateDetails?.date_time ?? event.date_time ?? null,
           location: privateDetails?.location ?? event.location ?? null,
           location_lat:
@@ -350,9 +358,10 @@ export function HomeScreen({
         )
       );
 
-      const [creatorNameMapRaw, countsMap] = await Promise.all([
+      const [creatorNameMapRaw, countsMap, sortRanksMap] = await Promise.all([
         fetchPublicProfileNameMap(creatorIds),
         fetchParticipantCounts((moreEventsData || []).map((event: any) => event.id)),
+        fetchEventFeedSortRanks((moreEventsData || []).map((event: any) => event.id)),
       ]);
 
       const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
@@ -371,6 +380,7 @@ export function HomeScreen({
           title: event.title,
           description: event.description,
           created_at: event.created_at ?? null,
+          sort_rank: sortRanksMap[event.id] ?? null,
           date_time: privateDetails?.date_time ?? event.date_time ?? null,
           location: privateDetails?.location ?? event.location ?? null,
           location_lat:

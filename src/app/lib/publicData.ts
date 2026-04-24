@@ -45,6 +45,51 @@ export type CreatorEventJoinRequest = EventJoinRequest & {
   requester_name: string | null;
 };
 
+export async function fetchEventFeedSortRanks(
+  eventIds: Array<string | null | undefined>
+): Promise<Record<string, number>> {
+  const uniqueEventIds = Array.from(
+    new Set(
+      eventIds.filter(
+        (eventId): eventId is string =>
+          typeof eventId === 'string' && eventId.trim().length > 0
+      )
+    )
+  );
+
+  if (uniqueEventIds.length === 0) {
+    return {};
+  }
+
+  const { data, error } = await supabase.rpc('get_event_feed_sort_ranks', {
+    target_event_ids: uniqueEventIds,
+  });
+
+  if (error) {
+    console.error('Failed to load event feed sort ranks:', error);
+    return {};
+  }
+
+  return (
+    (data as Array<{ event_id: string | null; sort_rank: number | string | null }> | null) || []
+  ).reduce<Record<string, number>>((acc, row) => {
+    if (!row?.event_id) {
+      return acc;
+    }
+
+    const parsedRank =
+      typeof row.sort_rank === 'number'
+        ? row.sort_rank
+        : Number.parseInt(String(row.sort_rank ?? ''), 10);
+
+    if (!Number.isNaN(parsedRank)) {
+      acc[row.event_id] = parsedRank;
+    }
+
+    return acc;
+  }, {});
+}
+
 export async function fetchPublicProfileNameMap(
   ids: Array<string | null | undefined>
 ): Promise<Record<string, string>> {

@@ -10,6 +10,7 @@ import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
 import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 import { feedback } from '../lib/feedback';
 import { createEventWithCreator, fetchMyProfileAccessSummary } from '../lib/publicData';
+import { LoadingLine } from './LoadingState';
 
 type MyProfileAccess = {
   id: string;
@@ -44,6 +45,7 @@ export function CreateEventScreen({
   const [joinMode, setJoinMode] = useState<'open' | 'request'>('open');
   const [loading, setLoading] = useState(false);
   const [profileAccess, setProfileAccess] = useState<MyProfileAccess | null>(null);
+  const [profileAccessResolved, setProfileAccessResolved] = useState(false);
 
   const { language, translate } = useLanguage();
 
@@ -52,8 +54,12 @@ export function CreateEventScreen({
 
   useEffect(() => {
     const loadProfileAccess = async () => {
-      const profileData = (await fetchMyProfileAccessSummary()) as MyProfileAccess | null;
-      setProfileAccess(profileData);
+      try {
+        const profileData = (await fetchMyProfileAccessSummary()) as MyProfileAccess | null;
+        setProfileAccess(profileData);
+      } finally {
+        setProfileAccessResolved(true);
+      }
     };
 
     void loadProfileAccess();
@@ -277,11 +283,7 @@ export function CreateEventScreen({
         style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <div className="space-y-5 max-w-sm mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('create.eventTitle')}
             </label>
@@ -297,13 +299,9 @@ export function CreateEventScreen({
                 borderColor: 'var(--border)',
               }}
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.13 }}
-          >
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('create.activityType')}
             </label>
@@ -333,13 +331,9 @@ export function CreateEventScreen({
                 );
               })}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.14 }}
-          >
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('create.joinModeTitle')}
             </label>
@@ -386,18 +380,20 @@ export function CreateEventScreen({
               </button>
             </div>
 
-            {!canUseRequestJoinMode && (
+            {profileAccessResolved && !canUseRequestJoinMode && (
               <p className="mt-2 text-xs text-muted-foreground">
                 {translate('create.requestModeProOnly')}
               </p>
             )}
-          </motion.div>
+            {!profileAccessResolved && (
+              <div className="mt-3 space-y-2">
+                <LoadingLine width="70%" />
+                <LoadingLine width="48%" />
+              </div>
+            )}
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('create.description')}
             </label>
@@ -415,14 +411,9 @@ export function CreateEventScreen({
                 borderColor: 'var(--border)',
               }}
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 gap-3"
-          >
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
                 {translate('create.date')}
@@ -453,13 +444,9 @@ export function CreateEventScreen({
                 }}
               />
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-          >
+          <div>
             <LocationAutocomplete
               label={translate('create.location')}
               placeholder={translate('create.locationPlaceholder')}
@@ -476,20 +463,15 @@ export function CreateEventScreen({
                 height={248}
               />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="p-6 border-t border-border"
-      >
+      <div className="p-6 border-t border-border">
         <TouchButton onClick={handleCreateEvent} variant="primary" fullWidth disabled={loading}>
           {loading ? translate('create.creating') : translate('create.createButton')}
         </TouchButton>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }

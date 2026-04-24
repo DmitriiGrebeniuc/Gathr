@@ -881,11 +881,7 @@ export function EventDetailsScreen({
           style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
         >
           <div className="max-w-sm mx-auto space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
+            <div>
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
                   <h1>{eventData.title}</h1>
@@ -919,7 +915,7 @@ export function EventDetailsScreen({
               <p className="text-muted-foreground leading-relaxed">
                 {eventData.description || translate('details.noDescription')}
               </p>
-            </motion.div>
+            </div>
 
             {isClosedAccessResolving && (
               <LoadingCard lines={['42%', '88%', '72%']} />
@@ -941,12 +937,7 @@ export function EventDetailsScreen({
             )}
 
             <div className="space-y-4">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 }}
-                className="flex items-start gap-3"
-              >
+              <div className="flex items-start gap-3">
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: 'var(--primary)' }}
@@ -969,14 +960,9 @@ export function EventDetailsScreen({
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-3"
-              >
+              <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
@@ -1032,14 +1018,10 @@ export function EventDetailsScreen({
                     />
                   </div>
                 ) : null}
-              </motion.div>
+              </div>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
+            <div>
               <button
                 onClick={() =>
                   onNavigate('participants', {
@@ -1051,9 +1033,9 @@ export function EventDetailsScreen({
                   })
                 }
                 className="text-sm text-muted-foreground mb-3 hover:opacity-80 active:opacity-60 transition-opacity"
-              >
-                {translate('details.participants')} ({participantCount})
-              </button>
+                >
+                  {translate('details.participants')} ({participantCount})
+                </button>
 
               {!participantAccessResolved ||
               (canViewParticipantIdentities && !participantListResolved) ? (
@@ -1086,11 +1068,8 @@ export function EventDetailsScreen({
                     const isEventCreator = eventData.creator_id === participant.user_id;
 
                     return (
-                      <motion.div
+                      <div
                         key={participant.user_id || idx}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3 + idx * 0.05 }}
                         className="relative"
                         title={
                           isEventCreator && isCurrentUser
@@ -1125,20 +1104,17 @@ export function EventDetailsScreen({
                             {translate('details.you')}
                           </div>
                         )}
-                      </motion.div>
+                      </div>
                     );
                   })}
 
                   {participantCount > 4 && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.5 }}
+                    <div
                       className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2 border-background"
                       style={{ backgroundColor: 'var(--secondary)' }}
                     >
                       +{participantCount - 4}
-                    </motion.div>
+                    </div>
                   )}
                 </button>
               ) : canViewParticipantIdentities && participantCount > 0 ? (
@@ -1163,19 +1139,14 @@ export function EventDetailsScreen({
                   {translate('details.noParticipants')}
                 </div>
               )}
-            </motion.div>
+            </div>
 
             {renderJoinRequestStatus()}
 
           </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="p-6 border-t border-border space-y-3"
-        >
+        <div className="p-6 border-t border-border space-y-3">
           {!isCreator && !isClosedAccessResolving && (
             <div className="grid grid-cols-2 gap-3">
               <TouchButton
@@ -1292,7 +1263,7 @@ export function EventDetailsScreen({
               </TouchButton>
             </div>
           )}
-        </motion.div>
+        </div>
 
         {showJoinRequestComposer && (
           <motion.div

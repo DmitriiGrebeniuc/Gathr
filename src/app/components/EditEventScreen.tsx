@@ -1,5 +1,5 @@
 import { motion, useDragControls, useMotionValue, useTransform, PanInfo } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TouchButton } from './TouchButton';
 import { supabase } from '../../lib/supabase';
 import { ACTIVITY_TYPES, type ActivityType, getActivityTypeMeta } from '../constants/activityTypes';
@@ -14,6 +14,7 @@ import {
   updateEventWithCreator,
 } from '../lib/publicData';
 import { hasUnlimitedAccess } from '../constants/planLimits';
+import { LoadingCard, LoadingLine } from './LoadingState';
 
 export function EditEventScreen({
   onNavigate,
@@ -42,62 +43,77 @@ export function EditEventScreen({
   const [joinMode, setJoinMode] = useState<'open' | 'request'>('open');
   const [loading, setLoading] = useState(false);
   const [canUseRequestJoinMode, setCanUseRequestJoinMode] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const hydrationRequestRef = useRef(0);
 
   const { language, translate } = useLanguage();
 
   useEffect(() => {
     const loadEventState = async () => {
       if (!event) {
+        setInitializing(false);
         return;
       }
 
-      setTitle(event.title || '');
-      setDescription(event.description || '');
-      setActivityType((event.activity_type || 'other') as ActivityType);
-      setJoinMode((event.join_mode || 'open') as 'open' | 'request');
+      const requestId = ++hydrationRequestRef.current;
+      setInitializing(true);
 
-      const [privateDetails, myAccess] = await Promise.all([
-        fetchEventPrivateDetails(event.id),
-        fetchMyProfileAccessSummary(),
-      ]);
+      try {
+        const [privateDetails, myAccess] = await Promise.all([
+          fetchEventPrivateDetails(event.id),
+          fetchMyProfileAccessSummary(),
+        ]);
 
-      setCanUseRequestJoinMode(
-        myAccess?.plan === 'pro' || hasUnlimitedAccess(myAccess?.has_unlimited_access)
-      );
+        if (requestId !== hydrationRequestRef.current) {
+          return;
+        }
 
-      const sourceDateTime = privateDetails?.date_time || event.date_time || null;
+        setTitle(event.title || '');
+        setDescription(event.description || '');
+        setActivityType((event.activity_type || 'other') as ActivityType);
+        setJoinMode((event.join_mode || 'open') as 'open' | 'request');
+        setCanUseRequestJoinMode(
+          myAccess?.plan === 'pro' || hasUnlimitedAccess(myAccess?.has_unlimited_access)
+        );
 
-      setLocation({
-        address: privateDetails?.location || event.location || '',
-        placeId: privateDetails?.location_place_id || event.location_place_id || null,
-        lat:
-          typeof privateDetails?.location_lat === 'number'
-            ? privateDetails.location_lat
-            : typeof event.location_lat === 'number'
-              ? event.location_lat
-              : null,
-        lng:
-          typeof privateDetails?.location_lng === 'number'
-            ? privateDetails.location_lng
-            : typeof event.location_lng === 'number'
-              ? event.location_lng
-              : null,
-        city: event.city || null,
-        cityNormalized: event.city_normalized || null,
-      });
+        const sourceDateTime = privateDetails?.date_time || event.date_time || null;
 
-      if (sourceDateTime) {
-        const eventDate = new Date(sourceDateTime);
+        setLocation({
+          address: privateDetails?.location || event.location || '',
+          placeId: privateDetails?.location_place_id || event.location_place_id || null,
+          lat:
+            typeof privateDetails?.location_lat === 'number'
+              ? privateDetails.location_lat
+              : typeof event.location_lat === 'number'
+                ? event.location_lat
+                : null,
+          lng:
+            typeof privateDetails?.location_lng === 'number'
+              ? privateDetails.location_lng
+              : typeof event.location_lng === 'number'
+                ? event.location_lng
+                : null,
+          city: event.city || null,
+          cityNormalized: event.city_normalized || null,
+        });
 
-        if (!Number.isNaN(eventDate.getTime())) {
-          const year = eventDate.getFullYear();
-          const month = String(eventDate.getMonth() + 1).padStart(2, '0');
-          const day = String(eventDate.getDate()).padStart(2, '0');
-          const hours = String(eventDate.getHours()).padStart(2, '0');
-          const minutes = String(eventDate.getMinutes()).padStart(2, '0');
+        if (sourceDateTime) {
+          const eventDate = new Date(sourceDateTime);
 
-          setDate(`${year}-${month}-${day}`);
-          setTime(`${hours}:${minutes}`);
+          if (!Number.isNaN(eventDate.getTime())) {
+            const year = eventDate.getFullYear();
+            const month = String(eventDate.getMonth() + 1).padStart(2, '0');
+            const day = String(eventDate.getDate()).padStart(2, '0');
+            const hours = String(eventDate.getHours()).padStart(2, '0');
+            const minutes = String(eventDate.getMinutes()).padStart(2, '0');
+
+            setDate(`${year}-${month}-${day}`);
+            setTime(`${hours}:${minutes}`);
+          }
+        }
+      } finally {
+        if (requestId === hydrationRequestRef.current) {
+          setInitializing(false);
         }
       }
     };
@@ -257,16 +273,24 @@ export function EditEventScreen({
         ></div>
       </div>
 
-      <div
-        className="flex-1 overflow-y-auto px-6 py-6"
-        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
-      >
+        <div
+          className="flex-1 overflow-y-auto px-6 py-6"
+          style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+        >
         <div className="space-y-5 max-w-sm mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
+          {initializing ? (
+            <>
+              <LoadingCard lines={['32%', '100%']} />
+              <LoadingCard lines={['28%', '70%', '68%']} />
+              <div className="grid grid-cols-2 gap-3">
+                <LoadingCard lines={2} />
+                <LoadingCard lines={2} />
+              </div>
+              <LoadingCard className="min-h-[17rem]" lines={['40%', '100%', '100%', '86%']} />
+            </>
+          ) : (
+            <>
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('edit.eventTitle')}
             </label>
@@ -282,13 +306,9 @@ export function EditEventScreen({
                 borderColor: 'var(--border)',
               }}
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.13 }}
-          >
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('edit.activityType')}
             </label>
@@ -318,13 +338,9 @@ export function EditEventScreen({
                 );
               })}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.14 }}
-          >
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('edit.joinModeTitle')}
             </label>
@@ -376,13 +392,9 @@ export function EditEventScreen({
                 {translate('edit.requestModeProOnly')}
               </p>
             )}
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
+          <div>
             <label className="block mb-2 text-sm text-muted-foreground">
               {translate('edit.description')}
             </label>
@@ -400,14 +412,9 @@ export function EditEventScreen({
                 borderColor: 'var(--border)',
               }}
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 gap-3"
-          >
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block mb-2 text-sm text-muted-foreground">
                 {translate('edit.date')}
@@ -438,13 +445,9 @@ export function EditEventScreen({
                 }}
               />
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-          >
+          <div>
             <LocationAutocomplete
               label={translate('edit.location')}
               placeholder={translate('edit.locationPlaceholder')}
@@ -461,20 +464,27 @@ export function EditEventScreen({
                 height={248}
               />
             </div>
-          </motion.div>
+          </div>
+            </>
+          )}
         </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="p-6 border-t border-border"
-      >
-        <TouchButton onClick={handleUpdateEvent} variant="primary" fullWidth disabled={loading}>
+      <div className="p-6 border-t border-border">
+        <TouchButton
+          onClick={handleUpdateEvent}
+          variant="primary"
+          fullWidth
+          disabled={loading || initializing}
+        >
           {loading ? translate('edit.saving') : translate('edit.saveButton')}
         </TouchButton>
-      </motion.div>
+        {initializing && (
+          <div className="mt-3">
+            <LoadingLine width="45%" />
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }

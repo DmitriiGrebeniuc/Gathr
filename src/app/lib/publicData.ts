@@ -1,4 +1,8 @@
 import { supabase } from '../../lib/supabase';
+import type {
+  EventContactMethods,
+  NormalizedEventContactMethods,
+} from './eventContacts';
 
 export type CreateEventWithCreatorInput = {
   title: string;
@@ -27,6 +31,8 @@ export type EventPrivateDetails = {
   location_lat: number | null;
   location_lng: number | null;
 };
+
+export type { EventContactDraft, EventContactMethods, NormalizedEventContactMethods } from './eventContacts';
 
 export type EventJoinRequestStatus = 'pending' | 'approved' | 'rejected';
 
@@ -329,6 +335,59 @@ export async function fetchEventPrivateDetails(
   }
 
   return (data as EventPrivateDetails | null) ?? null;
+}
+
+export async function fetchEventContactMethods(
+  eventId: string | null | undefined
+): Promise<EventContactMethods | null> {
+  if (!eventId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .rpc('get_event_contact_methods', {
+      target_event_id: eventId,
+    })
+    .maybeSingle();
+
+  if (error) {
+    console.error(`Failed to load contact methods for event ${eventId}:`, error);
+    return null;
+  }
+
+  return (data as EventContactMethods | null) ?? null;
+}
+
+export async function upsertEventContactMethods(
+  eventId: string,
+  contacts: NormalizedEventContactMethods
+): Promise<{ error: unknown }> {
+  if (!eventId) {
+    return { error: new Error('event_id_required') };
+  }
+
+  const hasAnyContacts =
+    !!contacts.instagram_url || !!contacts.telegram_url || !!contacts.phone_number;
+
+  if (!hasAnyContacts) {
+    const { error } = await supabase.from('event_contact_methods').delete().eq('event_id', eventId);
+
+    return { error };
+  }
+
+  const { error } = await supabase.from('event_contact_methods').upsert(
+    {
+      event_id: eventId,
+      instagram_url: contacts.instagram_url,
+      telegram_url: contacts.telegram_url,
+      phone_number: contacts.phone_number,
+    },
+    {
+      onConflict: 'event_id',
+    }
+  );
+
+  return { error };
 }
 
 export async function fetchAccessibleEventPrivateDetailsMap(

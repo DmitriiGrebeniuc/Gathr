@@ -9,12 +9,21 @@ import { EventLocationMap } from './EventLocationMap';
 import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 import { feedback } from '../lib/feedback';
 import {
+  fetchEventContactMethods,
   fetchEventPrivateDetails,
   fetchMyProfileAccessSummary,
+  upsertEventContactMethods,
   updateEventWithCreator,
 } from '../lib/publicData';
 import { hasUnlimitedAccess } from '../constants/planLimits';
 import { LoadingCard, LoadingLine } from './LoadingState';
+import { EventContactMethodsEditor } from './EventContactMethodsSection';
+import {
+  getEmptyEventContactDraft,
+  normalizeEventContactDraft,
+  toEventContactDraft,
+  type EventContactValidationField,
+} from '../lib/eventContacts';
 
 export function EditEventScreen({
   onNavigate,
@@ -41,6 +50,7 @@ export function EditEventScreen({
   });
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [joinMode, setJoinMode] = useState<'open' | 'request'>('open');
+  const [contactDraft, setContactDraft] = useState(getEmptyEventContactDraft());
   const [loading, setLoading] = useState(false);
   const [canUseRequestJoinMode, setCanUseRequestJoinMode] = useState(false);
   const [initializing, setInitializing] = useState(true);
@@ -59,9 +69,10 @@ export function EditEventScreen({
       setInitializing(true);
 
       try {
-        const [privateDetails, myAccess] = await Promise.all([
+        const [privateDetails, myAccess, contactMethods] = await Promise.all([
           fetchEventPrivateDetails(event.id),
           fetchMyProfileAccessSummary(),
+          fetchEventContactMethods(event.id),
         ]);
 
         if (requestId !== hydrationRequestRef.current) {
@@ -75,6 +86,7 @@ export function EditEventScreen({
         setCanUseRequestJoinMode(
           myAccess?.plan === 'pro' || hasUnlimitedAccess(myAccess?.has_unlimited_access)
         );
+        setContactDraft(toEventContactDraft(contactMethods));
 
         const sourceDateTime = privateDetails?.date_time || event.date_time || null;
 
@@ -185,6 +197,19 @@ export function EditEventScreen({
       return;
     }
 
+    const normalizedContacts = normalizeEventContactDraft(contactDraft);
+
+    if (normalizedContacts.invalidField) {
+      const keyByField: Record<EventContactValidationField, string> = {
+        instagram: 'eventContacts.invalidInstagram',
+        telegram: 'eventContacts.invalidTelegram',
+        phone: 'eventContacts.invalidPhone',
+      };
+
+      feedback.warning(translate(keyByField[normalizedContacts.invalidField] as any));
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -230,7 +255,19 @@ export function EditEventScreen({
         return;
       }
 
-      onNavigate('event-details', updatedEvent || event);
+      const resolvedEvent = updatedEvent || event;
+
+      const { error: contactError } = await upsertEventContactMethods(
+        event.id,
+        normalizedContacts.data
+      );
+
+      if (contactError) {
+        console.error('Failed to update event contact methods:', contactError);
+        feedback.warning(translate('eventContacts.contactsNotSavedAfterUpdate'));
+      }
+
+      onNavigate('event-details', resolvedEvent);
     } catch (error) {
       console.error('Unexpected update error:', error);
       feedback.error(translate('edit.unexpectedError'));
@@ -249,7 +286,7 @@ export function EditEventScreen({
       dragElastic={{ top: 0, bottom: 0.22 }}
       onDragEnd={handleDragEnd}
       style={{ y, opacity }}
-      className="h-full flex flex-col bg-background overflow-x-hidden"
+      className="relative h-full flex flex-col bg-background overflow-x-hidden"
       dragMomentum={false}
       dragTransition={{ power: 0.08, timeConstant: 140 }}
     >
@@ -413,6 +450,12 @@ export function EditEventScreen({
               }}
             />
           </div>
+
+          <EventContactMethodsEditor
+            draft={contactDraft}
+            onDraftChange={setContactDraft}
+            disabled={loading || initializing}
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div>

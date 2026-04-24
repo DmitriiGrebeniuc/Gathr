@@ -9,8 +9,18 @@ import { EventLocationMap } from './EventLocationMap';
 import { getPlanLimits, hasUnlimitedAccess } from '../constants/planLimits';
 import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
 import { feedback } from '../lib/feedback';
-import { createEventWithCreator, fetchMyProfileAccessSummary } from '../lib/publicData';
+import {
+  createEventWithCreator,
+  fetchMyProfileAccessSummary,
+  upsertEventContactMethods,
+} from '../lib/publicData';
 import { LoadingLine } from './LoadingState';
+import { EventContactMethodsEditor } from './EventContactMethodsSection';
+import {
+  getEmptyEventContactDraft,
+  normalizeEventContactDraft,
+  type EventContactValidationField,
+} from '../lib/eventContacts';
 
 type MyProfileAccess = {
   id: string;
@@ -43,6 +53,7 @@ export function CreateEventScreen({
   });
   const [activityType, setActivityType] = useState<ActivityType>('other');
   const [joinMode, setJoinMode] = useState<'open' | 'request'>('open');
+  const [contactDraft, setContactDraft] = useState(getEmptyEventContactDraft());
   const [loading, setLoading] = useState(false);
   const [profileAccess, setProfileAccess] = useState<MyProfileAccess | null>(null);
   const [profileAccessResolved, setProfileAccessResolved] = useState(false);
@@ -116,6 +127,19 @@ export function CreateEventScreen({
 
     if (!time) {
       feedback.warning(translate('create.selectTime'));
+      return;
+    }
+
+    const normalizedContacts = normalizeEventContactDraft(contactDraft);
+
+    if (normalizedContacts.invalidField) {
+      const keyByField: Record<EventContactValidationField, string> = {
+        instagram: 'eventContacts.invalidInstagram',
+        telegram: 'eventContacts.invalidTelegram',
+        phone: 'eventContacts.invalidPhone',
+      };
+
+      feedback.warning(translate(keyByField[normalizedContacts.invalidField] as any));
       return;
     }
 
@@ -235,6 +259,16 @@ export function CreateEventScreen({
         return;
       }
 
+      const { error: contactError } = await upsertEventContactMethods(
+        createdEvent.id,
+        normalizedContacts.data
+      );
+
+      if (contactError) {
+        console.error('Failed to save event contact methods:', contactError);
+        feedback.warning(translate('eventContacts.contactsNotSavedAfterCreate'));
+      }
+
       onNavigate('event-details', createdEvent);
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -254,7 +288,7 @@ export function CreateEventScreen({
       dragElastic={{ top: 0, bottom: 0.22 }}
       onDragEnd={handleDragEnd}
       style={{ y, opacity }}
-      className="h-full flex flex-col bg-background overflow-x-hidden"
+      className="relative h-full flex flex-col bg-background overflow-x-hidden"
       dragMomentum={false}
       dragTransition={{ power: 0.08, timeConstant: 140 }}
     >
@@ -412,6 +446,12 @@ export function CreateEventScreen({
               }}
             />
           </div>
+
+          <EventContactMethodsEditor
+            draft={contactDraft}
+            onDraftChange={setContactDraft}
+            disabled={loading}
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div>

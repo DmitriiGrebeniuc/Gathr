@@ -5,22 +5,26 @@ import { TouchButton } from './TouchButton';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { EventLocationMap } from './EventLocationMap';
+import { EventContactMethodsDisplay } from './EventContactMethodsSection';
 import { buildJoinEventLoginPayload } from '../auth/postLoginIntent';
 import { feedback } from '../lib/feedback';
 import { LoadingAvatarStrip, LoadingCard, LoadingLine } from './LoadingState';
 import {
   createEventJoinRequest,
   fetchCreatorEventJoinRequests,
+  fetchEventContactMethods,
   fetchEventPrivateDetails,
   fetchMyEventJoinRequest,
   fetchMyProfileAccessSummary,
   fetchParticipantCounts,
   fetchParticipantIdentityRows,
   fetchPublicProfileNameMap,
+  type EventContactMethods,
   type EventJoinRequest,
   type EventPrivateDetails,
 } from '../lib/publicData';
 import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
+import { hasAnyEventContactMethods } from '../lib/eventContacts';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -66,6 +70,7 @@ export function EventDetailsScreen({
   const [participantListResolved, setParticipantListResolved] = useState(false);
   const [eventStateResolved, setEventStateResolved] = useState(false);
   const [privateDetails, setPrivateDetails] = useState<EventPrivateDetails | null>(null);
+  const [contactMethods, setContactMethods] = useState<EventContactMethods | null>(null);
   const [myJoinRequest, setMyJoinRequest] = useState<EventJoinRequest | null>(null);
   const [showJoinRequestComposer, setShowJoinRequestComposer] = useState(false);
   const [joinRequestMessage, setJoinRequestMessage] = useState('');
@@ -81,6 +86,7 @@ export function EventDetailsScreen({
   const pendingAuthAction = event?.authAction || null;
   const joinMode = (eventData.join_mode || 'open') as 'open' | 'request';
   const canViewClosedDetails = joinMode !== 'request' || isCreator || hasJoined || isAdmin;
+  const canViewEventContacts = isCreator || hasJoined || isAdmin;
   const hasVisiblePrivatePreview =
     !!eventData.date_time ||
     !!eventData.location ||
@@ -322,6 +328,7 @@ export function EventDetailsScreen({
         }
 
         setPrivateDetails(nextPrivateDetails);
+        setContactMethods(null);
         setMyJoinRequest(null);
         setPendingJoinRequestsCount(0);
         setEventStateResolved(true);
@@ -342,6 +349,7 @@ export function EventDetailsScreen({
         setCanViewParticipantIdentities(creator || nextIsAdmin);
         setParticipantAccessResolved(true);
         setPrivateDetails(null);
+        setContactMethods(null);
         setMyJoinRequest(null);
         setPendingJoinRequestsCount(0);
         setEventStateResolved(true);
@@ -363,8 +371,12 @@ export function EventDetailsScreen({
       const canViewIdentities = creator || joined || nextIsAdmin;
       const canViewPrivateDetails =
         joinModeOverride === 'open' || creator || joined || nextIsAdmin;
+      const canViewContacts = creator || joined || nextIsAdmin;
       const nextPrivateDetails = canViewPrivateDetails
         ? await fetchEventPrivateDetails(eventIdOverride)
+        : null;
+      const nextContactMethods = canViewContacts
+        ? await fetchEventContactMethods(eventIdOverride)
         : null;
       const nextMyJoinRequest =
         joinModeOverride === 'request' && !creator && !joined && !nextIsAdmin
@@ -384,6 +396,7 @@ export function EventDetailsScreen({
       setHasJoined(joined);
       setCanViewParticipantIdentities(canViewIdentities);
       setPrivateDetails(nextPrivateDetails);
+      setContactMethods(nextContactMethods);
       setMyJoinRequest(nextMyJoinRequest);
       setPendingJoinRequestsCount(nextPendingJoinRequestsCount);
       setParticipantAccessResolved(true);
@@ -400,6 +413,7 @@ export function EventDetailsScreen({
       setCanViewParticipantIdentities(false);
       setParticipantAccessResolved(true);
       setPrivateDetails(null);
+      setContactMethods(null);
       setMyJoinRequest(null);
       setPendingJoinRequestsCount(0);
       setEventStateResolved(true);
@@ -415,6 +429,7 @@ export function EventDetailsScreen({
     setParticipantListResolved(false);
     setEventStateResolved(false);
     setPrivateDetails(null);
+    setContactMethods(null);
     setMyJoinRequest(null);
     setShowJoinRequestComposer(false);
     setJoinRequestMessage('');
@@ -1030,6 +1045,12 @@ export function EventDetailsScreen({
                 ) : null}
               </div>
             </div>
+
+            {eventStateResolved &&
+              canViewEventContacts &&
+              hasAnyEventContactMethods(contactMethods) && (
+                <EventContactMethodsDisplay contacts={contactMethods} />
+              )}
 
             <div>
               <button

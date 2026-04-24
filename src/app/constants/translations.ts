@@ -108,6 +108,34 @@ type TranslationKey =
     | 'notificationSettings.eventInvitationsDescription'
     | 'notificationSettings.eventJoinRequests'
     | 'notificationSettings.eventJoinRequestsDescription'
+    | 'eventContacts.sectionTitle'
+    | 'eventContacts.sectionDescription'
+    | 'eventContacts.detailsTitle'
+    | 'eventContacts.detailsDescription'
+    | 'eventContacts.instagram'
+    | 'eventContacts.telegram'
+    | 'eventContacts.phone'
+    | 'eventContacts.add'
+    | 'eventContacts.added'
+    | 'eventContacts.modalTitleInstagram'
+    | 'eventContacts.modalTitleTelegram'
+    | 'eventContacts.modalTitlePhone'
+    | 'eventContacts.modalDescriptionInstagram'
+    | 'eventContacts.modalDescriptionTelegram'
+    | 'eventContacts.modalDescriptionPhone'
+    | 'eventContacts.instagramPlaceholder'
+    | 'eventContacts.telegramPlaceholder'
+    | 'eventContacts.phonePlaceholder'
+    | 'eventContacts.save'
+    | 'eventContacts.remove'
+    | 'eventContacts.invalidInstagram'
+    | 'eventContacts.invalidTelegram'
+    | 'eventContacts.invalidPhone'
+    | 'eventContacts.contactsNotSavedAfterCreate'
+    | 'eventContacts.contactsNotSavedAfterUpdate'
+    | 'eventContacts.openInstagram'
+    | 'eventContacts.openTelegram'
+    | 'eventContacts.callPhone'
     | 'security.title'
     | 'security.cardTitle'
     | 'security.cardDescription'
@@ -3174,11 +3202,69 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 const localizedClosedEventOverrides: Partial<
     Record<LanguageCode, Partial<Record<TranslationKey, string>>>
 > = {
+    en: {
+        'eventContacts.sectionTitle': 'How can people contact you?',
+        'eventContacts.sectionDescription': 'Optional. Only event participants will see these contacts.',
+        'eventContacts.detailsTitle': 'Contact the organizer',
+        'eventContacts.detailsDescription': 'Shown only to participants of this event.',
+        'eventContacts.instagram': 'Instagram',
+        'eventContacts.telegram': 'Telegram',
+        'eventContacts.phone': 'Phone',
+        'eventContacts.add': 'Add',
+        'eventContacts.added': 'Added',
+        'eventContacts.modalTitleInstagram': 'Instagram contact',
+        'eventContacts.modalTitleTelegram': 'Telegram contact',
+        'eventContacts.modalTitlePhone': 'Phone number',
+        'eventContacts.modalDescriptionInstagram': 'Add your Instagram profile link or username.',
+        'eventContacts.modalDescriptionTelegram': 'Add your Telegram profile link or username.',
+        'eventContacts.modalDescriptionPhone': 'Add a phone number people can call.',
+        'eventContacts.instagramPlaceholder': '@yourname or instagram.com/yourname',
+        'eventContacts.telegramPlaceholder': '@yourname or t.me/yourname',
+        'eventContacts.phonePlaceholder': '+373...',
+        'eventContacts.save': 'OK',
+        'eventContacts.remove': 'Remove',
+        'eventContacts.invalidInstagram': 'Enter a valid Instagram username or link.',
+        'eventContacts.invalidTelegram': 'Enter a valid Telegram username or link.',
+        'eventContacts.invalidPhone': 'Enter a valid phone number.',
+        'eventContacts.contactsNotSavedAfterCreate': 'The event was created, but the contact methods were not saved.',
+        'eventContacts.contactsNotSavedAfterUpdate': 'The event was updated, but the contact methods were not saved.',
+        'eventContacts.openInstagram': 'Open Instagram',
+        'eventContacts.openTelegram': 'Open Telegram',
+        'eventContacts.callPhone': 'Call',
+    },
     ru: {
         'notificationSettings.eventJoinRequests': '\u0417\u0430\u044f\u0432\u043a\u0438 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435',
         'notificationSettings.eventJoinRequestsDescription': '\u041a\u043e\u0433\u0434\u0430 \u043a\u0442\u043e-\u0442\u043e \u043f\u043e\u0434\u0430\u0451\u0442 \u0437\u0430\u044f\u0432\u043a\u0443 \u0432 \u0432\u0430\u0448\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u043e\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435',
         'notifications.requestIconLabel': '\u0417\u0430\u044f\u0432\u043a\u0430 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435',
         'notifications.requestedToJoinYourEvent': '{name} \u043e\u0442\u043f\u0440\u0430\u0432\u0438\u043b \u0437\u0430\u044f\u0432\u043a\u0443 \u0432 \u0432\u0430\u0448\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435 {title}',
+        'eventContacts.sectionTitle': 'Как с вами можно связаться?',
+        'eventContacts.sectionDescription': 'Необязательно. Эти контакты увидят только участники события.',
+        'eventContacts.detailsTitle': 'Связаться с организатором',
+        'eventContacts.detailsDescription': 'Блок виден только участникам события.',
+        'eventContacts.instagram': 'Instagram',
+        'eventContacts.telegram': 'Telegram',
+        'eventContacts.phone': 'Телефон',
+        'eventContacts.add': 'Добавить',
+        'eventContacts.added': 'Добавлено',
+        'eventContacts.modalTitleInstagram': 'Instagram',
+        'eventContacts.modalTitleTelegram': 'Telegram',
+        'eventContacts.modalTitlePhone': 'Номер телефона',
+        'eventContacts.modalDescriptionInstagram': 'Добавьте ссылку на профиль Instagram или имя пользователя.',
+        'eventContacts.modalDescriptionTelegram': 'Добавьте ссылку на Telegram или имя пользователя.',
+        'eventContacts.modalDescriptionPhone': 'Добавьте номер, по которому с вами можно созвониться.',
+        'eventContacts.instagramPlaceholder': '@username или instagram.com/username',
+        'eventContacts.telegramPlaceholder': '@username или t.me/username',
+        'eventContacts.phonePlaceholder': '+373...',
+        'eventContacts.save': 'ОК',
+        'eventContacts.remove': 'Удалить',
+        'eventContacts.invalidInstagram': 'Введите корректную ссылку или username Instagram.',
+        'eventContacts.invalidTelegram': 'Введите корректную ссылку или username Telegram.',
+        'eventContacts.invalidPhone': 'Введите корректный номер телефона.',
+        'eventContacts.contactsNotSavedAfterCreate': 'Событие создано, но контакты сохранить не удалось.',
+        'eventContacts.contactsNotSavedAfterUpdate': 'Событие обновлено, но контакты сохранить не удалось.',
+        'eventContacts.openInstagram': 'Открыть Instagram',
+        'eventContacts.openTelegram': 'Открыть Telegram',
+        'eventContacts.callPhone': 'Позвонить',
         'home.searchButton': '\u041f\u043e\u0438\u0441\u043a',
         'home.searchPlaceholder': '\u0418\u0441\u043a\u0430\u0442\u044c \u0441\u043e\u0431\u044b\u0442\u0438\u044f',
         'home.visited': '\u041f\u043e\u0441\u0435\u0449\u0451\u043d\u043d\u044b\u0435',

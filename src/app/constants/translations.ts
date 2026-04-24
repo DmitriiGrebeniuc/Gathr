@@ -316,6 +316,7 @@ type TranslationKey =
     | 'home.discover'
     | 'home.joined'
     | 'home.myEvents'
+    | 'home.visited'
     | 'home.all'
     | 'home.allCities'
     | 'home.cityFilterLabel'
@@ -330,11 +331,13 @@ type TranslationKey =
     | 'home.past'
     | 'home.noMyEvents'
     | 'home.noJoinedEvents'
+    | 'home.noVisitedEvents'
     | 'home.noDiscoverEvents'
     | 'home.noEventsForFilter'
     | 'home.noEventsForCity'
     | 'home.createFirstEvent'
     | 'home.joinedWillAppear'
+    | 'home.visitedWillAppear'
     | 'home.noEventsFromOthers'
     | 'home.closedBadge'
     | 'home.closedDateHidden'
@@ -866,6 +869,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.discover': 'Discover',
         'home.joined': 'Joined',
         'home.myEvents': 'My Events',
+        'home.visited': 'Visited',
         'home.all': 'All',
         'home.allCities': 'All cities',
         'home.cityFilterLabel': 'City',
@@ -880,11 +884,13 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.past': 'Past',
         'home.noMyEvents': 'No my events yet',
         'home.noJoinedEvents': 'No joined events yet',
+        'home.noVisitedEvents': 'No visited events yet',
         'home.noDiscoverEvents': 'No discover events yet',
         'home.noEventsForFilter': 'No events found for this activity type.',
         'home.noEventsForCity': 'No events found for this city.',
         'home.createFirstEvent': 'Create your first event by tapping the + button.',
         'home.joinedWillAppear': 'Events you join will appear here.',
+        'home.visitedWillAppear': 'Past events you attended will appear here.',
         'home.noEventsFromOthers': 'There are no events from other users yet.',
         'home.closedBadge': 'Closed',
         'home.closedDateHidden': 'Date and time open after approval',
@@ -3157,6 +3163,9 @@ const localizedClosedEventOverrides: Partial<
     Record<LanguageCode, Partial<Record<TranslationKey, string>>>
 > = {
     ru: {
+        'home.visited': '\u041f\u043e\u0441\u0435\u0449\u0451\u043d\u043d\u044b\u0435',
+        'home.noVisitedEvents': '\u0422\u044b \u043f\u043e\u043a\u0430 \u043d\u0435 \u043f\u043e\u0441\u0435\u0449\u0430\u043b \u0441\u043e\u0431\u044b\u0442\u0438\u044f',
+        'home.visitedWillAppear': '\u041f\u0440\u043e\u0448\u0435\u0434\u0448\u0438\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u044f, \u0433\u0434\u0435 \u0442\u044b \u0443\u0447\u0430\u0441\u0442\u0432\u043e\u0432\u0430\u043b, \u043f\u043e\u044f\u0432\u044f\u0442\u0441\u044f \u0437\u0434\u0435\u0441\u044c.',
         'home.closedBadge': 'Закрытое',
         'home.closedDateHidden': 'Дата и время откроются после одобрения',
         'home.closedLocationHidden': 'Локация откроется после одобрения',
@@ -3211,6 +3220,9 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявка отклонена',
     },
     ro: {
+        'home.visited': 'Participate',
+        'home.noVisitedEvents': 'Nu ai evenimente vizitate Г®ncДѓ',
+        'home.visitedWillAppear': 'Evenimentele trecute la care ai participat vor apДѓrea aici.',
         'home.closedBadge': 'Închis',
         'home.closedDateHidden': 'Data și ora se deschid după aprobare',
         'home.closedLocationHidden': 'Locația se deschide după aprobare',
@@ -3274,6 +3286,9 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Cerere respinsă',
     },
     uk: {
+        'home.visited': '\u0412\u0456\u0434\u0432\u0456\u0434\u0430\u043d\u0456',
+        'home.noVisitedEvents': '\u0422\u0438 \u043f\u043e\u043a\u0438 \u043d\u0435 \u0432\u0456\u0434\u0432\u0456\u0434\u0443\u0432\u0430\u0432 \u043f\u043e\u0434\u0456\u0457',
+        'home.visitedWillAppear': '\u041c\u0438\u043d\u0443\u043b\u0456 \u043f\u043e\u0434\u0456\u0457, \u044f\u043a\u0456 \u0442\u0438 \u0432\u0456\u0434\u0432\u0456\u0434\u0430\u0432, \u0437\u2019\u044f\u0432\u043b\u044f\u0442\u0438\u043c\u0443\u0442\u044c\u0441\u044f \u0442\u0443\u0442.',
         'home.closedBadge': 'Закрита',
         'home.closedDateHidden': 'Дата й час відкриються після схвалення',
         'home.closedLocationHidden': 'Локація відкриється після схвалення',
@@ -3336,6 +3351,9 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявку відхилено',
     },
     de: {
+        'home.visited': 'Besucht',
+        'home.noVisitedEvents': 'Du hast noch keine besuchten Events',
+        'home.visitedWillAppear': 'Vergangene Events, an denen du teilgenommen hast, erscheinen hier.',
         'home.closedBadge': 'Geschlossen',
         'home.closedDateHidden': 'Datum und Uhrzeit werden nach der Freigabe sichtbar',
         'home.closedLocationHidden': 'Der Ort wird nach der Freigabe sichtbar',

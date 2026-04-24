@@ -54,7 +54,7 @@ export function HomeScreen({
   onNavigate: (screen: string, data?: any) => void;
 }) {
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
-  const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined'>('discover');
+  const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined' | 'visited'>('discover');
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
@@ -436,6 +436,8 @@ export function HomeScreen({
 
       if (activeTab === 'my') {
         matchesTab = isMyEvent;
+      } else if (activeTab === 'visited') {
+        matchesTab = isJoined && past;
       } else if (activeTab === 'joined') {
         matchesTab = !isMyEvent && isJoined && !past;
       } else {
@@ -550,7 +552,7 @@ export function HomeScreen({
       const aTime = getEventSortTime(a);
       const bTime = getEventSortTime(b);
 
-      if (activeTab === 'my') {
+      if (activeTab === 'my' || activeTab === 'visited') {
         return bTime - aTime;
       }
 
@@ -983,6 +985,20 @@ export function HomeScreen({
         >
           {translate('home.myEvents')}
         </motion.button>
+
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => setActiveTab('visited')}
+          className={`flex-1 py-3 transition-colors ${activeTab === 'visited' ? 'border-b-2' : 'text-muted-foreground'
+            }`}
+          style={
+            activeTab === 'visited'
+              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
+              : {}
+          }
+        >
+          {translate('home.visited')}
+        </motion.button>
       </div>
 
       <div className="border-b border-border px-4 py-2">
@@ -1240,6 +1256,8 @@ export function HomeScreen({
                   ? translate('home.noMyEvents')
                   : activeTab === 'joined'
                     ? translate('home.noJoinedEvents')
+                    : activeTab === 'visited'
+                      ? translate('home.noVisitedEvents')
                     : translate('home.noDiscoverEvents')}
               </h3>
 
@@ -1252,6 +1270,8 @@ export function HomeScreen({
                     ? translate('home.createFirstEvent')
                     : activeTab === 'joined'
                       ? translate('home.joinedWillAppear')
+                      : activeTab === 'visited'
+                        ? translate('home.visitedWillAppear')
                       : translate('home.noEventsFromOthers')}
               </p>
             </div>

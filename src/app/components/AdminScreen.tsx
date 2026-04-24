@@ -1,5 +1,6 @@
 import { ChevronLeft } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'motion/react';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { ACTIVITY_TYPES, getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
@@ -138,6 +139,10 @@ export function AdminScreen({
   initialSupportStatus?: SupportStatusFilter;
 }) {
   const { language, translate } = useLanguage();
+  const tabTransition = {
+    duration: 0.28,
+    ease: [0.22, 1, 0.36, 1] as const,
+  };
   const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
   const [activePage, setActivePage] = useState<AdminPage>(initialPage || 'overview');
   const [summary, setSummary] = useState<AdminSummary>(INITIAL_SUMMARY);
@@ -957,21 +962,28 @@ export function AdminScreen({
               const isActive = activePage === page.key;
 
               return (
-                <button
+                <motion.button
                   key={page.key}
                   type="button"
                   onClick={() => setActivePage(page.key)}
-                  className="rounded-lg px-3 py-2 text-xs transition-colors"
-                  style={{
-                    backgroundColor: isActive ? 'var(--accent-soft)' : 'transparent',
-                    border: isActive
-                      ? '1px solid var(--accent-border)'
-                      : '1px solid transparent',
-                    color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
-                  }}
+                  whileTap={{ scale: 0.985 }}
+                  transition={tabTransition}
+                  className="relative rounded-lg px-3 py-2 text-xs transition-colors"
+                  style={{ color: isActive ? 'var(--accent)' : 'var(--foreground-strong)' }}
                 >
-                  {page.label}
-                </button>
+                  {isActive && (
+                    <motion.span
+                      layoutId="admin-page-tab-indicator"
+                      className="absolute inset-0 rounded-lg border"
+                      style={{
+                        backgroundColor: 'var(--accent-soft)',
+                        borderColor: 'var(--accent-border)',
+                      }}
+                      transition={tabTransition}
+                    />
+                  )}
+                  <span className="relative z-10">{page.label}</span>
+                </motion.button>
               );
             })}
           </div>
@@ -1052,36 +1064,36 @@ export function AdminScreen({
             </div>
 
             <div className="flex gap-2 mb-4">
-              <button
+              <motion.button
                 onClick={() => setTimeFilter('future')}
-                className="px-3 py-2 rounded-lg text-sm transition-opacity"
+                whileTap={{ scale: 0.985 }}
+                transition={tabTransition}
+                className="relative px-3 py-2 rounded-lg text-sm border transition-colors"
                 style={{
                   backgroundColor:
                     timeFilter === 'future' ? 'var(--accent-soft)' : 'var(--surface-strong)',
-                  border:
-                    timeFilter === 'future'
-                      ? '1px solid var(--accent-border)'
-                      : '1px solid var(--border-subtle)',
+                  borderColor:
+                    timeFilter === 'future' ? 'var(--accent-border)' : 'var(--border-subtle)',
                   color: timeFilter === 'future' ? 'var(--accent)' : 'inherit',
                 }}
               >
                 {translate('admin.futureFilter')}
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => setTimeFilter('past')}
-                className="px-3 py-2 rounded-lg text-sm transition-opacity"
+                whileTap={{ scale: 0.985 }}
+                transition={tabTransition}
+                className="relative px-3 py-2 rounded-lg text-sm border transition-colors"
                 style={{
                   backgroundColor:
                     timeFilter === 'past' ? 'var(--accent-soft)' : 'var(--surface-strong)',
-                  border:
-                    timeFilter === 'past'
-                      ? '1px solid var(--accent-border)'
-                      : '1px solid var(--border-subtle)',
+                  borderColor:
+                    timeFilter === 'past' ? 'var(--accent-border)' : 'var(--border-subtle)',
                   color: timeFilter === 'past' ? 'var(--accent)' : 'inherit',
                 }}
               >
                 {translate('admin.pastFilter')}
-              </button>
+              </motion.button>
             </div>
 
             <input
@@ -1579,21 +1591,28 @@ export function AdminScreen({
                   const isActive = supportStatusFilter === filter.key;
 
                   return (
-                    <button
+                    <motion.button
                       key={filter.key}
                       type="button"
                       onClick={() => setSupportStatusFilter(filter.key)}
-                      className="rounded-lg px-2 py-2 text-[11px] transition-colors"
-                      style={{
-                        backgroundColor: isActive ? 'var(--accent-soft)' : 'transparent',
-                        border: isActive
-                          ? '1px solid var(--accent-border)'
-                          : '1px solid transparent',
-                        color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
-                      }}
+                      whileTap={{ scale: 0.985 }}
+                      transition={tabTransition}
+                      className="relative rounded-lg px-2 py-2 text-[11px] transition-colors"
+                      style={{ color: isActive ? 'var(--accent)' : 'var(--foreground-strong)' }}
                     >
-                      {filter.label}
-                    </button>
+                      {isActive && (
+                        <motion.span
+                          layoutId="admin-support-status-indicator"
+                          className="absolute inset-0 rounded-lg border"
+                          style={{
+                            backgroundColor: 'var(--accent-soft)',
+                            borderColor: 'var(--accent-border)',
+                          }}
+                          transition={tabTransition}
+                        />
+                      )}
+                      <span className="relative z-10">{filter.label}</span>
+                    </motion.button>
                   );
                 })}
               </div>

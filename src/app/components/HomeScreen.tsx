@@ -53,6 +53,10 @@ export function HomeScreen({
 }: {
   onNavigate: (screen: string, data?: any) => void;
 }) {
+  const tabTransition = {
+    duration: 0.28,
+    ease: [0.22, 1, 0.36, 1] as const,
+  };
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined' | 'visited'>('discover');
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
@@ -521,6 +525,16 @@ export function HomeScreen({
     [systemTheme, translate]
   );
 
+  const homeTabs = useMemo(
+    () => [
+      { key: 'discover' as const, label: translate('home.discover') },
+      { key: 'joined' as const, label: translate('home.joined') },
+      { key: 'my' as const, label: translate('home.myEvents') },
+      { key: 'visited' as const, label: translate('home.visited') },
+    ],
+    [translate]
+  );
+
   const launchOverlayStyles = useMemo(() => {
     if (effectiveTheme === 'dark') {
       return {
@@ -944,61 +958,32 @@ export function HomeScreen({
       </motion.div>
 
       <div className="flex border-b border-border">
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setActiveTab('discover')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'discover' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
-          style={
-            activeTab === 'discover'
-              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
-              : {}
-          }
-        >
-          {translate('home.discover')}
-        </motion.button>
+        {homeTabs.map((tab) => {
+          const isActive = activeTab === tab.key;
 
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setActiveTab('joined')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'joined' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
-          style={
-            activeTab === 'joined'
-              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
-              : {}
-          }
-        >
-          {translate('home.joined')}
-        </motion.button>
-
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setActiveTab('my')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'my' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
-          style={
-            activeTab === 'my'
-              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
-              : {}
-          }
-        >
-          {translate('home.myEvents')}
-        </motion.button>
-
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setActiveTab('visited')}
-          className={`flex-1 py-3 transition-colors ${activeTab === 'visited' ? 'border-b-2' : 'text-muted-foreground'
-            }`}
-          style={
-            activeTab === 'visited'
-              ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
-              : {}
-          }
-        >
-          {translate('home.visited')}
-        </motion.button>
+          return (
+            <motion.button
+              key={tab.key}
+              whileTap={{ scale: 0.985 }}
+              transition={tabTransition}
+              onClick={() => setActiveTab(tab.key)}
+              className="relative flex-1 py-3 text-muted-foreground transition-colors"
+              style={{
+                color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
+              }}
+            >
+              <span className="relative z-10">{tab.label}</span>
+              {isActive && (
+                <motion.span
+                  layoutId="home-top-tab-indicator"
+                  className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                  transition={tabTransition}
+                />
+              )}
+            </motion.button>
+          );
+        })}
       </div>
 
       <div className="border-b border-border px-4 py-2">

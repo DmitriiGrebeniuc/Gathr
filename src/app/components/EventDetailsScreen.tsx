@@ -86,6 +86,7 @@ export function EventDetailsScreen({
     joinMode === 'request' && eventStateResolved && !canViewClosedDetails;
   const shouldShowPrivateFieldsLoading =
     !eventStateResolved &&
+    !hasVisiblePrivatePreview &&
     (!!eventData.id || joinMode === 'request') &&
     (joinMode === 'request' ||
       !eventData.date_time ||
@@ -102,6 +103,15 @@ export function EventDetailsScreen({
     typeof privateDetails?.location_lng === 'number'
       ? privateDetails.location_lng
       : eventData.location_lng;
+  const hasVisiblePrivatePreview =
+    !!eventData.date_time ||
+    !!eventData.location ||
+    typeof eventData.location_lat === 'number' ||
+    typeof eventData.location_lng === 'number' ||
+    !!privateDetails?.date_time ||
+    !!privateDetails?.location ||
+    typeof privateDetails?.location_lat === 'number' ||
+    typeof privateDetails?.location_lng === 'number';
 
   const eventDate = displayedDateTime ? new Date(displayedDateTime) : null;
   const isPastEvent =
@@ -917,7 +927,7 @@ export function EventDetailsScreen({
               </p>
             </div>
 
-            {isClosedAccessResolving && (
+            {isClosedAccessResolving && !hasVisiblePrivatePreview && (
               <LoadingCard lines={['42%', '88%', '72%']} />
             )}
 

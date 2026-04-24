@@ -78,9 +78,13 @@ export function HomeScreen({
   const [serverOffset, setServerOffset] = useState(0);
   const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [initialLoaderPhase, setInitialLoaderPhase] = useState<'hidden' | 'visible' | 'exiting'>(
+    'hidden'
+  );
   const themePickerRef = useRef<HTMLDivElement | null>(null);
   const eventsRef = useRef<EventItem[]>([]);
   const currentUserIdRef = useRef<string | null>(null);
+  const initialLoaderShownAtRef = useRef<number | null>(null);
 
   const { language, translate } = useLanguage();
   const { themeMode, setThemeMode, systemTheme, effectiveTheme } = useTheme();
@@ -561,6 +565,7 @@ export function HomeScreen({
   }, [sortedEvents, visibleCount]);
 
   const shouldShowInitialLoader = loading && events.length === 0;
+  const shouldRenderAnimatedInitialLoader = initialLoaderPhase !== 'hidden';
   const shouldShowEmptyState = !loading && sortedEvents.length === 0;
   const canShowLoadMore = !loading && visibleEvents.length < sortedEvents.length;
   const canLoadMoreFromServer =
@@ -707,6 +712,45 @@ export function HomeScreen({
   useEffect(() => {
     fetchEvents(true);
   }, [language]);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    if (shouldShowInitialLoader) {
+      if (initialLoaderPhase === 'hidden') {
+        initialLoaderShownAtRef.current = Date.now();
+        setInitialLoaderPhase('visible');
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }
+
+    if (initialLoaderPhase === 'visible') {
+      const visibleFor = initialLoaderShownAtRef.current
+        ? Date.now() - initialLoaderShownAtRef.current
+        : 0;
+      const minVisibleDuration = 700;
+      const exitDelay = Math.max(0, minVisibleDuration - visibleFor);
+
+      timeoutId = setTimeout(() => {
+        setInitialLoaderPhase('exiting');
+
+        timeoutId = setTimeout(() => {
+          setInitialLoaderPhase('hidden');
+        }, 420);
+      }, exitDelay);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [shouldShowInitialLoader, initialLoaderPhase]);
 
   useEffect(() => {
     if (!isThemePickerOpen) {
@@ -1123,28 +1167,32 @@ export function HomeScreen({
           style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
           onScroll={handleContentScroll}
         >
-          <motion.div layout transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}>
-            <AnimatePresence initial={false} mode="popLayout">
-              {shouldShowInitialLoader && (
+          <motion.div layout transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}>
+            <AnimatePresence initial={false} mode="sync">
+              {shouldRenderAnimatedInitialLoader && (
                 <motion.div
                   key="home-initial-loader"
                   layout
-                  initial={{ opacity: 0, y: 14, scale: 0.985 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -12, scale: 0.992 }}
-                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                  initial={{ opacity: 0, y: 22, scale: 0.972 }}
+                  animate={
+                    initialLoaderPhase === 'exiting'
+                      ? { opacity: 0, y: -18, scale: 0.988 }
+                      : { opacity: 1, y: 0, scale: 1 }
+                  }
+                  exit={{ opacity: 0, y: -18, scale: 0.988 }}
+                  transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                   className="space-y-3 py-1"
                 >
                   <motion.div
                     layout
                     className="flex justify-center py-4"
-                    transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      initial={{ opacity: 0, y: 12, scale: 0.94 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.94 }}
-                      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                     >
                       <LoadingLogo size={52} label={translate('common.loading')} />
                     </motion.div>
@@ -1154,12 +1202,12 @@ export function HomeScreen({
                     <motion.div
                       key={`home-skeleton-${index}`}
                       layout
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 24 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
+                      exit={{ opacity: 0, y: -12 }}
                       transition={{
-                        duration: 0.28,
-                        delay: index * 0.04,
+                        duration: 0.38,
+                        delay: index * 0.05,
                         ease: [0.22, 1, 0.36, 1],
                       }}
                     >
@@ -1201,7 +1249,7 @@ export function HomeScreen({
             </div>
           )}
 
-          <AnimatePresence initial={false} mode="popLayout">
+          <AnimatePresence initial={false} mode="sync">
             {visibleEvents.map((event, index) => {
               const past = isPastEvent(event.date_time);
               const activityMeta = getActivityTypeMeta(event.activity_type, language);
@@ -1222,14 +1270,22 @@ export function HomeScreen({
                 <motion.div
                   key={event.id}
                   layout
-                  initial={{ opacity: 0, y: 18, scale: 0.985 }}
+                  initial={{ opacity: 0, y: 34, scale: 0.978 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -12, scale: 0.992 }}
+                  exit={{ opacity: 0, y: -14, scale: 0.992 }}
                   transition={{
-                    layout: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
-                    opacity: { duration: 0.28, delay: Math.min(index, 8) * 0.035 },
-                    y: { duration: 0.34, delay: Math.min(index, 8) * 0.035, ease: [0.22, 1, 0.36, 1] },
-                    scale: { duration: 0.34, delay: Math.min(index, 8) * 0.035, ease: [0.22, 1, 0.36, 1] },
+                    layout: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
+                    opacity: { duration: 0.36, delay: 0.08 + Math.min(index, 8) * 0.045 },
+                    y: {
+                      duration: 0.5,
+                      delay: 0.08 + Math.min(index, 8) * 0.045,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
+                    scale: {
+                      duration: 0.5,
+                      delay: 0.08 + Math.min(index, 8) * 0.045,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
                   }}
                   whileTap={{ scale: 0.985 }}
                   onClick={() =>

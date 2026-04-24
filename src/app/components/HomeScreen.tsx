@@ -1262,7 +1262,7 @@ export function HomeScreen({
             </div>
           )}
 
-          <motion.div layout className="space-y-3">
+          <motion.div layout="position" className="space-y-3">
             {visibleEvents.map((event) => {
               const past = isPastEvent(event.date_time);
               const activityMeta = getActivityTypeMeta(event.activity_type, language);
@@ -1282,9 +1282,9 @@ export function HomeScreen({
               return (
                 <motion.div
                   key={event.id}
-                  layout
+                  layout="position"
                   transition={{
-                    layout: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
+                    layout: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
                   }}
                   whileTap={{ scale: 0.985 }}
                   onClick={() =>

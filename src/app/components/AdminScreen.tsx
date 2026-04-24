@@ -119,7 +119,7 @@ const adminLoadingStack = (count = 2) =>
   Array.from({ length: count }, (_, index) => (
     <LoadingCard
       key={`admin-loading-${index}`}
-      lines={index === 0 ? 3 : 2}
+      lines={index === 0 ? ['42%', '78%', '58%'] : ['56%', '84%']}
       className="rounded-lg border"
       style={adminNestedCardStyle}
     />

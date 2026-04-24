@@ -1278,20 +1278,18 @@ export function HomeScreen({
                 <motion.div
                   key={event.id}
                   layout
-                  initial={{ opacity: 0, y: 34, scale: 0.978 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.992 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -14, scale: 0.992 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.996 }}
                   transition={{
-                    layout: { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
-                    opacity: { duration: 0.36, delay: 0.08 + Math.min(index, 8) * 0.045 },
+                    layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
+                    opacity: { duration: 0.22 },
                     y: {
-                      duration: 0.5,
-                      delay: 0.08 + Math.min(index, 8) * 0.045,
+                      duration: 0.26,
                       ease: [0.22, 1, 0.36, 1],
                     },
                     scale: {
-                      duration: 0.5,
-                      delay: 0.08 + Math.min(index, 8) * 0.045,
+                      duration: 0.26,
                       ease: [0.22, 1, 0.36, 1],
                     },
                   }}

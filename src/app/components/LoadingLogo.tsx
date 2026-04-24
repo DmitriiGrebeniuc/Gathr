@@ -37,13 +37,15 @@ export function LoadingLogo({
           transition={{
             duration: 2.8,
             repeat: Infinity,
+            repeatType: 'loop',
             ease: 'linear',
           }}
           className="absolute inset-0 rounded-full"
           style={{
-            border: '1px solid rgba(212, 175, 55, 0.22)',
-            borderTopColor: 'rgba(212, 175, 55, 0.9)',
-            borderRightColor: 'rgba(212, 175, 55, 0.45)',
+            border: '2px solid rgba(212, 175, 55, 0.14)',
+            borderTopColor: 'rgba(212, 175, 55, 0.98)',
+            borderRightColor: 'rgba(212, 175, 55, 0.6)',
+            willChange: 'transform',
           }}
         />
 

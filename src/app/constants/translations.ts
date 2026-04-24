@@ -321,6 +321,8 @@ type TranslationKey =
     | 'home.allCities'
     | 'home.cityFilterLabel'
     | 'home.citySearchPlaceholder'
+    | 'home.searchButton'
+    | 'home.searchPlaceholder'
     | 'home.noCitiesFound'
     | 'home.loadMore'
     | 'home.loading'
@@ -874,6 +876,8 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.allCities': 'All cities',
         'home.cityFilterLabel': 'City',
         'home.citySearchPlaceholder': 'Search city',
+        'home.searchButton': 'Search',
+        'home.searchPlaceholder': 'Search events',
         'home.noCitiesFound': 'No cities found',
         'home.loadMore': 'Load more',
         'home.loading': 'Loading...',
@@ -3163,6 +3167,8 @@ const localizedClosedEventOverrides: Partial<
     Record<LanguageCode, Partial<Record<TranslationKey, string>>>
 > = {
     ru: {
+        'home.searchButton': '\u041f\u043e\u0438\u0441\u043a',
+        'home.searchPlaceholder': '\u0418\u0441\u043a\u0430\u0442\u044c \u0441\u043e\u0431\u044b\u0442\u0438\u044f',
         'home.visited': '\u041f\u043e\u0441\u0435\u0449\u0451\u043d\u043d\u044b\u0435',
         'home.noVisitedEvents': '\u0422\u044b \u043f\u043e\u043a\u0430 \u043d\u0435 \u043f\u043e\u0441\u0435\u0449\u0430\u043b \u0441\u043e\u0431\u044b\u0442\u0438\u044f',
         'home.visitedWillAppear': '\u041f\u0440\u043e\u0448\u0435\u0434\u0448\u0438\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u044f, \u0433\u0434\u0435 \u0442\u044b \u0443\u0447\u0430\u0441\u0442\u0432\u043e\u0432\u0430\u043b, \u043f\u043e\u044f\u0432\u044f\u0442\u0441\u044f \u0437\u0434\u0435\u0441\u044c.',
@@ -3220,6 +3226,8 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявка отклонена',
     },
     ro: {
+        'home.searchButton': 'Caută',
+        'home.searchPlaceholder': 'Caută evenimente',
         'home.visited': 'Participate',
         'home.noVisitedEvents': 'Nu ai evenimente vizitate Г®ncДѓ',
         'home.visitedWillAppear': 'Evenimentele trecute la care ai participat vor apДѓrea aici.',
@@ -3286,6 +3294,8 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Cerere respinsă',
     },
     uk: {
+        'home.searchButton': '\u041f\u043e\u0448\u0443\u043a',
+        'home.searchPlaceholder': '\u0428\u0443\u043a\u0430\u0442\u0438 \u043f\u043e\u0434\u0456\u0457',
         'home.visited': '\u0412\u0456\u0434\u0432\u0456\u0434\u0430\u043d\u0456',
         'home.noVisitedEvents': '\u0422\u0438 \u043f\u043e\u043a\u0438 \u043d\u0435 \u0432\u0456\u0434\u0432\u0456\u0434\u0443\u0432\u0430\u0432 \u043f\u043e\u0434\u0456\u0457',
         'home.visitedWillAppear': '\u041c\u0438\u043d\u0443\u043b\u0456 \u043f\u043e\u0434\u0456\u0457, \u044f\u043a\u0456 \u0442\u0438 \u0432\u0456\u0434\u0432\u0456\u0434\u0430\u0432, \u0437\u2019\u044f\u0432\u043b\u044f\u0442\u0438\u043c\u0443\u0442\u044c\u0441\u044f \u0442\u0443\u0442.',
@@ -3351,6 +3361,8 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявку відхилено',
     },
     de: {
+        'home.searchButton': 'Suche',
+        'home.searchPlaceholder': 'Events suchen',
         'home.visited': 'Besucht',
         'home.noVisitedEvents': 'Du hast noch keine besuchten Events',
         'home.visitedWillAppear': 'Vergangene Events, an denen du teilgenommen hast, erscheinen hier.',

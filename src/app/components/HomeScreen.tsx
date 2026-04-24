@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type UIEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Check, LifeBuoy, Palette } from 'lucide-react';
+import { Check, LifeBuoy, Palette, Search, X } from 'lucide-react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
@@ -65,6 +65,8 @@ export function HomeScreen({
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
   const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [isEventSearchOpen, setIsEventSearchOpen] = useState(false);
+  const [eventSearchQuery, setEventSearchQuery] = useState('');
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
   const [isLaunchOverlayVisible, setIsLaunchOverlayVisible] = useState(() => {
     if (typeof window === 'undefined') {
@@ -430,8 +432,21 @@ export function HomeScreen({
         (event.activity_type || 'other') === selectedActivityType;
       const matchesCity =
         selectedCity === 'all' || event.city_normalized === selectedCity;
+      const normalizedSearchQuery = eventSearchQuery.trim().toLocaleLowerCase();
+      const searchableContent = [
+        event.title,
+        event.description,
+        event.location,
+        event.city,
+        event.creatorName,
+      ]
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .join(' ')
+        .toLocaleLowerCase();
+      const matchesSearch =
+        normalizedSearchQuery.length === 0 || searchableContent.includes(normalizedSearchQuery);
 
-      if (!matchesActivity || !matchesCity) {
+      if (!matchesActivity || !matchesCity || !matchesSearch) {
         return false;
       }
 
@@ -464,7 +479,7 @@ export function HomeScreen({
 
       return true;
     });
-  }, [events, currentUserId, joinedEventIds, activeTab, selectedActivityType, selectedCity]);
+  }, [events, currentUserId, joinedEventIds, activeTab, selectedActivityType, selectedCity, eventSearchQuery]);
 
   const availableCities = useMemo<CityFilterOption[]>(() => {
     const cityMap = new Map<string, string>();
@@ -723,6 +738,18 @@ export function HomeScreen({
     setSelectedCity(nextCity);
     setIsCityPickerOpen(false);
     setCitySearchQuery('');
+  };
+
+  const toggleEventSearch = () => {
+    setIsEventSearchOpen((prev) => {
+      const nextOpen = !prev;
+
+      if (!nextOpen) {
+        setEventSearchQuery('');
+      }
+
+      return nextOpen;
+    });
   };
 
   const handleDismissLaunchOverlay = () => {
@@ -1058,11 +1085,12 @@ export function HomeScreen({
         </div>
 
         <div className="mt-2">
+          <div className="flex items-stretch gap-2">
           <motion.button
             type="button"
             onClick={toggleCityPicker}
             whileTap={{ scale: 0.98 }}
-            className="w-full rounded-xl border px-3 py-2 text-left transition-all"
+            className="flex-1 rounded-xl border px-3 py-2 text-left transition-all"
             style={{
               backgroundColor: isCityPickerOpen ? 'var(--accent-soft-muted)' : 'rgba(255, 255, 255, 0.03)',
               borderColor: isCityPickerOpen
@@ -1095,6 +1123,69 @@ export function HomeScreen({
               </span>
             </div>
           </motion.button>
+            <motion.button
+              type="button"
+              onClick={toggleEventSearch}
+              whileTap={{ scale: 0.96 }}
+              className="shrink-0 rounded-xl border px-3 flex items-center justify-center transition-all"
+              style={{
+                width: 48,
+                backgroundColor: isEventSearchOpen ? 'var(--accent-soft-muted)' : 'rgba(255, 255, 255, 0.03)',
+                borderColor: isEventSearchOpen ? 'var(--accent-border)' : 'var(--border-subtle)',
+                color: isEventSearchOpen ? 'var(--accent)' : 'var(--foreground-strong)',
+              }}
+              aria-label={translate('home.searchButton')}
+              title={translate('home.searchButton')}
+            >
+              <Search size={18} strokeWidth={2.1} />
+            </motion.button>
+          </div>
+
+          <AnimatePresence initial={false}>
+            {isEventSearchOpen && (
+              <motion.div
+                key="home-event-search"
+                initial={{ opacity: 0, y: -8, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -8, height: 0 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <div
+                  className="mt-2 flex items-center gap-2 rounded-xl border px-3 py-2"
+                  style={{
+                    backgroundColor: 'var(--surface-overlay)',
+                    borderColor: 'var(--border-subtle)',
+                  }}
+                >
+                  <Search size={16} className="shrink-0 text-muted-foreground" strokeWidth={2} />
+                  <input
+                    type="text"
+                    value={eventSearchQuery}
+                    onChange={(event) =>
+                      setEventSearchQuery(limitText(event.target.value, INPUT_LIMITS.search))
+                    }
+                    maxLength={INPUT_LIMITS.search}
+                    placeholder={translate('home.searchPlaceholder')}
+                    autoComplete="off"
+                    className="w-full bg-transparent text-sm outline-none"
+                    style={{ color: 'var(--foreground-strong)' }}
+                  />
+                  {eventSearchQuery.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setEventSearchQuery('')}
+                      className="shrink-0 text-muted-foreground transition-opacity hover:opacity-70"
+                      aria-label="Clear search"
+                      title="Clear search"
+                    >
+                      <X size={16} strokeWidth={2} />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {isCityPickerOpen && (
             <motion.div

@@ -283,8 +283,8 @@ export function EditEventScreen({
               <LoadingCard lines={['32%', '100%']} />
               <LoadingCard lines={['28%', '70%', '68%']} />
               <div className="grid grid-cols-2 gap-3">
-                <LoadingCard lines={2} />
-                <LoadingCard lines={2} />
+                <LoadingCard lines={['56%', '100%']} />
+                <LoadingCard lines={['56%', '100%']} />
               </div>
               <LoadingCard className="min-h-[17rem]" lines={['40%', '100%', '100%', '86%']} />
             </>

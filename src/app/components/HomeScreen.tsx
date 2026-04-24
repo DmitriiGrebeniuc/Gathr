@@ -1277,8 +1277,8 @@ export function HomeScreen({
             </div>
           )}
 
-          <AnimatePresence initial={false} mode="sync">
-            {visibleEvents.map((event, index) => {
+          <motion.div layout className="space-y-3">
+            {visibleEvents.map((event) => {
               const past = isPastEvent(event.date_time);
               const activityMeta = getActivityTypeMeta(event.activity_type, language);
               const isRequestMode = event.join_mode === 'request';
@@ -1298,20 +1298,8 @@ export function HomeScreen({
                 <motion.div
                   key={event.id}
                   layout
-                  initial={{ opacity: 0, y: 8, scale: 0.992 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.996 }}
                   transition={{
-                    layout: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
-                    opacity: { duration: 0.22 },
-                    y: {
-                      duration: 0.26,
-                      ease: [0.22, 1, 0.36, 1],
-                    },
-                    scale: {
-                      duration: 0.26,
-                      ease: [0.22, 1, 0.36, 1],
-                    },
+                    layout: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
                   }}
                   whileTap={{ scale: 0.985 }}
                   onClick={() =>
@@ -1400,7 +1388,7 @@ export function HomeScreen({
                 </motion.div>
               );
             })}
-          </AnimatePresence>
+          </motion.div>
 
           {shouldShowLoadMore && (
             <motion.button

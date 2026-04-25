@@ -14,7 +14,7 @@ import {
 import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 
 type SummaryValue = number | null;
-type AdminPage = 'overview' | 'events' | 'users' | 'support';
+type AdminPage = 'overview' | 'events' | 'users' | 'participants' | 'support';
 type SupportRequestStatus = 'new' | 'in_progress' | 'resolved';
 type SupportStatusFilter = 'all' | SupportRequestStatus;
 
@@ -81,6 +81,15 @@ type SupportRequestPreview = {
   status: SupportRequestStatus;
   created_at: string | null;
   userName: string | null;
+};
+
+type AdminParticipationRow = {
+  participant_id: string;
+  participant_name: string | null;
+  event_id: string;
+  event_title: string | null;
+  event_date_time: string | null;
+  joined_at: string | null;
 };
 
 
@@ -170,6 +179,8 @@ export function AdminScreen({
   const [moderationUnavailable, setModerationUnavailable] = useState(false);
   const [invitationsUnavailable, setInvitationsUnavailable] = useState(false);
   const [usersUnavailable, setUsersUnavailable] = useState(false);
+  const [participantsRoster, setParticipantsRoster] = useState<AdminParticipationRow[]>([]);
+  const [participantsUnavailable, setParticipantsUnavailable] = useState(false);
   const [supportUnavailable, setSupportUnavailable] = useState(false);
   const [updatingSupportRequestId, setUpdatingSupportRequestId] = useState<string | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
@@ -236,6 +247,7 @@ export function AdminScreen({
           moderationEventsResult,
           latestPendingInvitationsResult,
           usersListResult,
+          participationRosterResult,
           supportRequestsListResult,
         ] = await Promise.allSettled([
           supabase.from('profiles').select('id', { count: 'exact', head: true }),
@@ -276,6 +288,7 @@ export function AdminScreen({
             .order('created_at', { ascending: false })
             .limit(5),
           supabase.rpc('admin_list_profiles'),
+          supabase.rpc('admin_list_participation_roster'),
           supabase.rpc('admin_list_support_requests'),
 
         ]);
@@ -529,6 +542,60 @@ export function AdminScreen({
           setUserSearch('');
         }
 
+        if (
+          participationRosterResult.status === 'fulfilled' &&
+          !participationRosterResult.value.error
+        ) {
+          const nextRoster =
+            ((participationRosterResult.value.data as AdminParticipationRow[] | null) || [])
+              .map((row) => ({
+                participant_id: row.participant_id,
+                participant_name:
+                  typeof row.participant_name === 'string' && row.participant_name.trim()
+                    ? row.participant_name
+                    : null,
+                event_id: row.event_id,
+                event_title:
+                  typeof row.event_title === 'string' && row.event_title.trim()
+                    ? row.event_title
+                    : null,
+                event_date_time:
+                  typeof row.event_date_time === 'string' && row.event_date_time.trim()
+                    ? row.event_date_time
+                    : null,
+                joined_at:
+                  typeof row.joined_at === 'string' && row.joined_at.trim()
+                    ? row.joined_at
+                    : null,
+              }))
+              .sort((a, b) => {
+                if (a.joined_at && b.joined_at) {
+                  const aTime = new Date(a.joined_at).getTime();
+                  const bTime = new Date(b.joined_at).getTime();
+
+                  if (!Number.isNaN(aTime) && !Number.isNaN(bTime) && aTime !== bTime) {
+                    return bTime - aTime;
+                  }
+                }
+
+                if (a.joined_at && !b.joined_at) {
+                  return -1;
+                }
+
+                if (!a.joined_at && b.joined_at) {
+                  return 1;
+                }
+
+                return (a.event_title || '').localeCompare(b.event_title || '', language);
+              });
+
+          setParticipantsRoster(nextRoster);
+          setParticipantsUnavailable(false);
+        } else {
+          setParticipantsRoster([]);
+          setParticipantsUnavailable(true);
+        }
+
 
 
       } catch (error) {
@@ -540,11 +607,13 @@ export function AdminScreen({
         setSelectedUserId(null);
         setUserSearch('');
         setLatestPendingInvitations([]);
+        setParticipantsRoster([]);
         setSupportRequests([]);
         setEventsUnavailable(true);
         setModerationUnavailable(true);
         setInvitationsUnavailable(true);
         setUsersUnavailable(true);
+        setParticipantsUnavailable(true);
         setSupportUnavailable(true);
 
       } finally {
@@ -557,6 +626,31 @@ export function AdminScreen({
   useEffect(() => {
     loadAdminOverview();
   }, [language]);
+
+  useEffect(() => {
+    if (activePage !== 'participants') {
+      return;
+    }
+
+    const participantsChannel = supabase
+      .channel('admin-participants-roster')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'participants',
+        },
+        async () => {
+          await loadAdminOverview();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(participantsChannel);
+    };
+  }, [activePage, language]);
 
   useEffect(() => {
     if (activePage !== 'support') {
@@ -646,6 +740,7 @@ export function AdminScreen({
     { key: 'overview', label: translate('admin.pageOverview') },
     { key: 'events', label: translate('admin.pageEvents') },
     { key: 'users', label: translate('admin.pageUsers') },
+    { key: 'participants', label: translate('admin.pageParticipants') },
     { key: 'support', label: translate('admin.pageSupport') },
   ];
 
@@ -1786,6 +1881,78 @@ export function AdminScreen({
                         </div>
                       );
                     })()
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activePage === 'participants' && (
+            <div
+              className="rounded-xl border p-5"
+              style={adminCardStyle}
+            >
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h3>{translate('admin.participantsPageTitle')}</h3>
+                <span className="text-xs text-muted-foreground">
+                  {translate('admin.readOnly')}
+                </span>
+              </div>
+
+              {loading && <div className="space-y-3">{adminLoadingStack(3)}</div>}
+
+              {!loading && participantsUnavailable && (
+                <p className="text-sm text-muted-foreground">
+                  {translate('admin.participantsUnavailable')}
+                </p>
+              )}
+
+              {!loading && !participantsUnavailable && participantsRoster.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {translate('admin.noParticipantsRoster')}
+                </p>
+              )}
+
+              {!loading && !participantsUnavailable && participantsRoster.length > 0 && (
+                <div className="space-y-3">
+                  {participantsRoster.map((row) => (
+                    <div
+                      key={`${row.participant_id}-${row.event_id}-${row.joined_at || 'joined'}`}
+                      className="rounded-lg border p-4"
+                      style={adminNestedCardStyle}
+                    >
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <p>{row.participant_name || translate('common.user')}</p>
+                          <p className="text-xs text-muted-foreground break-all">
+                            {row.participant_id}
+                          </p>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                              {translate('admin.joinedEventLabel')}
+                            </p>
+                            <p>{row.event_title || translate('common.event')}</p>
+                          </div>
+
+                          <div>
+                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                              {translate('admin.eventDateTimeLabel')}
+                            </p>
+                            <p>{formatDate(row.event_date_time)}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
+                            {translate('admin.joinedAtLabel')}
+                          </p>
+                          <p>{formatDate(row.joined_at)}</p>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

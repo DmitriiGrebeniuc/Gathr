@@ -274,8 +274,10 @@ type TranslationKey =
     | 'admin.pageOverview'
     | 'admin.pageEvents'
     | 'admin.pageUsers'
+    | 'admin.pageParticipants'
     | 'admin.pageSupport'
     | 'admin.usersTitle'
+    | 'admin.participantsPageTitle'
     | 'admin.userSearchPlaceholder'
     | 'admin.noUsers'
     | 'admin.noUsersMatch'
@@ -325,6 +327,11 @@ type TranslationKey =
     | 'admin.unavailable'
     | 'admin.noEvents'
     | 'admin.notAvailable'
+    | 'admin.participantsUnavailable'
+    | 'admin.noParticipantsRoster'
+    | 'admin.joinedEventLabel'
+    | 'admin.eventDateTimeLabel'
+    | 'admin.joinedAtLabel'
     | 'admin.supportPageTitle'
     | 'admin.noSupportRequests'
     | 'admin.supportRequestsUnavailable'
@@ -836,8 +843,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'admin.pageOverview': 'Overview',
         'admin.pageEvents': 'Events',
         'admin.pageUsers': 'Users',
+        'admin.pageParticipants': 'Participants',
         'admin.pageSupport': 'Support',
         'admin.usersTitle': 'Users',
+        'admin.participantsPageTitle': 'Participation roster',
         'admin.userSearchPlaceholder': 'Search users by name',
         'admin.noUsers': 'No users to show',
         'admin.noUsersMatch': 'No users match this search',
@@ -887,6 +896,11 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'admin.unavailable': 'Unavailable',
         'admin.noEvents': 'No events to show',
         'admin.notAvailable': 'Not available',
+        'admin.participantsUnavailable': 'Participation roster is unavailable right now',
+        'admin.noParticipantsRoster': 'No participation records yet',
+        'admin.joinedEventLabel': 'Joined event',
+        'admin.eventDateTimeLabel': 'Event date & time',
+        'admin.joinedAtLabel': 'Joined at',
         'admin.supportPageTitle': 'Support requests',
         'admin.noSupportRequests': 'No support requests yet',
         'admin.supportRequestsUnavailable': 'Support requests are unavailable right now',
@@ -3239,6 +3253,13 @@ const localizedClosedEventOverrides: Partial<
     Record<LanguageCode, Partial<Record<TranslationKey, string>>>
 > = {
     en: {
+        'admin.pageParticipants': 'Participants',
+        'admin.participantsPageTitle': 'Participation roster',
+        'admin.participantsUnavailable': 'Participation roster is unavailable right now',
+        'admin.noParticipantsRoster': 'No participation records yet',
+        'admin.joinedEventLabel': 'Joined event',
+        'admin.eventDateTimeLabel': 'Event date & time',
+        'admin.joinedAtLabel': 'Joined at',
         'eventContacts.sectionTitle': 'How can people contact you?',
         'eventContacts.sectionDescription': 'Optional. Only event participants will see these contacts.',
         'eventContacts.detailsTitle': 'Contact the organizer',
@@ -3269,6 +3290,13 @@ const localizedClosedEventOverrides: Partial<
         'eventContacts.callPhone': 'Call',
     },
     ru: {
+        'admin.pageParticipants': 'Участники',
+        'admin.participantsPageTitle': 'Журнал присоединений',
+        'admin.participantsUnavailable': 'Журнал присоединений сейчас недоступен',
+        'admin.noParticipantsRoster': 'Пока нет записей о присоединениях',
+        'admin.joinedEventLabel': 'Событие',
+        'admin.eventDateTimeLabel': 'Дата и время события',
+        'admin.joinedAtLabel': 'Присоединился',
         'notificationSettings.eventJoinRequests': '\u0417\u0430\u044f\u0432\u043a\u0438 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435',
         'notificationSettings.eventJoinRequestsDescription': '\u041a\u043e\u0433\u0434\u0430 \u043a\u0442\u043e-\u0442\u043e \u043f\u043e\u0434\u0430\u0451\u0442 \u0437\u0430\u044f\u0432\u043a\u0443 \u0432 \u0432\u0430\u0448\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u043e\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435',
         'notifications.requestIconLabel': '\u0417\u0430\u044f\u0432\u043a\u0430 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435',
@@ -3360,6 +3388,13 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявка отклонена',
     },
     ro: {
+        'admin.pageParticipants': 'Participanți',
+        'admin.participantsPageTitle': 'Jurnal de participări',
+        'admin.participantsUnavailable': 'Jurnalul de participări este indisponibil acum',
+        'admin.noParticipantsRoster': 'Încă nu există înregistrări de participare',
+        'admin.joinedEventLabel': 'Eveniment',
+        'admin.eventDateTimeLabel': 'Data și ora evenimentului',
+        'admin.joinedAtLabel': 'S-a alăturat la',
         'notificationSettings.eventJoinRequests': 'Cereri de participare',
         'notificationSettings.eventJoinRequestsDescription': 'Când cineva cere să intre în evenimentul tău închis',
         'notifications.requestIconLabel': 'Cerere de participare',
@@ -3432,6 +3467,13 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Cerere respinsă',
     },
     uk: {
+        'admin.pageParticipants': 'Учасники',
+        'admin.participantsPageTitle': 'Журнал приєднань',
+        'admin.participantsUnavailable': 'Журнал приєднань зараз недоступний',
+        'admin.noParticipantsRoster': 'Поки немає записів про приєднання',
+        'admin.joinedEventLabel': 'Подія',
+        'admin.eventDateTimeLabel': 'Дата й час події',
+        'admin.joinedAtLabel': 'Приєднався',
         'notificationSettings.eventJoinRequests': '\u0417\u0430\u044f\u0432\u043a\u0438 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f',
         'notificationSettings.eventJoinRequestsDescription': '\u041a\u043e\u043b\u0438 \u0445\u0442\u043e\u0441\u044c \u043f\u043e\u0434\u0430\u0454 \u0437\u0430\u044f\u0432\u043a\u0443 \u0434\u043e \u0432\u0430\u0448\u043e\u0457 \u0437\u0430\u043a\u0440\u0438\u0442\u043e\u0457 \u043f\u043e\u0434\u0456\u0457',
         'notifications.requestIconLabel': '\u0417\u0430\u044f\u0432\u043a\u0430 \u043d\u0430 \u0432\u0441\u0442\u0443\u043f',
@@ -3503,6 +3545,13 @@ const localizedClosedEventOverrides: Partial<
         'details.joinRequestRejected': 'Заявку відхилено',
     },
     de: {
+        'admin.pageParticipants': 'Teilnahmen',
+        'admin.participantsPageTitle': 'Teilnahmeprotokoll',
+        'admin.participantsUnavailable': 'Das Teilnahmeprotokoll ist derzeit nicht verfügbar',
+        'admin.noParticipantsRoster': 'Noch keine Teilnahmeeinträge',
+        'admin.joinedEventLabel': 'Event',
+        'admin.eventDateTimeLabel': 'Eventdatum & Uhrzeit',
+        'admin.joinedAtLabel': 'Beigetreten am',
         'notificationSettings.eventJoinRequests': 'Beitrittsanfragen',
         'notificationSettings.eventJoinRequestsDescription': 'Wenn jemand deinem geschlossenen Event beitreten möchte',
         'notifications.requestIconLabel': 'Beitrittsanfrage',

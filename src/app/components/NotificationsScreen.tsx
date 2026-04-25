@@ -8,6 +8,13 @@ import {
   fetchAccessibleEventPrivateDetailsMap,
   fetchPublicProfileNameMap,
 } from '../lib/publicData';
+import {
+  buildInviteNotificationKey,
+  buildJoinNotificationKey,
+  buildRequestNotificationKey,
+  buildUpcomingNotificationKey,
+  markNotificationKeysSeen,
+} from '../lib/notificationReads';
 
 type EventItem = {
   id: string;
@@ -239,7 +246,7 @@ export function NotificationsScreen({
               }
 
               return {
-                id: `upcoming-${event.id}`,
+                id: buildUpcomingNotificationKey(event.id),
                 type: 'upcoming',
                 message: buildUpcomingMessage(mergedEvent),
                 time: formatRelativeTime(mergedEvent.date_time),
@@ -348,7 +355,7 @@ export function NotificationsScreen({
               }
 
               return {
-                id: `join-${eventId}`,
+                id: buildJoinNotificationKey(eventId, latestJoin.created_at),
                 type: 'join',
                 message,
                 time: formatPastTime(latestJoin.created_at),
@@ -397,7 +404,7 @@ export function NotificationsScreen({
                 requesterNameMap[requestRow.requester_id] || translate('notifications.someone');
 
               return {
-                id: `request-${requestRow.id}`,
+                id: buildRequestNotificationKey(requestRow.id),
                 type: 'request' as const,
                 message: translate('notifications.requestedToJoinYourEvent')
                   .replaceAll('{name}', requesterName)
@@ -470,7 +477,7 @@ export function NotificationsScreen({
                 inviterNameMap[invitation.inviter_id] || translate('notifications.someone');
 
               return {
-                id: `invite-${invitation.id}`,
+                id: buildInviteNotificationKey(invitation.id),
                 type: 'invite' as const,
                 message: translate('notifications.invitedYouToEvent')
                   .replaceAll('{name}', inviterName)
@@ -522,6 +529,11 @@ export function NotificationsScreen({
 
         return aTime - bTime;
       });
+
+      await markNotificationKeysSeen(
+        user.id,
+        uniqueNotifications.map((notification) => notification.id)
+      );
 
       setNotifications(uniqueNotifications);
     } catch (error) {

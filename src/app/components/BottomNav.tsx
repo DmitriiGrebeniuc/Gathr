@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../../lib/supabase';
+import { fetchUnreadNotificationCountForUser } from '../lib/notificationReads';
 
 export function BottomNav({
   activeScreen,
@@ -9,6 +12,101 @@ export function BottomNav({
   onNavigate: (screen: string) => void;
 }) {
   const { translate } = useLanguage();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadUnreadCount = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        if (!cancelled) {
+          setUnreadCount(0);
+        }
+        return;
+      }
+
+      const count = await fetchUnreadNotificationCountForUser(user.id);
+
+      if (!cancelled) {
+        setUnreadCount(count);
+      }
+    };
+
+    void loadUnreadCount();
+
+    const participantsChannel = supabase
+      .channel('bottom-nav-notifications-participants')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'participants',
+        },
+        () => {
+          void loadUnreadCount();
+        }
+      )
+      .subscribe();
+
+    const eventsChannel = supabase
+      .channel('bottom-nav-notifications-events')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events',
+        },
+        () => {
+          void loadUnreadCount();
+        }
+      )
+      .subscribe();
+
+    const invitationsChannel = supabase
+      .channel('bottom-nav-notifications-invitations')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_invitations',
+        },
+        () => {
+          void loadUnreadCount();
+        }
+      )
+      .subscribe();
+
+    const joinRequestsChannel = supabase
+      .channel('bottom-nav-notifications-event-join-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_join_requests',
+        },
+        () => {
+          void loadUnreadCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(participantsChannel);
+      supabase.removeChannel(eventsChannel);
+      supabase.removeChannel(invitationsChannel);
+      supabase.removeChannel(joinRequestsChannel);
+    };
+  }, [activeScreen]);
 
   return (
     <motion.div
@@ -62,6 +160,22 @@ export function BottomNav({
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
+        {activeScreen !== 'notifications' && unreadCount > 0 && (
+          <motion.div
+            initial={{ scale: 0.85, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.85, opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="absolute -top-1 right-0 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full flex items-center justify-center text-[0.625rem] font-semibold"
+            style={{
+              backgroundColor: 'var(--accent)',
+              color: 'var(--accent-foreground)',
+              boxShadow: '0 0 0 2px var(--background)',
+            }}
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </motion.div>
+        )}
         <span className="text-xs">{translate('bottomNav.notifications')}</span>
       </motion.button>
 

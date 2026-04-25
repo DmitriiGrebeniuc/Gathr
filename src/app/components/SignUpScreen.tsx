@@ -18,6 +18,7 @@ export function SignUpScreen({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [showLegalRequired, setShowLegalRequired] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { translate } = useLanguage();
@@ -43,6 +44,7 @@ export function SignUpScreen({
     }
 
     if (!acceptedLegal) {
+      setShowLegalRequired(true);
       feedback.warning(translate('legal.mustAcceptTerms'));
       return;
     }
@@ -169,21 +171,38 @@ export function SignUpScreen({
               className="rounded-xl border p-4"
               style={{
                 backgroundColor: 'var(--card)',
-                borderColor: acceptedLegal ? 'var(--accent-border-muted)' : 'var(--border)',
+                borderColor: showLegalRequired
+                  ? 'var(--destructive-border-strong)'
+                  : acceptedLegal
+                    ? 'var(--accent-border-muted)'
+                    : 'var(--border)',
+                boxShadow: showLegalRequired ? '0 0 0 1px var(--destructive-border-strong)' : 'none',
               }}
             >
               <div className="flex items-start gap-3">
                 <button
                   type="button"
-                  onClick={() => setAcceptedLegal((prev) => !prev)}
+                  onClick={() => {
+                    setAcceptedLegal((prev) => !prev);
+                    setShowLegalRequired(false);
+                  }}
                   className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border"
                   style={{
-                    backgroundColor: acceptedLegal ? 'var(--accent-soft)' : 'transparent',
-                    borderColor: acceptedLegal ? 'var(--accent-border-strong)' : 'var(--border)',
-                    color: acceptedLegal ? 'var(--accent)' : 'transparent',
+                    backgroundColor: acceptedLegal
+                      ? 'var(--accent)'
+                      : showLegalRequired
+                        ? 'var(--destructive-soft)'
+                        : 'var(--surface-strong)',
+                    borderColor: acceptedLegal
+                      ? 'var(--accent)'
+                      : showLegalRequired
+                        ? 'var(--destructive-border-strong)'
+                        : 'var(--foreground-strong)',
+                    color: acceptedLegal ? 'var(--accent-foreground)' : 'transparent',
                   }}
                   disabled={loading}
                   aria-pressed={acceptedLegal}
+                  aria-invalid={showLegalRequired}
                 >
                   {acceptedLegal ? <Check size={14} strokeWidth={2.5} /> : null}
                 </button>
@@ -191,7 +210,10 @@ export function SignUpScreen({
                 <div className="text-sm leading-6 text-muted-foreground">
                   <button
                     type="button"
-                    onClick={() => setAcceptedLegal((prev) => !prev)}
+                    onClick={() => {
+                      setAcceptedLegal((prev) => !prev);
+                      setShowLegalRequired(false);
+                    }}
                     className="text-left"
                     disabled={loading}
                   >
@@ -220,6 +242,12 @@ export function SignUpScreen({
                   {translate('legal.and')} {translate('legal.acceptTermsSuffix')}.
                 </div>
               </div>
+
+              {showLegalRequired && (
+                <p className="mt-3 text-sm" style={{ color: 'var(--destructive)' }}>
+                  {translate('legal.mustAcceptTerms')}
+                </p>
+              )}
             </motion.div>
 
             <motion.div

@@ -51,6 +51,7 @@ type AdminUser = {
   plan: string | null;
   has_unlimited_access: boolean | null;
   is_banned: boolean | null;
+  created_at?: string | null;
 };
 
 type AdminListProfilesRow = {
@@ -60,6 +61,7 @@ type AdminListProfilesRow = {
   plan: string | null;
   has_unlimited_access: boolean | null;
   is_banned: boolean | null;
+  created_at?: string | null;
 };
 
 
@@ -485,7 +487,34 @@ export function AdminScreen({
         }
         
         if (usersListResult.status === 'fulfilled' && !usersListResult.value.error) {
-          const nextUsers = (usersListResult.value.data as AdminListProfilesRow[] | null) || [];
+          const nextUsers = ((usersListResult.value.data as AdminListProfilesRow[] | null) || [])
+            .map((user) => ({
+              ...user,
+              created_at:
+                typeof user.created_at === 'string' && user.created_at.trim()
+                  ? user.created_at
+                  : null,
+            }))
+            .sort((a, b) => {
+              if (a.created_at && b.created_at) {
+                const aTime = new Date(a.created_at).getTime();
+                const bTime = new Date(b.created_at).getTime();
+
+                if (!Number.isNaN(aTime) && !Number.isNaN(bTime) && aTime !== bTime) {
+                  return bTime - aTime;
+                }
+              }
+
+              if (a.created_at && !b.created_at) {
+                return -1;
+              }
+
+              if (!a.created_at && b.created_at) {
+                return 1;
+              }
+
+              return (a.name || '').localeCompare(b.name || '', language);
+            });
 
 
           setUsers(nextUsers);

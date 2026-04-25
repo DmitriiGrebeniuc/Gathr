@@ -10,6 +10,8 @@ type CurrentUser = {
   email: string | null;
   name: string | null;
   role: string | null;
+  plan: string | null;
+  has_unlimited_access: boolean;
 };
 
 type MyProfileAccess = {
@@ -61,6 +63,8 @@ export function ProfileScreen({
           email: authUser.email ?? null,
           name: profile?.name ?? null,
           role: profile?.role ?? null,
+          plan: profile?.plan ?? null,
+          has_unlimited_access: profile?.has_unlimited_access ?? false,
         });
       } catch (error) {
         console.error('Unexpected profile load error:', error);
@@ -136,6 +140,10 @@ export function ProfileScreen({
   };
 
   const isAdmin = user?.role === 'admin';
+  const hasProPlan = user?.plan === 'pro' || user?.has_unlimited_access;
+  const currentPlanLabel = hasProPlan
+    ? translate('profile.planProStatus')
+    : translate('profile.planFreeStatus');
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -173,6 +181,52 @@ export function ProfileScreen({
           </div>
 
           <div className="space-y-3 pt-4">
+            <div
+              className="w-full rounded-2xl border px-4 py-4"
+              style={{
+                borderColor: hasProPlan ? 'var(--accent-border)' : 'var(--border)',
+                backgroundColor: hasProPlan ? 'var(--accent-soft-muted)' : 'var(--card)',
+                boxShadow: hasProPlan ? 'var(--accent-outline-soft)' : 'none',
+              }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {translate('profile.currentPlan')}
+                  </p>
+                  {loading ? (
+                    <div className="mt-2 space-y-2">
+                      <LoadingLine width="7rem" height="1.25rem" rounded="9999px" />
+                      <LoadingLine width="13rem" height="0.95rem" rounded="9999px" />
+                    </div>
+                  ) : (
+                    <>
+                      <p className="mt-2 text-lg">{currentPlanLabel}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {hasProPlan
+                          ? translate('profile.planDescriptionPro')
+                          : translate('profile.planDescriptionFree')}
+                      </p>
+                    </>
+                  )}
+                </div>
+
+                {!loading && hasProPlan && (
+                  <span
+                    className="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, white 8%), color-mix(in srgb, var(--accent) 72%, black 28%))',
+                      borderColor: 'color-mix(in srgb, var(--accent) 72%, white 28%)',
+                      color: 'var(--accent-foreground)',
+                    }}
+                  >
+                    {translate('home.proBadge')}
+                  </span>
+                )}
+              </div>
+            </div>
+
             <button
               onClick={() => onNavigate('edit-profile')}
               className="w-full py-4 rounded-xl border transition-all text-left px-4 hover:border-accent/50"

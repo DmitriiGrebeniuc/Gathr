@@ -205,6 +205,11 @@ type TranslationKey =
     | 'notifications.inviteActionUnexpectedError'
     | 'profile.title'
     | 'profile.editProfile'
+    | 'profile.currentPlan'
+    | 'profile.planFreeStatus'
+    | 'profile.planProStatus'
+    | 'profile.planDescriptionFree'
+    | 'profile.planDescriptionPro'
     | 'profile.notificationSettings'
     | 'profile.language'
     | 'profile.appearance'
@@ -351,6 +356,7 @@ type TranslationKey =
     | 'home.visited'
     | 'home.all'
     | 'home.allCities'
+    | 'home.proBadge'
     | 'home.cityFilterLabel'
     | 'home.citySearchPlaceholder'
     | 'home.searchButton'
@@ -756,6 +762,11 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'profile.title': 'Profile',
         'profile.editProfile': 'Edit Profile',
+        'profile.currentPlan': 'Current plan',
+        'profile.planFreeStatus': 'Free',
+        'profile.planProStatus': 'Pro active',
+        'profile.planDescriptionFree': 'You are on the free plan right now.',
+        'profile.planDescriptionPro': 'Your Pro subscription is active now.',
         'profile.notificationSettings': 'Notification Settings',
         'profile.language': 'Language',
         'profile.appearance': 'Appearance',
@@ -910,6 +921,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.visited': 'Visited',
         'home.all': 'All',
         'home.allCities': 'All cities',
+        'home.proBadge': 'Pro',
         'home.cityFilterLabel': 'City',
         'home.citySearchPlaceholder': 'Search city',
         'home.searchButton': 'Search',
@@ -1343,6 +1355,11 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'profile.title': 'Профиль',
         'profile.editProfile': 'Редактировать профиль',
+        'profile.currentPlan': 'Текущий план',
+        'profile.planFreeStatus': 'Free',
+        'profile.planProStatus': 'Pro активен',
+        'profile.planDescriptionFree': 'Сейчас у тебя бесплатный план.',
+        'profile.planDescriptionPro': 'Твоя подписка Pro сейчас активна.',
         'profile.notificationSettings': 'Настройки уведомлений',
         'profile.language': 'Язык',
         'profile.privacySecurity': 'Конфиденциальность и безопасность',
@@ -1471,6 +1488,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.myEvents': 'Созданные',
         'home.all': 'Все',
         'home.allCities': 'Все города',
+        'home.proBadge': 'Pro',
         'home.cityFilterLabel': 'Город',
         'home.citySearchPlaceholder': 'Поиск города',
         'home.noCitiesFound': 'Города не найдены',
@@ -1855,6 +1873,11 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Editează profilul',
+        'profile.currentPlan': 'Plan curent',
+        'profile.planFreeStatus': 'Free',
+        'profile.planProStatus': 'Pro activ',
+        'profile.planDescriptionFree': 'Acum ești pe planul gratuit.',
+        'profile.planDescriptionPro': 'Abonamentul tău Pro este activ acum.',
         'profile.notificationSettings': 'Setări notificări',
         'profile.language': 'Limbă',
         'profile.privacySecurity': 'Confidențialitate și securitate',
@@ -1987,6 +2010,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.myEvents': 'Evenimentele mele',
         'home.all': 'Toate',
         'home.allCities': 'Toate orașele',
+        'home.proBadge': 'Pro',
         'home.cityFilterLabel': 'Oraș',
         'home.citySearchPlaceholder': 'Caută oraș',
         'home.noCitiesFound': 'Nu au fost găsite orașe',
@@ -2372,6 +2396,11 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'profile.title': 'Профіль',
         'profile.editProfile': 'Редагувати профіль',
+        'profile.currentPlan': 'Поточний план',
+        'profile.planFreeStatus': 'Free',
+        'profile.planProStatus': 'Pro активний',
+        'profile.planDescriptionFree': 'Зараз у тебе безкоштовний план.',
+        'profile.planDescriptionPro': 'Твоя підписка Pro зараз активна.',
         'profile.notificationSettings': 'Налаштування сповіщень',
         'profile.language': 'Мова',
         'profile.privacySecurity': 'Конфіденційність і безпека',
@@ -2506,6 +2535,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.myEvents': 'Мої події',
         'home.all': 'Усі',
         'home.allCities': 'Усі міста',
+        'home.proBadge': 'Pro',
         'home.cityFilterLabel': 'Місто',
         'home.citySearchPlaceholder': 'Пошук міста',
         'home.noCitiesFound': 'Міста не знайдено',
@@ -2890,6 +2920,11 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Profil bearbeiten',
+        'profile.currentPlan': 'Aktueller Plan',
+        'profile.planFreeStatus': 'Free',
+        'profile.planProStatus': 'Pro aktiv',
+        'profile.planDescriptionFree': 'Du nutzt aktuell den Free-Plan.',
+        'profile.planDescriptionPro': 'Dein Pro-Abo ist derzeit aktiv.',
         'profile.notificationSettings': 'Benachrichtigungseinstellungen',
         'profile.language': 'Sprache',
         'profile.privacySecurity': 'Datenschutz und Sicherheit',
@@ -3024,6 +3059,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.myEvents': 'Meine Events',
         'home.all': 'Alle',
         'home.allCities': 'Alle Städte',
+        'home.proBadge': 'Pro',
         'home.cityFilterLabel': 'Stadt',
         'home.citySearchPlaceholder': 'Stadt suchen',
         'home.noCitiesFound': 'Keine Städte gefunden',

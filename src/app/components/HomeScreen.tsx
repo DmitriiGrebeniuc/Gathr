@@ -80,6 +80,7 @@ export function HomeScreen({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasProPlan, setHasProPlan] = useState(false);
   const [openSupportTicketCount, setOpenSupportTicketCount] = useState(0);
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(LOCAL_BATCH_SIZE);
@@ -227,7 +228,10 @@ export function HomeScreen({
         const profileData = await fetchMyProfileAccessSummary();
         setCurrentUserName(profileData?.name || translate('common.user'));
         const nextIsAdmin = profileData?.role === 'admin';
+        const nextHasProPlan =
+          profileData?.plan === 'pro' || profileData?.has_unlimited_access === true;
         setIsAdmin(nextIsAdmin);
+        setHasProPlan(nextHasProPlan);
 
         if (nextIsAdmin) {
           await refreshOpenSupportTicketCount();
@@ -237,6 +241,7 @@ export function HomeScreen({
       } else {
         setCurrentUserName(translate('common.user'));
         setIsAdmin(false);
+        setHasProPlan(false);
         setOpenSupportTicketCount(0);
       }
 
@@ -912,27 +917,47 @@ export function HomeScreen({
             </motion.button>
           )}
 
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            animate={{
-              width: isHeaderCompact ? 36 : 40,
-              height: isHeaderCompact ? 36 : 40,
-            }}
-            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            onClick={() => onNavigate('profile')}
-            className="rounded-full flex items-center justify-center border shrink-0"
-            style={{
-              backgroundColor: 'var(--primary)',
-              borderColor: 'var(--accent-border)',
-              boxShadow: 'var(--accent-outline-soft)',
-              color: 'var(--foreground-strong)',
-            }}
-            title={currentUserName}
-          >
-            <span className={isHeaderCompact ? 'text-xs' : 'text-sm'}>
-              {getInitials(currentUserName)}
-            </span>
-          </motion.button>
+          <div className="relative shrink-0">
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              animate={{
+                width: isHeaderCompact ? 36 : 40,
+                height: isHeaderCompact ? 36 : 40,
+              }}
+              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+              onClick={() => onNavigate('profile')}
+              className="rounded-full flex items-center justify-center border shrink-0"
+              style={{
+                backgroundColor: 'var(--primary)',
+                borderColor: 'var(--accent-border)',
+                boxShadow: 'var(--accent-outline-soft)',
+                color: 'var(--foreground-strong)',
+              }}
+              title={currentUserName}
+            >
+              <span className={isHeaderCompact ? 'text-xs' : 'text-sm'}>
+                {getInitials(currentUserName)}
+              </span>
+            </motion.button>
+
+            {hasProPlan && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.92, y: -2 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="pointer-events-none absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]"
+                style={{
+                  background:
+                    'linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, white 8%), color-mix(in srgb, var(--accent) 72%, black 28%))',
+                  borderColor: 'color-mix(in srgb, var(--accent) 72%, white 28%)',
+                  color: 'var(--accent-foreground)',
+                  boxShadow: '0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent)',
+                }}
+              >
+                {translate('home.proBadge')}
+              </motion.span>
+            )}
+          </div>
 
           {isThemePickerOpen && (
             <motion.div

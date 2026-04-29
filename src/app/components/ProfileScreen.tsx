@@ -141,6 +141,7 @@ export function ProfileScreen({
 
   const isAdmin = user?.role === 'admin';
   const hasProPlan = user?.plan === 'pro' || user?.has_unlimited_access;
+  const missingEmail = !loading && !user?.email?.trim();
   const currentPlanLabel = hasProPlan
     ? translate('profile.planProStatus')
     : translate('profile.planFreeStatus');
@@ -179,6 +180,34 @@ export function ProfileScreen({
               </>
             )}
           </div>
+
+          {missingEmail && (
+            <div
+              className="rounded-2xl border px-4 py-4"
+              style={{
+                borderColor: 'var(--accent-border)',
+                backgroundColor: 'var(--accent-soft-muted)',
+                boxShadow: 'var(--accent-outline-soft)',
+              }}
+            >
+              <p className="text-sm">{translate('profile.addEmailTitle')}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {translate('profile.addEmailDescription')}
+              </p>
+
+              <button
+                onClick={() => onNavigate('edit-profile')}
+                className="mt-4 rounded-xl border px-4 py-2 text-sm transition-all hover:opacity-90"
+                style={{
+                  borderColor: 'var(--accent-border)',
+                  backgroundColor: 'var(--accent)',
+                  color: 'var(--accent-foreground)',
+                }}
+              >
+                {translate('profile.addEmailButton')}
+              </button>
+            </div>
+          )}
 
           <div className="space-y-3 pt-4">
             <div

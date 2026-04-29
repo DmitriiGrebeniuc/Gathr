@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { TouchButton } from './TouchButton';
@@ -12,6 +12,8 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [contactEmail, setContactEmail] = useState('');
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const handleSubmit = async () => {
     const nextSubject = trimAndLimitText(subject, INPUT_LIMITS.supportSubject);
@@ -24,6 +26,11 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
 
     if (!nextMessage) {
       feedback.warning(translate('support.enterMessage'));
+      return;
+    }
+
+    if (!contactEmail.trim()) {
+      feedback.warning(translate('support.sendRequiresEmail'));
       return;
     }
 
@@ -67,6 +74,27 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
     }
   };
 
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        setContactEmail(user?.email ?? '');
+      } catch (error) {
+        console.error('Unexpected support user load error:', error);
+        setContactEmail('');
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  const missingEmail = !loadingUser && !contactEmail.trim();
+
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="px-6 py-4 border-b border-border flex items-center gap-3">
@@ -81,6 +109,34 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
 
       <div className="flex-1 overflow-y-auto px-6 py-8">
         <div className="max-w-sm mx-auto space-y-6">
+          {missingEmail && (
+            <div
+              className="rounded-xl border p-5"
+              style={{
+                borderColor: 'var(--accent-border)',
+                backgroundColor: 'var(--accent-soft-muted)',
+                boxShadow: 'var(--accent-outline-soft)',
+              }}
+            >
+              <h3 className="mb-2">{translate('support.emailRequiredTitle')}</h3>
+              <p className="text-sm text-muted-foreground">
+                {translate('support.emailRequiredDescription')}
+              </p>
+
+              <button
+                onClick={() => onNavigate('edit-profile')}
+                className="mt-4 rounded-xl border px-4 py-2 text-sm transition-all hover:opacity-90"
+                style={{
+                  borderColor: 'var(--accent-border)',
+                  backgroundColor: 'var(--accent)',
+                  color: 'var(--accent-foreground)',
+                }}
+              >
+                {translate('support.addEmailButton')}
+              </button>
+            </div>
+          )}
+
           <div
             className="rounded-xl border p-5"
             style={{
@@ -136,7 +192,12 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
                 />
               </div>
 
-              <TouchButton onClick={handleSubmit} variant="primary" fullWidth>
+              <TouchButton
+                onClick={handleSubmit}
+                variant="primary"
+                fullWidth
+                disabled={sending || loadingUser || missingEmail}
+              >
                 {sending ? translate('support.sending') : translate('support.sendButton')}
               </TouchButton>
             </div>

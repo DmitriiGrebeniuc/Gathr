@@ -94,11 +94,17 @@ type TranslationKey =
     | 'editProfile.title'
     | 'editProfile.name'
     | 'editProfile.email'
+    | 'editProfile.emailPlaceholder'
+    | 'editProfile.emailHint'
     | 'editProfile.saveButton'
     | 'editProfile.loading'
     | 'editProfile.saving'
     | 'editProfile.userNotFound'
     | 'editProfile.enterName'
+    | 'editProfile.enterEmail'
+    | 'editProfile.invalidEmail'
+    | 'editProfile.emailAddSuccess'
+    | 'editProfile.emailAddFailed'
     | 'editProfile.saveFailed'
     | 'editProfile.unexpectedError'
     | 'notificationSettings.title'
@@ -175,6 +181,10 @@ type TranslationKey =
     | 'support.sendFailed'
     | 'support.sendUnexpectedError'
     | 'support.sentSuccess'
+    | 'support.emailRequiredTitle'
+    | 'support.emailRequiredDescription'
+    | 'support.addEmailButton'
+    | 'support.sendRequiresEmail'
     | 'notifications.title'
     | 'notifications.emptyTitle'
     | 'notifications.emptyDescription'
@@ -224,6 +234,9 @@ type TranslationKey =
     | 'profile.loading'
     | 'profile.loadingEmail'
     | 'profile.noEmail'
+    | 'profile.addEmailTitle'
+    | 'profile.addEmailDescription'
+    | 'profile.addEmailButton'
     | 'profile.logoutFailed'
     | 'profile.logoutUnexpectedError'
     | 'language.title'
@@ -684,11 +697,17 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'editProfile.title': 'Edit Profile',
         'editProfile.name': 'Name',
         'editProfile.email': 'Email',
+        'editProfile.emailPlaceholder': 'name@example.com',
+        'editProfile.emailHint': 'Add an email so support can reply to you when needed.',
         'editProfile.saveButton': 'Save Changes',
         'editProfile.loading': 'Loading...',
         'editProfile.saving': 'Saving...',
         'editProfile.userNotFound': 'User not found',
         'editProfile.enterName': 'Enter name',
+        'editProfile.enterEmail': 'Enter your email',
+        'editProfile.invalidEmail': 'Enter a valid email',
+        'editProfile.emailAddSuccess': 'Check your inbox and confirm your email to finish linking it',
+        'editProfile.emailAddFailed': 'Failed to add email',
         'editProfile.saveFailed': 'Failed to save profile',
         'editProfile.unexpectedError': 'An error occurred while saving the profile',
 
@@ -740,6 +759,11 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'support.sendFailed': 'Failed to send support request',
         'support.sendUnexpectedError': 'An error occurred while sending the support request',
         'support.sentSuccess': 'Your request has been sent',
+        'support.emailRequiredTitle': 'Add an email before contacting support',
+        'support.emailRequiredDescription':
+            'We need an email address to reply to your request. Add it in your profile first.',
+        'support.addEmailButton': 'Add email',
+        'support.sendRequiresEmail': 'Add and confirm your email before sending a support request',
 
         'notifications.title': 'Notifications',
         'notifications.emptyTitle': 'No notifications yet',
@@ -791,6 +815,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.loading': 'Loading...',
         'profile.loadingEmail': 'Loading email...',
         'profile.noEmail': 'No email',
+        'profile.addEmailTitle': 'Add your email',
+        'profile.addEmailDescription':
+            'Support cannot reply to your requests until an email is linked to your account.',
+        'profile.addEmailButton': 'Add email now',
         'profile.logoutFailed': 'Could not log out',
         'profile.logoutUnexpectedError': 'An error occurred while logging out',
 
@@ -1291,11 +1319,19 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'editProfile.title': 'Редактировать профиль',
         'editProfile.name': 'Имя',
         'editProfile.email': 'Email',
+        'editProfile.emailPlaceholder': 'name@example.com',
+        'editProfile.emailHint':
+            'Добавьте email, чтобы поддержка могла ответить вам при необходимости.',
         'editProfile.saveButton': 'Сохранить изменения',
         'editProfile.loading': 'Загрузка...',
         'editProfile.saving': 'Сохранение...',
         'editProfile.userNotFound': 'Пользователь не найден',
         'editProfile.enterName': 'Введите имя',
+        'editProfile.enterEmail': 'Введите email',
+        'editProfile.invalidEmail': 'Введите корректный email',
+        'editProfile.emailAddSuccess':
+            'Проверьте почту и подтвердите email, чтобы завершить привязку',
+        'editProfile.emailAddFailed': 'Не удалось добавить email',
         'editProfile.saveFailed': 'Не удалось сохранить профиль',
         'editProfile.unexpectedError': 'Произошла ошибка при сохранении профиля',
 
@@ -1345,6 +1381,12 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'support.sendFailed': 'Не удалось отправить обращение',
         'support.sendUnexpectedError': 'Произошла ошибка при отправке обращения',
         'support.sentSuccess': 'Ваше обращение отправлено',
+        'support.emailRequiredTitle': 'Добавьте email перед обращением в поддержку',
+        'support.emailRequiredDescription':
+            'Нам нужен email, чтобы ответить на ваше сообщение. Сначала добавьте его в профиль.',
+        'support.addEmailButton': 'Добавить email',
+        'support.sendRequiresEmail':
+            'Добавьте и подтвердите email перед отправкой обращения',
 
         'notifications.title': 'Уведомления',
         'notifications.emptyTitle': 'Пока нет уведомлений',
@@ -1393,6 +1435,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.loading': 'Загрузка...',
         'profile.loadingEmail': 'Загрузка email...',
         'profile.noEmail': 'Нет email',
+        'profile.addEmailTitle': 'Добавьте email',
+        'profile.addEmailDescription':
+            'Поддержка не сможет ответить на ваши обращения, пока к аккаунту не привязан email.',
+        'profile.addEmailButton': 'Добавить email',
         'profile.logoutFailed': 'Не удалось выйти из аккаунта',
         'profile.logoutUnexpectedError': 'Произошла ошибка при выходе',
 
@@ -1812,11 +1858,19 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'editProfile.title': 'Editează profilul',
         'editProfile.name': 'Nume',
         'editProfile.email': 'Email',
+        'editProfile.emailPlaceholder': 'name@example.com',
+        'editProfile.emailHint':
+            'Adaugă un email ca suportul să îți poată răspunde când este nevoie.',
         'editProfile.saveButton': 'Salvează modificările',
         'editProfile.loading': 'Se încarcă...',
         'editProfile.saving': 'Se salvează...',
         'editProfile.userNotFound': 'Utilizatorul nu a fost găsit',
         'editProfile.enterName': 'Introdu numele',
+        'editProfile.enterEmail': 'Introdu emailul',
+        'editProfile.invalidEmail': 'Introdu un email valid',
+        'editProfile.emailAddSuccess':
+            'Verifică inboxul și confirmă emailul pentru a finaliza conectarea',
+        'editProfile.emailAddFailed': 'Emailul nu a putut fi adăugat',
         'editProfile.saveFailed': 'Profilul nu a putut fi salvat',
         'editProfile.unexpectedError': 'A apărut o eroare la salvarea profilului',
 
@@ -1866,6 +1920,12 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'support.sendFailed': 'Solicitarea nu a putut fi trimisă',
         'support.sendUnexpectedError': 'A apărut o eroare la trimiterea solicitării',
         'support.sentSuccess': 'Solicitarea ta a fost trimisă',
+        'support.emailRequiredTitle': 'Adaugă un email înainte să contactezi suportul',
+        'support.emailRequiredDescription':
+            'Avem nevoie de un email ca să îți putem răspunde. Adaugă-l mai întâi în profil.',
+        'support.addEmailButton': 'Adaugă email',
+        'support.sendRequiresEmail':
+            'Adaugă și confirmă emailul înainte să trimiți o solicitare',
 
         'notifications.title': 'Notificări',
         'notifications.emptyTitle': 'Încă nu există notificări',
@@ -1914,6 +1974,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.loading': 'Se încarcă...',
         'profile.loadingEmail': 'Se încarcă emailul...',
         'profile.noEmail': 'Fără email',
+        'profile.addEmailTitle': 'Adaugă emailul tău',
+        'profile.addEmailDescription':
+            'Suportul nu poate răspunde solicitărilor tale până când contul nu are un email.',
+        'profile.addEmailButton': 'Adaugă email',
         'profile.logoutFailed': 'Nu te-ai putut deconecta',
         'profile.logoutUnexpectedError': 'A apărut o eroare la deconectare',
 
@@ -2338,11 +2402,19 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'editProfile.title': 'Редагувати профіль',
         'editProfile.name': "Ім'я",
         'editProfile.email': 'Email',
+        'editProfile.emailPlaceholder': 'name@example.com',
+        'editProfile.emailHint':
+            'Додайте email, щоб підтримка могла відповісти вам за потреби.',
         'editProfile.saveButton': 'Зберегти зміни',
         'editProfile.loading': 'Завантаження...',
         'editProfile.saving': 'Збереження...',
         'editProfile.userNotFound': 'Користувача не знайдено',
         'editProfile.enterName': "Введіть ім'я",
+        'editProfile.enterEmail': 'Введіть email',
+        'editProfile.invalidEmail': 'Введіть коректний email',
+        'editProfile.emailAddSuccess':
+            'Перевірте пошту та підтвердьте email, щоб завершити прив’язку',
+        'editProfile.emailAddFailed': 'Не вдалося додати email',
         'editProfile.saveFailed': 'Не вдалося зберегти профіль',
         'editProfile.unexpectedError': 'Сталася помилка під час збереження профілю',
 
@@ -2392,6 +2464,12 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'support.sendFailed': 'Не вдалося надіслати звернення',
         'support.sendUnexpectedError': 'Сталася помилка під час надсилання звернення',
         'support.sentSuccess': 'Ваше звернення надіслано',
+        'support.emailRequiredTitle': 'Додайте email перед зверненням у підтримку',
+        'support.emailRequiredDescription':
+            'Нам потрібен email, щоб відповісти на ваше повідомлення. Спочатку додайте його в профіль.',
+        'support.addEmailButton': 'Додати email',
+        'support.sendRequiresEmail':
+            'Додайте й підтвердьте email перед надсиланням звернення',
 
         'notifications.title': 'Сповіщення',
         'notifications.emptyTitle': 'Сповіщень поки немає',
@@ -2440,6 +2518,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.loading': 'Завантаження...',
         'profile.loadingEmail': 'Завантаження email...',
         'profile.noEmail': 'Немає email',
+        'profile.addEmailTitle': 'Додайте email',
+        'profile.addEmailDescription':
+            'Підтримка не зможе відповісти на ваші звернення, поки до акаунта не прив’язано email.',
+        'profile.addEmailButton': 'Додати email',
         'profile.logoutFailed': 'Не вдалося вийти з облікового запису',
         'profile.logoutUnexpectedError': 'Сталася помилка під час виходу',
 
@@ -2865,11 +2947,19 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'editProfile.title': 'Profil bearbeiten',
         'editProfile.name': 'Name',
         'editProfile.email': 'E-Mail',
+        'editProfile.emailPlaceholder': 'name@example.com',
+        'editProfile.emailHint':
+            'Füge eine E-Mail hinzu, damit der Support dir bei Bedarf antworten kann.',
         'editProfile.saveButton': 'Änderungen speichern',
         'editProfile.loading': 'Wird geladen...',
         'editProfile.saving': 'Wird gespeichert...',
         'editProfile.userNotFound': 'Benutzer nicht gefunden',
         'editProfile.enterName': 'Name eingeben',
+        'editProfile.enterEmail': 'E-Mail eingeben',
+        'editProfile.invalidEmail': 'Gib eine gültige E-Mail ein',
+        'editProfile.emailAddSuccess':
+            'Prüfe deinen Posteingang und bestätige die E-Mail, um sie fertig zu verknüpfen',
+        'editProfile.emailAddFailed': 'E-Mail konnte nicht hinzugefügt werden',
         'editProfile.saveFailed': 'Profil konnte nicht gespeichert werden',
         'editProfile.unexpectedError': 'Beim Speichern des Profils ist ein Fehler aufgetreten',
 
@@ -2919,6 +3009,12 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'support.sendFailed': 'Support-Anfrage konnte nicht gesendet werden',
         'support.sendUnexpectedError': 'Beim Senden der Support-Anfrage ist ein Fehler aufgetreten',
         'support.sentSuccess': 'Deine Anfrage wurde gesendet',
+        'support.emailRequiredTitle': 'Füge vor dem Kontakt mit dem Support eine E-Mail hinzu',
+        'support.emailRequiredDescription':
+            'Wir brauchen eine E-Mail-Adresse, um dir antworten zu können. Füge sie zuerst in deinem Profil hinzu.',
+        'support.addEmailButton': 'E-Mail hinzufügen',
+        'support.sendRequiresEmail':
+            'Füge deine E-Mail hinzu und bestätige sie, bevor du eine Support-Anfrage sendest',
 
         'notifications.title': 'Benachrichtigungen',
         'notifications.emptyTitle': 'Noch keine Benachrichtigungen',
@@ -2967,6 +3063,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.loading': 'Wird geladen...',
         'profile.loadingEmail': 'E-Mail wird geladen...',
         'profile.noEmail': 'Keine E-Mail',
+        'profile.addEmailTitle': 'Füge deine E-Mail hinzu',
+        'profile.addEmailDescription':
+            'Der Support kann dir auf Anfragen nicht antworten, solange dein Konto keine E-Mail hat.',
+        'profile.addEmailButton': 'E-Mail hinzufügen',
         'profile.logoutFailed': 'Abmeldung fehlgeschlagen',
         'profile.logoutUnexpectedError': 'Beim Abmelden ist ein Fehler aufgetreten',
 

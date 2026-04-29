@@ -13,6 +13,7 @@ export function EditProfileScreen({
 }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [initialEmail, setInitialEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export function EditProfileScreen({
         }
 
         setUserId(user.id);
+        setInitialEmail(user.email ?? '');
         setEmail(user.email ?? '');
 
         const profile = await fetchMyProfileAccessSummary();
@@ -83,6 +85,8 @@ export function EditProfileScreen({
 
   const handleSave = async () => {
     const trimmedName = name.trim();
+    const nextEmail = trimAndLimitText(email, INPUT_LIMITS.email);
+    const canAddEmail = !initialEmail.trim();
 
     if (!userId) {
       feedback.error(translate('editProfile.userNotFound'));
@@ -91,6 +95,16 @@ export function EditProfileScreen({
 
     if (!trimmedName) {
       feedback.warning(translate('editProfile.enterName'));
+      return;
+    }
+
+    if (canAddEmail && !nextEmail) {
+      feedback.warning(translate('editProfile.enterEmail'));
+      return;
+    }
+
+    if (canAddEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
+      feedback.warning(translate('editProfile.invalidEmail'));
       return;
     }
 
@@ -103,6 +117,24 @@ export function EditProfileScreen({
         console.error('Ошибка обновления профиля:', error);
         feedback.error(translate('editProfile.saveFailed'));
         setSaving(false);
+        return;
+      }
+
+      if (canAddEmail) {
+        const { error: emailError } = await supabase.auth.updateUser(
+          { email: nextEmail },
+          { emailRedirectTo: window.location.origin }
+        );
+
+        if (emailError) {
+          console.error('Failed to add email to auth user:', emailError);
+          feedback.error(emailError.message || translate('editProfile.emailAddFailed'));
+          setSaving(false);
+          return;
+        }
+
+        feedback.success(translate('editProfile.emailAddSuccess'));
+        onNavigate('profile');
         return;
       }
 
@@ -172,14 +204,27 @@ export function EditProfileScreen({
               <input
                 type="email"
                 value={email}
-                disabled
-                className="w-full px-4 py-3 rounded-xl border transition-all outline-none"
+                onChange={(e) => setEmail(limitText(e.target.value, INPUT_LIMITS.email))}
+                maxLength={INPUT_LIMITS.email}
+                placeholder={
+                  initialEmail.trim() ? undefined : translate('editProfile.emailPlaceholder')
+                }
+                disabled={loading || saving || Boolean(initialEmail.trim())}
+                className="w-full px-4 py-3 rounded-xl border transition-all outline-none focus:border-accent"
                 style={{
                   borderColor: 'var(--border)',
                   backgroundColor: 'var(--card)',
-                  color: 'var(--muted-foreground)',
+                  color: initialEmail.trim()
+                    ? 'var(--muted-foreground)'
+                    : 'var(--foreground)',
                 }}
               />
+
+              {!loading && !initialEmail.trim() && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {translate('editProfile.emailHint')}
+                </p>
+              )}
             </div>
           </div>
 

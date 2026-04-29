@@ -11,12 +11,14 @@ import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLim
 export function LoginScreen({
   onNavigate,
   onGoogleLogin,
+  onTelegramLogin,
   onAuthenticated,
   backTarget = 'welcome',
   backData,
 }: {
   onNavigate: (screen: string, data?: any) => void;
   onGoogleLogin: () => Promise<void>;
+  onTelegramLogin: () => Promise<void>;
   onAuthenticated: (user: User) => Promise<void>;
   backTarget?: string;
   backData?: any;
@@ -26,6 +28,7 @@ export function LoginScreen({
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [telegramLoading, setTelegramLoading] = useState(false);
 
   const { translate } = useLanguage();
 
@@ -36,6 +39,16 @@ export function LoginScreen({
       await onGoogleLogin();
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleTelegramAuth = async () => {
+    setTelegramLoading(true);
+
+    try {
+      await onTelegramLogin();
+    } finally {
+      setTelegramLoading(false);
     }
   };
 
@@ -118,7 +131,7 @@ export function LoginScreen({
           whileTap={{ scale: 0.95 }}
           onClick={() => onNavigate(backTarget, backData)}
           className="self-start text-muted-foreground mb-8"
-          disabled={loading || resetLoading || googleLoading}
+          disabled={loading || resetLoading || googleLoading || telegramLoading}
         >
           ← {translate('login.back')}
         </motion.button>
@@ -143,7 +156,7 @@ export function LoginScreen({
                 onClick={handleGoogleAuth}
                 variant="primary"
                 fullWidth
-                disabled={loading || resetLoading || googleLoading}
+                disabled={loading || resetLoading || googleLoading || telegramLoading}
                 className="flex items-center justify-center gap-3"
               >
                 <span
@@ -157,9 +170,31 @@ export function LoginScreen({
             </motion.div>
 
             <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.17 }}
+            >
+              <TouchButton
+                onClick={handleTelegramAuth}
+                variant="secondary"
+                fullWidth
+                disabled={loading || resetLoading || googleLoading || telegramLoading}
+                className="flex items-center justify-center gap-3"
+              >
+                <span
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold"
+                  style={{ backgroundColor: '#229ED9', color: '#ffffff' }}
+                >
+                  T
+                </span>
+                {telegramLoading ? translate('login.submitting') : translate('login.telegram')}
+              </TouchButton>
+            </motion.div>
+
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.18 }}
+              transition={{ delay: 0.2 }}
               className="flex items-center gap-3 py-1"
             >
               <div className="h-px flex-1 bg-border" />
@@ -172,7 +207,7 @@ export function LoginScreen({
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.22 }}
             >
               <label className="block mb-2 text-sm text-muted-foreground">
                 {translate('login.email')}
@@ -191,7 +226,7 @@ export function LoginScreen({
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.32 }}
             >
               <label className="block mb-2 text-sm text-muted-foreground">
                 {translate('login.password')}
@@ -210,14 +245,14 @@ export function LoginScreen({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.35 }}
+              transition={{ delay: 0.37 }}
               className="text-right"
             >
               <button
                 onClick={handleForgotPassword}
                 className="text-sm text-accent"
                 style={{ color: 'var(--accent)' }}
-                disabled={loading || resetLoading || googleLoading}
+                disabled={loading || resetLoading || googleLoading || telegramLoading}
               >
                 {resetLoading
                   ? translate('login.sendingReset')
@@ -228,14 +263,14 @@ export function LoginScreen({
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.42 }}
             >
               <TouchButton
                 onClick={handleLogin}
                 variant="secondary"
                 fullWidth
                 className="mt-2"
-                disabled={loading || resetLoading || googleLoading}
+                disabled={loading || resetLoading || googleLoading || telegramLoading}
               >
                 {loading ? translate('login.submitting') : translate('login.submit')}
               </TouchButton>
@@ -244,7 +279,7 @@ export function LoginScreen({
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.47 }}
               className="text-center text-sm text-muted-foreground mt-4"
             >
               {translate('login.noAccount')}{' '}
@@ -252,7 +287,7 @@ export function LoginScreen({
                 onClick={() => onNavigate('signup')}
                 className="text-accent"
                 style={{ color: 'var(--accent)' }}
-                disabled={loading || resetLoading || googleLoading}
+                disabled={loading || resetLoading || googleLoading || telegramLoading}
               >
                 {translate('login.signupLink')}
               </button>

@@ -534,6 +534,25 @@ export default function App() {
     }
   };
 
+  const handleTelegramLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'custom:telegram',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        console.error('Telegram OAuth sign-in failed:', error);
+        feedback.error(error.message || translate('login.telegramFailed'));
+      }
+    } catch (error) {
+      console.error('Unexpected Telegram OAuth sign-in error:', error);
+      feedback.error(translate('login.telegramFailed'));
+    }
+  };
+
   const handleLegalConsentAccepted = async () => {
     try {
       const {
@@ -935,12 +954,17 @@ export default function App() {
           <AnimatePresence mode="wait" initial={false}>
             <ScreenTransition key={currentScreen} direction={direction}>
               {currentScreen === 'welcome' && (
-                <WelcomeScreen onNavigate={handleNavigate} onGoogleLogin={handleGoogleLogin} />
+                <WelcomeScreen
+                  onNavigate={handleNavigate}
+                  onGoogleLogin={handleGoogleLogin}
+                  onTelegramLogin={handleTelegramLogin}
+                />
               )}
               {currentScreen === 'login' && (
                 <LoginScreen
                   onNavigate={handleNavigate}
                   onGoogleLogin={handleGoogleLogin}
+                  onTelegramLogin={handleTelegramLogin}
                   onAuthenticated={applySignedInNavigation}
                   backTarget={loginContext?.backScreen || 'welcome'}
                   backData={loginContext?.backData}

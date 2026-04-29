@@ -29,12 +29,15 @@ const markOnboardingCompleted = () => {
 export function WelcomeScreen({
   onNavigate,
   onGoogleLogin,
+  onTelegramLogin,
 }: {
   onNavigate: (screen: string, data?: any) => void;
   onGoogleLogin: () => Promise<void>;
+  onTelegramLogin: () => Promise<void>;
 }) {
   const { language, setLanguage, translate } = useLanguage();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [telegramLoading, setTelegramLoading] = useState(false);
   const [showLanguageChoice, setShowLanguageChoice] = useState(() => !hasCompletedLanguageChoice());
   const [showOnboarding, setShowOnboarding] = useState(
     () => hasCompletedLanguageChoice() && !hasCompletedOnboarding()
@@ -73,6 +76,16 @@ export function WelcomeScreen({
       await onGoogleLogin();
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleTelegramLogin = async () => {
+    setTelegramLoading(true);
+
+    try {
+      await onTelegramLogin();
+    } finally {
+      setTelegramLoading(false);
     }
   };
 
@@ -254,7 +267,7 @@ export function WelcomeScreen({
               onClick={handleGoogleLogin}
               variant="primary"
               fullWidth
-              disabled={googleLoading}
+              disabled={googleLoading || telegramLoading}
               className="flex items-center justify-center gap-3"
             >
               <span
@@ -267,10 +280,26 @@ export function WelcomeScreen({
             </TouchButton>
 
             <TouchButton
+              onClick={handleTelegramLogin}
+              variant="secondary"
+              fullWidth
+              disabled={googleLoading || telegramLoading}
+              className="flex items-center justify-center gap-3"
+            >
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold"
+                style={{ backgroundColor: '#229ED9', color: '#ffffff' }}
+              >
+                T
+              </span>
+              {telegramLoading ? translate('login.submitting') : translate('welcome.telegram')}
+            </TouchButton>
+
+            <TouchButton
               onClick={() => onNavigate('login')}
               variant="ghost"
               fullWidth
-              disabled={googleLoading}
+              disabled={googleLoading || telegramLoading}
               style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
             >
               {translate('welcome.login')}
@@ -279,7 +308,7 @@ export function WelcomeScreen({
             <button
               onClick={() => onNavigate('signup')}
               className="w-full pt-2 text-sm text-muted-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
-              disabled={googleLoading}
+              disabled={googleLoading || telegramLoading}
             >
               {translate('welcome.signup')}
             </button>
@@ -290,7 +319,7 @@ export function WelcomeScreen({
                 onClick={() => onNavigate('terms', { backTarget: 'welcome' })}
                 className="transition-opacity hover:opacity-80"
                 style={{ color: 'var(--accent)' }}
-                disabled={googleLoading}
+                disabled={googleLoading || telegramLoading}
               >
                 {translate('legal.termsLink')}
               </button>
@@ -300,7 +329,7 @@ export function WelcomeScreen({
                 onClick={() => onNavigate('privacy', { backTarget: 'welcome' })}
                 className="transition-opacity hover:opacity-80"
                 style={{ color: 'var(--accent)' }}
-                disabled={googleLoading}
+                disabled={googleLoading || telegramLoading}
               >
                 {translate('legal.privacyLink')}
               </button>

@@ -35,6 +35,7 @@ type TranslationKey =
     | 'welcome.languageChoiceTitle'
     | 'welcome.languageChoiceDescription'
     | 'welcome.google'
+    | 'welcome.telegram'
     | 'welcome.login'
     | 'welcome.signup'
     | 'legal.termsTitle'
@@ -54,6 +55,7 @@ type TranslationKey =
     | 'login.back'
     | 'login.title'
     | 'login.google'
+    | 'login.telegram'
     | 'login.emailDivider'
     | 'login.email'
     | 'login.emailPlaceholder'
@@ -67,6 +69,7 @@ type TranslationKey =
     | 'login.enterPassword'
     | 'login.failed'
     | 'login.googleFailed'
+    | 'login.telegramFailed'
     | 'login.unexpectedError'
     | 'signup.back'
     | 'signup.title'
@@ -615,6 +618,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'welcome.languageChoiceDescription':
             'If this is your first time here, choose the language you want to use in Gathr.',
         'welcome.google': 'Continue with Google',
+        'welcome.telegram': 'Continue with Telegram',
         'welcome.login': 'Continue with email',
         'welcome.signup': 'Create account with email',
         'legal.termsTitle': 'Terms of Service',
@@ -639,6 +643,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.back': 'Back',
         'login.title': 'Welcome back',
         'login.google': 'Continue with Google',
+        'login.telegram': 'Continue with Telegram',
         'login.emailDivider': 'Or continue with email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
@@ -652,6 +657,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.enterPassword': 'Enter password',
         'login.failed': 'Failed to log in',
         'login.googleFailed': 'Failed to continue with Google',
+        'login.telegramFailed': 'Failed to continue with Telegram',
         'login.unexpectedError': 'An error occurred while logging in',
 
         'signup.back': 'Back',
@@ -1219,6 +1225,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'welcome.languageChoiceDescription':
             'Если ты здесь впервые, выбери язык, на котором хочешь пользоваться Gathr.',
         'welcome.google': 'Продолжить через Google',
+        'welcome.telegram': 'Продолжить через Telegram',
         'welcome.login': 'Войти по email',
         'welcome.signup': 'Создать аккаунт по email',
         'legal.termsTitle': 'Условия использования',
@@ -1243,6 +1250,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.back': 'Назад',
         'login.title': 'С возвращением',
         'login.google': 'Продолжить через Google',
+        'login.telegram': 'Продолжить через Telegram',
         'login.emailDivider': 'Или войти по email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
@@ -1256,6 +1264,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.enterPassword': 'Введите пароль',
         'login.failed': 'Не удалось войти',
         'login.googleFailed': 'Не удалось продолжить через Google',
+        'login.telegramFailed': 'Не удалось продолжить через Telegram',
         'login.unexpectedError': 'Произошла ошибка при входе',
 
         'signup.back': 'Назад',
@@ -1737,6 +1746,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'welcome.languageChoiceDescription':
             'Dacă e prima ta vizită aici, alege limba în care vrei să folosești Gathr.',
         'welcome.google': 'Continuă cu Google',
+        'welcome.telegram': 'Continuă cu Telegram',
         'welcome.login': 'Continuă cu email',
         'welcome.signup': 'Creează cont cu email',
         'legal.termsTitle': 'Termeni de utilizare',
@@ -1761,6 +1771,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.back': 'Înapoi',
         'login.title': 'Bine ai revenit',
         'login.google': 'Continuă cu Google',
+        'login.telegram': 'Continuă cu Telegram',
         'login.emailDivider': 'Sau continuă cu email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
@@ -1774,6 +1785,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.enterPassword': 'Introdu parola',
         'login.failed': 'Autentificarea a eșuat',
         'login.googleFailed': 'Nu s-a putut continua cu Google',
+        'login.telegramFailed': 'Nu s-a putut continua cu Telegram',
         'login.unexpectedError': 'A apărut o eroare la autentificare',
 
         'signup.back': 'Înapoi',
@@ -2260,6 +2272,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'welcome.languageChoiceDescription':
             'Якщо ви тут уперше, оберіть мову, якою хочете користуватися Gathr.',
         'welcome.google': 'Продовжити через Google',
+        'welcome.telegram': 'Продовжити через Telegram',
         'welcome.login': 'Увійти через email',
         'welcome.signup': 'Створити акаунт через email',
         'legal.termsTitle': 'Умови використання',
@@ -2284,6 +2297,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.back': 'Назад',
         'login.title': 'З поверненням',
         'login.google': 'Продовжити через Google',
+        'login.telegram': 'Продовжити через Telegram',
         'login.emailDivider': 'Або увійти через email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
@@ -2297,6 +2311,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.enterPassword': 'Введіть пароль',
         'login.failed': 'Не вдалося увійти',
         'login.googleFailed': 'Не вдалося продовжити через Google',
+        'login.telegramFailed': 'Не вдалося продовжити через Telegram',
         'login.unexpectedError': 'Сталася помилка під час входу',
 
         'signup.back': 'Назад',
@@ -2784,6 +2799,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'welcome.languageChoiceDescription':
             'Wenn du zum ersten Mal hier bist, wähle die Sprache, in der du Gathr nutzen möchtest.',
         'welcome.google': 'Mit Google fortfahren',
+        'welcome.telegram': 'Mit Telegram fortfahren',
         'welcome.login': 'Mit E-Mail fortfahren',
         'welcome.signup': 'Konto mit E-Mail erstellen',
         'legal.termsTitle': 'Nutzungsbedingungen',
@@ -2808,6 +2824,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.back': 'Zurück',
         'login.title': 'Willkommen zurück',
         'login.google': 'Mit Google fortfahren',
+        'login.telegram': 'Mit Telegram fortfahren',
         'login.emailDivider': 'Oder mit E-Mail fortfahren',
         'login.email': 'E-Mail',
         'login.emailPlaceholder': 'your@email.com',
@@ -2821,6 +2838,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'login.enterPassword': 'Passwort eingeben',
         'login.failed': 'Anmeldung fehlgeschlagen',
         'login.googleFailed': 'Mit Google konnte nicht fortgefahren werden',
+        'login.telegramFailed': 'Mit Telegram konnte nicht fortgefahren werden',
         'login.unexpectedError': 'Beim Anmelden ist ein Fehler aufgetreten',
 
         'signup.back': 'Zurück',

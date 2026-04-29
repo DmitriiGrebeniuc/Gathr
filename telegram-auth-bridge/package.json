@@ -5,7 +5,10 @@
   "type": "module",
   "description": "Separate Telegram auth bridge for Gathr Supabase custom provider integration",
   "scripts": {
-    "build": "echo \"Telegram auth bridge scaffold is not implemented yet\"",
+    "build": "echo \"Telegram auth bridge scaffold is ready\"",
     "dev": "echo \"Telegram auth bridge scaffold is not implemented yet\""
+  },
+  "dependencies": {
+    "@vercel/node": "^5.3.24"
   }
 }

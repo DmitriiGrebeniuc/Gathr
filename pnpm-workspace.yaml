@@ -1,2 +1,3 @@
 packages:
   - '.'
+  - 'telegram-auth-bridge'

@@ -1,5 +1,15 @@
 # Telegram Auth Bridge
 
+> Temporary fallback scaffold.
+>
+> Keep this service only if direct Telegram OIDC integration with Supabase
+> turns out to be blocked by platform limitations.
+>
+> If Telegram works as a native Supabase custom OIDC provider, delete:
+> - the `telegram-auth-bridge/` folder from this repository
+> - the separate `telegram-auth-bridge` Vercel project
+> - the DNS record for `auth.gathr-app.site`
+
 This folder is reserved for the Telegram authentication bridge service.
 
 Why it lives separately:

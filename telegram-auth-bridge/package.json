@@ -1,0 +1,11 @@
+{
+  "name": "telegram-auth-bridge",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Separate Telegram auth bridge for Gathr Supabase custom provider integration",
+  "scripts": {
+    "build": "echo \"Telegram auth bridge scaffold is not implemented yet\"",
+    "dev": "echo \"Telegram auth bridge scaffold is not implemented yet\""
+  }
+}

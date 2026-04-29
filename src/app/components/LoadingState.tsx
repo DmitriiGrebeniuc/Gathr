@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 type LoadingLineProps = {
   width?: string;
   height?: string;
@@ -26,14 +28,20 @@ export function LoadingLine({
 export function LoadingCard({
   lines = ['70%', '100%', '82%'],
   className = '',
+  style,
 }: {
   lines?: string[];
   className?: string;
+  style?: CSSProperties;
 }) {
   return (
     <div
       className={`rounded-2xl border px-4 py-4 space-y-3 ${className}`}
-      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      style={{
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)',
+        ...style,
+      }}
     >
       {lines.map((width, index) => (
         <LoadingLine

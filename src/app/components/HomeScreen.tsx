@@ -16,7 +16,7 @@ import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
 import { LoadingCard, LoadingLine } from './LoadingState';
 import {
   fetchAccessibleEventPrivateDetailsMap,
-  fetchEventFeedSortRanks,
+  fetchEventFeedMetadata,
   fetchMyProfileAccessSummary,
   fetchJoinedEventIdsForUser,
   fetchParticipantCounts,
@@ -28,6 +28,7 @@ type EventItem = {
   description?: string | null;
   created_at?: string | null;
   sort_rank?: number | null;
+  is_past?: boolean | null;
   date_time?: string | null;
   location?: string | null;
   location_lat?: number | null;
@@ -134,10 +135,30 @@ export function HomeScreen({
     return date.toLocaleString();
   };
 
-  const isPastEvent = (dateString?: string | null) => {
-    if (!dateString) return false;
+  const isPastEvent = (eventOrDate?: EventItem | string | null) => {
+    if (!eventOrDate) return false;
 
-    const date = new Date(dateString);
+    if (typeof eventOrDate === 'object') {
+      if (typeof eventOrDate.is_past === 'boolean') {
+        return eventOrDate.is_past;
+      }
+
+      const nextDateString = eventOrDate.date_time;
+
+      if (!nextDateString) {
+        return false;
+      }
+
+      const nextDate = new Date(nextDateString);
+
+      if (Number.isNaN(nextDate.getTime())) {
+        return false;
+      }
+
+      return nextDate.getTime() < Date.now();
+    }
+
+    const date = new Date(eventOrDate);
 
     if (Number.isNaN(date.getTime())) {
       return false;
@@ -270,11 +291,11 @@ export function HomeScreen({
         )
       );
 
-      const [creatorNameMapRaw, countsMap, nextJoinedEventIds, sortRanksMap] = await Promise.all([
+      const [creatorNameMapRaw, countsMap, nextJoinedEventIds, feedMetadataMap] = await Promise.all([
         fetchPublicProfileNameMap(creatorIds),
         fetchParticipantCounts((eventsData || []).map((event: any) => event.id)),
         fetchJoinedEventIdsForUser(userId),
-        fetchEventFeedSortRanks((eventsData || []).map((event: any) => event.id)),
+        fetchEventFeedMetadata((eventsData || []).map((event: any) => event.id)),
       ]);
 
       const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
@@ -295,7 +316,8 @@ export function HomeScreen({
           title: event.title,
           description: event.description,
           created_at: event.created_at ?? null,
-          sort_rank: sortRanksMap[event.id] ?? null,
+          sort_rank: feedMetadataMap[event.id]?.sortRank ?? null,
+          is_past: feedMetadataMap[event.id]?.isPast ?? null,
           date_time: privateDetails?.date_time ?? event.date_time ?? null,
           location: privateDetails?.location ?? event.location ?? null,
           location_lat:
@@ -365,10 +387,10 @@ export function HomeScreen({
         )
       );
 
-      const [creatorNameMapRaw, countsMap, sortRanksMap] = await Promise.all([
+      const [creatorNameMapRaw, countsMap, feedMetadataMap] = await Promise.all([
         fetchPublicProfileNameMap(creatorIds),
         fetchParticipantCounts((moreEventsData || []).map((event: any) => event.id)),
-        fetchEventFeedSortRanks((moreEventsData || []).map((event: any) => event.id)),
+        fetchEventFeedMetadata((moreEventsData || []).map((event: any) => event.id)),
       ]);
 
       const privateDetailsMap = await fetchAccessibleEventPrivateDetailsMap(
@@ -387,7 +409,8 @@ export function HomeScreen({
           title: event.title,
           description: event.description,
           created_at: event.created_at ?? null,
-          sort_rank: sortRanksMap[event.id] ?? null,
+          sort_rank: feedMetadataMap[event.id]?.sortRank ?? null,
+          is_past: feedMetadataMap[event.id]?.isPast ?? null,
           date_time: privateDetails?.date_time ?? event.date_time ?? null,
           location: privateDetails?.location ?? event.location ?? null,
           location_lat:
@@ -431,7 +454,7 @@ export function HomeScreen({
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      const past = isPastEvent(event.date_time);
+      const past = isPastEvent(event);
       const matchesActivity =
         selectedActivityType === 'all' ||
         (event.activity_type || 'other') === selectedActivityType;
@@ -1390,7 +1413,7 @@ export function HomeScreen({
 
           <motion.div layout="position" className="space-y-3">
             {visibleEvents.map((event) => {
-              const past = isPastEvent(event.date_time);
+              const past = isPastEvent(event);
               const activityMeta = getActivityTypeMeta(event.activity_type, language);
               const isRequestMode = event.join_mode === 'request';
               const canViewClosedPreview =

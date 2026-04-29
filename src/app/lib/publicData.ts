@@ -51,9 +51,14 @@ export type CreatorEventJoinRequest = EventJoinRequest & {
   requester_name: string | null;
 };
 
-export async function fetchEventFeedSortRanks(
+export type EventFeedMetadata = {
+  sortRank: number;
+  isPast: boolean | null;
+};
+
+export async function fetchEventFeedMetadata(
   eventIds: Array<string | null | undefined>
-): Promise<Record<string, number>> {
+): Promise<Record<string, EventFeedMetadata>> {
   const uniqueEventIds = Array.from(
     new Set(
       eventIds.filter(
@@ -72,13 +77,17 @@ export async function fetchEventFeedSortRanks(
   });
 
   if (error) {
-    console.error('Failed to load event feed sort ranks:', error);
+    console.error('Failed to load event feed metadata:', error);
     return {};
   }
 
   return (
-    (data as Array<{ event_id: string | null; sort_rank: number | string | null }> | null) || []
-  ).reduce<Record<string, number>>((acc, row) => {
+    (data as Array<{
+      event_id: string | null;
+      sort_rank: number | string | null;
+      is_past?: boolean | null;
+    }> | null) || []
+  ).reduce<Record<string, EventFeedMetadata>>((acc, row) => {
     if (!row?.event_id) {
       return acc;
     }
@@ -89,11 +98,24 @@ export async function fetchEventFeedSortRanks(
         : Number.parseInt(String(row.sort_rank ?? ''), 10);
 
     if (!Number.isNaN(parsedRank)) {
-      acc[row.event_id] = parsedRank;
+      acc[row.event_id] = {
+        sortRank: parsedRank,
+        isPast: typeof row.is_past === 'boolean' ? row.is_past : null,
+      };
     }
 
     return acc;
   }, {});
+}
+
+export async function fetchEventFeedSortRanks(
+  eventIds: Array<string | null | undefined>
+): Promise<Record<string, number>> {
+  const metadataMap = await fetchEventFeedMetadata(eventIds);
+
+  return Object.fromEntries(
+    Object.entries(metadataMap).map(([eventId, metadata]) => [eventId, metadata.sortRank])
+  );
 }
 
 export async function fetchPublicProfileNameMap(

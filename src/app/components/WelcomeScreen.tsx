@@ -296,7 +296,7 @@ export function WelcomeScreen({
             </TouchButton>
 
             <TouchButton
-              onClick={() => onNavigate('login')}
+              onClick={() => onNavigate('login', { mode: 'login' })}
               variant="ghost"
               fullWidth
               disabled={googleLoading || telegramLoading}
@@ -304,14 +304,6 @@ export function WelcomeScreen({
             >
               {translate('welcome.login')}
             </TouchButton>
-
-            <button
-              onClick={() => onNavigate('signup')}
-              className="w-full pt-2 text-sm text-muted-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
-              disabled={googleLoading || telegramLoading}
-            >
-              {translate('welcome.signup')}
-            </button>
 
             <div className="pt-2 text-center text-xs text-muted-foreground">
               <button

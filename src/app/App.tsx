@@ -3,7 +3,6 @@ import { AnimatePresence } from 'motion/react';
 import type { User } from '@supabase/supabase-js';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { LoginScreen } from './components/LoginScreen';
-import { SignUpScreen } from './components/SignUpScreen';
 import { HomeScreen } from './components/HomeScreen';
 import { CreateEventScreen } from './components/CreateEventScreen';
 import { EditEventScreen } from './components/EditEventScreen';
@@ -963,14 +962,20 @@ export default function App() {
               {currentScreen === 'login' && (
                 <LoginScreen
                   onNavigate={handleNavigate}
-                  onGoogleLogin={handleGoogleLogin}
-                  onTelegramLogin={handleTelegramLogin}
                   onAuthenticated={applySignedInNavigation}
                   backTarget={loginContext?.backScreen || 'welcome'}
                   backData={loginContext?.backData}
+                  initialMode={selectedEvent?.mode === 'signup' ? 'signup' : 'login'}
                 />
               )}
-              {currentScreen === 'signup' && <SignUpScreen onNavigate={handleNavigate} />}
+              {currentScreen === 'signup' && (
+                <LoginScreen
+                  onNavigate={handleNavigate}
+                  onAuthenticated={applySignedInNavigation}
+                  backTarget="welcome"
+                  initialMode="signup"
+                />
+              )}
               {currentScreen === 'terms' && (
                 <TermsScreen
                   onNavigate={handleNavigate}

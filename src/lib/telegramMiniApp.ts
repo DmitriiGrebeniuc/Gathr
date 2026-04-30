@@ -23,6 +23,7 @@ type TelegramWebApp = {
     }
   ) => void;
   ready?: () => void;
+  expand?: () => void;
 };
 
 declare global {
@@ -90,6 +91,25 @@ export function getTelegramMiniAppInitData() {
   }
 
   return window.Telegram?.WebApp?.initData?.trim() ?? '';
+}
+
+export function initTelegramMiniApp() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const webApp = window.Telegram?.WebApp;
+
+  if (!webApp) {
+    return;
+  }
+
+  try {
+    webApp.ready?.();
+    webApp.expand?.();
+  } catch (error) {
+    console.error('Failed to initialize Telegram Mini App runtime:', error);
+  }
 }
 
 export function isTelegramInAppBrowser() {

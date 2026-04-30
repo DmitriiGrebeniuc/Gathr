@@ -35,6 +35,7 @@ import { loadSharedEventById } from './auth/loadSharedEvent';
 import type { PostLoginIntent } from './auth/postLoginIntent';
 import {
   getTelegramMiniAppBrowserFallbackCopy,
+  initTelegramMiniApp,
   isTelegramMiniApp,
   openInExternalBrowser,
 } from '../lib/telegramMiniApp';
@@ -599,6 +600,10 @@ export default function App() {
       feedback.error(translate('profile.logoutFailed'));
     }
   };
+
+  useEffect(() => {
+    initTelegramMiniApp();
+  }, []);
 
   useEffect(() => {
     const getViewportHeight = () => {

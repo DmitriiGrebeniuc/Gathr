@@ -37,14 +37,10 @@ export function WelcomeScreen({
   onNavigate,
   onGoogleLogin,
   onTelegramLogin,
-  telegramMiniAppAuthFailed = false,
-  telegramMiniAppDebugLines = [],
 }: {
   onNavigate: (screen: string, data?: any) => void;
   onGoogleLogin: () => Promise<void>;
   onTelegramLogin: () => Promise<void>;
-  telegramMiniAppAuthFailed?: boolean;
-  telegramMiniAppDebugLines?: string[];
 }) {
   const { language, setLanguage, translate } = useLanguage();
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -54,8 +50,6 @@ export function WelcomeScreen({
     () => hasCompletedLanguageChoice() && !hasCompletedOnboarding()
   );
   const [onboardingStep, setOnboardingStep] = useState(0);
-  const insideTelegramApp = useMemo(() => isTelegramAppContext(), []);
-  const insideTelegramMiniApp = useMemo(() => isTelegramMiniApp(), []);
   const showTelegramBrowserFallback = useMemo(() => shouldUseTelegramBrowserFallback(), []);
 
   const onboardingPages = useMemo(
@@ -318,25 +312,6 @@ export function WelcomeScreen({
               </div>
             )}
 
-            {insideTelegramApp && telegramMiniAppDebugLines.length > 0 && (
-              <div
-                className="rounded-2xl border p-4 space-y-2"
-                style={{
-                  backgroundColor: 'var(--card)',
-                  borderColor: 'var(--destructive-border-strong, #7f1d1d)',
-                }}
-              >
-                <p className="text-sm" style={{ color: 'var(--accent)' }}>
-                  Telegram debug
-                </p>
-                <div className="space-y-1 text-xs text-muted-foreground break-words">
-                  {telegramMiniAppDebugLines.map((line) => (
-                    <p key={line}>{line}</p>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <TouchButton
               onClick={handleGoogleLogin}
               variant="primary"
@@ -353,23 +328,21 @@ export function WelcomeScreen({
               {googleLoading ? translate('login.submitting') : translate('welcome.google')}
             </TouchButton>
 
-            {(!insideTelegramMiniApp || telegramMiniAppAuthFailed) && (
-              <TouchButton
-                onClick={handleTelegramLogin}
-                variant="secondary"
-                fullWidth
-                disabled={googleLoading || telegramLoading}
-                className="flex items-center justify-center gap-3"
+            <TouchButton
+              onClick={handleTelegramLogin}
+              variant="secondary"
+              fullWidth
+              disabled={googleLoading || telegramLoading}
+              className="flex items-center justify-center gap-3"
+            >
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold"
+                style={{ backgroundColor: '#229ED9', color: '#ffffff' }}
               >
-                <span
-                  className="flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold"
-                  style={{ backgroundColor: '#229ED9', color: '#ffffff' }}
-                >
-                  T
-                </span>
-                {telegramLoading ? translate('login.submitting') : translate('welcome.telegram')}
-              </TouchButton>
-            )}
+                T
+              </span>
+              {telegramLoading ? translate('login.submitting') : translate('welcome.telegram')}
+            </TouchButton>
 
             <TouchButton
               onClick={() => onNavigate('login', { mode: 'login' })}

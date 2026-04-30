@@ -35,7 +35,6 @@ import { loadSharedEventById } from './auth/loadSharedEvent';
 import type { PostLoginIntent } from './auth/postLoginIntent';
 import {
   getTelegramMiniAppBrowserFallbackCopy,
-  isTelegramAppContext,
   isTelegramMiniApp,
   openInExternalBrowser,
 } from '../lib/telegramMiniApp';
@@ -544,7 +543,7 @@ export default function App() {
   };
 
   const handleTelegramLogin = async () => {
-    if (isTelegramAppContext()) {
+    if (isTelegramMiniApp()) {
       const browserFallbackCopy = getTelegramMiniAppBrowserFallbackCopy(language);
       openInExternalBrowser(window.location.origin);
       feedback.info(browserFallbackCopy.description);

@@ -38,11 +38,13 @@ export function WelcomeScreen({
   onGoogleLogin,
   onTelegramLogin,
   telegramMiniAppAuthFailed = false,
+  telegramMiniAppDebugLines = [],
 }: {
   onNavigate: (screen: string, data?: any) => void;
   onGoogleLogin: () => Promise<void>;
   onTelegramLogin: () => Promise<void>;
   telegramMiniAppAuthFailed?: boolean;
+  telegramMiniAppDebugLines?: string[];
 }) {
   const { language, setLanguage, translate } = useLanguage();
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -313,6 +315,25 @@ export function WelcomeScreen({
                 >
                   {telegramBrowserFallbackCopy.button}
                 </TouchButton>
+              </div>
+            )}
+
+            {insideTelegramApp && telegramMiniAppDebugLines.length > 0 && (
+              <div
+                className="rounded-2xl border p-4 space-y-2"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--destructive-border-strong, #7f1d1d)',
+                }}
+              >
+                <p className="text-sm" style={{ color: 'var(--accent)' }}>
+                  Telegram debug
+                </p>
+                <div className="space-y-1 text-xs text-muted-foreground break-words">
+                  {telegramMiniAppDebugLines.map((line) => (
+                    <p key={line}>{line}</p>
+                  ))}
+                </div>
               </div>
             )}
 

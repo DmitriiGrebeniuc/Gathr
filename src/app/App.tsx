@@ -129,6 +129,7 @@ export default function App() {
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [authChecked, setAuthChecked] = useState(false);
   const [telegramMiniAppAuthFailed, setTelegramMiniAppAuthFailed] = useState(false);
+  const [telegramMiniAppDebugLines, setTelegramMiniAppDebugLines] = useState<string[]>([]);
 
   const [pendingAfterAuth, setPendingAfterAuth] = useState<PostLoginIntent | null>(
     initialAuthRedirectState.pendingAfterAuth
@@ -154,6 +155,10 @@ export default function App() {
   const currentEntry = navigationStack[navigationStack.length - 1] ?? { screen: 'welcome' };
   const currentScreen = currentEntry.screen;
   const selectedEvent = currentEntry.data ?? null;
+
+  const setTelegramMiniAppDebug = (...lines: Array<string | null | undefined>) => {
+    setTelegramMiniAppDebugLines(lines.filter((line): line is string => Boolean(line)));
+  };
 
   useEffect(() => {
     currentScreenRef.current = currentScreen;
@@ -548,9 +553,19 @@ export default function App() {
   const handleTelegramLogin = async () => {
     if (isTelegramMiniApp()) {
       try {
+        setTelegramMiniAppDebug(
+          'mode=miniapp-manual-retry',
+          'step=starting',
+          `hasInitData=${String(Boolean(window.Telegram?.WebApp?.initData?.trim()))}`
+        );
         skipNextSignedInNavigationRef.current = true;
         setTelegramMiniAppAuthFailed(false);
         await signInWithTelegramMiniApp();
+        setTelegramMiniAppDebug(
+          'mode=miniapp-manual-retry',
+          'step=exchange-complete',
+          'step=fetch-user'
+        );
         const {
           data: { user },
           error,
@@ -562,11 +577,22 @@ export default function App() {
 
         telegramMiniAppAuthAttemptedRef.current = false;
         setTelegramMiniAppAuthFailed(false);
+        setTelegramMiniAppDebug(
+          'mode=miniapp-manual-retry',
+          'step=success',
+          `userId=${user.id}`
+        );
         await applySignedInNavigation(user);
         return;
       } catch (error) {
         skipNextSignedInNavigationRef.current = false;
         setTelegramMiniAppAuthFailed(true);
+        setTelegramMiniAppDebug(
+          'mode=miniapp-manual-retry',
+          'step=failed',
+          `error=${error instanceof Error ? error.message : String(error)}`,
+          `hasInitData=${String(Boolean(window.Telegram?.WebApp?.initData?.trim()))}`
+        );
         console.error('Telegram Mini App manual auth retry failed:', error);
         feedback.error(translate('login.telegramFailed'));
         return;
@@ -765,13 +791,28 @@ export default function App() {
       telegramMiniAppAuthAttemptedRef.current = true;
 
       try {
+        setTelegramMiniAppDebug(
+          'mode=miniapp-bootstrap',
+          'step=starting',
+          `hasInitData=${String(Boolean(window.Telegram?.WebApp?.initData?.trim()))}`
+        );
         skipNextSignedInNavigationRef.current = true;
         await signInWithTelegramMiniApp();
         setTelegramMiniAppAuthFailed(false);
+        setTelegramMiniAppDebug(
+          'mode=miniapp-bootstrap',
+          'step=exchange-complete'
+        );
         return true;
       } catch (error) {
         skipNextSignedInNavigationRef.current = false;
         setTelegramMiniAppAuthFailed(true);
+        setTelegramMiniAppDebug(
+          'mode=miniapp-bootstrap',
+          'step=failed',
+          `error=${error instanceof Error ? error.message : String(error)}`,
+          `hasInitData=${String(Boolean(window.Telegram?.WebApp?.initData?.trim()))}`
+        );
         console.error('Telegram Mini App bootstrap auth failed:', error);
         return false;
       }
@@ -829,8 +870,17 @@ export default function App() {
         } else if (activeSession?.user) {
           telegramMiniAppAuthAttemptedRef.current = false;
           setTelegramMiniAppAuthFailed(false);
+          setTelegramMiniAppDebug(
+            'mode=session-check',
+            'step=active-session',
+            `userId=${activeSession.user.id}`
+          );
           await applySignedInNavigation(activeSession.user);
         } else {
+          setTelegramMiniAppDebug(
+            'mode=session-check',
+            'step=no-session'
+          );
           resetNavigation('welcome', null, 'back');
         }
       } catch (error) {
@@ -897,6 +947,10 @@ export default function App() {
         telegramMiniAppAuthAttemptedRef.current = false;
         skipNextSignedInNavigationRef.current = false;
         setTelegramMiniAppAuthFailed(false);
+        setTelegramMiniAppDebug(
+          'mode=auth-state-change',
+          'event=SIGNED_OUT'
+        );
         resetNavigation('welcome', null, 'back');
       }
     });
@@ -1054,6 +1108,7 @@ export default function App() {
                   onGoogleLogin={handleGoogleLogin}
                   onTelegramLogin={handleTelegramLogin}
                   telegramMiniAppAuthFailed={telegramMiniAppAuthFailed}
+                  telegramMiniAppDebugLines={telegramMiniAppDebugLines}
                 />
               )}
               {currentScreen === 'login' && (

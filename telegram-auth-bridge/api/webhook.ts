@@ -4,13 +4,19 @@ import {
   createBotCopy,
   editBotMessage,
   getBotConfig,
+  resolveTelegramLocale,
   sendBotMessage,
 } from '../src/telegramBot.js';
+
+type TelegramUser = {
+  language_code?: string;
+};
 
 type TelegramMessage = {
   chat?: {
     id: number;
   };
+  from?: TelegramUser;
   text?: string;
   message_id?: number;
 };
@@ -18,6 +24,7 @@ type TelegramMessage = {
 type TelegramCallbackQuery = {
   id: string;
   data?: string;
+  from?: TelegramUser;
   message?: TelegramMessage;
 };
 
@@ -40,6 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ok: true,
       service: 'telegram-bot-backend',
       webhook: '/api/webhook',
+      locales: ['en', 'ru', 'ro', 'de'],
     });
     return;
   }
@@ -61,7 +69,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const update = (req.body || {}) as TelegramUpdate;
-    const copy = createBotCopy(config.appUrl, config.supportUrl);
+    const locale = resolveTelegramLocale(
+      update.callback_query?.from?.language_code ?? update.message?.from?.language_code
+    );
+    const copy = createBotCopy(config.appUrl, config.supportUrl, locale);
 
     if (update.message?.chat?.id && typeof update.message.text === 'string') {
       const chatId = update.message.chat.id;

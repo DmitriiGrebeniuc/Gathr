@@ -115,7 +115,6 @@ function GoogleAutocompleteInput({
       inputRef.current,
       {
         fields: ['formatted_address', 'geometry', 'place_id', 'address_components'],
-        types: ['geocode'],
       }
     );
 

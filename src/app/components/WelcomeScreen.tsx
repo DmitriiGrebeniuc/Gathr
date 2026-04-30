@@ -8,6 +8,7 @@ import { hasCompletedLanguageChoice, markLanguageChoiceCompleted } from '../../l
 import {
   getTelegramMiniAppBrowserFallbackCopy,
   isTelegramAppContext,
+  isTelegramMiniApp,
   shouldUseTelegramBrowserFallback,
   openInExternalBrowser,
 } from '../../lib/telegramMiniApp';
@@ -50,6 +51,7 @@ export function WelcomeScreen({
   );
   const [onboardingStep, setOnboardingStep] = useState(0);
   const insideTelegramApp = useMemo(() => isTelegramAppContext(), []);
+  const insideTelegramMiniApp = useMemo(() => isTelegramMiniApp(), []);
   const showTelegramBrowserFallback = useMemo(() => shouldUseTelegramBrowserFallback(), []);
 
   const onboardingPages = useMemo(
@@ -328,7 +330,7 @@ export function WelcomeScreen({
               {googleLoading ? translate('login.submitting') : translate('welcome.google')}
             </TouchButton>
 
-            {!insideTelegramApp && (
+            {!insideTelegramMiniApp && (
               <TouchButton
                 onClick={handleTelegramLogin}
                 variant="secondary"

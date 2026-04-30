@@ -54,8 +54,11 @@ type TranslationKey =
     | 'legal.consentSaveFailed'
     | 'login.back'
     | 'login.title'
+    | 'login.description'
     | 'login.google'
     | 'login.telegram'
+    | 'login.modeLogin'
+    | 'login.modeSignup'
     | 'login.emailDivider'
     | 'login.email'
     | 'login.emailPlaceholder'
@@ -73,6 +76,7 @@ type TranslationKey =
     | 'login.unexpectedError'
     | 'signup.back'
     | 'signup.title'
+    | 'signup.description'
     | 'signup.name'
     | 'signup.namePlaceholder'
     | 'signup.email'
@@ -654,9 +658,12 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'legal.consentSaveFailed': 'Failed to save legal consent',
 
         'login.back': 'Back',
-        'login.title': 'Welcome back',
+        'login.title': 'Continue with email',
+        'login.description': 'Enter your email and password to keep going.',
         'login.google': 'Continue with Google',
         'login.telegram': 'Continue with Telegram',
+        'login.modeLogin': 'Log in',
+        'login.modeSignup': 'Sign up',
         'login.emailDivider': 'Or continue with email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
@@ -675,6 +682,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'signup.back': 'Back',
         'signup.title': 'Create account',
+        'signup.description': 'Create an account with email if that feels easier for you.',
         'signup.name': 'Name',
         'signup.namePlaceholder': 'Your name',
         'signup.email': 'Email',
@@ -1252,9 +1260,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'welcome.languageChoiceTitle': 'Выбери язык',
         'welcome.languageChoiceDescription':
             'Если ты здесь впервые, выбери язык, на котором хочешь пользоваться Gathr.',
-        'welcome.google': 'Продолжить через Google',
-        'welcome.telegram': 'Продолжить через Telegram',
-        'welcome.login': 'Войти по email',
+        'welcome.google': 'Продолжить с Google',
+        'welcome.telegram': 'Продолжить с Telegram',
+        'welcome.login': 'Продолжить с email',
         'welcome.signup': 'Создать аккаунт по email',
         'legal.termsTitle': 'Условия использования',
         'legal.privacyTitle': 'Политика конфиденциальности',
@@ -1276,10 +1284,13 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'legal.consentSaveFailed': 'Не удалось сохранить юридическое согласие',
 
         'login.back': 'Назад',
-        'login.title': 'С возвращением',
+        'login.title': 'Продолжить с email',
+        'login.description': 'Введите email и пароль, чтобы продолжить.',
         'login.google': 'Продолжить через Google',
         'login.telegram': 'Продолжить через Telegram',
-        'login.emailDivider': 'Или войти по email',
+        'login.modeLogin': 'Войти',
+        'login.modeSignup': 'Регистрация',
+        'login.emailDivider': 'Или продолжить по email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
         'login.password': 'Пароль',
@@ -1297,6 +1308,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'signup.back': 'Назад',
         'signup.title': 'Создать аккаунт',
+        'signup.description': 'Создайте аккаунт по email, если вам так удобнее.',
         'signup.name': 'Имя',
         'signup.namePlaceholder': 'Ваше имя',
         'signup.email': 'Email',
@@ -1815,9 +1827,12 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'legal.consentSaveFailed': 'Nu s-a putut salva consimțământul legal',
 
         'login.back': 'Înapoi',
-        'login.title': 'Bine ai revenit',
+        'login.title': 'Continuă cu email',
+        'login.description': 'Introdu emailul și parola ca să continui.',
         'login.google': 'Continuă cu Google',
         'login.telegram': 'Continuă cu Telegram',
+        'login.modeLogin': 'Intră',
+        'login.modeSignup': 'Înregistrare',
         'login.emailDivider': 'Sau continuă cu email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
@@ -1836,6 +1851,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'signup.back': 'Înapoi',
         'signup.title': 'Creează cont',
+        'signup.description': 'Creează un cont cu email dacă așa îți este mai ușor.',
         'signup.name': 'Nume',
         'signup.namePlaceholder': 'Numele tău',
         'signup.email': 'Email',
@@ -2335,9 +2351,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'welcome.languageChoiceTitle': 'Оберіть мову',
         'welcome.languageChoiceDescription':
             'Якщо ви тут уперше, оберіть мову, якою хочете користуватися Gathr.',
-        'welcome.google': 'Продовжити через Google',
-        'welcome.telegram': 'Продовжити через Telegram',
-        'welcome.login': 'Увійти через email',
+        'welcome.google': 'Продовжити з Google',
+        'welcome.telegram': 'Продовжити з Telegram',
+        'welcome.login': 'Продовжити з email',
         'welcome.signup': 'Створити акаунт через email',
         'legal.termsTitle': 'Умови використання',
         'legal.privacyTitle': 'Політика конфіденційності',
@@ -2359,10 +2375,13 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'legal.consentSaveFailed': 'Не вдалося зберегти юридичну згоду',
 
         'login.back': 'Назад',
-        'login.title': 'З поверненням',
+        'login.title': 'Продовжити з email',
+        'login.description': 'Введіть email і пароль, щоб продовжити.',
         'login.google': 'Продовжити через Google',
         'login.telegram': 'Продовжити через Telegram',
-        'login.emailDivider': 'Або увійти через email',
+        'login.modeLogin': 'Увійти',
+        'login.modeSignup': 'Реєстрація',
+        'login.emailDivider': 'Або продовжити через email',
         'login.email': 'Email',
         'login.emailPlaceholder': 'your@email.com',
         'login.password': 'Пароль',
@@ -2380,6 +2399,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'signup.back': 'Назад',
         'signup.title': 'Створити акаунт',
+        'signup.description': 'Створіть акаунт через email, якщо так зручніше.',
         'signup.name': "Ім'я",
         'signup.namePlaceholder': "Ваше ім'я",
         'signup.email': 'Email',
@@ -2904,9 +2924,12 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'legal.consentSaveFailed': 'Die rechtliche Zustimmung konnte nicht gespeichert werden',
 
         'login.back': 'Zurück',
-        'login.title': 'Willkommen zurück',
+        'login.title': 'Mit E-Mail fortfahren',
+        'login.description': 'Gib deine E-Mail und dein Passwort ein, um fortzufahren.',
         'login.google': 'Mit Google fortfahren',
         'login.telegram': 'Mit Telegram fortfahren',
+        'login.modeLogin': 'Anmelden',
+        'login.modeSignup': 'Registrieren',
         'login.emailDivider': 'Oder mit E-Mail fortfahren',
         'login.email': 'E-Mail',
         'login.emailPlaceholder': 'your@email.com',
@@ -2925,6 +2948,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
 
         'signup.back': 'Zurück',
         'signup.title': 'Konto erstellen',
+        'signup.description': 'Erstelle ein Konto mit E-Mail, wenn sich das für dich einfacher anfühlt.',
         'signup.name': 'Name',
         'signup.namePlaceholder': 'Dein Name',
         'signup.email': 'E-Mail',

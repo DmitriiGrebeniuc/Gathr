@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Check } from 'lucide-react';
+import { Check, ChevronLeft } from 'lucide-react';
 import { TouchButton } from './TouchButton';
 import { SwipeableScreen } from './SwipeableScreen';
 import { useMemo, useState } from 'react';
@@ -38,7 +38,11 @@ export function LoginScreen({
 
   const isLoginMode = mode === 'login';
   const title = useMemo(
-    () => (isLoginMode ? translate('welcome.login') : translate('signup.title')),
+    () => (isLoginMode ? translate('login.title') : translate('signup.title')),
+    [isLoginMode, translate]
+  );
+  const description = useMemo(
+    () => (isLoginMode ? translate('login.description') : translate('signup.description')),
     [isLoginMode, translate]
   );
 
@@ -196,10 +200,11 @@ export function LoginScreen({
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => onNavigate(backTarget, backData)}
-          className="self-start text-muted-foreground mb-8"
+          className="self-start inline-flex items-center gap-2 text-muted-foreground mb-8"
           disabled={isBusy}
         >
-          в†ђ {translate('login.back')}
+          <ChevronLeft size={20} />
+          <span>{translate('login.back')}</span>
         </motion.button>
 
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
@@ -207,10 +212,19 @@ export function LoginScreen({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-4"
+            className="mb-2"
           >
             {title}
           </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.13 }}
+            className="text-sm text-muted-foreground mb-6 leading-6"
+          >
+            {description}
+          </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -219,7 +233,7 @@ export function LoginScreen({
             className="rounded-2xl border p-1 mb-6 flex gap-1"
             style={{
               borderColor: 'var(--border)',
-              backgroundColor: 'var(--card)',
+              backgroundColor: 'var(--surface-strong)',
             }}
           >
             <button
@@ -232,7 +246,7 @@ export function LoginScreen({
               }}
               disabled={isBusy}
             >
-              {translate('signup.loginLink')}
+              {translate('login.modeLogin')}
             </button>
 
             <button
@@ -245,7 +259,7 @@ export function LoginScreen({
               }}
               disabled={isBusy}
             >
-              {translate('login.signupLink')}
+              {translate('login.modeSignup')}
             </button>
           </motion.div>
 

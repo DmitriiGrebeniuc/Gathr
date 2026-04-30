@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { getUsableContactEmail, hasUsableContactEmail } from '../../lib/authContactEmail';
 import { TouchButton } from './TouchButton';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
@@ -29,7 +30,7 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
       return;
     }
 
-    if (!contactEmail.trim()) {
+    if (!hasUsableContactEmail(contactEmail)) {
       feedback.warning(translate('support.sendRequiresEmail'));
       return;
     }
@@ -81,7 +82,7 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
           data: { user },
         } = await supabase.auth.getUser();
 
-        setContactEmail(user?.email ?? '');
+        setContactEmail(getUsableContactEmail(user?.email ?? null) ?? '');
       } catch (error) {
         console.error('Unexpected support user load error:', error);
         setContactEmail('');
@@ -93,7 +94,7 @@ export function SupportScreen({ onNavigate }: { onNavigate: (screen: string) => 
     loadUser();
   }, []);
 
-  const missingEmail = !loadingUser && !contactEmail.trim();
+  const missingEmail = !loadingUser && !hasUsableContactEmail(contactEmail);
 
   return (
     <div className="h-full flex flex-col bg-background">

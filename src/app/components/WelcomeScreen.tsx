@@ -8,6 +8,7 @@ import { hasCompletedLanguageChoice, markLanguageChoiceCompleted } from '../../l
 import {
   getTelegramMiniAppBrowserFallbackCopy,
   isTelegramAppContext,
+  shouldUseTelegramBrowserFallback,
   openInExternalBrowser,
 } from '../../lib/telegramMiniApp';
 
@@ -49,6 +50,7 @@ export function WelcomeScreen({
   );
   const [onboardingStep, setOnboardingStep] = useState(0);
   const insideTelegramApp = useMemo(() => isTelegramAppContext(), []);
+  const showTelegramBrowserFallback = useMemo(() => shouldUseTelegramBrowserFallback(), []);
 
   const onboardingPages = useMemo(
     () => [
@@ -277,7 +279,7 @@ export function WelcomeScreen({
           </motion.div>
         ) : !showLanguageChoice ? (
           <>
-            {insideTelegramApp && (
+            {showTelegramBrowserFallback && (
               <div
                 className="rounded-2xl border p-4 space-y-3"
                 style={{

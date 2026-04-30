@@ -36,8 +36,11 @@ import type { PostLoginIntent } from './auth/postLoginIntent';
 import {
   getTelegramMiniAppBrowserFallbackCopy,
   isTelegramAppContext,
+  isTelegramMiniApp,
   openInExternalBrowser,
 } from '../lib/telegramMiniApp';
+import { getUsableContactEmail } from '../lib/authContactEmail';
+import { signInWithTelegramMiniApp } from '../lib/telegramMiniAppAuth';
 import {
   isClearPostLoginIntentPayload,
   isLoginNavigationPayload,
@@ -140,6 +143,8 @@ export default function App() {
   const currentScreenRef = useRef('welcome');
   const navigationStackRef = useRef<NavigationEntry[]>([{ screen: 'welcome' }]);
   const skipNextPopStateRef = useRef(false);
+  const telegramMiniAppAuthAttemptedRef = useRef(false);
+  const skipNextSignedInNavigationRef = useRef(false);
 
   const { language, translate } = useLanguage();
   const isMobileViewport = window.innerWidth < 768;
@@ -310,7 +315,7 @@ export default function App() {
       return metadataName.trim();
     }
 
-    const emailName = user.email?.split('@')[0]?.trim();
+    const emailName = getUsableContactEmail(user.email ?? null)?.split('@')[0]?.trim();
 
     if (emailName) {
       return emailName;
@@ -716,6 +721,24 @@ export default function App() {
       return true;
     };
 
+    const tryTelegramMiniAppBootstrap = async () => {
+      if (telegramMiniAppAuthAttemptedRef.current || !isTelegramMiniApp()) {
+        return false;
+      }
+
+      telegramMiniAppAuthAttemptedRef.current = true;
+
+      try {
+        skipNextSignedInNavigationRef.current = true;
+        await signInWithTelegramMiniApp();
+        return true;
+      } catch (error) {
+        skipNextSignedInNavigationRef.current = false;
+        console.error('Telegram Mini App bootstrap auth failed:', error);
+        return false;
+      }
+    };
+
     const checkSession = async () => {
       try {
         if (isRecovery && accessToken && refreshToken) {
@@ -737,6 +760,24 @@ export default function App() {
           return;
         }
 
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        let activeSession = session;
+        let activeError = error;
+
+        if (!activeSession?.user) {
+          const miniAppSignedIn = await tryTelegramMiniAppBootstrap();
+
+          if (miniAppSignedIn) {
+            const refreshedSessionResult = await supabase.auth.getSession();
+            activeSession = refreshedSessionResult.data.session;
+            activeError = refreshedSessionResult.error;
+          }
+        }
+
         const openedSharedEvent = await openSharedEventIfNeeded();
 
         if (openedSharedEvent) {
@@ -744,16 +785,11 @@ export default function App() {
           return;
         }
 
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('Ошибка получения сессии:', error);
+        if (activeError) {
+          console.error('Ошибка получения сессии:', activeError);
           resetNavigation('welcome', null, 'back');
-        } else if (session?.user) {
-          await applySignedInNavigation(session.user);
+        } else if (activeSession?.user) {
+          await applySignedInNavigation(activeSession.user);
         } else {
           resetNavigation('welcome', null, 'back');
         }
@@ -770,6 +806,11 @@ export default function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && skipNextSignedInNavigationRef.current) {
+        skipNextSignedInNavigationRef.current = false;
+        return;
+      }
+
       if (event === 'PASSWORD_RECOVERY') {
         isRecoveryModeRef.current = true;
         resetNavigation('reset-password', null, 'forward');
@@ -1079,3 +1120,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { getUsableContactEmail, hasUsableContactEmail } from '../../lib/authContactEmail';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
 import { fetchMyProfileAccessSummary, updateMyProfileName } from '../lib/publicData';
@@ -19,6 +20,7 @@ export function EditProfileScreen({
   const [userId, setUserId] = useState<string | null>(null);
 
   const { translate } = useLanguage();
+  const canAddEmail = !hasUsableContactEmail(initialEmail);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -36,9 +38,11 @@ export function EditProfileScreen({
           return;
         }
 
+        const contactEmail = getUsableContactEmail(user.email ?? null) ?? '';
+
         setUserId(user.id);
-        setInitialEmail(user.email ?? '');
-        setEmail(user.email ?? '');
+        setInitialEmail(contactEmail);
+        setEmail(contactEmail);
 
         const profile = await fetchMyProfileAccessSummary();
         setName(profile?.name ?? '');
@@ -86,8 +90,6 @@ export function EditProfileScreen({
   const handleSave = async () => {
     const trimmedName = name.trim();
     const nextEmail = trimAndLimitText(email, INPUT_LIMITS.email);
-    const canAddEmail = !initialEmail.trim();
-
     if (!userId) {
       feedback.error(translate('editProfile.userNotFound'));
       return;
@@ -206,21 +208,19 @@ export function EditProfileScreen({
                 value={email}
                 onChange={(e) => setEmail(limitText(e.target.value, INPUT_LIMITS.email))}
                 maxLength={INPUT_LIMITS.email}
-                placeholder={
-                  initialEmail.trim() ? undefined : translate('editProfile.emailPlaceholder')
-                }
-                disabled={loading || saving || Boolean(initialEmail.trim())}
+                placeholder={canAddEmail ? translate('editProfile.emailPlaceholder') : undefined}
+                disabled={loading || saving || !canAddEmail}
                 className="w-full px-4 py-3 rounded-xl border transition-all outline-none focus:border-accent"
                 style={{
                   borderColor: 'var(--border)',
                   backgroundColor: 'var(--card)',
-                  color: initialEmail.trim()
+                  color: !canAddEmail
                     ? 'var(--muted-foreground)'
                     : 'var(--foreground)',
                 }}
               />
 
-              {!loading && !initialEmail.trim() && (
+              {!loading && canAddEmail && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   {translate('editProfile.emailHint')}
                 </p>

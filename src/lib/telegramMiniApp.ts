@@ -22,6 +22,7 @@ type TelegramWebApp = {
       try_browser?: TelegramOpenLinkBrowser;
     }
   ) => void;
+  ready?: () => void;
 };
 
 declare global {
@@ -83,6 +84,14 @@ export function isTelegramMiniApp() {
   return Boolean(webApp?.initData || webApp?.initDataUnsafe?.user);
 }
 
+export function getTelegramMiniAppInitData() {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  return window.Telegram?.WebApp?.initData?.trim() ?? '';
+}
+
 export function isTelegramInAppBrowser() {
   if (typeof window === 'undefined') {
     return false;
@@ -94,6 +103,10 @@ export function isTelegramInAppBrowser() {
 
 export function isTelegramAppContext() {
   return isTelegramMiniApp() || isTelegramInAppBrowser();
+}
+
+export function shouldUseTelegramBrowserFallback() {
+  return isTelegramInAppBrowser() && !isTelegramMiniApp();
 }
 
 export function openInExternalBrowser(url: string) {

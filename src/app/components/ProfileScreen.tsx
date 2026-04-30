@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { getUsableContactEmail, hasUsableContactEmail } from '../../lib/authContactEmail';
 import { useLanguage } from '../context/LanguageContext';
 import { feedback } from '../lib/feedback';
 import { LoadingLine } from './LoadingState';
@@ -58,9 +59,11 @@ export function ProfileScreen({
           console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїСЂРѕС„РёР»СЏ:', profileError);
         }
 
+        const contactEmail = getUsableContactEmail(authUser.email ?? null);
+
         setUser({
           id: authUser.id,
-          email: authUser.email ?? null,
+          email: contactEmail,
           name: profile?.name ?? null,
           role: profile?.role ?? null,
           plan: profile?.plan ?? null,
@@ -141,7 +144,7 @@ export function ProfileScreen({
 
   const isAdmin = user?.role === 'admin';
   const hasProPlan = user?.plan === 'pro' || user?.has_unlimited_access;
-  const missingEmail = !loading && !user?.email?.trim();
+  const missingEmail = !loading && !hasUsableContactEmail(user?.email);
   const currentPlanLabel = hasProPlan
     ? translate('profile.planProStatus')
     : translate('profile.planFreeStatus');

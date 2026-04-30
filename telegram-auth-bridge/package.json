@@ -9,6 +9,7 @@
     "dev": "echo \"Telegram auth bridge scaffold is not implemented yet\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
     "@vercel/node": "^5.3.24"
   },
   "devDependencies": {

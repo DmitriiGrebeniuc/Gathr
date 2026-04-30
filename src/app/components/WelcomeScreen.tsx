@@ -37,10 +37,12 @@ export function WelcomeScreen({
   onNavigate,
   onGoogleLogin,
   onTelegramLogin,
+  telegramMiniAppAuthFailed = false,
 }: {
   onNavigate: (screen: string, data?: any) => void;
   onGoogleLogin: () => Promise<void>;
   onTelegramLogin: () => Promise<void>;
+  telegramMiniAppAuthFailed?: boolean;
 }) {
   const { language, setLanguage, translate } = useLanguage();
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -330,7 +332,7 @@ export function WelcomeScreen({
               {googleLoading ? translate('login.submitting') : translate('welcome.google')}
             </TouchButton>
 
-            {!insideTelegramMiniApp && (
+            {(!insideTelegramMiniApp || telegramMiniAppAuthFailed) && (
               <TouchButton
                 onClick={handleTelegramLogin}
                 variant="secondary"

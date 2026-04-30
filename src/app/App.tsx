@@ -127,6 +127,7 @@ export default function App() {
   ]);
   const [direction, setDirection] = useState<NavigationDirection>('forward');
   const [authChecked, setAuthChecked] = useState(false);
+  const [telegramMiniAppAuthFailed, setTelegramMiniAppAuthFailed] = useState(false);
 
   const [pendingAfterAuth, setPendingAfterAuth] = useState<PostLoginIntent | null>(
     initialAuthRedirectState.pendingAfterAuth
@@ -735,9 +736,11 @@ export default function App() {
       try {
         skipNextSignedInNavigationRef.current = true;
         await signInWithTelegramMiniApp();
+        setTelegramMiniAppAuthFailed(false);
         return true;
       } catch (error) {
         skipNextSignedInNavigationRef.current = false;
+        setTelegramMiniAppAuthFailed(true);
         console.error('Telegram Mini App bootstrap auth failed:', error);
         return false;
       }
@@ -1014,6 +1017,7 @@ export default function App() {
                   onNavigate={handleNavigate}
                   onGoogleLogin={handleGoogleLogin}
                   onTelegramLogin={handleTelegramLogin}
+                  telegramMiniAppAuthFailed={telegramMiniAppAuthFailed}
                 />
               )}
               {currentScreen === 'login' && (

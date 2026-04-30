@@ -7,7 +7,7 @@ import { LANGUAGES, type LanguageCode } from '../constants/languages';
 import { hasCompletedLanguageChoice, markLanguageChoiceCompleted } from '../../lib/language';
 import {
   getTelegramMiniAppBrowserFallbackCopy,
-  isTelegramMiniApp,
+  isTelegramAppContext,
   openInExternalBrowser,
 } from '../../lib/telegramMiniApp';
 
@@ -48,7 +48,7 @@ export function WelcomeScreen({
     () => hasCompletedLanguageChoice() && !hasCompletedOnboarding()
   );
   const [onboardingStep, setOnboardingStep] = useState(0);
-  const insideTelegramMiniApp = useMemo(() => isTelegramMiniApp(), []);
+  const insideTelegramApp = useMemo(() => isTelegramAppContext(), []);
 
   const onboardingPages = useMemo(
     () => [
@@ -277,7 +277,7 @@ export function WelcomeScreen({
           </motion.div>
         ) : !showLanguageChoice ? (
           <>
-            {insideTelegramMiniApp && (
+            {insideTelegramApp && (
               <div
                 className="rounded-2xl border p-4 space-y-3"
                 style={{
@@ -326,7 +326,7 @@ export function WelcomeScreen({
               {googleLoading ? translate('login.submitting') : translate('welcome.google')}
             </TouchButton>
 
-            {!insideTelegramMiniApp && (
+            {!insideTelegramApp && (
               <TouchButton
                 onClick={handleTelegramLogin}
                 variant="secondary"

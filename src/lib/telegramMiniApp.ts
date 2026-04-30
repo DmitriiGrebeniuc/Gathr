@@ -83,6 +83,19 @@ export function isTelegramMiniApp() {
   return Boolean(webApp?.initData || webApp?.initDataUnsafe?.user);
 }
 
+export function isTelegramInAppBrowser() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const userAgent = window.navigator.userAgent || '';
+  return /Telegram/i.test(userAgent);
+}
+
+export function isTelegramAppContext() {
+  return isTelegramMiniApp() || isTelegramInAppBrowser();
+}
+
 export function openInExternalBrowser(url: string) {
   if (typeof window === 'undefined') {
     return;

@@ -551,6 +551,18 @@ export default function App() {
         skipNextSignedInNavigationRef.current = true;
         setTelegramMiniAppAuthFailed(false);
         await signInWithTelegramMiniApp();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
+
+        if (error || !user) {
+          throw error ?? new Error('telegram_miniapp_user_missing_after_signin');
+        }
+
+        telegramMiniAppAuthAttemptedRef.current = false;
+        setTelegramMiniAppAuthFailed(false);
+        await applySignedInNavigation(user);
         return;
       } catch (error) {
         skipNextSignedInNavigationRef.current = false;

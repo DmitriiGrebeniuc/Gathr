@@ -22,6 +22,7 @@ function getTelegramAuthBridgeUrl() {
 async function exchangeMiniAppTokenHash(payload: MiniAppAuthPayload) {
   const attemptedTypes = new Set<string>([
     payload.verification_type || 'magiclink',
+    'signup',
     'email',
     'magiclink',
   ]);

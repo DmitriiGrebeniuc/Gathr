@@ -546,6 +546,21 @@ export default function App() {
 
   const handleTelegramLogin = async () => {
     if (isTelegramMiniApp()) {
+      try {
+        skipNextSignedInNavigationRef.current = true;
+        setTelegramMiniAppAuthFailed(false);
+        await signInWithTelegramMiniApp();
+        return;
+      } catch (error) {
+        skipNextSignedInNavigationRef.current = false;
+        setTelegramMiniAppAuthFailed(true);
+        console.error('Telegram Mini App manual auth retry failed:', error);
+        feedback.error(translate('login.telegramFailed'));
+        return;
+      }
+    }
+
+    if (isTelegramAppContext()) {
       const browserFallbackCopy = getTelegramMiniAppBrowserFallbackCopy(language);
       openInExternalBrowser(window.location.origin);
       feedback.info(browserFallbackCopy.description);

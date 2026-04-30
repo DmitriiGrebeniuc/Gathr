@@ -5,7 +5,7 @@ import {
   editBotMessage,
   getBotConfig,
   sendBotMessage,
-} from '../src/telegramBot';
+} from '../src/telegramBot.js';
 
 type TelegramMessage = {
   chat?: {

@@ -59,10 +59,12 @@ export default async function handler(req: VercelRequestLike, res: VercelRespons
 
   try {
     const config = getBotConfig();
+    const secretHeader = req.headers?.['x-telegram-bot-api-secret-token'];
+    const secretToken = Array.isArray(secretHeader) ? secretHeader[0] : secretHeader;
 
     if (
       config.webhookSecret &&
-      req.headers['x-telegram-bot-api-secret-token'] !== config.webhookSecret
+      secretToken !== config.webhookSecret
     ) {
       res.status(401).json({ ok: false, error: 'invalid_webhook_secret' });
       return;

@@ -608,6 +608,9 @@ export default function App() {
 
   const handleLegalConsentLogout = async () => {
     clearAuthRedirectState();
+    telegramMiniAppAuthAttemptedRef.current = false;
+    skipNextSignedInNavigationRef.current = false;
+    setTelegramMiniAppAuthFailed(false);
     resetNavigation('welcome', null, 'back');
 
     const { error } = await supabase.auth.signOut();
@@ -812,6 +815,8 @@ export default function App() {
           console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СЃРµСЃСЃРёРё:', activeError);
           resetNavigation('welcome', null, 'back');
         } else if (activeSession?.user) {
+          telegramMiniAppAuthAttemptedRef.current = false;
+          setTelegramMiniAppAuthFailed(false);
           await applySignedInNavigation(activeSession.user);
         } else {
           resetNavigation('welcome', null, 'back');
@@ -877,6 +882,9 @@ export default function App() {
         }
 
         clearAuthRedirectState();
+        telegramMiniAppAuthAttemptedRef.current = false;
+        skipNextSignedInNavigationRef.current = false;
+        setTelegramMiniAppAuthFailed(false);
         resetNavigation('welcome', null, 'back');
       }
     });

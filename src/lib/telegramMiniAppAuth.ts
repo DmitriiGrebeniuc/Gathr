@@ -31,7 +31,6 @@ async function exchangeMiniAppTokenHash(payload: MiniAppAuthPayload) {
 
   for (const type of attemptedTypes) {
     const { data, error } = await supabase.auth.verifyOtp({
-      email: payload.email,
       token_hash: payload.token_hash,
       type: type as never,
     });

@@ -5,6 +5,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { useMemo, useState } from 'react';
 import { LANGUAGES, type LanguageCode } from '../constants/languages';
 import { hasCompletedLanguageChoice, markLanguageChoiceCompleted } from '../../lib/language';
+import {
+  getTelegramMiniAppBrowserFallbackCopy,
+  isTelegramMiniApp,
+  openInExternalBrowser,
+} from '../../lib/telegramMiniApp';
 
 const ONBOARDING_COMPLETED_KEY = 'gathr-onboarding-completed';
 const HOME_LAUNCH_OVERLAY_DISMISSED_KEY = 'gathr-home-launch-overlay-dismissed';
@@ -43,6 +48,7 @@ export function WelcomeScreen({
     () => hasCompletedLanguageChoice() && !hasCompletedOnboarding()
   );
   const [onboardingStep, setOnboardingStep] = useState(0);
+  const insideTelegramMiniApp = useMemo(() => isTelegramMiniApp(), []);
 
   const onboardingPages = useMemo(
     () => [
@@ -68,6 +74,10 @@ export function WelcomeScreen({
 
   const currentOnboardingPage = onboardingPages[onboardingStep];
   const isLastOnboardingStep = onboardingStep === onboardingPages.length - 1;
+  const telegramBrowserFallbackCopy = useMemo(
+    () => getTelegramMiniAppBrowserFallbackCopy(language),
+    [language]
+  );
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
@@ -110,6 +120,10 @@ export function WelcomeScreen({
     }
 
     setOnboardingStep((prev) => prev + 1);
+  };
+
+  const handleOpenInBrowser = () => {
+    openInExternalBrowser(window.location.origin);
   };
 
   return (
@@ -263,6 +277,39 @@ export function WelcomeScreen({
           </motion.div>
         ) : !showLanguageChoice ? (
           <>
+            {insideTelegramMiniApp && (
+              <div
+                className="rounded-2xl border p-4 space-y-3"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--accent-border-muted)',
+                  boxShadow: 'var(--accent-outline-soft)',
+                }}
+              >
+                <div className="space-y-1">
+                  <p style={{ color: 'var(--accent)' }}>
+                    {telegramBrowserFallbackCopy.title}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {telegramBrowserFallbackCopy.description}
+                  </p>
+                </div>
+
+                <TouchButton
+                  onClick={handleOpenInBrowser}
+                  variant="secondary"
+                  fullWidth
+                  disabled={googleLoading || telegramLoading}
+                  style={{
+                    borderColor: 'var(--accent-border-muted)',
+                    color: 'var(--accent)',
+                  }}
+                >
+                  {telegramBrowserFallbackCopy.button}
+                </TouchButton>
+              </div>
+            )}
+
             <TouchButton
               onClick={handleGoogleLogin}
               variant="primary"
@@ -279,21 +326,23 @@ export function WelcomeScreen({
               {googleLoading ? translate('login.submitting') : translate('welcome.google')}
             </TouchButton>
 
-            <TouchButton
-              onClick={handleTelegramLogin}
-              variant="secondary"
-              fullWidth
-              disabled={googleLoading || telegramLoading}
-              className="flex items-center justify-center gap-3"
-            >
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold"
-                style={{ backgroundColor: '#229ED9', color: '#ffffff' }}
+            {!insideTelegramMiniApp && (
+              <TouchButton
+                onClick={handleTelegramLogin}
+                variant="secondary"
+                fullWidth
+                disabled={googleLoading || telegramLoading}
+                className="flex items-center justify-center gap-3"
               >
-                T
-              </span>
-              {telegramLoading ? translate('login.submitting') : translate('welcome.telegram')}
-            </TouchButton>
+                <span
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-sm font-semibold"
+                  style={{ backgroundColor: '#229ED9', color: '#ffffff' }}
+                >
+                  T
+                </span>
+                {telegramLoading ? translate('login.submitting') : translate('welcome.telegram')}
+              </TouchButton>
+            )}
 
             <TouchButton
               onClick={() => onNavigate('login', { mode: 'login' })}

@@ -34,6 +34,11 @@ import { getSharedEventIdFromPath } from './auth/sharedEventPath';
 import { loadSharedEventById } from './auth/loadSharedEvent';
 import type { PostLoginIntent } from './auth/postLoginIntent';
 import {
+  getTelegramMiniAppBrowserFallbackCopy,
+  isTelegramMiniApp,
+  openInExternalBrowser,
+} from '../lib/telegramMiniApp';
+import {
   isClearPostLoginIntentPayload,
   isLoginNavigationPayload,
 } from './auth/postLoginIntent';
@@ -136,7 +141,7 @@ export default function App() {
   const navigationStackRef = useRef<NavigationEntry[]>([{ screen: 'welcome' }]);
   const skipNextPopStateRef = useRef(false);
 
-  const { translate } = useLanguage();
+  const { language, translate } = useLanguage();
   const isMobileViewport = window.innerWidth < 768;
 
   const currentEntry = navigationStack[navigationStack.length - 1] ?? { screen: 'welcome' };
@@ -534,6 +539,13 @@ export default function App() {
   };
 
   const handleTelegramLogin = async () => {
+    if (isTelegramMiniApp()) {
+      const browserFallbackCopy = getTelegramMiniAppBrowserFallbackCopy(language);
+      openInExternalBrowser(window.location.origin);
+      feedback.info(browserFallbackCopy.description);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'custom:telegram',

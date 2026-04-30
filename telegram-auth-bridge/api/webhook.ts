@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequestLike, VercelResponseLike } from './_lib/vercel.js';
 import {
   answerCallbackQuery,
   createBotCopy,
@@ -41,7 +41,7 @@ function matchesCommand(text: string | undefined, command: string) {
   return text === command || text.startsWith(`${command} `) || text.startsWith(`${command}@`);
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequestLike, res: VercelResponseLike) {
   if (req.method === 'GET') {
     res.status(200).json({
       ok: true,

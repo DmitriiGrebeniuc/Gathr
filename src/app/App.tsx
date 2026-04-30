@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import type { User } from '@supabase/supabase-js';
 import { WelcomeScreen } from './components/WelcomeScreen';
@@ -36,6 +36,7 @@ import type { PostLoginIntent } from './auth/postLoginIntent';
 import {
   getTelegramMiniAppBrowserFallbackCopy,
   initTelegramMiniApp,
+  isTelegramAppContext,
   isTelegramMiniApp,
   openInExternalBrowser,
 } from '../lib/telegramMiniApp';
@@ -770,7 +771,7 @@ export default function App() {
           });
 
           if (sessionError) {
-            console.error('Ошибка установки recovery session:', sessionError);
+            console.error('РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІРєРё recovery session:', sessionError);
             resetNavigation('welcome', null, 'back');
             setAuthChecked(true);
             return;
@@ -808,7 +809,7 @@ export default function App() {
         }
 
         if (activeError) {
-          console.error('Ошибка получения сессии:', activeError);
+          console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СЃРµСЃСЃРёРё:', activeError);
           resetNavigation('welcome', null, 'back');
         } else if (activeSession?.user) {
           await applySignedInNavigation(activeSession.user);
@@ -1143,4 +1144,5 @@ export default function App() {
     </div>
   );
 }
+
 

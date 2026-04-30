@@ -1,6 +1,6 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequestLike, VercelResponseLike } from './_lib/vercel.js';
 
-export default function handler(_req: VercelRequest, res: VercelResponse) {
+export default function handler(_req: VercelRequestLike, res: VercelResponseLike) {
   res.status(200).json({
     ok: true,
     service: 'telegram-auth-bridge',

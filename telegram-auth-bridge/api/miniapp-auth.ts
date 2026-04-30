@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequestLike, VercelResponseLike } from './_lib/vercel.js';
 import { exchangeTelegramMiniAppInitDataForSupabaseOtp } from '../src/miniAppAuth.js';
 
 const DEFAULT_ALLOWED_ORIGIN = 'https://gathr-app.site';
@@ -13,14 +13,14 @@ function getAllowedOrigin() {
   return configuredOrigin.replace(/\/+$/, '');
 }
 
-function applyCorsHeaders(res: VercelResponse) {
+function applyCorsHeaders(res: VercelResponseLike) {
   res.setHeader('Access-Control-Allow-Origin', getAllowedOrigin());
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'content-type');
   res.setHeader('Vary', 'Origin');
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequestLike, res: VercelResponseLike) {
   applyCorsHeaders(res);
 
   if (req.method === 'OPTIONS') {

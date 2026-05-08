@@ -1,35 +1,11 @@
-﻿import { useEffect, useRef, useState } from 'react';
-import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import type { User } from '@supabase/supabase-js';
-import { WelcomeScreen } from './components/WelcomeScreen';
-import { LoginScreen } from './components/LoginScreen';
-import { HomeScreen } from './components/HomeScreen';
-import { CreateEventScreen } from './components/CreateEventScreen';
-import { EditEventScreen } from './components/EditEventScreen';
-import { EventDetailsScreen } from './components/EventDetailsScreen';
-import { ParticipantsScreen } from './components/ParticipantsScreen';
-import { NotificationsScreen } from './components/NotificationsScreen';
-import { ProfileScreen } from './components/ProfileScreen';
-import { EditProfileScreen } from './components/EditProfileScreen';
-import { NotificationSettingsScreen } from './components/NotificationSettingsScreen';
-import { SecurityScreen } from './components/SecurityScreen';
-import { SupportScreen } from './components/SupportScreen';
-import { AdminScreen } from './components/AdminScreen';
 import { BottomNav } from './components/BottomNav';
 import { ScreenTransition } from './components/ScreenTransition';
-import { LoadingLogo } from './components/LoadingLogo';
-import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { supabase } from '../lib/supabase';
-import { LanguageScreen } from './components/LanguageScreen';
-import { AppearanceScreen } from './components/AppearanceScreen';
-import { TermsScreen } from './components/TermsScreen';
-import { PrivacyScreen } from './components/PrivacyScreen';
-import { LegalConsentScreen } from './components/LegalConsentScreen';
 import { FeedbackHost } from './components/FeedbackHost';
 import { useLanguage } from './context/LanguageContext';
-import { InviteUsersScreen } from './components/InviteUsersScreen';
-import { EventJoinRequestsScreen } from './components/EventJoinRequestsScreen';
 import { feedback } from './lib/feedback';
 import { getSharedEventIdFromPath } from './auth/sharedEventPath';
 import { loadSharedEventById } from './auth/loadSharedEvent';
@@ -41,124 +17,31 @@ import {
   isTelegramMiniApp,
   openInExternalBrowser,
 } from '../lib/telegramMiniApp';
-import { getUsableContactEmail } from '../lib/authContactEmail';
 import { signInWithTelegramMiniApp } from '../lib/telegramMiniAppAuth';
 import {
   isClearPostLoginIntentPayload,
   isLoginNavigationPayload,
 } from './auth/postLoginIntent';
-import { CURRENT_LEGAL_VERSION } from './constants/legalDocuments';
-
-type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
-type ScreenName = string;
-type NavigationEntry = {
-  screen: ScreenName;
-  data?: any;
-};
-
-type LoginContext = {
-  backScreen: string;
-  backData?: any;
-} | null;
-
-type AppErrorBoundaryProps = {
-  children: ReactNode;
-  fallback: ReactNode;
-  resetKey: string;
-};
-
-type AppErrorBoundaryState = {
-  hasError: boolean;
-};
-
-class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
-  state: AppErrorBoundaryState = {
-    hasError: false,
-  };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Screen render error:', error, errorInfo);
-  }
-
-  componentDidUpdate(prevProps: AppErrorBoundaryProps) {
-    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
-      this.setState({ hasError: false });
-    }
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-
-    return this.props.children;
-  }
-}
-
-const AUTH_REDIRECT_STATE_KEY = 'gathr-auth-redirect-state';
-
-function readStoredAuthRedirectState(): {
-  pendingAfterAuth: PostLoginIntent | null;
-  loginContext: LoginContext;
-} {
-  if (typeof window === 'undefined') {
-    return {
-      pendingAfterAuth: null,
-      loginContext: null,
-    };
-  }
-
-  try {
-    const raw = window.sessionStorage.getItem(AUTH_REDIRECT_STATE_KEY);
-
-    if (!raw) {
-      return {
-        pendingAfterAuth: null,
-        loginContext: null,
-      };
-    }
-
-    const parsed = JSON.parse(raw) as {
-      pendingAfterAuth?: PostLoginIntent | null;
-      loginContext?: LoginContext;
-    };
-
-    return {
-      pendingAfterAuth: parsed.pendingAfterAuth ?? null,
-      loginContext: parsed.loginContext ?? null,
-    };
-  } catch (error) {
-    console.error('Failed to read stored auth redirect state:', error);
-    return {
-      pendingAfterAuth: null,
-      loginContext: null,
-    };
-  }
-}
-
-function getAuthFlowType(href: string) {
-  const match = href.match(/[?#&]type=([^&#]+)/);
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
-type CurrentProfileAccess = {
-  id: string;
-  name: string | null;
-  role?: string | null;
-  plan?: string | null;
-  has_unlimited_access?: boolean | null;
-  is_banned?: boolean | null;
-};
-
-type CurrentLegalConsent = {
-  accepted_terms_at?: string | null;
-  accepted_privacy_at?: string | null;
-  accepted_legal_version?: string | null;
-};
+import {
+  readStoredAuthRedirectState,
+  persistStoredAuthRedirectState,
+} from './auth/authRedirectState';
+import { getAuthFlowType } from './auth/authFlow';
+import {
+  getCurrentLegalConsent,
+  getCurrentProfileAccess,
+  hasAcceptedCurrentLegal,
+  syncProfileFromAuthUser,
+} from './auth/currentUserProfile';
+import { AppErrorBoundary } from './components/app/AppErrorBoundary';
+import { AppFrame, AppLoadingFrame } from './components/app/AppFrame';
+import { AppScreenRenderer } from './components/app/AppScreenRenderer';
+import type {
+  LoginContext,
+  NavigationDirection,
+  NavigationEntry,
+  ScreenName,
+} from './types/navigation';
 
 export default function App() {
   const initialAuthRedirectState = readStoredAuthRedirectState();
@@ -305,22 +188,7 @@ export default function App() {
     nextPendingAfterAuth: PostLoginIntent | null,
     nextLoginContext: LoginContext
   ) => {
-    try {
-      if (!nextPendingAfterAuth && !nextLoginContext) {
-        window.sessionStorage.removeItem(AUTH_REDIRECT_STATE_KEY);
-        return;
-      }
-
-      window.sessionStorage.setItem(
-        AUTH_REDIRECT_STATE_KEY,
-        JSON.stringify({
-          pendingAfterAuth: nextPendingAfterAuth,
-          loginContext: nextLoginContext,
-        })
-      );
-    } catch (error) {
-      console.error('Failed to persist auth redirect state:', error);
-    }
+    persistStoredAuthRedirectState(nextPendingAfterAuth, nextLoginContext);
   };
 
   const updateAuthRedirectState = (
@@ -350,192 +218,8 @@ export default function App() {
     feedback.error(translate('auth.accountBlocked'));
   };
 
-  const getPreferredProfileName = (user: User) => {
-    const metadata = user.user_metadata ?? {};
-    const profileNameCandidates = [
-      metadata.name,
-      metadata.full_name,
-      metadata.user_name,
-      metadata.preferred_username,
-      metadata.given_name,
-      metadata.nickname,
-    ];
-
-    const metadataName = profileNameCandidates.find(
-      (candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0
-    );
-
-    if (metadataName) {
-      return metadataName.trim();
-    }
-
-    const emailName = getUsableContactEmail(user.email ?? null)?.split('@')[0]?.trim();
-
-    if (emailName) {
-      return emailName;
-    }
-
-    return translate('common.user');
-  };
-
-  const syncProfileFromAuthUser = async (user: User) => {
-    const fallbackName = getPreferredProfileName(user);
-    const acceptedTermsAt =
-      typeof user.user_metadata?.accepted_terms_at === 'string'
-        ? user.user_metadata.accepted_terms_at
-        : null;
-    const acceptedPrivacyAt =
-      typeof user.user_metadata?.accepted_privacy_at === 'string'
-        ? user.user_metadata.accepted_privacy_at
-        : null;
-    const acceptedLegalVersion =
-      typeof user.user_metadata?.accepted_legal_version === 'string'
-        ? user.user_metadata.accepted_legal_version
-        : null;
-
-    try {
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, name, accepted_terms_at, accepted_privacy_at, accepted_legal_version')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error('Failed to load profile after auth:', profileError);
-        return;
-      }
-
-      if (!existingProfile) {
-        const { error: insertError } = await supabase.from('profiles').insert({
-          id: user.id,
-          name: fallbackName,
-          accepted_terms_at: acceptedTermsAt,
-          accepted_privacy_at: acceptedPrivacyAt,
-          accepted_legal_version: acceptedLegalVersion,
-        });
-
-        if (
-          insertError &&
-          insertError.code !== '23505' &&
-          !insertError.message.toLowerCase().includes('duplicate key')
-        ) {
-          console.error('Failed to create missing profile after auth:', insertError);
-        }
-
-        return;
-      }
-
-      if (!existingProfile.name?.trim() && fallbackName) {
-        const updatePayload: Record<string, string | null> = {
-          name: fallbackName,
-        };
-
-        if (!existingProfile.accepted_terms_at && acceptedTermsAt) {
-          updatePayload.accepted_terms_at = acceptedTermsAt;
-        }
-
-        if (!existingProfile.accepted_privacy_at && acceptedPrivacyAt) {
-          updatePayload.accepted_privacy_at = acceptedPrivacyAt;
-        }
-
-        if (!existingProfile.accepted_legal_version && acceptedLegalVersion) {
-          updatePayload.accepted_legal_version = acceptedLegalVersion;
-        }
-
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update(updatePayload)
-          .eq('id', user.id);
-
-        if (updateError) {
-          console.error('Failed to enrich profile name after auth:', updateError);
-        }
-        return;
-      }
-
-      if (
-        (!existingProfile.accepted_terms_at && acceptedTermsAt) ||
-        (!existingProfile.accepted_privacy_at && acceptedPrivacyAt) ||
-        (!existingProfile.accepted_legal_version && acceptedLegalVersion)
-      ) {
-        const updatePayload: Record<string, string | null> = {};
-
-        if (!existingProfile.accepted_terms_at && acceptedTermsAt) {
-          updatePayload.accepted_terms_at = acceptedTermsAt;
-        }
-
-        if (!existingProfile.accepted_privacy_at && acceptedPrivacyAt) {
-          updatePayload.accepted_privacy_at = acceptedPrivacyAt;
-        }
-
-        if (!existingProfile.accepted_legal_version && acceptedLegalVersion) {
-          updatePayload.accepted_legal_version = acceptedLegalVersion;
-        }
-
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update(updatePayload)
-          .eq('id', user.id);
-
-        if (updateError) {
-          console.error('Failed to enrich legal consent after auth:', updateError);
-        }
-      }
-    } catch (error) {
-      console.error('Unexpected profile sync error:', error);
-    }
-  };
-
-  const getCurrentProfileAccess = async () => {
-    try {
-      const { data, error } = await supabase.rpc('get_my_profile_access').maybeSingle();
-
-      if (error) {
-        console.error('Failed to load current profile access:', error);
-        return null;
-      }
-
-      return (data as CurrentProfileAccess | null) ?? null;
-    } catch (error) {
-      console.error('Unexpected current profile access error:', error);
-      return null;
-    }
-  };
-
-  const getCurrentLegalConsent = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('accepted_terms_at, accepted_privacy_at, accepted_legal_version')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Failed to load current legal consent:', error);
-        return null;
-      }
-
-      return (data as CurrentLegalConsent | null) ?? null;
-    } catch (error) {
-      console.error('Unexpected current legal consent error:', error);
-      return null;
-    }
-  };
-
-  const hasAcceptedCurrentLegal = (consent: CurrentLegalConsent | null) => {
-    if (!consent) {
-      return false;
-    }
-
-    return Boolean(
-      consent.accepted_terms_at &&
-        consent.accepted_privacy_at &&
-        consent.accepted_legal_version === CURRENT_LEGAL_VERSION
-    );
-  };
-
   const applySignedInNavigation = async (user: User) => {
-    await syncProfileFromAuthUser(user);
+    await syncProfileFromAuthUser(user, translate('common.user'));
 
     const profileAccess = await getCurrentProfileAccess();
 
@@ -1057,165 +741,43 @@ export default function App() {
 
   if (!authChecked) {
     return (
-      <div
-        className="w-full flex items-start justify-start md:items-center md:justify-center bg-secondary overflow-hidden"
-        style={{ minHeight: 'var(--app-height, 100dvh)', height: 'var(--app-height, 100dvh)' }}
-      >
-        <div
-          className="relative overflow-hidden flex flex-col items-center justify-center w-full h-full md:min-h-0 md:w-auto"
-          style={{
-            width: '100%',
-            height: 'var(--app-height, 100dvh)',
-            maxWidth: isMobileViewport ? '100%' : '390px',
-            maxHeight: isMobileViewport ? 'none' : '844px',
-            backgroundColor: 'var(--background)',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-            borderRadius: isMobileViewport ? '0' : '2.5rem',
-          }}
-        >
-          <LoadingLogo label={translate('common.loading')} />
-        </div>
-      </div>
+      <AppLoadingFrame
+        isMobileViewport={isMobileViewport}
+        loadingLabel={translate('common.loading')}
+      />
     );
   }
 
   return (
-    <div
-      className="w-full flex items-start justify-start md:items-center md:justify-center bg-secondary overflow-hidden"
-      style={{ minHeight: 'var(--app-height, 100dvh)', height: 'var(--app-height, 100dvh)' }}
-    >
-      <div
-        className="relative overflow-hidden flex flex-col w-full h-full md:min-h-0 md:w-auto"
-        style={{
-          width: '100%',
-          height: 'var(--app-height, 100dvh)',
-          maxWidth: isMobileViewport ? '100%' : '390px',
-          maxHeight: isMobileViewport ? 'none' : '844px',
-          backgroundColor: 'var(--background)',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-          borderRadius: isMobileViewport ? '0' : '2.5rem',
-        }}
-      >
-        <FeedbackHost />
+    <AppFrame isMobileViewport={isMobileViewport}>
+      <FeedbackHost />
 
-        <div className="flex-1 overflow-hidden relative">
-          <AppErrorBoundary fallback={screenErrorFallback} resetKey={currentScreen}>
-            <AnimatePresence mode="wait" initial={false}>
-              <ScreenTransition key={currentScreen} direction={direction}>
-              {currentScreen === 'welcome' && (
-                <WelcomeScreen
-                  onNavigate={handleNavigate}
-                  onGoogleLogin={handleGoogleLogin}
-                  onTelegramLogin={handleTelegramLogin}
-                />
-              )}
-              {currentScreen === 'login' && (
-                <LoginScreen
-                  onNavigate={handleNavigate}
-                  onAuthenticated={applySignedInNavigation}
-                  backTarget={loginContext?.backScreen || 'welcome'}
-                  backData={loginContext?.backData}
-                  initialMode={selectedEvent?.mode === 'signup' ? 'signup' : 'login'}
-                />
-              )}
-              {currentScreen === 'signup' && (
-                <LoginScreen
-                  onNavigate={handleNavigate}
-                  onAuthenticated={applySignedInNavigation}
-                  backTarget="welcome"
-                  initialMode="signup"
-                />
-              )}
-              {currentScreen === 'terms' && (
-                <TermsScreen
-                  onNavigate={handleNavigate}
-                  backTarget={selectedEvent?.backTarget || 'signup'}
-                />
-              )}
-              {currentScreen === 'privacy' && (
-                <PrivacyScreen
-                  onNavigate={handleNavigate}
-                  backTarget={selectedEvent?.backTarget || 'signup'}
-                />
-              )}
-              {currentScreen === 'legal-consent' && (
-                <LegalConsentScreen
-                  onNavigate={handleNavigate}
-                  onAccepted={handleLegalConsentAccepted}
-                  onLogout={handleLegalConsentLogout}
-                />
-              )}
-              {currentScreen === 'reset-password' && (
-                <ResetPasswordScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'home' && <HomeScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'create-event' && <CreateEventScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'edit-event' && (
-                <EditEventScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'event-details' && (
-                <EventDetailsScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'participants' && (
-                <ParticipantsScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'event-join-requests' && (
-                <EventJoinRequestsScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'invite-users' && (
-                <InviteUsersScreen onNavigate={handleNavigate} event={selectedEvent} />
-              )}
-              {currentScreen === 'notifications' && (
-                <NotificationsScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'profile' && <ProfileScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'edit-profile' && (
-                <EditProfileScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'notification-settings' && (
-                <NotificationSettingsScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'security' && <SecurityScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'support' && <SupportScreen onNavigate={handleNavigate} />}
-              {currentScreen === 'admin' && (
-                <AdminScreen
-                  onNavigate={handleNavigate}
-                  initialPage={
-                    selectedEvent?.adminPage === 'support' ||
-                    selectedEvent?.adminPage === 'events' ||
-                    selectedEvent?.adminPage === 'users' ||
-                    selectedEvent?.adminPage === 'overview'
-                      ? selectedEvent.adminPage
-                      : undefined
-                  }
-                  initialSupportStatus={
-                    selectedEvent?.supportStatus === 'new' ||
-                    selectedEvent?.supportStatus === 'in_progress' ||
-                    selectedEvent?.supportStatus === 'resolved' ||
-                    selectedEvent?.supportStatus === 'all'
-                      ? selectedEvent.supportStatus
-                      : undefined
-                  }
-                />
-              )}
-              {currentScreen === 'language' && (
-                <LanguageScreen onNavigate={handleNavigate} />
-              )}
-              {currentScreen === 'appearance' && (
-                <AppearanceScreen onNavigate={handleNavigate} />
-              )}
-              </ScreenTransition>
-            </AnimatePresence>
-          </AppErrorBoundary>
-        </div>
-
-        <AnimatePresence>
-          {showBottomNav && (
-            <BottomNav activeScreen={currentScreen} onNavigate={handleNavigate} />
-          )}
-        </AnimatePresence>
+      <div className="flex-1 overflow-hidden relative">
+        <AppErrorBoundary fallback={screenErrorFallback} resetKey={currentScreen}>
+          <AnimatePresence mode="wait" initial={false}>
+            <ScreenTransition key={currentScreen} direction={direction}>
+              <AppScreenRenderer
+                currentScreen={currentScreen}
+                selectedEvent={selectedEvent}
+                loginContext={loginContext}
+                onNavigate={handleNavigate}
+                onGoogleLogin={handleGoogleLogin}
+                onTelegramLogin={handleTelegramLogin}
+                onAuthenticated={applySignedInNavigation}
+                onLegalConsentAccepted={handleLegalConsentAccepted}
+                onLegalConsentLogout={handleLegalConsentLogout}
+              />
+            </ScreenTransition>
+          </AnimatePresence>
+        </AppErrorBoundary>
       </div>
-    </div>
+
+      <AnimatePresence>
+        {showBottomNav && (
+          <BottomNav activeScreen={currentScreen} onNavigate={handleNavigate} />
+        )}
+      </AnimatePresence>
+    </AppFrame>
   );
 }
 

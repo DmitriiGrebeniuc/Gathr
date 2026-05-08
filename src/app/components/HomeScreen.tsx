@@ -19,13 +19,9 @@ import { HomeEventCard } from './home/HomeEventCard';
 import { HomeEmptyState, HomeInitialLoader } from './home/HomeFeedStates';
 import {
   getEventTimestamp,
-  HomeCityPulse,
   HomeDiscoverHistoryNudge,
-  HomeExploreByVibe,
   HomeFeedSection,
   HomeSocialProofSummary,
-  HomeTemplateIdeas,
-  HomeTrendingCreators,
 } from './home/HomeFeedSections';
 import { HomeFilters } from './home/HomeFilters';
 import { HomeHeader } from './home/HomeHeader';
@@ -1184,8 +1180,8 @@ export function HomeScreen({
 
       <PullToRefresh onRefresh={handleRefresh}>
         <div
-          className="h-full overflow-y-auto px-6 py-4 space-y-3"
-          style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
+          className="h-full overflow-y-auto px-4 py-3 space-y-3"
+          style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
           onScroll={handleContentScroll}
         >
           <HomeInitialLoader phase={initialLoaderPhase} translate={translate} />
@@ -1203,46 +1199,33 @@ export function HomeScreen({
           )}
 
           {activeTab === 'discover' && (
-            <div className="space-y-6">
-              <HomeExploreByVibe
-                selectedActivityType={selectedActivityType}
-                language={language}
-                translate={translate}
-                onSelectActivityType={setSelectedActivityType}
-              />
-
+            <div className="space-y-5">
+              {/* Featured event - show just the first one prominently */}
               {featuredEvents.length > 0 && (
-                <HomeFeedSection
-                  title={translate('home.featuredThisWeek')}
-                  subtitle={translate('home.featuredThisWeekSubtitle')}
-                >
-                  <div className="space-y-3">
-                    {featuredEvents.map((event) => (
-                      <HomeEventCard
-                        key={`featured-${event.id}`}
-                        event={event}
-                        currentUserId={currentUserId}
-                        joinedEventIds={joinedEventIds}
-                        isAdmin={isAdmin}
-                        variant="featured"
-                        badgeLabel={translate('home.featuredBadge')}
-                        language={language}
-                        translate={translate}
-                        isPastEvent={isPastEvent}
-                        formatEventDate={formatEventDate}
-                        onOpen={openEventDetails}
-                      />
-                    ))}
-                  </div>
-                </HomeFeedSection>
+                <div className="space-y-2">
+                  <HomeEventCard
+                    key={`featured-${featuredEvents[0].id}`}
+                    event={featuredEvents[0]}
+                    currentUserId={currentUserId}
+                    joinedEventIds={joinedEventIds}
+                    isAdmin={isAdmin}
+                    variant="featured"
+                    badgeLabel={translate('home.featuredBadge')}
+                    language={language}
+                    translate={translate}
+                    isPastEvent={isPastEvent}
+                    formatEventDate={formatEventDate}
+                    onOpen={openEventDetails}
+                  />
+                </div>
               )}
 
+              {/* Upcoming events - main feed */}
               {(visibleUpcomingEvents.length > 0 || shouldShowLoadMore) && (
                 <HomeFeedSection
                   title={translate('home.upcomingEvents')}
-                  subtitle={translate('home.upcomingEventsSubtitle')}
                 >
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {visibleUpcomingEvents.map((event) => (
                       <HomeEventCard
                         key={event.id}
@@ -1312,15 +1295,15 @@ export function HomeScreen({
             </motion.button>
           )}
 
+          {/* Past events - compact secondary section */}
           {activeTab === 'discover' && shouldShowDiscoverHistory && (
-            <div className="space-y-6">
+            <div className="space-y-4 pt-2" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.04)' }}>
               {recentlyHappenedEvents.length > 0 && (
                 <HomeFeedSection
                   title={translate('home.recentlyHappened')}
-                  subtitle={translate('home.recentlyHappenedSubtitle')}
                 >
-                  <div className="space-y-3">
-                    {recentlyHappenedEvents.map((event) => (
+                  <div className="space-y-2">
+                    {recentlyHappenedEvents.slice(0, 3).map((event) => (
                       <HomeEventCard
                         key={`recent-${event.id}`}
                         event={event}
@@ -1339,72 +1322,70 @@ export function HomeScreen({
                   </div>
                 </HomeFeedSection>
               )}
-
-              {popularPastEvents.length > 0 && (
-                <HomeFeedSection
-                  title={translate('home.popularPastEvents')}
-                  subtitle={translate('home.popularPastEventsSubtitle')}
-                >
-                  <div className="space-y-3">
-                    {popularPastEvents.map((event) => (
-                      <HomeEventCard
-                        key={`popular-past-${event.id}`}
-                        event={event}
-                        currentUserId={currentUserId}
-                        joinedEventIds={joinedEventIds}
-                        isAdmin={isAdmin}
-                        variant="muted"
-                        badgeLabel={translate('home.completedBadge')}
-                        language={language}
-                        translate={translate}
-                        isPastEvent={isPastEvent}
-                        formatEventDate={formatEventDate}
-                        onOpen={openEventDetails}
-                      />
-                    ))}
-                  </div>
-                </HomeFeedSection>
-              )}
             </div>
           )}
 
+          {/* Ambient sections - compact and secondary */}
           {activeTab === 'discover' && (
-            <div className="space-y-6">
-              <HomeTrendingCreators creators={trendingCreators} translate={translate} />
-
-              <HomeCityPulse items={cityPulseItems} translate={translate} />
-
-              <HomeTemplateIdeas
-                ideas={templateIdeas}
-                translate={translate}
-                onSelectTemplate={handleCreateEvent}
-              />
-
+            <div className="space-y-3 pt-3" style={{ opacity: 0.85 }}>
               <HomeSocialProofSummary
                 eventsCount={socialProofSummary.eventsCount}
                 totalParticipants={socialProofSummary.totalParticipants}
                 citiesCount={socialProofSummary.citiesCount}
                 translate={translate}
               />
+
+              {(trendingCreators.length > 0 || cityPulseItems.length > 0) && (
+                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {trendingCreators.slice(0, 2).map((creator) => (
+                    <div
+                      key={creator.id}
+                      className="shrink-0 flex items-center gap-2 rounded-lg px-3 py-2"
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                      }}
+                    >
+                      <div
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px]"
+                        style={{
+                          backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                          color: 'var(--accent)',
+                        }}
+                      >
+                        {creator.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-[11px]" style={{ color: 'var(--foreground-strong)' }}>
+                          {creator.name}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {creator.eventCount} {translate('home.hostedEventsLabel')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {cityPulseItems.slice(0, 1).map((item) => (
+                    <div
+                      key={item.id}
+                      className="shrink-0 flex items-center gap-2 rounded-lg px-3 py-2 max-w-[200px]"
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                      }}
+                    >
+                      <span className="text-[10px]" style={{ color: 'var(--accent)' }}>•</span>
+                      <p className="text-[11px] text-muted-foreground truncate">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       </PullToRefresh>
 
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleCreateEvent}
-        className="absolute bottom-24 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
-        style={{
-          bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
-          backgroundColor: 'var(--accent)',
-          color: 'var(--accent-foreground)',
-          boxShadow: '0 8px 24px rgba(212, 175, 55, 0.4)',
-        }}
-      >
-        <span className="text-2xl">+</span>
-      </motion.button>
+      
 
       {isLaunchOverlayVisible && (
         <HomeLaunchOverlay

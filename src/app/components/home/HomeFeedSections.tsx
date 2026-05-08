@@ -70,13 +70,13 @@ type HomeDiscoverHistoryNudgeProps = {
 
 export function HomeFeedSection({ title, subtitle, children }: HomeFeedSectionProps) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-2">
       <div>
-        <h2 className="text-base" style={{ color: 'var(--foreground-strong)' }}>
+        <h2 className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>
           {title}
         </h2>
         {subtitle && (
-          <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground" style={{ opacity: 0.7 }}>{subtitle}</p>
         )}
       </div>
       {children}
@@ -318,20 +318,23 @@ export function HomeSocialProofSummary({
 
   return (
     <div
-      className="grid grid-cols-3 gap-2 rounded-xl border p-3"
+      className="flex items-center justify-center gap-4 rounded-lg py-2 px-3"
       style={{
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        border: '1px solid rgba(255, 255, 255, 0.04)',
       }}
     >
-      {stats.map((stat) => (
-        <div key={stat.label} className="min-w-0 text-center">
-          <p className="text-base" style={{ color: 'var(--accent)' }}>
+      {stats.map((stat, index) => (
+        <div key={stat.label} className="flex items-center gap-1.5">
+          <span className="text-sm font-medium" style={{ color: 'var(--accent)' }}>
             {stat.value}
-          </p>
-          <p className="mt-1 truncate text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          </span>
+          <span className="text-[10px] text-muted-foreground">
             {stat.label}
-          </p>
+          </span>
+          {index < stats.length - 1 && (
+            <span className="ml-2 text-muted-foreground" style={{ opacity: 0.3 }}>·</span>
+          )}
         </div>
       ))}
     </div>

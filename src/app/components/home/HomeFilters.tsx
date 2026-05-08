@@ -60,7 +60,8 @@ export function HomeFilters({
 }: HomeFiltersProps) {
   return (
     <>
-      <div className="flex border-b border-border">
+      {/* Compact tabs */}
+      <div className="flex" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
         {homeTabs.map((tab) => {
           const isActive = activeTab === tab.key;
 
@@ -70,7 +71,7 @@ export function HomeFilters({
               whileTap={{ scale: 0.985 }}
               transition={tabTransition}
               onClick={() => setActiveTab(tab.key)}
-              className="relative flex-1 py-3 text-muted-foreground transition-colors"
+              className="relative flex-1 py-2.5 text-xs font-medium transition-colors"
               style={{
                 color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
               }}
@@ -89,30 +90,28 @@ export function HomeFilters({
         })}
       </div>
 
-      <div className="border-b border-border px-4 py-2">
+      {/* Compact filter bar */}
+      <div className="px-4 py-2" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+        {/* Activity chips - more compact */}
         <div
-          className="flex gap-2 overflow-x-auto no-scrollbar"
+          className="flex gap-1.5 overflow-x-auto no-scrollbar"
           style={{
-            scrollPaddingLeft: '0.25rem',
-            scrollPaddingRight: '0.25rem',
+            scrollPaddingLeft: '0.125rem',
+            scrollPaddingRight: '0.125rem',
             WebkitOverflowScrolling: 'touch',
             overscrollBehaviorX: 'contain',
-            paddingLeft: '0.125rem',
-            paddingRight: '0.125rem',
           }}
         >
           <motion.button
             type="button"
             onClick={() => setSelectedActivityType('all')}
             whileTap={{ scale: 0.96 }}
-            className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
+            className="shrink-0 px-2.5 py-1 rounded-full text-[11px] transition-all"
             style={{
               backgroundColor:
-                selectedActivityType === 'all' ? 'var(--accent-soft)' : 'var(--card)',
-              borderColor:
-                selectedActivityType === 'all' ? 'var(--accent-border-strong)' : 'var(--border)',
-              color: selectedActivityType === 'all' ? 'var(--accent)' : 'var(--foreground-strong)',
-              boxShadow: selectedActivityType === 'all' ? 'var(--accent-outline-soft)' : 'none',
+                selectedActivityType === 'all' ? 'rgba(212, 175, 55, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+              color: selectedActivityType === 'all' ? 'var(--accent)' : 'var(--muted-foreground)',
+              border: selectedActivityType === 'all' ? '1px solid rgba(212, 175, 55, 0.25)' : '1px solid transparent',
             }}
           >
             {translate('home.all')}
@@ -128,98 +127,96 @@ export function HomeFilters({
                 type="button"
                 onClick={() => setSelectedActivityType(type.value)}
                 whileTap={{ scale: 0.96 }}
-                className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
+                className="shrink-0 px-2.5 py-1 rounded-full text-[11px] transition-all"
                 style={{
-                  backgroundColor: isActive ? 'var(--accent-soft)' : 'var(--card)',
-                  borderColor: isActive ? 'var(--accent-border-strong)' : 'var(--border)',
-                  color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
-                  boxShadow: isActive ? 'var(--accent-outline-soft)' : 'none',
+                  backgroundColor: isActive ? 'rgba(212, 175, 55, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                  color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
+                  border: isActive ? '1px solid rgba(212, 175, 55, 0.25)' : '1px solid transparent',
                 }}
               >
-                <span className="mr-1.5">{activityMeta.emoji}</span>
+                <span className="mr-1">{activityMeta.emoji}</span>
                 <span>{activityMeta.label}</span>
               </motion.button>
             );
           })}
         </div>
 
-        <div className="mt-2">
-          <div className="flex items-stretch gap-2">
-            <motion.button
-              type="button"
-              onClick={toggleCityPicker}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 rounded-xl border px-3 py-2 text-left transition-all"
-              style={{
-                backgroundColor: isCityPickerOpen
-                  ? 'var(--accent-soft-muted)'
-                  : 'rgba(255, 255, 255, 0.03)',
-                borderColor: isCityPickerOpen ? 'var(--accent-border)' : 'var(--border-subtle)',
-              }}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                    {translate('home.cityFilterLabel')}
-                  </p>
-                  <p
-                    className="truncate text-sm"
-                    style={{
-                      color: selectedCity === 'all' ? 'var(--foreground-strong)' : 'var(--accent)',
-                    }}
-                  >
-                    {selectedCityLabel}
-                  </p>
-                </div>
+        {/* City and Search row - more compact */}
+        <div className="mt-2 flex items-center gap-2">
+          <motion.button
+            type="button"
+            onClick={toggleCityPicker}
+            whileTap={{ scale: 0.98 }}
+            className="flex-1 rounded-lg px-3 py-1.5 text-left transition-all"
+            style={{
+              backgroundColor: isCityPickerOpen
+                ? 'rgba(212, 175, 55, 0.08)'
+                : 'rgba(255, 255, 255, 0.03)',
+              border: isCityPickerOpen ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid rgba(255, 255, 255, 0.06)',
+            }}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 flex items-center gap-2">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {translate('home.cityFilterLabel')}
+                </span>
                 <span
-                  className="shrink-0 text-xs text-muted-foreground transition-transform"
+                  className="truncate text-xs"
                   style={{
-                    transform: isCityPickerOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    color: selectedCity === 'all' ? 'var(--foreground-strong)' : 'var(--accent)',
                   }}
                 >
-                  ▼
+                  {selectedCityLabel}
                 </span>
               </div>
-            </motion.button>
+              <span
+                className="shrink-0 text-[10px] text-muted-foreground transition-transform"
+                style={{
+                  transform: isCityPickerOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}
+              >
+                ▼
+              </span>
+            </div>
+          </motion.button>
 
-            <motion.button
-              type="button"
-              onClick={toggleEventSearch}
-              whileTap={{ scale: 0.96 }}
-              className="shrink-0 rounded-xl border px-3 flex items-center justify-center transition-all"
-              style={{
-                width: 48,
-                backgroundColor: isEventSearchOpen
-                  ? 'var(--accent-soft-muted)'
-                  : 'rgba(255, 255, 255, 0.03)',
-                borderColor: isEventSearchOpen ? 'var(--accent-border)' : 'var(--border-subtle)',
-                color: isEventSearchOpen ? 'var(--accent)' : 'var(--foreground-strong)',
-              }}
-              aria-label={translate('home.searchButton')}
-              title={translate('home.searchButton')}
-            >
-              <Search size={18} strokeWidth={2.1} />
-            </motion.button>
-          </div>
+          <motion.button
+            type="button"
+            onClick={toggleEventSearch}
+            whileTap={{ scale: 0.96 }}
+            className="shrink-0 rounded-lg px-2.5 py-1.5 flex items-center justify-center transition-all"
+            style={{
+              backgroundColor: isEventSearchOpen
+                ? 'rgba(212, 175, 55, 0.08)'
+                : 'rgba(255, 255, 255, 0.03)',
+              border: isEventSearchOpen ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid rgba(255, 255, 255, 0.06)',
+              color: isEventSearchOpen ? 'var(--accent)' : 'var(--muted-foreground)',
+            }}
+            aria-label={translate('home.searchButton')}
+            title={translate('home.searchButton')}
+          >
+            <Search size={16} strokeWidth={2} />
+          </motion.button>
+        </div>
 
-          <AnimatePresence initial={false}>
+        <AnimatePresence initial={false}>
             {isEventSearchOpen && (
               <motion.div
                 key="home-event-search"
-                initial={{ opacity: 0, y: -8, height: 0 }}
+                initial={{ opacity: 0, y: -6, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -8, height: 0 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                exit={{ opacity: 0, y: -6, height: 0 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
                 <div
-                  className="mt-2 flex items-center gap-2 rounded-xl border px-3 py-2"
+                  className="mt-2 flex items-center gap-2 rounded-lg px-3 py-1.5"
                   style={{
-                    backgroundColor: 'var(--surface-overlay)',
-                    borderColor: 'var(--border-subtle)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
                   }}
                 >
-                  <Search size={16} className="shrink-0 text-muted-foreground" strokeWidth={2} />
+                  <Search size={14} className="shrink-0 text-muted-foreground" strokeWidth={2} />
                   <input
                     type="text"
                     value={eventSearchQuery}
@@ -229,7 +226,7 @@ export function HomeFilters({
                     maxLength={INPUT_LIMITS.search}
                     placeholder={translate('home.searchPlaceholder')}
                     autoComplete="off"
-                    className="w-full bg-transparent text-sm outline-none"
+                    className="w-full bg-transparent text-xs outline-none"
                     style={{ color: 'var(--foreground-strong)' }}
                   />
                   {eventSearchQuery.length > 0 && (
@@ -240,7 +237,7 @@ export function HomeFilters({
                       aria-label="Clear search"
                       title="Clear search"
                     >
-                      <X size={16} strokeWidth={2} />
+                      <X size={14} strokeWidth={2} />
                     </button>
                   )}
                 </div>
@@ -250,16 +247,16 @@ export function HomeFilters({
 
           {isCityPickerOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.16 }}
-              className="mt-2 rounded-xl border overflow-hidden"
+              transition={{ duration: 0.14 }}
+              className="mt-2 rounded-lg overflow-hidden"
               style={{
-                backgroundColor: 'var(--surface-overlay)',
-                borderColor: 'var(--border-subtle)',
+                backgroundColor: 'rgba(18, 18, 18, 0.98)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
               }}
             >
-              <div className="border-b border-border px-3 py-2">
+              <div className="px-3 py-2" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                 <input
                   type="text"
                   value={citySearchQuery}
@@ -269,24 +266,24 @@ export function HomeFilters({
                   maxLength={INPUT_LIMITS.search}
                   placeholder={translate('home.citySearchPlaceholder')}
                   autoComplete="off"
-                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"
+                  className="w-full rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors"
                   style={{
-                    backgroundColor: 'var(--card)',
-                    borderColor: 'var(--border-subtle)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
                     color: 'var(--foreground-strong)',
                   }}
                 />
               </div>
 
-              <div className="max-h-48 overflow-y-auto no-scrollbar py-1">
+              <div className="max-h-40 overflow-y-auto no-scrollbar py-1">
                 <button
                   type="button"
                   onClick={() => handleSelectCity('all')}
-                  className="w-full px-3 py-2 text-left text-sm transition-colors"
+                  className="w-full px-3 py-1.5 text-left text-xs transition-colors"
                   style={{
                     color: selectedCity === 'all' ? 'var(--accent)' : 'var(--foreground-strong)',
                     backgroundColor:
-                      selectedCity === 'all' ? 'var(--accent-soft-muted)' : 'transparent',
+                      selectedCity === 'all' ? 'rgba(212, 175, 55, 0.08)' : 'transparent',
                   }}
                 >
                   {translate('home.allCities')}
@@ -300,10 +297,10 @@ export function HomeFilters({
                       key={cityOption.cityNormalized}
                       type="button"
                       onClick={() => handleSelectCity(cityOption.cityNormalized)}
-                      className="w-full px-3 py-2 text-left text-sm transition-colors"
+                      className="w-full px-3 py-1.5 text-left text-xs transition-colors"
                       style={{
                         color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
-                        backgroundColor: isActive ? 'var(--accent-soft-muted)' : 'transparent',
+                        backgroundColor: isActive ? 'rgba(212, 175, 55, 0.08)' : 'transparent',
                       }}
                     >
                       {cityOption.city}
@@ -312,14 +309,13 @@ export function HomeFilters({
                 })}
 
                 {filteredCityOptions.length === 0 && (
-                  <div className="px-3 py-3 text-sm text-muted-foreground">
+                  <div className="px-3 py-2 text-xs text-muted-foreground">
                     {translate('home.noCitiesFound')}
                   </div>
                 )}
               </div>
             </motion.div>
           )}
-        </div>
       </div>
     </>
   );

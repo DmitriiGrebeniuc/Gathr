@@ -49,30 +49,29 @@ export function HomeEventCard({
 
   return (
     <motion.div
-      whileTap={{ scale: 0.985 }}
+      whileTap={{ scale: 0.988 }}
       onClick={() => onOpen(event)}
-      className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
+      className="rounded-lg p-3.5 cursor-pointer transition-all active:opacity-90"
       style={{
-        backgroundColor: variant === 'featured' ? 'var(--accent-soft-muted)' : 'var(--card)',
-        borderColor: isRequestMode ? 'var(--accent-border-strong)' : 'var(--border)',
-        boxShadow:
-          variant === 'featured'
-            ? '0 8px 22px rgba(212, 175, 55, 0.16)'
-            : '0 4px 12px rgba(0, 0, 0, 0.3)',
-        opacity: past || variant === 'muted' ? 0.72 : 1,
+        backgroundColor: variant === 'featured' ? 'rgba(212, 175, 55, 0.06)' : 'rgba(255, 255, 255, 0.025)',
+        border: variant === 'featured' 
+          ? '1px solid rgba(212, 175, 55, 0.18)' 
+          : isRequestMode 
+            ? '1px solid rgba(212, 175, 55, 0.15)'
+            : '1px solid rgba(255, 255, 255, 0.06)',
+        opacity: past || variant === 'muted' ? 0.65 : 1,
       }}
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <h3>{event.title}</h3>
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <h3 className="text-sm font-medium" style={{ color: 'var(--foreground-strong)' }}>{event.title}</h3>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           {isRequestMode && (
             <span
-              className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+              className="text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap"
               style={{
-                borderColor: 'var(--accent-border-strong)',
                 color: 'var(--accent)',
-                backgroundColor: 'var(--accent-soft-muted)',
+                backgroundColor: 'rgba(212, 175, 55, 0.1)',
               }}
             >
               {translate('home.closedBadge')}
@@ -81,24 +80,22 @@ export function HomeEventCard({
 
           {past && (
             <span
-              className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+              className="text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap"
               style={{
-                borderColor: 'var(--accent-border-muted)',
-                color: 'var(--accent)',
-                backgroundColor: 'var(--accent-soft-muted)',
+                color: 'var(--muted-foreground)',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
               }}
             >
               {badgeLabel || translate('home.past')}
             </span>
           )}
 
-          {!past && badgeLabel && (
+          {!past && badgeLabel && variant === 'featured' && (
             <span
-              className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+              className="text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap"
               style={{
-                borderColor: 'var(--accent-border-muted)',
                 color: 'var(--accent)',
-                backgroundColor: 'var(--accent-soft-muted)',
+                backgroundColor: 'rgba(212, 175, 55, 0.12)',
               }}
             >
               {badgeLabel}
@@ -109,11 +106,10 @@ export function HomeEventCard({
 
       <div className="mb-2">
         <span
-          className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border"
+          className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded"
           style={{
-            borderColor: 'rgba(212, 175, 55, 0.22)',
             color: 'var(--accent)',
-            backgroundColor: 'rgba(212, 175, 55, 0.06)',
+            backgroundColor: 'rgba(212, 175, 55, 0.08)',
           }}
         >
           <span>{activityMeta.emoji}</span>
@@ -121,19 +117,21 @@ export function HomeEventCard({
         </span>
       </div>
 
-      <p className="text-sm text-muted-foreground mb-2">{dateLabel}</p>
+      <p className="text-xs text-muted-foreground mb-1">{dateLabel}</p>
 
-      <p className="text-sm text-muted-foreground mb-3">{locationLabel}</p>
+      <p className="text-xs text-muted-foreground mb-2.5">{locationLabel}</p>
 
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-muted-foreground">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] text-muted-foreground">
           {translate('home.createdBy')}{' '}
-          {event.creator_id === currentUserId
-            ? translate('home.you')
-            : event.creatorName || translate('common.unknown')}
+          <span style={{ color: event.creator_id === currentUserId ? 'var(--accent)' : 'var(--foreground-strong)' }}>
+            {event.creator_id === currentUserId
+              ? translate('home.you')
+              : event.creatorName || translate('common.unknown')}
+          </span>
         </span>
 
-        <span className="text-xs text-muted-foreground">
+        <span className="text-[11px] text-muted-foreground">
           {event.participantCount}{' '}
           {event.participantCount === 1
             ? translate('home.participant')

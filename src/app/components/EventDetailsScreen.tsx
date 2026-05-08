@@ -1,14 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
-import { TouchButton } from './TouchButton';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
-import { EventLocationMap } from './EventLocationMap';
-import { EventContactMethodsDisplay } from './EventContactMethodsSection';
 import { buildJoinEventLoginPayload } from '../auth/postLoginIntent';
 import { feedback } from '../lib/feedback';
-import { LoadingAvatarStrip, LoadingCard, LoadingLine } from './LoadingState';
 import {
   createEventJoinRequest,
   fetchCreatorEventJoinRequests,
@@ -23,8 +19,11 @@ import {
   type EventJoinRequest,
   type EventPrivateDetails,
 } from '../lib/publicData';
-import { INPUT_LIMITS, limitText, trimAndLimitText } from '../constants/inputLimits';
-import { hasAnyEventContactMethods } from '../lib/eventContacts';
+import { INPUT_LIMITS, trimAndLimitText } from '../constants/inputLimits';
+import { EventDetailsFooterActions } from './event-details/EventDetailsFooterActions';
+import { EventDetailsOverview } from './event-details/EventDetailsOverview';
+import { EventDetailsParticipantsPreview } from './event-details/EventDetailsParticipantsPreview';
+import { JoinRequestComposer } from './event-details/JoinRequestComposer';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -906,489 +905,80 @@ export function EventDetailsScreen({
           style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
         >
           <div className="max-w-sm mx-auto space-y-6">
-            <div>
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div>
-                  <h1>{eventData.title}</h1>
-                  {joinMode === 'request' && (
-                    <span
-                      className="mt-2 inline-flex text-[10px] px-2 py-1 rounded-full border"
-                      style={{
-                        borderColor: 'var(--accent-border-strong)',
-                        color: 'var(--accent)',
-                        backgroundColor: 'var(--accent-soft-muted)',
-                      }}
-                    >
-                      {translate('details.closedBadge')}
-                    </span>
-                  )}
-                </div>
+            <EventDetailsOverview
+              eventData={eventData}
+              joinMode={joinMode}
+              isPastEvent={isPastEvent}
+              isClosedAccessResolving={isClosedAccessResolving}
+              hasVisiblePrivatePreview={hasVisiblePrivatePreview}
+              shouldShowClosedRestrictedState={shouldShowClosedRestrictedState}
+              shouldShowPrivateFieldsLoading={shouldShowPrivateFieldsLoading}
+              displayedDateTime={displayedDateTime}
+              displayedLocation={displayedLocation}
+              displayedLocationLat={displayedLocationLat}
+              displayedLocationLng={displayedLocationLng}
+              googleMapsUrl={googleMapsUrl}
+              isNativeApp={isNativeApp}
+              canViewClosedDetails={canViewClosedDetails}
+              hasLocationCoordinates={hasLocationCoordinates}
+              eventStateResolved={eventStateResolved}
+              canViewEventContacts={canViewEventContacts}
+              contactMethods={contactMethods}
+              translate={translate}
+              formatDate={formatDate}
+            />
 
-                {isPastEvent && (
-                  <span
-                    className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
-                    style={{
-                      borderColor: 'var(--accent-border-muted)',
-                      color: 'var(--accent)',
-                      backgroundColor: 'var(--accent-soft-muted)',
-                    }}
-                  >
-                    {translate('details.pastEvent')}
-                  </span>
-                )}
-              </div>
-              <p className="text-muted-foreground leading-relaxed">
-                {eventData.description || translate('details.noDescription')}
-              </p>
-            </div>
-
-            {isClosedAccessResolving && !hasVisiblePrivatePreview && (
-              <LoadingCard lines={['42%', '88%', '72%']} />
-            )}
-
-            {shouldShowClosedRestrictedState && (
-              <div
-                className="rounded-2xl border px-4 py-4"
-                style={{
-                  backgroundColor: 'var(--card)',
-                  borderColor: 'var(--accent-border-muted)',
-                }}
-              >
-                <p style={{ color: 'var(--accent)' }}>{translate('details.closedTitle')}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {translate('details.closedDescription')}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: 'var(--primary)' }}
-                >
-                  <span className="text-sm">📅</span>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{translate('details.dateTime')}</p>
-                  <p>
-                    {shouldShowPrivateFieldsLoading
-                      ? ''
-                      : shouldShowClosedRestrictedState
-                      ? translate('details.closedDateHidden')
-                      : formatDate(displayedDateTime)}
-                  </p>
-                  {shouldShowPrivateFieldsLoading && (
-                    <div className="mt-2 space-y-2">
-                      <LoadingLine width="7rem" />
-                      <LoadingLine width="5rem" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: 'var(--primary)' }}
-                  >
-                    <span className="text-sm">📍</span>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{translate('details.location')}</p>
-                    <p>
-                      {shouldShowPrivateFieldsLoading
-                        ? ''
-                        : shouldShowClosedRestrictedState
-                        ? translate('details.closedLocationHidden')
-                        : displayedLocation || translate('details.locationNotSpecified')}
-                    </p>
-                    {shouldShowPrivateFieldsLoading && (
-                      <div className="mt-2 space-y-2">
-                        <LoadingLine width="9rem" />
-                        <LoadingLine width="12rem" />
-                      </div>
-                    )}
-
-                    {googleMapsUrl && isNativeApp && canViewClosedDetails && (
-                      <a
-                        href={googleMapsUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-block mt-2 text-sm"
-                        style={{ color: 'var(--accent)' }}
-                      >
-                        Open in Google Maps
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {shouldShowPrivateFieldsLoading ? (
-                  <LoadingCard className="min-h-[10rem]" lines={['100%', '100%', '90%']} />
-                ) : shouldShowClosedRestrictedState ? (
-                  <div
-                    className="rounded-2xl border px-4 py-4 text-sm text-muted-foreground"
-                    style={{ backgroundColor: 'var(--card)' }}
-                  >
-                    {translate('details.closedMapHidden')}
-                  </div>
-                ) : hasLocationCoordinates ? (
-                  <div className="mt-3 -mx-6 sm:mx-0">
-                    <EventLocationMap
-                      lat={displayedLocationLat}
-                      lng={displayedLocationLng}
-                      height={256}
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            {eventStateResolved &&
-              canViewEventContacts &&
-              hasAnyEventContactMethods(contactMethods) && (
-                <EventContactMethodsDisplay contacts={contactMethods} />
-              )}
-
-            <div>
-              <button
-                onClick={() =>
-                  onNavigate('participants', {
-                    ...eventData,
-                    backTarget,
-                    currentUserId,
-                    participantCount,
-                    canViewParticipantIdentities,
-                  })
-                }
-                className="text-sm text-muted-foreground mb-3 hover:opacity-80 active:opacity-60 transition-opacity"
-                >
-                  {translate('details.participants')} ({participantCount})
-                </button>
-
-              {!participantAccessResolved ||
-              (canViewParticipantIdentities && !participantListResolved) ? (
-                <div
-                  className="rounded-2xl border px-4 py-4 space-y-3"
-                  style={{ backgroundColor: 'var(--card)' }}
-                >
-                  <LoadingAvatarStrip />
-                  <div className="space-y-2">
-                    <LoadingLine width="66%" />
-                    <LoadingLine width="48%" />
-                  </div>
-                </div>
-              ) : canViewParticipantIdentities && participants.length > 0 ? (
-                <button
-                  onClick={() =>
-                    onNavigate('participants', {
-                      ...eventData,
-                      backTarget,
-                      currentUserId,
-                      participantCount,
-                      canViewParticipantIdentities,
-                    })
-                  }
-                  className="flex items-center -space-x-2 hover:opacity-90 active:opacity-70 transition-opacity"
-                >
-                  {participants.slice(0, 4).map((participant: any, idx: number) => {
-                    const name = participant.publicName || translate('common.user');
-                    const isCurrentUser = currentUserId === participant.user_id;
-                    const isEventCreator = eventData.creator_id === participant.user_id;
-
-                    return (
-                      <div
-                        key={participant.user_id || idx}
-                        className="relative"
-                        title={
-                          isEventCreator && isCurrentUser
-                            ? `${name} • ${translate('details.creator')} • ${translate('details.you')}`
-                            : isEventCreator
-                              ? `${name} • ${translate('details.creator')}`
-                              : isCurrentUser
-                                ? `${name} • ${translate('details.you')}`
-                                : name
-                        }
-                      >
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2"
-                          style={{
-                            backgroundColor: 'var(--primary)',
-                            borderColor: isEventCreator ? 'var(--accent)' : 'var(--background)',
-                            boxShadow: isEventCreator ? '0 0 0 1px rgba(212, 175, 55, 0.18)' : 'none',
-                          }}
-                        >
-                          {name.slice(0, 2).toUpperCase()}
-                        </div>
-
-                        {isCurrentUser && (
-                          <div
-                            className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] leading-none border"
-                            style={{
-                              backgroundColor: 'var(--background)',
-                              borderColor: 'var(--accent-border-muted)',
-                              color: 'var(--accent)',
-                            }}
-                          >
-                            {translate('details.you')}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {participantCount > 4 && (
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-xs border-2 border-background"
-                      style={{ backgroundColor: 'var(--secondary)' }}
-                    >
-                      +{participantCount - 4}
-                    </div>
-                  )}
-                </button>
-              ) : canViewParticipantIdentities && participantCount > 0 ? (
-                <div
-                  className="rounded-2xl border px-4 py-4 space-y-3"
-                  style={{ backgroundColor: 'var(--card)' }}
-                >
-                  <LoadingAvatarStrip />
-                </div>
-              ) : !canViewParticipantIdentities && participantCount > 0 ? (
-                <div
-                  className="px-4 py-3 rounded-xl text-sm text-muted-foreground border border-border"
-                  style={{ backgroundColor: 'var(--card)' }}
-                >
-                  {translate('details.participantsRestricted')}
-                </div>
-              ) : (
-                <div
-                  className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground"
-                  style={{ backgroundColor: 'var(--card)' }}
-                >
-                  {translate('details.noParticipants')}
-                </div>
-              )}
-            </div>
+            <EventDetailsParticipantsPreview
+              eventData={eventData}
+              backTarget={backTarget}
+              currentUserId={currentUserId}
+              participantCount={participantCount}
+              participantAccessResolved={participantAccessResolved}
+              participantListResolved={participantListResolved}
+              canViewParticipantIdentities={canViewParticipantIdentities}
+              participants={participants}
+              translate={translate}
+              onNavigate={onNavigate}
+            />
 
             {renderJoinRequestStatus()}
 
           </div>
         </div>
 
-        <div className="p-6 border-t border-border space-y-3">
-          {!isCreator && !isClosedAccessResolving && (
-            <div className="grid grid-cols-2 gap-3">
-              <TouchButton
-                variant="ghost"
-                onClick={handleShare}
-                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
-              </TouchButton>
-
-              {hasJoined ? (
-                <TouchButton
-                  variant="danger"
-                  onClick={handleLeave}
-                  disabled={loadingAction || loadingDelete}
-                >
-                  {loadingAction ? translate('details.leaving') : translate('details.leaveEvent')}
-                </TouchButton>
-              ) : joinMode === 'request' ? (
-                <TouchButton
-                  variant="primary"
-                  onClick={handleOpenJoinRequestComposer}
-                  disabled={
-                    loadingAction ||
-                    loadingDelete ||
-                    submittingJoinRequest ||
-                    !!myJoinRequest ||
-                    isPastEvent
-                  }
-                >
-                  {translate('details.joinRequestButton')}
-                </TouchButton>
-              ) : !isPastEvent ? (
-                <TouchButton
-                  variant="primary"
-                  onClick={handleJoin}
-                  disabled={loadingAction || loadingDelete}
-                >
-                  {loadingAction ? translate('details.joining') : translate('details.joinEvent')}
-                </TouchButton>
-              ) : (
-                <div
-                  className="px-4 py-3 rounded-xl text-center text-sm text-muted-foreground border border-border flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--card)' }}
-                >
-                  {translate('details.eventEnded')}
-                </div>
-              )}
-            </div>
-          )}
-
-          {isCreator && joinMode === 'request' && !isClosedAccessResolving && (
-            <div className="grid grid-cols-2 gap-3">
-              <TouchButton
-                variant="ghost"
-                onClick={handleShare}
-                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
-              </TouchButton>
-
-              <TouchButton
-                variant="ghost"
-                onClick={handleOpenJoinRequests}
-                disabled={loadingAction || loadingDelete || !eventData.id}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {`${translate('details.joinRequestsButton')} (${pendingJoinRequestsCount})`}
-              </TouchButton>
-            </div>
-          )}
-
-          {isCreator && joinMode !== 'request' && !isClosedAccessResolving && (
-            <div className="grid grid-cols-2 gap-3">
-              <TouchButton
-                variant="ghost"
-                onClick={handleShare}
-                disabled={sharing || loadingAction || loadingDelete || !eventData.id}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {sharing ? translate('details.sharing') : translate('details.shareEvent')}
-              </TouchButton>
-
-              <TouchButton
-                variant="ghost"
-                onClick={handleOpenInvite}
-                disabled={loadingAction || loadingDelete || !eventData.id}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {translate('inviteUsers.invite')}
-              </TouchButton>
-            </div>
-          )}
-
-          {isCreator && (
-            <div className="grid grid-cols-2 gap-3">
-              <TouchButton
-                variant="ghost"
-                onClick={() => onNavigate('edit-event', eventData)}
-                disabled={loadingDelete || loadingAction}
-                style={{ borderColor: 'var(--accent-border-muted)', color: 'var(--accent)' }}
-              >
-                {translate('details.editEvent')}
-              </TouchButton>
-
-              <TouchButton
-                variant="danger"
-                onClick={handleDeleteEvent}
-                disabled={loadingDelete || loadingAction}
-              >
-                {loadingDelete ? translate('details.deleting') : translate('details.deleteEvent')}
-              </TouchButton>
-            </div>
-          )}
-        </div>
+        <EventDetailsFooterActions
+          isCreator={isCreator}
+          joinMode={joinMode}
+          isClosedAccessResolving={isClosedAccessResolving}
+          hasJoined={hasJoined}
+          isPastEvent={isPastEvent}
+          loadingAction={loadingAction}
+          loadingDelete={loadingDelete}
+          sharing={sharing}
+          submittingJoinRequest={submittingJoinRequest}
+          hasJoinRequest={!!myJoinRequest}
+          eventData={eventData}
+          pendingJoinRequestsCount={pendingJoinRequestsCount}
+          translate={translate}
+          onShare={handleShare}
+          onLeave={handleLeave}
+          onJoin={handleJoin}
+          onOpenJoinRequestComposer={handleOpenJoinRequestComposer}
+          onOpenJoinRequests={handleOpenJoinRequests}
+          onOpenInvite={handleOpenInvite}
+          onEdit={() => onNavigate('edit-event', eventData)}
+          onDelete={handleDeleteEvent}
+        />
 
         {showJoinRequestComposer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute inset-0 z-40 flex items-end bg-black/55 px-4 pb-4"
-            style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
-            onClick={() => {
-              if (!submittingJoinRequest) {
-                setShowJoinRequestComposer(false);
-              }
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="mx-auto w-full max-w-sm rounded-[28px] border px-5 py-5 shadow-2xl"
-              style={{
-                backgroundColor: 'var(--card)',
-                borderColor: 'var(--accent-border-muted)',
-              }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div>
-                  <p style={{ color: 'var(--accent)' }}>
-                    {translate('details.joinRequestButton')}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {translate('details.joinRequestMessageLabel')}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowJoinRequestComposer(false)}
-                  disabled={submittingJoinRequest}
-                  className="rounded-full px-2 py-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-50"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  {translate('common.cancel')}
-                </button>
-              </div>
-
-              <textarea
-                rows={4}
-                value={joinRequestMessage}
-                onChange={(event) =>
-                  setJoinRequestMessage(
-                    limitText(event.target.value, INPUT_LIMITS.eventJoinRequestMessage)
-                  )
-                }
-                maxLength={INPUT_LIMITS.eventJoinRequestMessage}
-                placeholder={translate('details.joinRequestMessagePlaceholder')}
-                className="w-full rounded-2xl border px-3 py-3 text-sm outline-none resize-none transition-colors"
-                style={{
-                  backgroundColor: 'var(--surface-strong)',
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--foreground-strong)',
-                }}
-              />
-
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <span className="text-xs text-muted-foreground">
-                  {joinRequestMessage.length}/{INPUT_LIMITS.eventJoinRequestMessage}
-                </span>
-
-                <div className="flex gap-3">
-                  <TouchButton
-                    variant="ghost"
-                    onClick={() => setShowJoinRequestComposer(false)}
-                    disabled={submittingJoinRequest}
-                    style={{
-                      borderColor: 'var(--accent-border-muted)',
-                      color: 'var(--accent)',
-                    }}
-                  >
-                    {translate('common.cancel')}
-                  </TouchButton>
-
-                  <TouchButton
-                    variant="primary"
-                    onClick={handleSubmitJoinRequest}
-                    disabled={submittingJoinRequest}
-                  >
-                    {submittingJoinRequest
-                      ? translate('details.joinRequestSubmitting')
-                      : translate('details.joinRequestSubmit')}
-                  </TouchButton>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <JoinRequestComposer
+            message={joinRequestMessage}
+            submitting={submittingJoinRequest}
+            translate={translate}
+            onMessageChange={setJoinRequestMessage}
+            onSubmit={handleSubmitJoinRequest}
+            onClose={() => setShowJoinRequestComposer(false)}
+          />
         )}
       </div>
     </SwipeableScreen>

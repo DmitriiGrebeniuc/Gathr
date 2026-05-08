@@ -1,19 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type UIEvent } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
-import { Check, LifeBuoy, Palette, Search, X } from 'lucide-react';
+import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
-import {
-  ACTIVITY_TYPES,
-  type ActivityType,
-  getActivityTypeMeta,
-} from '../constants/activityTypes';
-import { LoadingLogo } from './LoadingLogo';
+import type { ActivityType } from '../constants/activityTypes';
 import { normalizeCityName } from '../lib/locationCity';
-import { INPUT_LIMITS, limitText } from '../constants/inputLimits';
-import { LoadingCard, LoadingLine } from './LoadingState';
+import { LoadingLine } from './LoadingState';
 import {
   fetchAccessibleEventPrivateDetailsMap,
   fetchEventFeedMetadata,
@@ -22,30 +15,12 @@ import {
   fetchParticipantCounts,
   fetchPublicProfileNameMap,
 } from '../lib/publicData';
-type EventItem = {
-  id: string;
-  title: string;
-  description?: string | null;
-  created_at?: string | null;
-  sort_rank?: number | null;
-  is_past?: boolean | null;
-  date_time?: string | null;
-  location?: string | null;
-  location_lat?: number | null;
-  location_lng?: number | null;
-  city?: string | null;
-  city_normalized?: string | null;
-  creator_id?: string | null;
-  creatorName?: string | null;
-  activity_type?: ActivityType | null;
-  join_mode?: 'open' | 'request' | null;
-  participantCount: number;
-};
-
-type CityFilterOption = {
-  city: string;
-  cityNormalized: string;
-};
+import { HomeEventCard } from './home/HomeEventCard';
+import { HomeEmptyState, HomeInitialLoader } from './home/HomeFeedStates';
+import { HomeFilters } from './home/HomeFilters';
+import { HomeHeader } from './home/HomeHeader';
+import { HomeLaunchOverlay } from './home/HomeLaunchOverlay';
+import type { CityFilterOption, HomeEventItem, HomeTab } from './home/types';
 
 const SERVER_BATCH_SIZE = 100;
 const LOCAL_BATCH_SIZE = 10;
@@ -61,7 +36,7 @@ export function HomeScreen({
     ease: [0.22, 1, 0.36, 1] as const,
   };
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
-  const [activeTab, setActiveTab] = useState<'discover' | 'my' | 'joined' | 'visited'>('discover');
+  const [activeTab, setActiveTab] = useState<HomeTab>('discover');
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
@@ -76,7 +51,7 @@ export function HomeScreen({
 
     return window.localStorage.getItem(HOME_LAUNCH_OVERLAY_DISMISSED_KEY) !== 'true';
   });
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const [events, setEvents] = useState<HomeEventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>('User');
@@ -92,7 +67,7 @@ export function HomeScreen({
     'hidden'
   );
   const themePickerRef = useRef<HTMLDivElement | null>(null);
-  const eventsRef = useRef<EventItem[]>([]);
+  const eventsRef = useRef<HomeEventItem[]>([]);
   const currentUserIdRef = useRef<string | null>(null);
   const initialLoaderShownAtRef = useRef<number | null>(null);
 
@@ -135,7 +110,7 @@ export function HomeScreen({
     return date.toLocaleString();
   };
 
-  const isPastEvent = (eventOrDate?: EventItem | string | null) => {
+  const isPastEvent = (eventOrDate?: HomeEventItem | string | null) => {
     if (!eventOrDate) return false;
 
     if (typeof eventOrDate === 'object') {
@@ -167,7 +142,7 @@ export function HomeScreen({
     return date.getTime() < Date.now();
   };
 
-  const getEventSortTime = (event: EventItem) => {
+  const getEventSortTime = (event: HomeEventItem) => {
     if (typeof event.sort_rank === 'number' && Number.isFinite(event.sort_rank)) {
       return event.sort_rank;
     }
@@ -308,7 +283,7 @@ export function HomeScreen({
 
       setJoinedEventIds(nextJoinedEventIds);
 
-      const mappedEvents: EventItem[] = (eventsData || []).map((event: any) => {
+      const mappedEvents: HomeEventItem[] = (eventsData || []).map((event: any) => {
         const privateDetails = privateDetailsMap[event.id];
 
         return {
@@ -401,7 +376,7 @@ export function HomeScreen({
         Object.entries(creatorNameMapRaw).map(([id, name]) => [id, name || translate('common.unknown')])
       );
 
-      const mappedMoreEvents: EventItem[] = (moreEventsData || []).map((event: any) => {
+      const mappedMoreEvents: HomeEventItem[] = (moreEventsData || []).map((event: any) => {
         const privateDetails = privateDetailsMap[event.id];
 
         return {
@@ -853,463 +828,45 @@ export function HomeScreen({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <motion.div
-        animate={{
-          paddingTop: isHeaderCompact ? 12 : 16,
-          paddingBottom: isHeaderCompact ? 12 : 16,
-        }}
-        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-        className="sticky top-0 z-20 flex items-center justify-between px-6 border-b border-border"
-        style={{
-          backgroundColor: 'rgba(15, 15, 15, 0.94)',
-          backdropFilter: 'blur(14px)',
-        }}
-      >
-        <motion.h1
-          animate={{
-            scale: isHeaderCompact ? 0.92 : 1,
-            transformOrigin: 'left center',
-          }}
-          transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-          className="text-2xl"
-          style={{ color: 'var(--accent)' }}
-        >
-          Gathr
-        </motion.h1>
+      <HomeHeader
+        isHeaderCompact={isHeaderCompact}
+        themePickerRef={themePickerRef}
+        isThemePickerOpen={isThemePickerOpen}
+        setIsThemePickerOpen={setIsThemePickerOpen}
+        themeOptions={themeOptions}
+        themeMode={themeMode}
+        setThemeMode={setThemeMode}
+        isAdmin={isAdmin}
+        openSupportTicketCount={openSupportTicketCount}
+        currentUserName={currentUserName}
+        hasProPlan={hasProPlan}
+        getInitials={getInitials}
+        translate={translate}
+        onNavigate={onNavigate}
+      />
 
-        <div ref={themePickerRef} className="relative flex items-center gap-2 shrink-0">
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            animate={{
-              width: isHeaderCompact ? 36 : 40,
-              height: isHeaderCompact ? 36 : 40,
-            }}
-            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            onClick={() => setIsThemePickerOpen((prev) => !prev)}
-            className="rounded-full flex items-center justify-center border shrink-0"
-            style={{
-              backgroundColor: isThemePickerOpen ? 'var(--accent-soft)' : 'var(--primary)',
-              borderColor: isThemePickerOpen ? 'var(--accent-border-strong)' : 'var(--border)',
-              boxShadow: isThemePickerOpen ? 'var(--accent-outline-soft)' : 'none',
-              color: isThemePickerOpen ? 'var(--accent)' : 'var(--foreground-strong)',
-            }}
-            title={translate('profile.appearance')}
-          >
-            <Palette size={isHeaderCompact ? 16 : 18} strokeWidth={2} />
-          </motion.button>
-
-          {isAdmin && (
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              animate={{
-                width: isHeaderCompact ? 36 : 40,
-                height: isHeaderCompact ? 36 : 40,
-              }}
-              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-              onClick={() =>
-                onNavigate('admin', {
-                  adminPage: 'support',
-                  supportStatus: 'new',
-                })
-              }
-              className="relative rounded-full flex items-center justify-center border shrink-0"
-              style={{
-                backgroundColor:
-                  openSupportTicketCount > 0 ? 'var(--accent-soft)' : 'var(--primary)',
-                borderColor:
-                  openSupportTicketCount > 0 ? 'var(--accent-border-strong)' : 'var(--border)',
-                color:
-                  openSupportTicketCount > 0 ? 'var(--accent)' : 'var(--foreground-strong)',
-              }}
-              title={translate('admin.supportRequests')}
-              aria-label={translate('admin.supportRequests')}
-            >
-              <LifeBuoy size={isHeaderCompact ? 16 : 18} strokeWidth={2} />
-              {openSupportTicketCount > 0 && (
-                <span
-                  className="absolute -right-1 -top-1 min-w-5 h-5 rounded-full px-1 flex items-center justify-center text-[10px] border"
-                  style={{
-                    backgroundColor: 'var(--accent)',
-                    borderColor: 'var(--background)',
-                    color: 'var(--accent-foreground)',
-                  }}
-                >
-                  {openSupportTicketCount > 99 ? '99+' : openSupportTicketCount}
-                </span>
-              )}
-            </motion.button>
-          )}
-
-          <div className="relative shrink-0">
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              animate={{
-                width: isHeaderCompact ? 36 : 40,
-                height: isHeaderCompact ? 36 : 40,
-              }}
-              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-              onClick={() => onNavigate('profile')}
-              className="rounded-full flex items-center justify-center border shrink-0"
-              style={{
-                backgroundColor: 'var(--primary)',
-                borderColor: 'var(--accent-border)',
-                boxShadow: 'var(--accent-outline-soft)',
-                color: 'var(--foreground-strong)',
-              }}
-              title={currentUserName}
-            >
-              <span className={isHeaderCompact ? 'text-xs' : 'text-sm'}>
-                {getInitials(currentUserName)}
-              </span>
-            </motion.button>
-
-            {hasProPlan && (
-              <motion.span
-                initial={{ opacity: 0, scale: 0.92, y: -2 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                className="pointer-events-none absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]"
-                style={{
-                  background:
-                    'linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, white 8%), color-mix(in srgb, var(--accent) 72%, black 28%))',
-                  borderColor: 'color-mix(in srgb, var(--accent) 72%, white 28%)',
-                  color: 'var(--accent-foreground)',
-                  boxShadow: '0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent)',
-                }}
-              >
-                {translate('home.proBadge')}
-              </motion.span>
-            )}
-          </div>
-
-          {isThemePickerOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.16 }}
-              className="absolute right-0 top-full mt-2 w-56 rounded-2xl border p-2"
-              style={{
-                backgroundColor: 'var(--surface-overlay)',
-                borderColor: 'var(--border-subtle)',
-                boxShadow: '0 16px 32px rgba(0, 0, 0, 0.18)',
-              }}
-            >
-              <div className="space-y-1">
-                {themeOptions.map((option) => {
-                  const isActive = themeMode === option.value;
-
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        setThemeMode(option.value);
-                        setIsThemePickerOpen(false);
-                      }}
-                      className="w-full rounded-xl px-3 py-2 text-left transition-all"
-                      style={{
-                        backgroundColor: isActive
-                          ? 'var(--accent-soft-muted)'
-                          : 'transparent',
-                        color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-sm">{option.label}</p>
-                          {option.hint && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {option.hint}
-                            </p>
-                          )}
-                        </div>
-
-                        <span
-                          className="shrink-0"
-                          style={{
-                            color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
-                          }}
-                        >
-                          {isActive ? <Check size={16} strokeWidth={2.25} /> : null}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
-
-      <div className="flex border-b border-border">
-        {homeTabs.map((tab) => {
-          const isActive = activeTab === tab.key;
-
-          return (
-            <motion.button
-              key={tab.key}
-              whileTap={{ scale: 0.985 }}
-              transition={tabTransition}
-              onClick={() => setActiveTab(tab.key)}
-              className="relative flex-1 py-3 text-muted-foreground transition-colors"
-              style={{
-                color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
-              }}
-            >
-              <span className="relative z-10">{tab.label}</span>
-              {isActive && (
-                <motion.span
-                  layoutId="home-top-tab-indicator"
-                  className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full"
-                  style={{ backgroundColor: 'var(--accent)' }}
-                  transition={tabTransition}
-                />
-              )}
-            </motion.button>
-          );
-        })}
-      </div>
-
-      <div className="border-b border-border px-4 py-2">
-        <div
-          className="flex gap-2 overflow-x-auto no-scrollbar"
-          style={{
-            scrollPaddingLeft: '0.25rem',
-            scrollPaddingRight: '0.25rem',
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehaviorX: 'contain',
-            paddingLeft: '0.125rem',
-            paddingRight: '0.125rem',
-          }}
-        >
-          <motion.button
-            type="button"
-            onClick={() => setSelectedActivityType('all')}
-            whileTap={{ scale: 0.96 }}
-            className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
-            style={{
-              backgroundColor:
-                selectedActivityType === 'all' ? 'var(--accent-soft)' : 'var(--card)',
-              borderColor:
-                selectedActivityType === 'all'
-                  ? 'var(--accent-border-strong)'
-                  : 'var(--border)',
-              color: selectedActivityType === 'all' ? 'var(--accent)' : 'var(--foreground-strong)',
-              boxShadow:
-                selectedActivityType === 'all'
-                  ? 'var(--accent-outline-soft)'
-                  : 'none',
-            }}
-          >
-            {translate('home.all')}
-          </motion.button>
-
-          {ACTIVITY_TYPES.map((type) => {
-            const isActive = selectedActivityType === type.value;
-            const activityMeta = getActivityTypeMeta(type.value, language);
-
-            return (
-              <motion.button
-                key={type.value}
-                type="button"
-                onClick={() => setSelectedActivityType(type.value)}
-                whileTap={{ scale: 0.96 }}
-                className="shrink-0 px-3 py-1.5 rounded-full text-xs border transition-all"
-                style={{
-                  backgroundColor: isActive ? 'var(--accent-soft)' : 'var(--card)',
-                  borderColor: isActive
-                    ? 'var(--accent-border-strong)'
-                    : 'var(--border)',
-                  color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
-                  boxShadow: isActive ? 'var(--accent-outline-soft)' : 'none',
-                }}
-              >
-                  <span className="mr-1.5">{activityMeta.emoji}</span>
-                  <span>{activityMeta.label}</span>
-              </motion.button>
-            );
-          })}
-        </div>
-
-        <div className="mt-2">
-          <div className="flex items-stretch gap-2">
-          <motion.button
-            type="button"
-            onClick={toggleCityPicker}
-            whileTap={{ scale: 0.98 }}
-            className="flex-1 rounded-xl border px-3 py-2 text-left transition-all"
-            style={{
-              backgroundColor: isCityPickerOpen ? 'var(--accent-soft-muted)' : 'rgba(255, 255, 255, 0.03)',
-              borderColor: isCityPickerOpen
-                ? 'var(--accent-border)'
-                : 'var(--border-subtle)',
-            }}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {translate('home.cityFilterLabel')}
-                </p>
-                <p
-                  className="truncate text-sm"
-                  style={{
-                    color:
-                      selectedCity === 'all' ? 'var(--foreground-strong)' : 'var(--accent)',
-                  }}
-                >
-                  {selectedCityLabel}
-                </p>
-              </div>
-              <span
-                className="shrink-0 text-xs text-muted-foreground transition-transform"
-                style={{
-                  transform: isCityPickerOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                }}
-              >
-                ▼
-              </span>
-            </div>
-          </motion.button>
-            <motion.button
-              type="button"
-              onClick={toggleEventSearch}
-              whileTap={{ scale: 0.96 }}
-              className="shrink-0 rounded-xl border px-3 flex items-center justify-center transition-all"
-              style={{
-                width: 48,
-                backgroundColor: isEventSearchOpen ? 'var(--accent-soft-muted)' : 'rgba(255, 255, 255, 0.03)',
-                borderColor: isEventSearchOpen ? 'var(--accent-border)' : 'var(--border-subtle)',
-                color: isEventSearchOpen ? 'var(--accent)' : 'var(--foreground-strong)',
-              }}
-              aria-label={translate('home.searchButton')}
-              title={translate('home.searchButton')}
-            >
-              <Search size={18} strokeWidth={2.1} />
-            </motion.button>
-          </div>
-
-          <AnimatePresence initial={false}>
-            {isEventSearchOpen && (
-              <motion.div
-                key="home-event-search"
-                initial={{ opacity: 0, y: -8, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -8, height: 0 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden"
-              >
-                <div
-                  className="mt-2 flex items-center gap-2 rounded-xl border px-3 py-2"
-                  style={{
-                    backgroundColor: 'var(--surface-overlay)',
-                    borderColor: 'var(--border-subtle)',
-                  }}
-                >
-                  <Search size={16} className="shrink-0 text-muted-foreground" strokeWidth={2} />
-                  <input
-                    type="text"
-                    value={eventSearchQuery}
-                    onChange={(event) =>
-                      setEventSearchQuery(limitText(event.target.value, INPUT_LIMITS.search))
-                    }
-                    maxLength={INPUT_LIMITS.search}
-                    placeholder={translate('home.searchPlaceholder')}
-                    autoComplete="off"
-                    className="w-full bg-transparent text-sm outline-none"
-                    style={{ color: 'var(--foreground-strong)' }}
-                  />
-                  {eventSearchQuery.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setEventSearchQuery('')}
-                      className="shrink-0 text-muted-foreground transition-opacity hover:opacity-70"
-                      aria-label="Clear search"
-                      title="Clear search"
-                    >
-                      <X size={16} strokeWidth={2} />
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {isCityPickerOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.16 }}
-              className="mt-2 rounded-xl border overflow-hidden"
-              style={{
-                backgroundColor: 'var(--surface-overlay)',
-                borderColor: 'var(--border-subtle)',
-              }}
-            >
-              <div className="border-b border-border px-3 py-2">
-                <input
-                  type="text"
-                  value={citySearchQuery}
-                  onChange={(event) =>
-                    setCitySearchQuery(limitText(event.target.value, INPUT_LIMITS.search))
-                  }
-                  maxLength={INPUT_LIMITS.search}
-                  placeholder={translate('home.citySearchPlaceholder')}
-                  autoComplete="off"
-                  className="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"
-                  style={{
-                    backgroundColor: 'var(--card)',
-                    borderColor: 'var(--border-subtle)',
-                    color: 'var(--foreground-strong)',
-                  }}
-                />
-              </div>
-
-              <div className="max-h-48 overflow-y-auto no-scrollbar py-1">
-                <button
-                  type="button"
-                  onClick={() => handleSelectCity('all')}
-                  className="w-full px-3 py-2 text-left text-sm transition-colors"
-                  style={{
-                    color: selectedCity === 'all' ? 'var(--accent)' : 'var(--foreground-strong)',
-                    backgroundColor:
-                      selectedCity === 'all' ? 'var(--accent-soft-muted)' : 'transparent',
-                  }}
-                >
-                  {translate('home.allCities')}
-                </button>
-
-                {filteredCityOptions.map((cityOption) => {
-                  const isActive = selectedCity === cityOption.cityNormalized;
-
-                  return (
-                    <button
-                      key={cityOption.cityNormalized}
-                      type="button"
-                      onClick={() => handleSelectCity(cityOption.cityNormalized)}
-                      className="w-full px-3 py-2 text-left text-sm transition-colors"
-                      style={{
-                        color: isActive ? 'var(--accent)' : 'var(--foreground-strong)',
-                        backgroundColor: isActive
-                          ? 'var(--accent-soft-muted)'
-                          : 'transparent',
-                      }}
-                    >
-                      {cityOption.city}
-                    </button>
-                  );
-                })}
-
-                {filteredCityOptions.length === 0 && (
-                  <div className="px-3 py-3 text-sm text-muted-foreground">
-                    {translate('home.noCitiesFound')}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </div>
+      <HomeFilters
+        homeTabs={homeTabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        tabTransition={tabTransition}
+        selectedActivityType={selectedActivityType}
+        setSelectedActivityType={setSelectedActivityType}
+        language={language}
+        selectedCity={selectedCity}
+        selectedCityLabel={selectedCityLabel}
+        isCityPickerOpen={isCityPickerOpen}
+        toggleCityPicker={toggleCityPicker}
+        citySearchQuery={citySearchQuery}
+        setCitySearchQuery={setCitySearchQuery}
+        filteredCityOptions={filteredCityOptions}
+        handleSelectCity={handleSelectCity}
+        isEventSearchOpen={isEventSearchOpen}
+        toggleEventSearch={toggleEventSearch}
+        eventSearchQuery={eventSearchQuery}
+        setEventSearchQuery={setEventSearchQuery}
+        translate={translate}
+      />
 
       <PullToRefresh onRefresh={handleRefresh}>
         <div
@@ -1317,211 +874,37 @@ export function HomeScreen({
           style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
           onScroll={handleContentScroll}
         >
-          <motion.div layout transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}>
-            <AnimatePresence initial={false} mode="sync">
-              {shouldRenderAnimatedInitialLoader && (
-                <motion.div
-                  key="home-initial-loader"
-                  layout
-                  className="overflow-hidden"
-                  initial={{ opacity: 0, y: 22, scale: 0.972 }}
-                  animate={
-                    initialLoaderPhase === 'exiting'
-                      ? { opacity: 0, y: -18, scale: 0.988, height: 0, marginBottom: 0 }
-                      : { opacity: 1, y: 0, scale: 1, height: 'auto', marginBottom: 0 }
-                  }
-                  exit={{ opacity: 0, y: -18, scale: 0.988, height: 0, marginBottom: 0 }}
-                  transition={{
-                    opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
-                    y: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
-                    scale: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
-                    height: { duration: 0.44, ease: [0.22, 1, 0.36, 1] },
-                    marginBottom: { duration: 0.44, ease: [0.22, 1, 0.36, 1] },
-                  }}
-                >
-                  <div className="space-y-3 py-1">
-                    <motion.div
-                      layout
-                      className="flex justify-center py-4"
-                      transition={{ duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <motion.div
-                        initial={{ opacity: 0, y: 12, scale: 0.94 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.94 }}
-                        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                      >
-                        <LoadingLogo size={52} label={translate('common.loading')} />
-                      </motion.div>
-                    </motion.div>
-
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <motion.div
-                        key={`home-skeleton-${index}`}
-                        layout
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -12 }}
-                        transition={{
-                          duration: 0.38,
-                          delay: index * 0.05,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                      >
-                        <LoadingCard className="rounded-xl" lines={['42%', '26%', '68%', '84%', '55%']} />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+          <HomeInitialLoader phase={initialLoaderPhase} translate={translate} />
 
           {shouldShowEmptyState && (
-            <div
-              className="rounded-xl p-4 border border-border"
-              style={{
-                backgroundColor: 'var(--card)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              }}
-            >
-              <h3 className="mb-2">
-                {activeTab === 'my'
-                  ? translate('home.noMyEvents')
-                  : activeTab === 'joined'
-                    ? translate('home.noJoinedEvents')
-                    : activeTab === 'visited'
-                      ? translate('home.noVisitedEvents')
-                    : translate('home.noDiscoverEvents')}
-              </h3>
-
-              <p className="text-sm text-muted-foreground">
-                {selectedCity !== 'all'
-                  ? translate('home.noEventsForCity')
-                  : selectedActivityType !== 'all'
-                  ? translate('home.noEventsForFilter')
-                  : activeTab === 'my'
-                    ? translate('home.createFirstEvent')
-                    : activeTab === 'joined'
-                      ? translate('home.joinedWillAppear')
-                      : activeTab === 'visited'
-                        ? translate('home.visitedWillAppear')
-                      : translate('home.noEventsFromOthers')}
-              </p>
-            </div>
+            <HomeEmptyState
+              activeTab={activeTab}
+              selectedCity={selectedCity}
+              selectedActivityType={selectedActivityType}
+              translate={translate}
+            />
           )}
 
           <motion.div layout="position" className="space-y-3">
-            {visibleEvents.map((event) => {
-              const past = isPastEvent(event);
-              const activityMeta = getActivityTypeMeta(event.activity_type, language);
-              const isRequestMode = event.join_mode === 'request';
-              const canViewClosedPreview =
-                !isRequestMode ||
-                event.creator_id === currentUserId ||
-                joinedEventIds.includes(event.id) ||
-                isAdmin;
-              const dateLabel = isRequestMode && !canViewClosedPreview
-                ? translate('home.closedDateHidden')
-                : formatEventDate(event.date_time);
-              const locationLabel = isRequestMode && !canViewClosedPreview
-                ? translate('home.closedLocationHidden')
-                : event.location || translate('details.locationNotSpecified');
-
-              return (
-                <motion.div
-                  key={event.id}
-                  layout="position"
-                  transition={{
-                    layout: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
-                  }}
-                  whileTap={{ scale: 0.985 }}
-                  onClick={() =>
-                    onNavigate('event-details', {
-                      ...event,
-                      backTarget: 'home',
-                    })
-                  }
-                  className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
-                  style={{
-                    backgroundColor: 'var(--card)',
-                    borderColor: isRequestMode ? 'var(--accent-border-strong)' : 'var(--border)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                    opacity: past ? 0.72 : 1,
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3>{event.title}</h3>
-
-                    <div className="flex items-center gap-2">
-                      {isRequestMode && (
-                        <span
-                          className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
-                          style={{
-                            borderColor: 'var(--accent-border-strong)',
-                            color: 'var(--accent)',
-                            backgroundColor: 'var(--accent-soft-muted)',
-                          }}
-                        >
-                          {translate('home.closedBadge')}
-                        </span>
-                      )}
-
-                      {past && (
-                        <span
-                          className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
-                          style={{
-                            borderColor: 'var(--accent-border-muted)',
-                            color: 'var(--accent)',
-                            backgroundColor: 'var(--accent-soft-muted)',
-                          }}
-                        >
-                          {translate('home.past')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mb-2">
-                    <span
-                      className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border"
-                      style={{
-                        borderColor: 'rgba(212, 175, 55, 0.22)',
-                        color: 'var(--accent)',
-                        backgroundColor: 'rgba(212, 175, 55, 0.06)',
-                      }}
-                    >
-                      <span>{activityMeta.emoji}</span>
-                      <span>{activityMeta.label}</span>
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {dateLabel}
-                  </p>
-
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {locationLabel}
-                  </p>
-
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground">
-                      {translate('home.createdBy')}{' '}
-                      {event.creator_id === currentUserId
-                        ? translate('home.you')
-                        : event.creatorName || translate('common.unknown')}
-                    </span>
-
-                    <span className="text-xs text-muted-foreground">
-                      {event.participantCount}{' '}
-                      {event.participantCount === 1
-                        ? translate('home.participant')
-                        : translate('home.participants')}
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
+            {visibleEvents.map((event) => (
+              <HomeEventCard
+                key={event.id}
+                event={event}
+                currentUserId={currentUserId}
+                joinedEventIds={joinedEventIds}
+                isAdmin={isAdmin}
+                language={language}
+                translate={translate}
+                isPastEvent={isPastEvent}
+                formatEventDate={formatEventDate}
+                onOpen={(nextEvent) =>
+                  onNavigate('event-details', {
+                    ...nextEvent,
+                    backTarget: 'home',
+                  })
+                }
+              />
+            ))}
           </motion.div>
 
           {shouldShowLoadMore && (
@@ -1565,58 +948,11 @@ export function HomeScreen({
       </motion.button>
 
       {isLaunchOverlayVisible && (
-        <div
-          className="absolute inset-0 z-40 flex items-center justify-center px-6"
-          style={{
-            backgroundColor: launchOverlayStyles.scrimBackground,
-            backdropFilter: 'blur(6px)',
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18 }}
-            className="w-full max-w-sm rounded-2xl border p-6"
-            style={{
-              backgroundColor: launchOverlayStyles.cardBackground,
-              borderColor: launchOverlayStyles.cardBorder,
-              boxShadow: launchOverlayStyles.cardShadow,
-            }}
-          >
-            <div className="space-y-3">
-              <div
-                className="inline-flex rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.18em]"
-                style={{
-                  borderColor: launchOverlayStyles.badgeBorder,
-                  color: 'var(--accent)',
-                  backgroundColor: launchOverlayStyles.badgeBackground,
-                }}
-              >
-                Gathr
-              </div>
-
-              <h2 className="text-xl leading-tight">{translate('home.launchOverlayTitle')}</h2>
-
-              <p className="text-sm leading-6 text-muted-foreground">
-                {translate('home.launchOverlayText')}
-              </p>
-            </div>
-
-            <motion.button
-              type="button"
-              whileTap={{ scale: 0.98 }}
-              onClick={handleDismissLaunchOverlay}
-              className="mt-6 w-full rounded-xl px-4 py-3 text-sm font-medium"
-              style={{
-                backgroundColor: 'var(--accent)',
-                color: 'var(--accent-foreground)',
-                boxShadow: launchOverlayStyles.buttonShadow,
-              }}
-            >
-              {translate('home.launchOverlayButton')}
-            </motion.button>
-          </motion.div>
-        </div>
+        <HomeLaunchOverlay
+          styles={launchOverlayStyles}
+          translate={translate}
+          onDismiss={handleDismissLaunchOverlay}
+        />
       )}
     </div>
   );

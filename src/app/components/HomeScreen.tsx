@@ -644,6 +644,26 @@ export function HomeScreen({
       .slice(0, 5);
   }, [activeTab, sortedEvents]);
 
+  const featuredEventIds = useMemo(() => {
+    return new Set(featuredEvents.map((event) => event.id));
+  }, [featuredEvents]);
+
+  const discoverUpcomingEvents = useMemo(() => {
+    if (activeTab !== 'discover') {
+      return [];
+    }
+
+    return sortedEvents.filter((event) => !featuredEventIds.has(event.id));
+  }, [activeTab, sortedEvents, featuredEventIds]);
+
+  const visibleUpcomingEvents = useMemo(() => {
+    if (activeTab !== 'discover') {
+      return visibleEvents;
+    }
+
+    return discoverUpcomingEvents.slice(0, visibleCount);
+  }, [activeTab, discoverUpcomingEvents, visibleCount, visibleEvents]);
+
   const recentlyHappenedEvents = useMemo(() => {
     if (activeTab !== 'discover') {
       return [];
@@ -749,6 +769,7 @@ export function HomeScreen({
     const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
     const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
     const items: Array<{ id: string; text: string }> = [];
+    const primaryRecentlyHappenedId = recentlyHappenedEvents[0]?.id ?? null;
 
     const createdThisWeekCount = filteredEventsByControls.filter((event) => {
       const createdAt = event.created_at ? new Date(event.created_at).getTime() : Number.NaN;
@@ -763,7 +784,12 @@ export function HomeScreen({
     }
 
     const topPastEvent = filteredEventsByControls
-      .filter((event) => isPastEvent(event) && event.participantCount > 0)
+      .filter(
+        (event) =>
+          isPastEvent(event) &&
+          event.participantCount > 0 &&
+          event.id !== primaryRecentlyHappenedId
+      )
       .sort((a, b) => b.participantCount - a.participantCount)[0];
 
     if (topPastEvent) {
@@ -800,7 +826,7 @@ export function HomeScreen({
     }
 
     const recentPastEvent = filteredEventsByControls
-      .filter((event) => isPastEvent(event))
+      .filter((event) => isPastEvent(event) && event.id !== primaryRecentlyHappenedId)
       .sort((a, b) => getEventTimestamp(b) - getEventTimestamp(a))[0];
 
     if (recentPastEvent && !items.some((item) => item.id.includes(recentPastEvent.id))) {
@@ -811,7 +837,7 @@ export function HomeScreen({
     }
 
     return items.slice(0, 4);
-  }, [activeTab, filteredEventsByControls, language, translate]);
+  }, [activeTab, filteredEventsByControls, language, recentlyHappenedEvents, translate]);
 
   const templateIdeas = useMemo(
     () => [
@@ -846,17 +872,20 @@ export function HomeScreen({
 
   const socialProofSummary = useMemo(() => {
     const citySet = new Set(
-      events
+      filteredEventsByControls
         .map((event) => event.city_normalized)
         .filter((city): city is string => typeof city === 'string' && city.trim().length > 0)
     );
 
     return {
-      eventsCount: events.length,
-      totalParticipants: events.reduce((sum, event) => sum + event.participantCount, 0),
+      eventsCount: filteredEventsByControls.length,
+      totalParticipants: filteredEventsByControls.reduce(
+        (sum, event) => sum + event.participantCount,
+        0
+      ),
       citiesCount: citySet.size,
     };
-  }, [events]);
+  }, [filteredEventsByControls]);
 
   const shouldShowInitialLoader = loading && events.length === 0;
   const shouldRenderAnimatedInitialLoader = initialLoaderPhase !== 'hidden';
@@ -864,7 +893,11 @@ export function HomeScreen({
     activeTab === 'discover' &&
     (recentlyHappenedEvents.length > 0 || popularPastEvents.length > 0);
   const shouldShowEmptyState = !loading && sortedEvents.length === 0 && !shouldShowDiscoverHistory;
-  const canShowLoadMore = !loading && visibleEvents.length < sortedEvents.length;
+  const canShowLoadMore =
+    !loading &&
+    (activeTab === 'discover'
+      ? visibleUpcomingEvents.length < discoverUpcomingEvents.length
+      : visibleEvents.length < sortedEvents.length);
   const canLoadMoreFromServer =
     !loading &&
     !loadingMore &&
@@ -889,7 +922,12 @@ export function HomeScreen({
   };
 
   const handleLoadMore = async () => {
-    if (visibleCount < sortedEvents.length) {
+    const visibleListLength =
+      activeTab === 'discover' ? visibleUpcomingEvents.length : visibleEvents.length;
+    const totalListLength =
+      activeTab === 'discover' ? discoverUpcomingEvents.length : sortedEvents.length;
+
+    if (visibleListLength < totalListLength) {
       setVisibleCount((prev) => prev + LOCAL_BATCH_SIZE);
       return;
     }
@@ -1166,24 +1204,11 @@ export function HomeScreen({
 
           {activeTab === 'discover' && (
             <div className="space-y-6">
-              <HomeSocialProofSummary
-                eventsCount={socialProofSummary.eventsCount}
-                totalParticipants={socialProofSummary.totalParticipants}
-                citiesCount={socialProofSummary.citiesCount}
-                translate={translate}
-              />
-
               <HomeExploreByVibe
                 selectedActivityType={selectedActivityType}
                 language={language}
                 translate={translate}
                 onSelectActivityType={setSelectedActivityType}
-              />
-
-              <HomeTemplateIdeas
-                ideas={templateIdeas}
-                translate={translate}
-                onSelectTemplate={handleCreateEvent}
               />
 
               {featuredEvents.length > 0 && (
@@ -1212,13 +1237,13 @@ export function HomeScreen({
                 </HomeFeedSection>
               )}
 
-              {(visibleEvents.length > 0 || shouldShowLoadMore) && (
+              {(visibleUpcomingEvents.length > 0 || shouldShowLoadMore) && (
                 <HomeFeedSection
                   title={translate('home.upcomingEvents')}
                   subtitle={translate('home.upcomingEventsSubtitle')}
                 >
                   <motion.div layout="position" className="space-y-3">
-                    {visibleEvents.map((event) => (
+                    {visibleUpcomingEvents.map((event) => (
                       <HomeEventCard
                         key={event.id}
                         event={event}
@@ -1236,16 +1261,12 @@ export function HomeScreen({
                 </HomeFeedSection>
               )}
 
-              {visibleEvents.length === 0 && shouldShowDiscoverHistory && !loading && (
+              {visibleUpcomingEvents.length === 0 && shouldShowDiscoverHistory && !loading && (
                 <HomeDiscoverHistoryNudge
                   translate={translate}
                   onCreateEvent={handleCreateEvent}
                 />
               )}
-
-              <HomeTrendingCreators creators={trendingCreators} translate={translate} />
-
-              <HomeCityPulse items={cityPulseItems} translate={translate} />
             </div>
           )}
 
@@ -1344,6 +1365,27 @@ export function HomeScreen({
                   </motion.div>
                 </HomeFeedSection>
               )}
+            </div>
+          )}
+
+          {activeTab === 'discover' && (
+            <div className="space-y-6">
+              <HomeTrendingCreators creators={trendingCreators} translate={translate} />
+
+              <HomeCityPulse items={cityPulseItems} translate={translate} />
+
+              <HomeTemplateIdeas
+                ideas={templateIdeas}
+                translate={translate}
+                onSelectTemplate={handleCreateEvent}
+              />
+
+              <HomeSocialProofSummary
+                eventsCount={socialProofSummary.eventsCount}
+                totalParticipants={socialProofSummary.totalParticipants}
+                citiesCount={socialProofSummary.citiesCount}
+                translate={translate}
+              />
             </div>
           )}
         </div>

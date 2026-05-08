@@ -23,17 +23,14 @@ export function AppFrame({
       style={{ minHeight: 'var(--app-height, 100dvh)', height: 'var(--app-height, 100dvh)' }}
     >
       <div
-        className={`relative overflow-hidden flex flex-col w-full h-full md:min-h-0 md:w-auto${
+        data-mobile-viewport={isMobileViewport ? 'true' : 'false'}
+        className={`relative overflow-hidden flex flex-col h-full w-full min-w-0 max-w-full md:min-h-0 md:max-h-[844px] md:max-w-[390px] md:rounded-[2.5rem]${
           centerContent ? ' items-center justify-center' : ''
         }`}
         style={{
-          width: '100%',
           height: 'var(--app-height, 100dvh)',
-          maxWidth: isMobileViewport ? '100%' : '390px',
-          maxHeight: isMobileViewport ? 'none' : '844px',
           backgroundColor: 'var(--background)',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-          borderRadius: isMobileViewport ? '0' : '2.5rem',
         }}
       >
         {children}

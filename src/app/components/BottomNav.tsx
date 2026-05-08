@@ -114,7 +114,7 @@ export function BottomNav({
       animate={{ y: 0 }}
       exit={{ y: 100 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="flex items-center justify-around border-t"
+      className="flex w-full shrink-0 items-center justify-around border-t"
       style={{
         borderColor: 'var(--border)',
         backgroundColor: 'var(--background)',

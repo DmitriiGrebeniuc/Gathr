@@ -4,7 +4,7 @@ import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
-import type { ActivityType } from '../constants/activityTypes';
+import { getActivityTypeMeta, type ActivityType } from '../constants/activityTypes';
 import { canonicalizeCityName, normalizeCityName } from '../lib/locationCity';
 import { LoadingLine } from './LoadingState';
 import {
@@ -19,9 +19,13 @@ import { HomeEventCard } from './home/HomeEventCard';
 import { HomeEmptyState, HomeInitialLoader } from './home/HomeFeedStates';
 import {
   getEventTimestamp,
+  HomeCityPulse,
+  HomeDiscoverHistoryNudge,
   HomeExploreByVibe,
   HomeFeedSection,
   HomeSocialProofSummary,
+  HomeTemplateIdeas,
+  HomeTrendingCreators,
 } from './home/HomeFeedSections';
 import { HomeFilters } from './home/HomeFilters';
 import { HomeHeader } from './home/HomeHeader';
@@ -670,6 +674,176 @@ export function HomeScreen({
       .slice(0, 5);
   }, [activeTab, filteredEventsByControls, recentlyHappenedEvents]);
 
+  const trendingCreators = useMemo(() => {
+    if (activeTab !== 'discover') {
+      return [];
+    }
+
+    const creatorMap = new Map<
+      string,
+      {
+        id: string;
+        name: string;
+        eventCount: number;
+        totalParticipants: number;
+        lastActivityAt: number;
+      }
+    >();
+
+    filteredEventsByControls.forEach((event) => {
+      if (!event.creator_id) {
+        return;
+      }
+
+      const existing = creatorMap.get(event.creator_id);
+      const lastActivityAt = Math.max(
+        getEventTimestamp(event),
+        event.created_at ? new Date(event.created_at).getTime() || 0 : 0
+      );
+
+      if (existing) {
+        existing.eventCount += 1;
+        existing.totalParticipants += event.participantCount;
+        existing.lastActivityAt = Math.max(existing.lastActivityAt, lastActivityAt);
+        return;
+      }
+
+      creatorMap.set(event.creator_id, {
+        id: event.creator_id,
+        name: event.creatorName || translate('common.unknown'),
+        eventCount: 1,
+        totalParticipants: event.participantCount,
+        lastActivityAt,
+      });
+    });
+
+    return Array.from(creatorMap.values())
+      .filter((creator) => creator.eventCount > 1 || creator.totalParticipants > 0)
+      .sort((a, b) => {
+        if (b.eventCount !== a.eventCount) {
+          return b.eventCount - a.eventCount;
+        }
+
+        if (b.totalParticipants !== a.totalParticipants) {
+          return b.totalParticipants - a.totalParticipants;
+        }
+
+        return b.lastActivityAt - a.lastActivityAt;
+      })
+      .slice(0, 3)
+      .map((creator) => ({
+        id: creator.id,
+        name: creator.name,
+        initials: getInitials(creator.name),
+        eventCount: creator.eventCount,
+        totalParticipants: creator.totalParticipants,
+      }));
+  }, [activeTab, filteredEventsByControls, translate]);
+
+  const cityPulseItems = useMemo(() => {
+    if (activeTab !== 'discover') {
+      return [];
+    }
+
+    const now = Date.now();
+    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
+    const items: Array<{ id: string; text: string }> = [];
+
+    const createdThisWeekCount = filteredEventsByControls.filter((event) => {
+      const createdAt = event.created_at ? new Date(event.created_at).getTime() : Number.NaN;
+      return !Number.isNaN(createdAt) && createdAt >= weekAgo;
+    }).length;
+
+    if (createdThisWeekCount >= 2) {
+      items.push({
+        id: 'created-this-week',
+        text: `${createdThisWeekCount} ${translate('home.cityPulseCreatedThisWeek')}`,
+      });
+    }
+
+    const topPastEvent = filteredEventsByControls
+      .filter((event) => isPastEvent(event) && event.participantCount > 0)
+      .sort((a, b) => b.participantCount - a.participantCount)[0];
+
+    if (topPastEvent) {
+      items.push({
+        id: `past-participants-${topPastEvent.id}`,
+        text: `${topPastEvent.title} ${translate('home.cityPulseHad')} ${
+          topPastEvent.participantCount
+        } ${translate('home.socialProofParticipants')}`,
+      });
+    }
+
+    const monthlyActivityCounts = new Map<ActivityType, number>();
+    filteredEventsByControls.forEach((event) => {
+      const eventAt = getEventTimestamp(event);
+
+      if (eventAt < monthAgo || !event.activity_type) {
+        return;
+      }
+
+      monthlyActivityCounts.set(
+        event.activity_type,
+        (monthlyActivityCounts.get(event.activity_type) || 0) + 1
+      );
+    });
+
+    const topActivity = Array.from(monthlyActivityCounts.entries()).sort((a, b) => b[1] - a[1])[0];
+
+    if (topActivity && topActivity[1] >= 2) {
+      const activityMeta = getActivityTypeMeta(topActivity[0], language);
+      items.push({
+        id: `popular-activity-${topActivity[0]}`,
+        text: `${activityMeta.label} ${translate('home.cityPulsePopularThisMonth')}`,
+      });
+    }
+
+    const recentPastEvent = filteredEventsByControls
+      .filter((event) => isPastEvent(event))
+      .sort((a, b) => getEventTimestamp(b) - getEventTimestamp(a))[0];
+
+    if (recentPastEvent && !items.some((item) => item.id.includes(recentPastEvent.id))) {
+      items.push({
+        id: `recent-${recentPastEvent.id}`,
+        text: `${recentPastEvent.title} ${translate('home.cityPulseHappenedRecently')}`,
+      });
+    }
+
+    return items.slice(0, 4);
+  }, [activeTab, filteredEventsByControls, language, translate]);
+
+  const templateIdeas = useMemo(
+    () => [
+      {
+        id: 'football',
+        label: translate('home.templateFootball'),
+        activityType: 'sports' as ActivityType,
+      },
+      {
+        id: 'coffee',
+        label: translate('home.templateCoffee'),
+        activityType: 'food_drinks' as ActivityType,
+      },
+      {
+        id: 'walk',
+        label: translate('home.templateWalk'),
+        activityType: 'outdoors' as ActivityType,
+      },
+      {
+        id: 'board-games',
+        label: translate('home.templateBoardGames'),
+        activityType: 'entertainment' as ActivityType,
+      },
+      {
+        id: 'study',
+        label: translate('home.templateStudy'),
+        activityType: 'study' as ActivityType,
+      },
+    ],
+    [translate]
+  );
+
   const socialProofSummary = useMemo(() => {
     const citySet = new Set(
       events
@@ -697,6 +871,22 @@ export function HomeScreen({
     hasMoreServerEvents &&
     sortedEvents.length >= visibleCount;
   const shouldShowLoadMore = canShowLoadMore || canLoadMoreFromServer;
+
+  const hasActiveFilters =
+    selectedActivityType !== 'all' || selectedCity !== 'all' || eventSearchQuery.trim().length > 0;
+
+  const handleClearFilters = () => {
+    setSelectedActivityType('all');
+    setSelectedCity('all');
+    setEventSearchQuery('');
+    setCitySearchQuery('');
+    setIsCityPickerOpen(false);
+    setIsEventSearchOpen(false);
+  };
+
+  const handleCreateEvent = () => {
+    onNavigate('create-event');
+  };
 
   const handleLoadMore = async () => {
     if (visibleCount < sortedEvents.length) {
@@ -967,7 +1157,10 @@ export function HomeScreen({
               activeTab={activeTab}
               selectedCity={selectedCity}
               selectedActivityType={selectedActivityType}
+              hasActiveFilters={hasActiveFilters}
               translate={translate}
+              onClearFilters={handleClearFilters}
+              onCreateEvent={handleCreateEvent}
             />
           )}
 
@@ -985,6 +1178,12 @@ export function HomeScreen({
                 language={language}
                 translate={translate}
                 onSelectActivityType={setSelectedActivityType}
+              />
+
+              <HomeTemplateIdeas
+                ideas={templateIdeas}
+                translate={translate}
+                onSelectTemplate={handleCreateEvent}
               />
 
               {featuredEvents.length > 0 && (
@@ -1036,6 +1235,17 @@ export function HomeScreen({
                   </motion.div>
                 </HomeFeedSection>
               )}
+
+              {visibleEvents.length === 0 && shouldShowDiscoverHistory && !loading && (
+                <HomeDiscoverHistoryNudge
+                  translate={translate}
+                  onCreateEvent={handleCreateEvent}
+                />
+              )}
+
+              <HomeTrendingCreators creators={trendingCreators} translate={translate} />
+
+              <HomeCityPulse items={cityPulseItems} translate={translate} />
             </div>
           )}
 
@@ -1142,7 +1352,7 @@ export function HomeScreen({
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => onNavigate('create-event')}
+        onClick={handleCreateEvent}
         className="absolute bottom-24 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
         style={{
           bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',

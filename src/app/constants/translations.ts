@@ -414,6 +414,27 @@ type TranslationKey =
     | 'home.socialProofEvents'
     | 'home.socialProofParticipants'
     | 'home.socialProofCities'
+    | 'home.templateIdeasTitle'
+    | 'home.templateIdeasSubtitle'
+    | 'home.templateFootball'
+    | 'home.templateCoffee'
+    | 'home.templateWalk'
+    | 'home.templateBoardGames'
+    | 'home.templateStudy'
+    | 'home.trendingCreatorsTitle'
+    | 'home.trendingCreatorsSubtitle'
+    | 'home.activeHostBadge'
+    | 'home.hostedEventsLabel'
+    | 'home.cityPulseTitle'
+    | 'home.cityPulseSubtitle'
+    | 'home.cityPulseCreatedThisWeek'
+    | 'home.cityPulseHad'
+    | 'home.cityPulsePopularThisMonth'
+    | 'home.cityPulseHappenedRecently'
+    | 'home.noUpcomingButPastTitle'
+    | 'home.noUpcomingButPastDescription'
+    | 'home.clearFilters'
+    | 'home.createEventCta'
     | 'home.noMyEvents'
     | 'home.noJoinedEvents'
     | 'home.noVisitedEvents'
@@ -1026,6 +1047,28 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': 'events',
         'home.socialProofParticipants': 'joined',
         'home.socialProofCities': 'cities',
+        'home.templateIdeasTitle': 'Start with an idea',
+        'home.templateIdeasSubtitle': 'Pick a quick format and create your own plan.',
+        'home.templateFootball': 'Football game',
+        'home.templateCoffee': 'Coffee meetup',
+        'home.templateWalk': 'Walk',
+        'home.templateBoardGames': 'Board games',
+        'home.templateStudy': 'Study session',
+        'home.trendingCreatorsTitle': 'Trending creators',
+        'home.trendingCreatorsSubtitle': 'Hosts who keep the city active.',
+        'home.activeHostBadge': 'Active host',
+        'home.hostedEventsLabel': 'hosted',
+        'home.cityPulseTitle': 'City pulse',
+        'home.cityPulseSubtitle': 'Small signals from real loaded activity.',
+        'home.cityPulseCreatedThisWeek': 'events were created this week',
+        'home.cityPulseHad': 'had',
+        'home.cityPulsePopularThisMonth': 'is popular this month',
+        'home.cityPulseHappenedRecently': 'happened recently',
+        'home.noUpcomingButPastTitle': 'No upcoming matches, but the city is not empty',
+        'home.noUpcomingButPastDescription':
+            'Recent activity is below. You can start the next event.',
+        'home.clearFilters': 'Clear filters',
+        'home.createEventCta': 'Create event',
         'home.noMyEvents': 'No my events yet',
         'home.noJoinedEvents': 'No joined events yet',
         'home.noVisitedEvents': 'No visited events yet',
@@ -1634,6 +1677,27 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': '\u0441\u043e\u0431\u044b\u0442\u0438\u0439',
         'home.socialProofParticipants': '\u0443\u0447\u0430\u0441\u0442\u0438\u0439',
         'home.socialProofCities': '\u0433\u043e\u0440\u043e\u0434\u043e\u0432',
+        'home.templateIdeasTitle': '\u041d\u0430\u0447\u0430\u0442\u044c \u0441 \u0438\u0434\u0435\u0438',
+        'home.templateIdeasSubtitle': '\u0412\u044b\u0431\u0435\u0440\u0438 \u043f\u0440\u043e\u0441\u0442\u043e\u0439 \u0444\u043e\u0440\u043c\u0430\u0442 \u0438 \u0441\u043e\u0437\u0434\u0430\u0439 \u0441\u0432\u043e\u044e \u0432\u0441\u0442\u0440\u0435\u0447\u0443.',
+        'home.templateFootball': '\u0424\u0443\u0442\u0431\u043e\u043b',
+        'home.templateCoffee': '\u041a\u043e\u0444\u0435-\u0432\u0441\u0442\u0440\u0435\u0447\u0430',
+        'home.templateWalk': '\u041f\u0440\u043e\u0433\u0443\u043b\u043a\u0430',
+        'home.templateBoardGames': '\u041d\u0430\u0441\u0442\u043e\u043b\u043a\u0438',
+        'home.templateStudy': '\u0423\u0447\u0451\u0431\u043d\u0430\u044f \u0441\u0435\u0441\u0441\u0438\u044f',
+        'home.trendingCreatorsTitle': '\u0410\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u043e\u0440\u0433\u0430\u043d\u0438\u0437\u0430\u0442\u043e\u0440\u044b',
+        'home.trendingCreatorsSubtitle': '\u041b\u044e\u0434\u0438, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u043f\u043e\u043c\u043e\u0433\u0430\u044e\u0442 \u0433\u043e\u0440\u043e\u0434\u0443 \u0436\u0438\u0442\u044c.',
+        'home.activeHostBadge': '\u0410\u043a\u0442\u0438\u0432\u043d\u044b\u0439',
+        'home.hostedEventsLabel': '\u043f\u0440\u043e\u0432\u0451\u043b',
+        'home.cityPulseTitle': '\u041f\u0443\u043b\u044c\u0441 \u0433\u043e\u0440\u043e\u0434\u0430',
+        'home.cityPulseSubtitle': '\u041a\u043e\u0440\u043e\u0442\u043a\u0438\u0435 \u0441\u0438\u0433\u043d\u0430\u043b\u044b \u0438\u0437 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0439 \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u0438.',
+        'home.cityPulseCreatedThisWeek': '\u0441\u043e\u0431\u044b\u0442\u0438\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u043e \u043d\u0430 \u044d\u0442\u043e\u0439 \u043d\u0435\u0434\u0435\u043b\u0435',
+        'home.cityPulseHad': '\u0441\u043e\u0431\u0440\u0430\u043b\u043e',
+        'home.cityPulsePopularThisMonth': '\u043f\u043e\u043f\u0443\u043b\u044f\u0440\u043d\u043e \u0432 \u044d\u0442\u043e\u043c \u043c\u0435\u0441\u044f\u0446\u0435',
+        'home.cityPulseHappenedRecently': '\u043f\u0440\u043e\u0448\u043b\u043e \u043d\u0435\u0434\u0430\u0432\u043d\u043e',
+        'home.noUpcomingButPastTitle': '\u041d\u043e\u0432\u044b\u0445 \u043f\u043b\u0430\u043d\u043e\u0432 \u043d\u0435\u0442, \u043d\u043e \u0433\u043e\u0440\u043e\u0434 \u043d\u0435 \u043f\u0443\u0441\u0442\u043e\u0439',
+        'home.noUpcomingButPastDescription': '\u041d\u0438\u0436\u0435 \u0432\u0438\u0434\u043d\u0430 \u043d\u0435\u0434\u0430\u0432\u043d\u044f\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c. \u041c\u043e\u0436\u043d\u043e \u0437\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u044c \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0443\u044e \u0432\u0441\u0442\u0440\u0435\u0447\u0443.',
+        'home.clearFilters': '\u0421\u0431\u0440\u043e\u0441\u0438\u0442\u044c \u0444\u0438\u043b\u044c\u0442\u0440\u044b',
+        'home.createEventCta': '\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0441\u043e\u0431\u044b\u0442\u0438\u0435',
         'home.noMyEvents': 'У тебя пока нет событий',
         'home.noJoinedEvents': 'Ты пока никуда не присоединился',
         'home.noDiscoverEvents': 'Событий пока нет',
@@ -2199,6 +2263,28 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': 'evenimente',
         'home.socialProofParticipants': 'participări',
         'home.socialProofCities': 'orașe',
+        'home.templateIdeasTitle': 'Începe cu o idee',
+        'home.templateIdeasSubtitle': 'Alege un format rapid și creează propriul plan.',
+        'home.templateFootball': 'Fotbal',
+        'home.templateCoffee': 'Cafea meetup',
+        'home.templateWalk': 'Plimbare',
+        'home.templateBoardGames': 'Jocuri de masă',
+        'home.templateStudy': 'Sesiune de studiu',
+        'home.trendingCreatorsTitle': 'Creatori activi',
+        'home.trendingCreatorsSubtitle': 'Gazde care țin orașul în mișcare.',
+        'home.activeHostBadge': 'Gazdă activă',
+        'home.hostedEventsLabel': 'organizate',
+        'home.cityPulseTitle': 'Pulsul orașului',
+        'home.cityPulseSubtitle': 'Semnale mici din activitatea reală încărcată.',
+        'home.cityPulseCreatedThisWeek': 'evenimente au fost create săptămâna aceasta',
+        'home.cityPulseHad': 'a avut',
+        'home.cityPulsePopularThisMonth': 'este popular luna aceasta',
+        'home.cityPulseHappenedRecently': 's-a întâmplat recent',
+        'home.noUpcomingButPastTitle': 'Nu sunt planuri viitoare, dar orașul nu e gol',
+        'home.noUpcomingButPastDescription':
+            'Activitatea recentă este mai jos. Poți porni următorul eveniment.',
+        'home.clearFilters': 'Resetează filtrele',
+        'home.createEventCta': 'Creează eveniment',
         'home.noMyEvents': 'Nu ai încă evenimente',
         'home.noJoinedEvents': 'Nu ai participări încă',
         'home.noDiscoverEvents': 'Nu există evenimente momentan',
@@ -2767,6 +2853,27 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': '\u043f\u043e\u0434\u0456\u0439',
         'home.socialProofParticipants': '\u0443\u0447\u0430\u0441\u0442\u0435\u0439',
         'home.socialProofCities': '\u043c\u0456\u0441\u0442',
+        'home.templateIdeasTitle': '\u041f\u043e\u0447\u0430\u0442\u0438 \u0437 \u0456\u0434\u0435\u0457',
+        'home.templateIdeasSubtitle': '\u041e\u0431\u0435\u0440\u0438 \u043f\u0440\u043e\u0441\u0442\u0438\u0439 \u0444\u043e\u0440\u043c\u0430\u0442 \u0456 \u0441\u0442\u0432\u043e\u0440\u0438 \u0441\u0432\u043e\u044e \u0437\u0443\u0441\u0442\u0440\u0456\u0447.',
+        'home.templateFootball': '\u0424\u0443\u0442\u0431\u043e\u043b',
+        'home.templateCoffee': '\u041a\u0430\u0432\u0430-\u0437\u0443\u0441\u0442\u0440\u0456\u0447',
+        'home.templateWalk': '\u041f\u0440\u043e\u0433\u0443\u043b\u044f\u043d\u043a\u0430',
+        'home.templateBoardGames': '\u041d\u0430\u0441\u0442\u0456\u043b\u044c\u043d\u0456 \u0456\u0433\u0440\u0438',
+        'home.templateStudy': '\u041d\u0430\u0432\u0447\u0430\u043b\u044c\u043d\u0430 \u0441\u0435\u0441\u0456\u044f',
+        'home.trendingCreatorsTitle': '\u0410\u043a\u0442\u0438\u0432\u043d\u0456 \u043e\u0440\u0433\u0430\u043d\u0456\u0437\u0430\u0442\u043e\u0440\u0438',
+        'home.trendingCreatorsSubtitle': '\u041b\u044e\u0434\u0438, \u044f\u043a\u0456 \u043f\u0456\u0434\u0442\u0440\u0438\u043c\u0443\u044e\u0442\u044c \u0436\u0438\u0442\u0442\u044f \u043c\u0456\u0441\u0442\u0430.',
+        'home.activeHostBadge': '\u0410\u043a\u0442\u0438\u0432\u043d\u0438\u0439',
+        'home.hostedEventsLabel': '\u043f\u0440\u043e\u0432\u0456\u0432',
+        'home.cityPulseTitle': '\u041f\u0443\u043b\u044c\u0441 \u043c\u0456\u0441\u0442\u0430',
+        'home.cityPulseSubtitle': '\u041a\u043e\u0440\u043e\u0442\u043a\u0456 \u0441\u0438\u0433\u043d\u0430\u043b\u0438 \u0437 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0457 \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u0456.',
+        'home.cityPulseCreatedThisWeek': '\u043f\u043e\u0434\u0456\u0457 \u0441\u0442\u0432\u043e\u0440\u0435\u043d\u043e \u0446\u044c\u043e\u0433\u043e \u0442\u0438\u0436\u043d\u044f',
+        'home.cityPulseHad': '\u0437\u0456\u0431\u0440\u0430\u043b\u043e',
+        'home.cityPulsePopularThisMonth': '\u043f\u043e\u043f\u0443\u043b\u044f\u0440\u043d\u0435 \u0446\u044c\u043e\u0433\u043e \u043c\u0456\u0441\u044f\u0446\u044f',
+        'home.cityPulseHappenedRecently': '\u0432\u0456\u0434\u0431\u0443\u043b\u043e\u0441\u044f \u043d\u0435\u0449\u043e\u0434\u0430\u0432\u043d\u043e',
+        'home.noUpcomingButPastTitle': '\u041d\u043e\u0432\u0438\u0445 \u043f\u043b\u0430\u043d\u0456\u0432 \u043d\u0435\u043c\u0430\u0454, \u0430\u043b\u0435 \u043c\u0456\u0441\u0442\u043e \u043d\u0435 \u043f\u043e\u0440\u043e\u0436\u043d\u0454',
+        'home.noUpcomingButPastDescription': '\u041d\u0438\u0436\u0447\u0435 \u0432\u0438\u0434\u043d\u0430 \u043d\u0435\u0449\u043e\u0434\u0430\u0432\u043d\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u0456\u0441\u0442\u044c. \u041c\u043e\u0436\u043d\u0430 \u0437\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u0438 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0443 \u0437\u0443\u0441\u0442\u0440\u0456\u0447.',
+        'home.clearFilters': '\u0421\u043a\u0438\u043d\u0443\u0442\u0438 \u0444\u0456\u043b\u044c\u0442\u0440\u0438',
+        'home.createEventCta': '\u0421\u0442\u0432\u043e\u0440\u0438\u0442\u0438 \u043f\u043e\u0434\u0456\u044e',
         'home.noMyEvents': 'У тебе поки немає подій',
         'home.noJoinedEvents': 'Ти поки ні до чого не приєднався',
         'home.noDiscoverEvents': 'Подій поки немає',
@@ -3334,6 +3441,28 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': 'Events',
         'home.socialProofParticipants': 'Teilnahmen',
         'home.socialProofCities': 'Städte',
+        'home.templateIdeasTitle': 'Mit einer Idee starten',
+        'home.templateIdeasSubtitle': 'Wähle ein schnelles Format und erstelle deinen Plan.',
+        'home.templateFootball': 'Fußballspiel',
+        'home.templateCoffee': 'Kaffee-Treffen',
+        'home.templateWalk': 'Spaziergang',
+        'home.templateBoardGames': 'Brettspiele',
+        'home.templateStudy': 'Lernsession',
+        'home.trendingCreatorsTitle': 'Aktive Gastgeber',
+        'home.trendingCreatorsSubtitle': 'Menschen, die die Stadt aktiv halten.',
+        'home.activeHostBadge': 'Aktiv',
+        'home.hostedEventsLabel': 'veranstaltet',
+        'home.cityPulseTitle': 'Stadtpuls',
+        'home.cityPulseSubtitle': 'Kleine Signale aus echter geladener Aktivität.',
+        'home.cityPulseCreatedThisWeek': 'Events wurden diese Woche erstellt',
+        'home.cityPulseHad': 'hatte',
+        'home.cityPulsePopularThisMonth': 'ist diesen Monat beliebt',
+        'home.cityPulseHappenedRecently': 'ist kürzlich passiert',
+        'home.noUpcomingButPastTitle': 'Keine kommenden Pläne, aber die Stadt ist nicht leer',
+        'home.noUpcomingButPastDescription':
+            'Die jüngste Aktivität steht unten. Du kannst das nächste Event starten.',
+        'home.clearFilters': 'Filter löschen',
+        'home.createEventCta': 'Event erstellen',
         'home.noMyEvents': 'Du hast noch keine Events',
         'home.noJoinedEvents': 'Du bist noch keinem Event beigetreten',
         'home.noDiscoverEvents': 'Noch keine Events vorhanden',

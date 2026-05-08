@@ -28,6 +28,46 @@ type HomeSocialProofSummaryProps = {
   translate: (key: any) => string;
 };
 
+type HomeTrendingCreator = {
+  id: string;
+  name: string;
+  initials: string;
+  eventCount: number;
+  totalParticipants: number;
+};
+
+type HomeActivityPulseItem = {
+  id: string;
+  text: string;
+};
+
+type HomeTemplateIdea = {
+  id: string;
+  label: string;
+  activityType: ActivityType;
+};
+
+type HomeTrendingCreatorsProps = {
+  creators: HomeTrendingCreator[];
+  translate: (key: any) => string;
+};
+
+type HomeCityPulseProps = {
+  items: HomeActivityPulseItem[];
+  translate: (key: any) => string;
+};
+
+type HomeTemplateIdeasProps = {
+  ideas: HomeTemplateIdea[];
+  translate: (key: any) => string;
+  onSelectTemplate: (idea: HomeTemplateIdea) => void;
+};
+
+type HomeDiscoverHistoryNudgeProps = {
+  translate: (key: any) => string;
+  onCreateEvent: () => void;
+};
+
 export function HomeFeedSection({ title, subtitle, children }: HomeFeedSectionProps) {
   return (
     <section className="space-y-3">
@@ -41,6 +81,48 @@ export function HomeFeedSection({ title, subtitle, children }: HomeFeedSectionPr
       </div>
       {children}
     </section>
+  );
+}
+
+export function HomeTemplateIdeas({
+  ideas,
+  translate,
+  onSelectTemplate,
+}: HomeTemplateIdeasProps) {
+  if (ideas.length === 0) {
+    return null;
+  }
+
+  return (
+    <HomeFeedSection
+      title={translate('home.templateIdeasTitle')}
+      subtitle={translate('home.templateIdeasSubtitle')}
+    >
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {ideas.map((idea) => {
+          const activityMeta = getActivityTypeMeta(idea.activityType);
+
+          return (
+            <motion.button
+              key={idea.id}
+              type="button"
+              whileTap={{ scale: 0.97 }}
+              onClick={() => onSelectTemplate(idea)}
+              className="min-w-[8.5rem] rounded-xl border px-3 py-3 text-left transition-all"
+              style={{
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
+              }}
+            >
+              <span className="block text-lg">{activityMeta.emoji}</span>
+              <span className="mt-1 block text-sm" style={{ color: 'var(--foreground-strong)' }}>
+                {idea.label}
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </HomeFeedSection>
   );
 }
 
@@ -84,6 +166,128 @@ export function HomeExploreByVibe({
         })}
       </div>
     </HomeFeedSection>
+  );
+}
+
+export function HomeTrendingCreators({ creators, translate }: HomeTrendingCreatorsProps) {
+  if (creators.length === 0) {
+    return null;
+  }
+
+  return (
+    <HomeFeedSection
+      title={translate('home.trendingCreatorsTitle')}
+      subtitle={translate('home.trendingCreatorsSubtitle')}
+    >
+      <div className="grid gap-2">
+        {creators.map((creator) => (
+          <div
+            key={creator.id}
+            className="flex items-center gap-3 rounded-xl border p-3"
+            style={{
+              backgroundColor: 'var(--card)',
+              borderColor: 'var(--border)',
+            }}
+          >
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm"
+              style={{
+                backgroundColor: 'var(--accent-soft-muted)',
+                borderColor: 'var(--accent-border-muted)',
+                color: 'var(--accent)',
+              }}
+            >
+              {creator.initials}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className="truncate text-sm" style={{ color: 'var(--foreground-strong)' }}>
+                  {creator.name}
+                </p>
+                <span
+                  className="shrink-0 rounded-full border px-2 py-0.5 text-[10px]"
+                  style={{
+                    borderColor: 'var(--accent-border-muted)',
+                    color: 'var(--accent)',
+                    backgroundColor: 'var(--accent-soft-muted)',
+                  }}
+                >
+                  {translate('home.activeHostBadge')}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {creator.eventCount} {translate('home.hostedEventsLabel')} ·{' '}
+                {creator.totalParticipants} {translate('home.socialProofParticipants')}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </HomeFeedSection>
+  );
+}
+
+export function HomeCityPulse({ items, translate }: HomeCityPulseProps) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <HomeFeedSection
+      title={translate('home.cityPulseTitle')}
+      subtitle={translate('home.cityPulseSubtitle')}
+    >
+      <div
+        className="rounded-xl border p-3"
+        style={{
+          backgroundColor: 'var(--card)',
+          borderColor: 'var(--border)',
+        }}
+      >
+        <div className="space-y-2">
+          {items.map((item) => (
+            <p key={item.id} className="text-sm text-muted-foreground">
+              <span style={{ color: 'var(--accent)' }}>•</span> {item.text}
+            </p>
+          ))}
+        </div>
+      </div>
+    </HomeFeedSection>
+  );
+}
+
+export function HomeDiscoverHistoryNudge({
+  translate,
+  onCreateEvent,
+}: HomeDiscoverHistoryNudgeProps) {
+  return (
+    <div
+      className="rounded-xl border p-4"
+      style={{
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)',
+      }}
+    >
+      <h3 className="text-sm" style={{ color: 'var(--foreground-strong)' }}>
+        {translate('home.noUpcomingButPastTitle')}
+      </h3>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {translate('home.noUpcomingButPastDescription')}
+      </p>
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.98 }}
+        onClick={onCreateEvent}
+        className="mt-3 rounded-lg px-3 py-2 text-xs"
+        style={{
+          backgroundColor: 'var(--accent)',
+          color: 'var(--accent-foreground)',
+        }}
+      >
+        {translate('home.createEventCta')}
+      </motion.button>
+    </div>
   );
 }
 

@@ -78,15 +78,23 @@ type HomeEmptyStateProps = {
   activeTab: HomeTab;
   selectedCity: string;
   selectedActivityType: string;
+  hasActiveFilters: boolean;
   translate: (key: any) => string;
+  onClearFilters: () => void;
+  onCreateEvent: () => void;
 };
 
 export function HomeEmptyState({
   activeTab,
   selectedCity,
   selectedActivityType,
+  hasActiveFilters,
   translate,
+  onClearFilters,
+  onCreateEvent,
 }: HomeEmptyStateProps) {
+  const shouldShowCreateAction = activeTab === 'discover' || activeTab === 'my';
+
   return (
     <div
       className="rounded-xl p-4 border border-border"
@@ -118,6 +126,41 @@ export function HomeEmptyState({
                   ? translate('home.visitedWillAppear')
                   : translate('home.noEventsFromOthers')}
       </p>
+
+      {(hasActiveFilters || shouldShowCreateAction) && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {hasActiveFilters && (
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              onClick={onClearFilters}
+              className="rounded-lg border px-3 py-2 text-xs"
+              style={{
+                borderColor: 'var(--accent-border-muted)',
+                color: 'var(--accent)',
+                backgroundColor: 'var(--accent-soft-muted)',
+              }}
+            >
+              {translate('home.clearFilters')}
+            </motion.button>
+          )}
+
+          {shouldShowCreateAction && (
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              onClick={onCreateEvent}
+              className="rounded-lg px-3 py-2 text-xs"
+              style={{
+                backgroundColor: 'var(--accent)',
+                color: 'var(--accent-foreground)',
+              }}
+            >
+              {translate('home.createEventCta')}
+            </motion.button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -673,10 +673,12 @@ export default function App() {
         navDirection = 'back';
       } else if (modalScreens.includes(screen)) {
         navDirection = 'up';
+      } else if (modalScreens.includes(currentScreen) && mainScreens.includes(screen)) {
+        navDirection = 'down';
       } else if (detailScreens.includes(currentScreen) && mainScreens.includes(screen)) {
         navDirection = 'back';
       } else if (mainScreens.includes(currentScreen) && mainScreens.includes(screen)) {
-        navDirection = 'forward';
+        navDirection = 'fade';
       } else if (mainScreens.includes(currentScreen) && detailScreens.includes(screen)) {
         navDirection = 'forward';
       }

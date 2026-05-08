@@ -1,4 +1,4 @@
-export type NavigationDirection = 'forward' | 'back' | 'up' | 'down';
+export type NavigationDirection = 'forward' | 'back' | 'up' | 'down' | 'fade';
 
 export type ScreenName = string;
 

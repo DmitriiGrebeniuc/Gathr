@@ -1216,7 +1216,7 @@ export function HomeScreen({
                   title={translate('home.featuredThisWeek')}
                   subtitle={translate('home.featuredThisWeekSubtitle')}
                 >
-                  <motion.div layout="position" className="space-y-3">
+                  <div className="space-y-3">
                     {featuredEvents.map((event) => (
                       <HomeEventCard
                         key={`featured-${event.id}`}
@@ -1233,7 +1233,7 @@ export function HomeScreen({
                         onOpen={openEventDetails}
                       />
                     ))}
-                  </motion.div>
+                  </div>
                 </HomeFeedSection>
               )}
 
@@ -1242,7 +1242,7 @@ export function HomeScreen({
                   title={translate('home.upcomingEvents')}
                   subtitle={translate('home.upcomingEventsSubtitle')}
                 >
-                  <motion.div layout="position" className="space-y-3">
+                  <div className="space-y-3">
                     {visibleUpcomingEvents.map((event) => (
                       <HomeEventCard
                         key={event.id}
@@ -1257,7 +1257,7 @@ export function HomeScreen({
                         onOpen={openEventDetails}
                       />
                     ))}
-                  </motion.div>
+                  </div>
                 </HomeFeedSection>
               )}
 
@@ -1271,7 +1271,7 @@ export function HomeScreen({
           )}
 
           {activeTab !== 'discover' && (
-            <motion.div layout="position" className="space-y-3">
+            <div className="space-y-3">
               {visibleEvents.map((event) => (
                 <HomeEventCard
                   key={event.id}
@@ -1286,7 +1286,7 @@ export function HomeScreen({
                   onOpen={openEventDetails}
                 />
               ))}
-            </motion.div>
+            </div>
           )}
 
           {shouldShowLoadMore && (
@@ -1319,7 +1319,7 @@ export function HomeScreen({
                   title={translate('home.recentlyHappened')}
                   subtitle={translate('home.recentlyHappenedSubtitle')}
                 >
-                  <motion.div layout="position" className="space-y-3">
+                  <div className="space-y-3">
                     {recentlyHappenedEvents.map((event) => (
                       <HomeEventCard
                         key={`recent-${event.id}`}
@@ -1336,7 +1336,7 @@ export function HomeScreen({
                         onOpen={openEventDetails}
                       />
                     ))}
-                  </motion.div>
+                  </div>
                 </HomeFeedSection>
               )}
 
@@ -1345,7 +1345,7 @@ export function HomeScreen({
                   title={translate('home.popularPastEvents')}
                   subtitle={translate('home.popularPastEventsSubtitle')}
                 >
-                  <motion.div layout="position" className="space-y-3">
+                  <div className="space-y-3">
                     {popularPastEvents.map((event) => (
                       <HomeEventCard
                         key={`popular-past-${event.id}`}
@@ -1362,7 +1362,7 @@ export function HomeScreen({
                         onOpen={openEventDetails}
                       />
                     ))}
-                  </motion.div>
+                  </div>
                 </HomeFeedSection>
               )}
             </div>

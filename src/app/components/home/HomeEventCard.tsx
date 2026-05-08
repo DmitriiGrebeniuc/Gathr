@@ -49,10 +49,6 @@ export function HomeEventCard({
 
   return (
     <motion.div
-      layout="position"
-      transition={{
-        layout: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
-      }}
       whileTap={{ scale: 0.985 }}
       onClick={() => onOpen(event)}
       className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"

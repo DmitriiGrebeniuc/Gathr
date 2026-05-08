@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { TouchButton } from './TouchButton';
-import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { LoadingCard, LoadingLine } from './LoadingState';
 import {
@@ -11,6 +10,8 @@ import {
   type CreatorEventJoinRequest,
 } from '../lib/publicData';
 import { feedback } from '../lib/feedback';
+import { supabase } from '../../lib/supabase';
+import { useSupabaseRealtimeChannel } from '../lib/useSupabaseRealtimeChannel';
 
 export function EventJoinRequestsScreen({
   onNavigate,
@@ -56,10 +57,12 @@ export function EventJoinRequestsScreen({
 
   useEffect(() => {
     void loadRequests();
+  }, [event?.id]);
 
+  useSupabaseRealtimeChannel(() => {
     if (!event?.id) return;
 
-    const channel = supabase
+    return supabase
       .channel(`event-join-requests-${event.id}`)
       .on(
         'postgres_changes',
@@ -74,10 +77,6 @@ export function EventJoinRequestsScreen({
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [event?.id]);
 
   const handleReview = async (

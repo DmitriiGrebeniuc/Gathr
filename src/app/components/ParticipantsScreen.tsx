@@ -10,6 +10,7 @@ import {
   fetchParticipantIdentityRows,
   fetchPublicProfileNameMap,
 } from '../lib/publicData';
+import { useSupabaseRealtimeChannel } from '../lib/useSupabaseRealtimeChannel';
 
 type ParticipantItem = {
   user_id: string;
@@ -117,10 +118,12 @@ export function ParticipantsScreen({
   useEffect(() => {
     setParticipantCount(event?.participantCount || 0);
     loadParticipants();
+  }, [event?.id, event?.creator_id, event?.canViewParticipantIdentities]);
 
+  useSupabaseRealtimeChannel(() => {
     if (!event?.id) return;
 
-    const channel = supabase
+    return supabase
       .channel(`participants-screen-${event.id}`)
       .on(
         'postgres_changes',
@@ -135,10 +138,6 @@ export function ParticipantsScreen({
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [event?.id, event?.creator_id, event?.canViewParticipantIdentities]);
 
   return (

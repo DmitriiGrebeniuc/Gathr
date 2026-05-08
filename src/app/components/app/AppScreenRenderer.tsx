@@ -6,7 +6,7 @@ import { EditEventScreen } from '../EditEventScreen';
 import { EditProfileScreen } from '../EditProfileScreen';
 import { EventDetailsScreen } from '../EventDetailsScreen';
 import { EventJoinRequestsScreen } from '../EventJoinRequestsScreen';
-import { HomeScreen } from '../HomeScreen';
+import { HomeScreenNew } from '../HomeScreenNew';
 import { InviteUsersScreen } from '../InviteUsersScreen';
 import { LanguageScreen } from '../LanguageScreen';
 import { LegalConsentScreen } from '../LegalConsentScreen';
@@ -100,7 +100,7 @@ export function AppScreenRenderer({
       {currentScreen === 'reset-password' && (
         <ResetPasswordScreen onNavigate={onNavigate} />
       )}
-      {currentScreen === 'home' && <HomeScreen onNavigate={onNavigate} />}
+      {currentScreen === 'home' && <HomeScreenNew onNavigate={onNavigate} />}
       {currentScreen === 'create-event' && <CreateEventScreen onNavigate={onNavigate} />}
       {currentScreen === 'edit-event' && (
         <EditEventScreen onNavigate={onNavigate} event={selectedEvent} />

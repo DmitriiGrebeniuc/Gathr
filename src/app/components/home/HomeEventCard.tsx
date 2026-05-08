@@ -8,6 +8,8 @@ type HomeEventCardProps = {
   currentUserId: string | null;
   joinedEventIds: string[];
   isAdmin: boolean;
+  variant?: 'default' | 'featured' | 'muted';
+  badgeLabel?: string | null;
   language: LanguageCode;
   translate: (key: any) => string;
   isPastEvent: (eventOrDate?: HomeEventItem | string | null) => boolean;
@@ -20,6 +22,8 @@ export function HomeEventCard({
   currentUserId,
   joinedEventIds,
   isAdmin,
+  variant = 'default',
+  badgeLabel,
   language,
   translate,
   isPastEvent,
@@ -53,10 +57,13 @@ export function HomeEventCard({
       onClick={() => onOpen(event)}
       className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
       style={{
-        backgroundColor: 'var(--card)',
+        backgroundColor: variant === 'featured' ? 'var(--accent-soft-muted)' : 'var(--card)',
         borderColor: isRequestMode ? 'var(--accent-border-strong)' : 'var(--border)',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-        opacity: past ? 0.72 : 1,
+        boxShadow:
+          variant === 'featured'
+            ? '0 8px 22px rgba(212, 175, 55, 0.16)'
+            : '0 4px 12px rgba(0, 0, 0, 0.3)',
+        opacity: past || variant === 'muted' ? 0.72 : 1,
       }}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -85,7 +92,20 @@ export function HomeEventCard({
                 backgroundColor: 'var(--accent-soft-muted)',
               }}
             >
-              {translate('home.past')}
+              {badgeLabel || translate('home.past')}
+            </span>
+          )}
+
+          {!past && badgeLabel && (
+            <span
+              className="text-[10px] px-2 py-1 rounded-full border whitespace-nowrap"
+              style={{
+                borderColor: 'var(--accent-border-muted)',
+                color: 'var(--accent)',
+                backgroundColor: 'var(--accent-soft-muted)',
+              }}
+            >
+              {badgeLabel}
             </span>
           )}
         </div>

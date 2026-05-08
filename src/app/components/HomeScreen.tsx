@@ -17,6 +17,12 @@ import {
 } from '../lib/publicData';
 import { HomeEventCard } from './home/HomeEventCard';
 import { HomeEmptyState, HomeInitialLoader } from './home/HomeFeedStates';
+import {
+  getEventTimestamp,
+  HomeExploreByVibe,
+  HomeFeedSection,
+  HomeSocialProofSummary,
+} from './home/HomeFeedSections';
 import { HomeFilters } from './home/HomeFilters';
 import { HomeHeader } from './home/HomeHeader';
 import { HomeLaunchOverlay } from './home/HomeLaunchOverlay';
@@ -427,9 +433,8 @@ export function HomeScreen({
     }
   };
 
-  const filteredEvents = useMemo(() => {
+  const filteredEventsByControls = useMemo(() => {
     return events.filter((event) => {
-      const past = isPastEvent(event);
       const matchesActivity =
         selectedActivityType === 'all' ||
         (event.activity_type || 'other') === selectedActivityType;
@@ -452,6 +457,14 @@ export function HomeScreen({
       if (!matchesActivity || !matchesCity || !matchesSearch) {
         return false;
       }
+
+      return true;
+    });
+  }, [events, selectedActivityType, selectedCity, eventSearchQuery]);
+
+  const filteredEvents = useMemo(() => {
+    return filteredEventsByControls.filter((event) => {
+      const past = isPastEvent(event);
 
       if (!currentUserId) {
         if (activeTab !== 'discover' || past) {
@@ -482,7 +495,7 @@ export function HomeScreen({
 
       return true;
     });
-  }, [events, currentUserId, joinedEventIds, activeTab, selectedActivityType, selectedCity, eventSearchQuery]);
+  }, [filteredEventsByControls, currentUserId, joinedEventIds, activeTab]);
 
   const availableCities = useMemo<CityFilterOption[]>(() => {
     const cityMap = new Map<string, string>();
@@ -608,9 +621,73 @@ export function HomeScreen({
     return sortedEvents.slice(0, visibleCount);
   }, [sortedEvents, visibleCount]);
 
+  const featuredEvents = useMemo(() => {
+    if (activeTab !== 'discover') {
+      return [];
+    }
+
+    return [...sortedEvents]
+      .filter((event) => !isPastEvent(event))
+      .sort((a, b) => {
+        if (b.participantCount !== a.participantCount) {
+          return b.participantCount - a.participantCount;
+        }
+
+        return getEventTimestamp(a) - getEventTimestamp(b);
+      })
+      .slice(0, 5);
+  }, [activeTab, sortedEvents]);
+
+  const recentlyHappenedEvents = useMemo(() => {
+    if (activeTab !== 'discover') {
+      return [];
+    }
+
+    return filteredEventsByControls
+      .filter((event) => isPastEvent(event))
+      .sort((a, b) => getEventTimestamp(b) - getEventTimestamp(a))
+      .slice(0, 10);
+  }, [activeTab, filteredEventsByControls]);
+
+  const popularPastEvents = useMemo(() => {
+    if (activeTab !== 'discover') {
+      return [];
+    }
+
+    const recentlyHappenedIds = new Set(recentlyHappenedEvents.map((event) => event.id));
+
+    return filteredEventsByControls
+      .filter((event) => isPastEvent(event) && !recentlyHappenedIds.has(event.id))
+      .sort((a, b) => {
+        if (b.participantCount !== a.participantCount) {
+          return b.participantCount - a.participantCount;
+        }
+
+        return getEventTimestamp(b) - getEventTimestamp(a);
+      })
+      .slice(0, 5);
+  }, [activeTab, filteredEventsByControls, recentlyHappenedEvents]);
+
+  const socialProofSummary = useMemo(() => {
+    const citySet = new Set(
+      events
+        .map((event) => event.city_normalized)
+        .filter((city): city is string => typeof city === 'string' && city.trim().length > 0)
+    );
+
+    return {
+      eventsCount: events.length,
+      totalParticipants: events.reduce((sum, event) => sum + event.participantCount, 0),
+      citiesCount: citySet.size,
+    };
+  }, [events]);
+
   const shouldShowInitialLoader = loading && events.length === 0;
   const shouldRenderAnimatedInitialLoader = initialLoaderPhase !== 'hidden';
-  const shouldShowEmptyState = !loading && sortedEvents.length === 0;
+  const shouldShowDiscoverHistory =
+    activeTab === 'discover' &&
+    (recentlyHappenedEvents.length > 0 || popularPastEvents.length > 0);
+  const shouldShowEmptyState = !loading && sortedEvents.length === 0 && !shouldShowDiscoverHistory;
   const canShowLoadMore = !loading && visibleEvents.length < sortedEvents.length;
   const canLoadMoreFromServer =
     !loading &&
@@ -765,6 +842,13 @@ export function HomeScreen({
     }
   };
 
+  const openEventDetails = (event: HomeEventItem) => {
+    onNavigate('event-details', {
+      ...event,
+      backTarget: 'home',
+    });
+  };
+
   useEffect(() => {
     fetchEvents(true);
   }, [language]);
@@ -885,27 +969,92 @@ export function HomeScreen({
             />
           )}
 
-          <motion.div layout="position" className="space-y-3">
-            {visibleEvents.map((event) => (
-              <HomeEventCard
-                key={event.id}
-                event={event}
-                currentUserId={currentUserId}
-                joinedEventIds={joinedEventIds}
-                isAdmin={isAdmin}
+          {activeTab === 'discover' && (
+            <div className="space-y-6">
+              <HomeSocialProofSummary
+                eventsCount={socialProofSummary.eventsCount}
+                totalParticipants={socialProofSummary.totalParticipants}
+                citiesCount={socialProofSummary.citiesCount}
+                translate={translate}
+              />
+
+              <HomeExploreByVibe
+                selectedActivityType={selectedActivityType}
                 language={language}
                 translate={translate}
-                isPastEvent={isPastEvent}
-                formatEventDate={formatEventDate}
-                onOpen={(nextEvent) =>
-                  onNavigate('event-details', {
-                    ...nextEvent,
-                    backTarget: 'home',
-                  })
-                }
+                onSelectActivityType={setSelectedActivityType}
               />
-            ))}
-          </motion.div>
+
+              {featuredEvents.length > 0 && (
+                <HomeFeedSection
+                  title={translate('home.featuredThisWeek')}
+                  subtitle={translate('home.featuredThisWeekSubtitle')}
+                >
+                  <motion.div layout="position" className="space-y-3">
+                    {featuredEvents.map((event) => (
+                      <HomeEventCard
+                        key={`featured-${event.id}`}
+                        event={event}
+                        currentUserId={currentUserId}
+                        joinedEventIds={joinedEventIds}
+                        isAdmin={isAdmin}
+                        variant="featured"
+                        badgeLabel={translate('home.featuredBadge')}
+                        language={language}
+                        translate={translate}
+                        isPastEvent={isPastEvent}
+                        formatEventDate={formatEventDate}
+                        onOpen={openEventDetails}
+                      />
+                    ))}
+                  </motion.div>
+                </HomeFeedSection>
+              )}
+
+              {(visibleEvents.length > 0 || shouldShowLoadMore) && (
+                <HomeFeedSection
+                  title={translate('home.upcomingEvents')}
+                  subtitle={translate('home.upcomingEventsSubtitle')}
+                >
+                  <motion.div layout="position" className="space-y-3">
+                    {visibleEvents.map((event) => (
+                      <HomeEventCard
+                        key={event.id}
+                        event={event}
+                        currentUserId={currentUserId}
+                        joinedEventIds={joinedEventIds}
+                        isAdmin={isAdmin}
+                        language={language}
+                        translate={translate}
+                        isPastEvent={isPastEvent}
+                        formatEventDate={formatEventDate}
+                        onOpen={openEventDetails}
+                      />
+                    ))}
+                  </motion.div>
+                </HomeFeedSection>
+              )}
+            </div>
+          )}
+
+          {activeTab !== 'discover' && (
+            <motion.div layout="position" className="space-y-3">
+              {visibleEvents.map((event) => (
+                <HomeEventCard
+                  key={event.id}
+                  event={event}
+                  currentUserId={currentUserId}
+                  joinedEventIds={joinedEventIds}
+                  isAdmin={isAdmin}
+                  language={language}
+                  translate={translate}
+                  isPastEvent={isPastEvent}
+                  formatEventDate={formatEventDate}
+                  onOpen={openEventDetails}
+                />
+              ))}
+            </motion.div>
+          )}
 
           {shouldShowLoadMore && (
             <motion.button
@@ -928,6 +1077,62 @@ export function HomeScreen({
                 translate('home.loadMore')
               )}
             </motion.button>
+          )}
+
+          {activeTab === 'discover' && shouldShowDiscoverHistory && (
+            <div className="space-y-6">
+              {recentlyHappenedEvents.length > 0 && (
+                <HomeFeedSection
+                  title={translate('home.recentlyHappened')}
+                  subtitle={translate('home.recentlyHappenedSubtitle')}
+                >
+                  <motion.div layout="position" className="space-y-3">
+                    {recentlyHappenedEvents.map((event) => (
+                      <HomeEventCard
+                        key={`recent-${event.id}`}
+                        event={event}
+                        currentUserId={currentUserId}
+                        joinedEventIds={joinedEventIds}
+                        isAdmin={isAdmin}
+                        variant="muted"
+                        badgeLabel={translate('home.completedBadge')}
+                        language={language}
+                        translate={translate}
+                        isPastEvent={isPastEvent}
+                        formatEventDate={formatEventDate}
+                        onOpen={openEventDetails}
+                      />
+                    ))}
+                  </motion.div>
+                </HomeFeedSection>
+              )}
+
+              {popularPastEvents.length > 0 && (
+                <HomeFeedSection
+                  title={translate('home.popularPastEvents')}
+                  subtitle={translate('home.popularPastEventsSubtitle')}
+                >
+                  <motion.div layout="position" className="space-y-3">
+                    {popularPastEvents.map((event) => (
+                      <HomeEventCard
+                        key={`popular-past-${event.id}`}
+                        event={event}
+                        currentUserId={currentUserId}
+                        joinedEventIds={joinedEventIds}
+                        isAdmin={isAdmin}
+                        variant="muted"
+                        badgeLabel={translate('home.completedBadge')}
+                        language={language}
+                        translate={translate}
+                        isPastEvent={isPastEvent}
+                        formatEventDate={formatEventDate}
+                        onOpen={openEventDetails}
+                      />
+                    ))}
+                  </motion.div>
+                </HomeFeedSection>
+              )}
+            </div>
           )}
         </div>
       </PullToRefresh>

@@ -399,6 +399,21 @@ type TranslationKey =
     | 'home.participant'
     | 'home.participants'
     | 'home.past'
+    | 'home.completedBadge'
+    | 'home.featuredBadge'
+    | 'home.featuredThisWeek'
+    | 'home.featuredThisWeekSubtitle'
+    | 'home.upcomingEvents'
+    | 'home.upcomingEventsSubtitle'
+    | 'home.recentlyHappened'
+    | 'home.recentlyHappenedSubtitle'
+    | 'home.popularPastEvents'
+    | 'home.popularPastEventsSubtitle'
+    | 'home.exploreByVibeTitle'
+    | 'home.exploreByVibeSubtitle'
+    | 'home.socialProofEvents'
+    | 'home.socialProofParticipants'
+    | 'home.socialProofCities'
     | 'home.noMyEvents'
     | 'home.noJoinedEvents'
     | 'home.noVisitedEvents'
@@ -996,6 +1011,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.participant': 'participant',
         'home.participants': 'participants',
         'home.past': 'Past',
+        'home.completedBadge': 'Completed',
+        'home.featuredBadge': 'Featured',
+        'home.featuredThisWeek': 'Featured this week',
+        'home.featuredThisWeekSubtitle': 'Upcoming events with the strongest real activity.',
+        'home.upcomingEvents': 'Upcoming events',
+        'home.upcomingEventsSubtitle': 'Fresh plans you can still join.',
+        'home.recentlyHappened': 'Recently happened',
+        'home.recentlyHappenedSubtitle': 'A real look at what the city has been doing.',
+        'home.popularPastEvents': 'Popular past events',
+        'home.popularPastEventsSubtitle': 'Completed events with the most joined participants.',
+        'home.exploreByVibeTitle': 'Explore by vibe',
+        'home.exploreByVibeSubtitle': 'Pick an activity type to shape the feed.',
+        'home.socialProofEvents': 'events',
+        'home.socialProofParticipants': 'joined',
+        'home.socialProofCities': 'cities',
         'home.noMyEvents': 'No my events yet',
         'home.noJoinedEvents': 'No joined events yet',
         'home.noVisitedEvents': 'No visited events yet',
@@ -1589,6 +1619,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.participant': 'участник',
         'home.participants': 'участников',
         'home.past': 'Прошло',
+        'home.completedBadge': '\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e',
+        'home.featuredBadge': '\u0412\u044b\u0431\u043e\u0440',
+        'home.featuredThisWeek': '\u0412\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u0435 \u043d\u0430 \u044d\u0442\u043e\u0439 \u043d\u0435\u0434\u0435\u043b\u0435',
+        'home.featuredThisWeekSubtitle': '\u0411\u043b\u0438\u0436\u0430\u0439\u0448\u0438\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u044f \u0441 \u0441\u0430\u043c\u043e\u0439 \u0437\u0430\u043c\u0435\u0442\u043d\u043e\u0439 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0439 \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c\u044e.',
+        'home.upcomingEvents': '\u0411\u043b\u0438\u0436\u0430\u0439\u0448\u0438\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u044f',
+        'home.upcomingEventsSubtitle': '\u041f\u043b\u0430\u043d\u044b, \u043a \u043a\u043e\u0442\u043e\u0440\u044b\u043c \u0435\u0449\u0435 \u043c\u043e\u0436\u043d\u043e \u043f\u0440\u0438\u0441\u043e\u0435\u0434\u0438\u043d\u0438\u0442\u044c\u0441\u044f.',
+        'home.recentlyHappened': '\u041d\u0435\u0434\u0430\u0432\u043d\u043e \u043f\u0440\u043e\u0448\u043b\u043e',
+        'home.recentlyHappenedSubtitle': '\u0420\u0435\u0430\u043b\u044c\u043d\u0430\u044f \u0438\u0441\u0442\u043e\u0440\u0438\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u0438 \u0433\u043e\u0440\u043e\u0434\u0430.',
+        'home.popularPastEvents': '\u041f\u043e\u043f\u0443\u043b\u044f\u0440\u043d\u044b\u0435 \u043f\u0440\u043e\u0448\u0435\u0434\u0448\u0438\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u044f',
+        'home.popularPastEventsSubtitle': '\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043d\u044b\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u044f \u0441 \u0431\u043e\u043b\u044c\u0448\u0438\u043c \u0447\u0438\u0441\u043b\u043e\u043c \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432.',
+        'home.exploreByVibeTitle': '\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u043d\u0430\u0441\u0442\u0440\u043e\u0435\u043d\u0438\u0435',
+        'home.exploreByVibeSubtitle': '\u0412\u044b\u0431\u0435\u0440\u0438 \u0442\u0438\u043f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u0438, \u0447\u0442\u043e\u0431\u044b \u043d\u0430\u0441\u0442\u0440\u043e\u0438\u0442\u044c \u043b\u0435\u043d\u0442\u0443.',
+        'home.socialProofEvents': '\u0441\u043e\u0431\u044b\u0442\u0438\u0439',
+        'home.socialProofParticipants': '\u0443\u0447\u0430\u0441\u0442\u0438\u0439',
+        'home.socialProofCities': '\u0433\u043e\u0440\u043e\u0434\u043e\u0432',
         'home.noMyEvents': 'У тебя пока нет событий',
         'home.noJoinedEvents': 'Ты пока никуда не присоединился',
         'home.noDiscoverEvents': 'Событий пока нет',
@@ -2139,6 +2184,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.participant': 'participant',
         'home.participants': 'participanți',
         'home.past': 'Trecut',
+        'home.completedBadge': 'Finalizat',
+        'home.featuredBadge': 'Recomandat',
+        'home.featuredThisWeek': 'Recomandate săptămâna aceasta',
+        'home.featuredThisWeekSubtitle': 'Evenimente viitoare cu cea mai vizibilă activitate reală.',
+        'home.upcomingEvents': 'Evenimente viitoare',
+        'home.upcomingEventsSubtitle': 'Planuri la care încă te poți alătura.',
+        'home.recentlyHappened': 'S-au întâmplat recent',
+        'home.recentlyHappenedSubtitle': 'O privire reală asupra activității din oraș.',
+        'home.popularPastEvents': 'Evenimente trecute populare',
+        'home.popularPastEventsSubtitle': 'Evenimente finalizate cu cei mai mulți participanți.',
+        'home.exploreByVibeTitle': 'Explorează după vibe',
+        'home.exploreByVibeSubtitle': 'Alege un tip de activitate pentru a modela feedul.',
+        'home.socialProofEvents': 'evenimente',
+        'home.socialProofParticipants': 'participări',
+        'home.socialProofCities': 'orașe',
         'home.noMyEvents': 'Nu ai încă evenimente',
         'home.noJoinedEvents': 'Nu ai participări încă',
         'home.noDiscoverEvents': 'Nu există evenimente momentan',
@@ -2692,6 +2752,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.participant': 'учасник',
         'home.participants': 'учасників',
         'home.past': 'Минуло',
+        'home.completedBadge': '\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u043e',
+        'home.featuredBadge': '\u0412\u0438\u0431\u0456\u0440',
+        'home.featuredThisWeek': '\u0412\u0438\u0431\u0440\u0430\u043d\u0435 \u0446\u044c\u043e\u0433\u043e \u0442\u0438\u0436\u043d\u044f',
+        'home.featuredThisWeekSubtitle': '\u041d\u0430\u0439\u0431\u043b\u0438\u0436\u0447\u0456 \u043f\u043e\u0434\u0456\u0457 \u0437 \u043d\u0430\u0439\u043f\u043e\u043c\u0456\u0442\u043d\u0456\u0448\u043e\u044e \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u044e \u0430\u043a\u0442\u0438\u0432\u043d\u0456\u0441\u0442\u044e.',
+        'home.upcomingEvents': '\u041d\u0430\u0439\u0431\u043b\u0438\u0436\u0447\u0456 \u043f\u043e\u0434\u0456\u0457',
+        'home.upcomingEventsSubtitle': '\u041f\u043b\u0430\u043d\u0438, \u0434\u043e \u044f\u043a\u0438\u0445 \u0449\u0435 \u043c\u043e\u0436\u043d\u0430 \u0434\u043e\u043b\u0443\u0447\u0438\u0442\u0438\u0441\u044f.',
+        'home.recentlyHappened': '\u041d\u0435\u0449\u043e\u0434\u0430\u0432\u043d\u043e \u0432\u0456\u0434\u0431\u0443\u043b\u043e\u0441\u044f',
+        'home.recentlyHappenedSubtitle': '\u0420\u0435\u0430\u043b\u044c\u043d\u0430 \u0456\u0441\u0442\u043e\u0440\u0456\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u0456 \u043c\u0456\u0441\u0442\u0430.',
+        'home.popularPastEvents': '\u041f\u043e\u043f\u0443\u043b\u044f\u0440\u043d\u0456 \u043c\u0438\u043d\u0443\u043b\u0456 \u043f\u043e\u0434\u0456\u0457',
+        'home.popularPastEventsSubtitle': '\u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0456 \u043f\u043e\u0434\u0456\u0457 \u0437 \u043d\u0430\u0439\u0431\u0456\u043b\u044c\u0448\u043e\u044e \u043a\u0456\u043b\u044c\u043a\u0456\u0441\u0442\u044e \u0443\u0447\u0430\u0441\u043d\u0438\u043a\u0456\u0432.',
+        'home.exploreByVibeTitle': '\u041e\u0431\u0435\u0440\u0438 \u043d\u0430\u0441\u0442\u0440\u0456\u0439',
+        'home.exploreByVibeSubtitle': '\u041e\u0431\u0435\u0440\u0438 \u0442\u0438\u043f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u0456, \u0449\u043e\u0431 \u043d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u0442\u0438 \u0441\u0442\u0440\u0456\u0447\u043a\u0443.',
+        'home.socialProofEvents': '\u043f\u043e\u0434\u0456\u0439',
+        'home.socialProofParticipants': '\u0443\u0447\u0430\u0441\u0442\u0435\u0439',
+        'home.socialProofCities': '\u043c\u0456\u0441\u0442',
         'home.noMyEvents': 'У тебе поки немає подій',
         'home.noJoinedEvents': 'Ти поки ні до чого не приєднався',
         'home.noDiscoverEvents': 'Подій поки немає',
@@ -3244,6 +3319,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.participant': 'Teilnehmer',
         'home.participants': 'Teilnehmer',
         'home.past': 'Vergangen',
+        'home.completedBadge': 'Abgeschlossen',
+        'home.featuredBadge': 'Empfohlen',
+        'home.featuredThisWeek': 'Diese Woche empfohlen',
+        'home.featuredThisWeekSubtitle': 'Kommende Events mit der stärksten echten Aktivität.',
+        'home.upcomingEvents': 'Kommende Events',
+        'home.upcomingEventsSubtitle': 'Pläne, denen du noch beitreten kannst.',
+        'home.recentlyHappened': 'Kürzlich passiert',
+        'home.recentlyHappenedSubtitle': 'Ein echter Blick auf die Aktivität in der Stadt.',
+        'home.popularPastEvents': 'Beliebte vergangene Events',
+        'home.popularPastEventsSubtitle': 'Abgeschlossene Events mit den meisten Teilnehmenden.',
+        'home.exploreByVibeTitle': 'Nach Stimmung entdecken',
+        'home.exploreByVibeSubtitle': 'Wähle einen Aktivitätstyp, um den Feed zu formen.',
+        'home.socialProofEvents': 'Events',
+        'home.socialProofParticipants': 'Teilnahmen',
+        'home.socialProofCities': 'Städte',
         'home.noMyEvents': 'Du hast noch keine Events',
         'home.noJoinedEvents': 'Du bist noch keinem Event beigetreten',
         'home.noDiscoverEvents': 'Noch keine Events vorhanden',

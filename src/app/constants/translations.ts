@@ -20,6 +20,9 @@ type TranslationKey =
     | 'common.name'
     | 'common.email'
     | 'common.password'
+    | 'appError.title'
+    | 'appError.description'
+    | 'appError.backHome'
     | 'bottomNav.home'
     | 'bottomNav.notifications'
     | 'bottomNav.profile'
@@ -616,6 +619,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'common.name': 'Name',
         'common.email': 'Email',
         'common.password': 'Password',
+        'appError.title': 'Something went wrong',
+        'appError.description': 'This screen could not be shown. You can return home and keep using Gathr.',
+        'appError.backHome': 'Back to home',
 
         'bottomNav.home': 'Home',
         'bottomNav.notifications': 'Notifications',
@@ -1242,6 +1248,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'common.name': 'Имя',
         'common.email': 'Email',
         'common.password': 'Пароль',
+        'appError.title': 'Что-то пошло не так',
+        'appError.description': 'Этот экран не удалось показать. Можно вернуться на главную и продолжить пользоваться Gathr.',
+        'appError.backHome': 'На главную',
 
         'bottomNav.home': 'Главная',
         'bottomNav.notifications': 'Уведомления',
@@ -1785,6 +1794,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'common.name': 'Nume',
         'common.email': 'Email',
         'common.password': 'Parolă',
+        'appError.title': 'Ceva nu a mers bine',
+        'appError.description': 'Acest ecran nu a putut fi afișat. Poți reveni acasă și continua să folosești Gathr.',
+        'appError.backHome': 'Înapoi acasă',
 
         'bottomNav.home': 'Acasă',
         'bottomNav.notifications': 'Notificări',
@@ -2333,6 +2345,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'common.name': "Ім'я",
         'common.email': 'Email',
         'common.password': 'Пароль',
+        'appError.title': 'Щось пішло не так',
+        'appError.description': 'Цей екран не вдалося показати. Можна повернутися на головну і продовжити користуватися Gathr.',
+        'appError.backHome': 'На головну',
 
         'bottomNav.home': 'Головна',
         'bottomNav.notifications': 'Сповіщення',
@@ -2882,6 +2897,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'common.name': 'Name',
         'common.email': 'E-Mail',
         'common.password': 'Passwort',
+        'appError.title': 'Etwas ist schiefgelaufen',
+        'appError.description': 'Dieser Bildschirm konnte nicht angezeigt werden. Du kannst zur Startseite zurückkehren und Gathr weiter nutzen.',
+        'appError.backHome': 'Zur Startseite',
 
         'bottomNav.home': 'Start',
         'bottomNav.notifications': 'Benachrichtigungen',

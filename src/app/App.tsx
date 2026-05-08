@@ -1,4 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AnimatePresence } from 'motion/react';
 import type { User } from '@supabase/supabase-js';
 import { WelcomeScreen } from './components/WelcomeScreen';
@@ -59,6 +60,44 @@ type LoginContext = {
   backScreen: string;
   backData?: any;
 } | null;
+
+type AppErrorBoundaryProps = {
+  children: ReactNode;
+  fallback: ReactNode;
+  resetKey: string;
+};
+
+type AppErrorBoundaryState = {
+  hasError: boolean;
+};
+
+class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
+  state: AppErrorBoundaryState = {
+    hasError: false,
+  };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Screen render error:', error, errorInfo);
+  }
+
+  componentDidUpdate(prevProps: AppErrorBoundaryProps) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
 
 const AUTH_REDIRECT_STATE_KEY = 'gathr-auth-redirect-state';
 
@@ -982,6 +1021,39 @@ export default function App() {
   };
 
   const showBottomNav = ['home', 'notifications', 'profile'].includes(currentScreen);
+  const screenErrorFallback = (
+    <div
+      className="h-full flex flex-col items-center justify-center gap-4 px-6 text-center"
+      style={{ backgroundColor: 'var(--background)' }}
+    >
+      <div
+        className="w-full rounded-xl border p-5"
+        style={{
+          backgroundColor: 'var(--card)',
+          borderColor: 'var(--border)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+        }}
+      >
+        <h2 className="text-lg" style={{ color: 'var(--foreground-strong)' }}>
+          {translate('appError.title')}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {translate('appError.description')}
+        </p>
+        <button
+          type="button"
+          onClick={() => resetNavigation('home', null, 'back')}
+          className="mt-4 w-full rounded-xl px-4 py-3 text-sm font-medium"
+          style={{
+            backgroundColor: 'var(--accent)',
+            color: 'var(--accent-foreground)',
+          }}
+        >
+          {translate('appError.backHome')}
+        </button>
+      </div>
+    </div>
+  );
 
   if (!authChecked) {
     return (
@@ -1027,8 +1099,9 @@ export default function App() {
         <FeedbackHost />
 
         <div className="flex-1 overflow-hidden relative">
-          <AnimatePresence mode="wait" initial={false}>
-            <ScreenTransition key={currentScreen} direction={direction}>
+          <AppErrorBoundary fallback={screenErrorFallback} resetKey={currentScreen}>
+            <AnimatePresence mode="wait" initial={false}>
+              <ScreenTransition key={currentScreen} direction={direction}>
               {currentScreen === 'welcome' && (
                 <WelcomeScreen
                   onNavigate={handleNavigate}
@@ -1131,8 +1204,9 @@ export default function App() {
               {currentScreen === 'appearance' && (
                 <AppearanceScreen onNavigate={handleNavigate} />
               )}
-            </ScreenTransition>
-          </AnimatePresence>
+              </ScreenTransition>
+            </AnimatePresence>
+          </AppErrorBoundary>
         </div>
 
         <AnimatePresence>

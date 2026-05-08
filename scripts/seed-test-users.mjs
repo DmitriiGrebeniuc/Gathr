@@ -1,6 +1,7 @@
 console.log('SCRIPT STARTED')
 
 import { createClient } from '@supabase/supabase-js'
+import fs from 'node:fs'
 import process from 'node:process'
 
 const supabaseUrl = process.env.SUPABASE_URL
@@ -18,48 +19,9 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   },
 })
 
-const testUsers = [
-  {
-    email: 'gathr.seed.1@example.com',
-    password: 'TestUser123!',
-    name: 'Alex',
-  },
-  {
-    email: 'gathr.seed.2@example.com',
-    password: 'TestUser123!',
-    name: 'Maria',
-  },
-  {
-    email: 'gathr.seed.3@example.com',
-    password: 'TestUser123!',
-    name: 'Nikita',
-  },
-  {
-    email: 'gathr.seed.4@example.com',
-    password: 'TestUser123!',
-    name: 'Elena',
-  },
-  {
-    email: 'gathr.seed.5@example.com',
-    password: 'TestUser123!',
-    name: 'Denis',
-  },
-  {
-    email: 'gathr.seed.6@example.com',
-    password: 'TestUser123!',
-    name: 'Andrei',
-  },
-  {
-    email: 'gathr.seed.7@example.com',
-    password: 'TestUser123!',
-    name: 'Cristina',
-  },
-  {
-    email: 'gathr.seed.8@example.com',
-    password: 'TestUser123!',
-    name: 'Victor',
-  },
-]
+const testUsers = JSON.parse(
+  fs.readFileSync('./scripts/test-users.json', 'utf-8')
+)
 
 async function findAuthUserByEmail(email) {
   let page = 1

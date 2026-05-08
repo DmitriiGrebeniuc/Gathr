@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import type { ActivityType } from '../constants/activityTypes';
-import { normalizeCityName } from '../lib/locationCity';
+import { canonicalizeCityName, normalizeCityName } from '../lib/locationCity';
 import { LoadingLine } from './LoadingState';
 import {
   fetchAccessibleEventPrivateDetailsMap,
@@ -291,6 +291,7 @@ export function HomeScreen({
 
       const mappedEvents: HomeEventItem[] = (eventsData || []).map((event: any) => {
         const privateDetails = privateDetailsMap[event.id];
+        const canonicalCity = canonicalizeCityName(event.city || event.city_normalized);
 
         return {
           id: event.id,
@@ -313,8 +314,8 @@ export function HomeScreen({
               : typeof event.location_lng === 'number'
                 ? event.location_lng
                 : null,
-          city: event.city,
-          city_normalized: event.city_normalized,
+          city: canonicalCity.city || event.city,
+          city_normalized: canonicalCity.cityNormalized || event.city_normalized,
           creator_id: event.creator_id,
           creatorName: event.creator_id
             ? creatorNameMap[event.creator_id] || translate('common.unknown')
@@ -384,6 +385,7 @@ export function HomeScreen({
 
       const mappedMoreEvents: HomeEventItem[] = (moreEventsData || []).map((event: any) => {
         const privateDetails = privateDetailsMap[event.id];
+        const canonicalCity = canonicalizeCityName(event.city || event.city_normalized);
 
         return {
           id: event.id,
@@ -406,8 +408,8 @@ export function HomeScreen({
               : typeof event.location_lng === 'number'
                 ? event.location_lng
                 : null,
-          city: event.city,
-          city_normalized: event.city_normalized,
+          city: canonicalCity.city || event.city,
+          city_normalized: canonicalCity.cityNormalized || event.city_normalized,
           creator_id: event.creator_id,
           creatorName: event.creator_id
             ? creatorNameMap[event.creator_id] || translate('common.unknown')

@@ -46,5 +46,77 @@
     "password": "TestUser123!",
     "name": "Victor Zolotoi",
     "role": "user"
+  },
+  {
+    "email": "gathr.seed.9@example.com",
+    "password": "TestUser123!",
+    "name": "Irina Sokolova",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.10@example.com",
+    "password": "TestUser123!",
+    "name": "Mihai Rusu",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.11@example.com",
+    "password": "TestUser123!",
+    "name": "Sofia Marin",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.12@example.com",
+    "password": "TestUser123!",
+    "name": "Daniel Popescu",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.13@example.com",
+    "password": "TestUser123!",
+    "name": "Anastasia K",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.14@example.com",
+    "password": "TestUser123!",
+    "name": "Sergey Ivanov",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.15@example.com",
+    "password": "TestUser123!",
+    "name": "Olga M",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.16@example.com",
+    "password": "TestUser123!",
+    "name": "Daria Petrescu",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.17@example.com",
+    "password": "TestUser123!",
+    "name": "Maxim D",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.18@example.com",
+    "password": "TestUser123!",
+    "name": "Alina Ceban",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.19@example.com",
+    "password": "TestUser123!",
+    "name": "Roman B",
+    "role": "user"
+  },
+  {
+    "email": "gathr.seed.20@example.com",
+    "password": "TestUser123!",
+    "name": "Katerina L",
+    "role": "user"
   }
 ]

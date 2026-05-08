@@ -8,6 +8,33 @@ type GeocoderLikeResult = {
   address_components?: AddressComponent[];
 };
 
+type CanonicalCity = {
+  city: string;
+  cityNormalized: string;
+  aliases: string[];
+};
+
+const CANONICAL_CITIES: CanonicalCity[] = [
+  {
+    city: 'Chișinău',
+    cityNormalized: 'chisinau',
+    aliases: [
+      'chisinau',
+      'chișinău',
+      'chişinău',
+      'кишинев',
+      'кишинёв',
+      'кишинэу',
+      'кишинев мун',
+      'municipiul chisinau',
+      'municipiul chișinău',
+      'municipiul chişinău',
+      'chisinau municipality',
+      'chișinău municipality',
+    ],
+  },
+];
+
 export function normalizeCityName(value: string | null | undefined) {
   if (!value) {
     return null;
@@ -21,6 +48,37 @@ export function normalizeCityName(value: string | null | undefined) {
     .replace(/\s+/g, ' ');
 
   return normalized || null;
+}
+
+export function canonicalizeCityName(value: string | null | undefined) {
+  const normalized = normalizeCityName(value);
+
+  if (!normalized) {
+    return {
+      city: null,
+      cityNormalized: null,
+    };
+  }
+
+  const canonicalCity = CANONICAL_CITIES.find(
+    (item) =>
+      item.cityNormalized === normalized ||
+      item.aliases.some((alias) => normalizeCityName(alias) === normalized)
+  );
+
+  if (canonicalCity) {
+    return {
+      city: canonicalCity.city,
+      cityNormalized: canonicalCity.cityNormalized,
+    };
+  }
+
+  const city = value?.trim() || null;
+
+  return {
+    city,
+    cityNormalized: normalized,
+  };
 }
 
 export function extractCityFromAddressComponents(components: AddressComponent[] | null | undefined) {
@@ -41,10 +99,7 @@ export function extractCityFromAddressComponents(components: AddressComponent[] 
     const city = match?.long_name?.trim() || null;
 
     if (city) {
-      return {
-        city,
-        cityNormalized: normalizeCityName(city),
-      };
+      return canonicalizeCityName(city);
     }
   }
 

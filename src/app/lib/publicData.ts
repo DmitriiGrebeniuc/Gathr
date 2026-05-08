@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { canonicalizeCityName } from './locationCity';
 import type {
   EventContactMethods,
   NormalizedEventContactMethods,
@@ -291,6 +292,8 @@ export async function createEventWithCreator(input: CreateEventWithCreatorInput)
   data: Record<string, any> | null;
   error: unknown;
 }> {
+  const canonicalCity = canonicalizeCityName(input.city || input.cityNormalized);
+
   const { data, error } = await supabase.rpc('create_event_with_creator', {
     new_title: input.title,
     new_description: input.description,
@@ -299,8 +302,8 @@ export async function createEventWithCreator(input: CreateEventWithCreatorInput)
     new_location_place_id: input.locationPlaceId,
     new_location_lat: input.locationLat,
     new_location_lng: input.locationLng,
-    new_city: input.city,
-    new_city_normalized: input.cityNormalized,
+    new_city: canonicalCity.city,
+    new_city_normalized: canonicalCity.cityNormalized,
     new_activity_type: input.activityType,
     new_visibility: input.visibility ?? 'public',
     new_join_mode: input.joinMode ?? 'open',
@@ -316,6 +319,8 @@ export async function updateEventWithCreator(input: UpdateEventWithCreatorInput)
   data: Record<string, any> | null;
   error: unknown;
 }> {
+  const canonicalCity = canonicalizeCityName(input.city || input.cityNormalized);
+
   const { data, error } = await supabase.rpc('update_event_with_creator', {
     target_event_id: input.eventId,
     new_title: input.title,
@@ -325,8 +330,8 @@ export async function updateEventWithCreator(input: UpdateEventWithCreatorInput)
     new_location_place_id: input.locationPlaceId,
     new_location_lat: input.locationLat,
     new_location_lng: input.locationLng,
-    new_city: input.city,
-    new_city_normalized: input.cityNormalized,
+    new_city: canonicalCity.city,
+    new_city_normalized: canonicalCity.cityNormalized,
     new_activity_type: input.activityType,
     new_visibility: input.visibility ?? 'public',
     new_join_mode: input.joinMode ?? 'open',

@@ -95,13 +95,13 @@ export function getTelegramMiniAppInitData() {
 
 export function initTelegramMiniApp() {
   if (typeof window === 'undefined') {
-    return;
+    return () => undefined;
   }
 
   const webApp = window.Telegram?.WebApp;
 
   if (!webApp) {
-    return;
+    return () => undefined;
   }
 
   try {
@@ -110,6 +110,8 @@ export function initTelegramMiniApp() {
   } catch (error) {
     console.error('Failed to initialize Telegram Mini App runtime:', error);
   }
+
+  return () => undefined;
 }
 
 export function isTelegramInAppBrowser() {

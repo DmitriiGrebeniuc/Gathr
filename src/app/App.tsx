@@ -160,15 +160,23 @@ export default function App() {
     navigationStackRef.current = navigationStack;
   }, [currentScreen, navigationStack]);
 
-  const syncBrowserState = (mode: 'push' | 'replace') => {
+  const getSafeNavigationStack = (entries: NavigationEntry[]) =>
+    entries.length > 0 ? entries : [{ screen: 'welcome' }];
+
+  const syncBrowserState = (
+    mode: 'push' | 'replace',
+    entries: NavigationEntry[] = navigationStackRef.current
+  ) => {
     if (typeof window === 'undefined') {
       return;
     }
 
+    const safeEntries = getSafeNavigationStack(entries);
+    const currentEntry = safeEntries[safeEntries.length - 1];
     const state = {
       gathrNavigation: true,
-      depth: navigationStackRef.current.length,
-      screen: navigationStackRef.current[navigationStackRef.current.length - 1]?.screen || 'welcome',
+      depth: safeEntries.length,
+      screen: currentEntry?.screen || 'welcome',
     };
 
     if (mode === 'push') {
@@ -179,15 +187,26 @@ export default function App() {
     window.history.replaceState(state, '');
   };
 
+  const applyNavigationStack = (
+    entries: NavigationEntry[],
+    nextDirection: NavigationDirection,
+    browserMode: 'push' | 'replace'
+  ) => {
+    const nextStack = getSafeNavigationStack(entries);
+
+    setDirection(nextDirection);
+    navigationStackRef.current = nextStack;
+    currentScreenRef.current = nextStack[nextStack.length - 1]?.screen || 'welcome';
+    setNavigationStack(nextStack);
+    syncBrowserState(browserMode, nextStack);
+  };
+
   const replaceNavigation = (
     entries: NavigationEntry[],
     nextDirection: NavigationDirection = 'forward',
     browserMode: 'push' | 'replace' = 'replace'
   ) => {
-    setDirection(nextDirection);
-    navigationStackRef.current = entries;
-    setNavigationStack(entries);
-    syncBrowserState(browserMode);
+    applyNavigationStack(entries, nextDirection, browserMode);
   };
 
   const resetNavigation = (
@@ -203,9 +222,7 @@ export default function App() {
 
     if (stack.length > 1) {
       const nextStack = stack.slice(0, -1);
-      setDirection('back');
-      navigationStackRef.current = nextStack;
-      setNavigationStack(nextStack);
+      applyNavigationStack(nextStack, 'back', 'replace');
 
       if (typeof window !== 'undefined' && window.history.state?.gathrNavigation) {
         skipNextPopStateRef.current = true;
@@ -235,9 +252,7 @@ export default function App() {
       };
     }
 
-    setDirection('back');
-    navigationStackRef.current = nextStack;
-    setNavigationStack(nextStack);
+    applyNavigationStack(nextStack, 'back', 'replace');
 
     const stepsBack = stack.length - nextStack.length;
     if (typeof window !== 'undefined' && stepsBack > 0 && window.history.state?.gathrNavigation) {
@@ -245,8 +260,6 @@ export default function App() {
       window.history.go(-stepsBack);
       return;
     }
-
-    syncBrowserState('replace');
   };
 
   const persistAuthRedirectState = (
@@ -634,7 +647,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    initTelegramMiniApp();
+    return initTelegramMiniApp();
   }, []);
 
   useEffect(() => {
@@ -692,9 +705,7 @@ export default function App() {
 
       if (stack.length > 1) {
         const nextStack = stack.slice(0, -1);
-        setDirection('back');
-        navigationStackRef.current = nextStack;
-        setNavigationStack(nextStack);
+        applyNavigationStack(nextStack, 'back', 'replace');
         return;
       }
 

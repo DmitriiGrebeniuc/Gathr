@@ -249,6 +249,36 @@ export function HomeHeader({
     });
   };
 
+  const markPreviewNotificationsRead = async () => {
+    const unreadNotificationIds = notificationPreviewItems
+      .filter((notification) => notification.isUnread)
+      .map((notification) => notification.id);
+
+    if (unreadNotificationIds.length === 0) {
+      return;
+    }
+
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return;
+    }
+
+    await markNotificationKeysSeen(user.id, unreadNotificationIds);
+    const nextUnreadCount = await fetchUnreadNotificationCountForUser(user.id);
+
+    setUnreadNotificationCount(nextUnreadCount);
+    setNotificationPreviewItems((prevItems) =>
+      prevItems.map((item) => ({
+        ...item,
+        isUnread: false,
+      }))
+    );
+  };
+
   return (
     <motion.div
       animate={{
@@ -445,27 +475,41 @@ export function HomeHeader({
                       <p className="text-sm font-semibold" style={{ color: 'var(--foreground-strong)' }}>
                         {translate('notifications.title')}
                       </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {unreadNotificationCount > 0
-                          ? `${unreadNotificationCount} ${translate('bottomNav.notifications')}`
-                          : translate('notifications.emptyTitle')}
-                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsNotificationPopoverOpen(false);
-                        onNavigate('notifications');
-                      }}
-                      className="shrink-0 rounded-full border px-3 py-1.5 text-xs transition-opacity hover:opacity-80"
-                      style={{
-                        borderColor: 'var(--accent-border-muted)',
-                        color: 'var(--accent)',
-                        backgroundColor: 'var(--accent-soft-muted)',
-                      }}
-                    >
-                      {translate('notifications.viewAll')}
-                    </button>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {notificationPreviewItems.some((notification) => notification.isUnread) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void markPreviewNotificationsRead();
+                          }}
+                          className="rounded-full border px-3 py-1.5 text-xs transition-opacity hover:opacity-80"
+                          style={{
+                            borderColor: 'var(--border-subtle)',
+                            color: 'var(--foreground-strong)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.035)',
+                          }}
+                        >
+                          {translate('notifications.markRead')}
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsNotificationPopoverOpen(false);
+                          onNavigate('notifications');
+                        }}
+                        className="rounded-full border px-3 py-1.5 text-xs transition-opacity hover:opacity-80"
+                        style={{
+                          borderColor: 'var(--accent-border-muted)',
+                          color: 'var(--accent)',
+                          backgroundColor: 'var(--accent-soft-muted)',
+                        }}
+                      >
+                        {translate('notifications.viewAll')}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="relative mt-3 max-h-[22rem] overflow-y-auto pr-1 no-scrollbar">

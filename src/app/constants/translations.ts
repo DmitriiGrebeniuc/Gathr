@@ -227,6 +227,7 @@ type TranslationKey =
     | 'notifications.viewAll'
     | 'notifications.previewError'
     | 'notifications.retry'
+    | 'notifications.markRead'
     | 'profile.title'
     | 'profile.editProfile'
     | 'profile.currentPlan'
@@ -859,6 +860,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.viewAll': 'All notifications',
         'notifications.previewError': 'Failed to load notifications',
         'notifications.retry': 'Retry',
+        'notifications.markRead': 'Read',
 
         'profile.title': 'Profile',
         'profile.editProfile': 'Edit Profile',
@@ -1533,6 +1535,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.viewAll': 'Все уведомления',
         'notifications.previewError': 'Не удалось загрузить уведомления',
         'notifications.retry': 'Повторить',
+        'notifications.markRead': 'Прочитано',
 
         'profile.title': 'Профиль',
         'profile.editProfile': 'Редактировать профиль',
@@ -2124,6 +2127,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.viewAll': 'Toate notificările',
         'notifications.previewError': 'Notificările nu au putut fi încărcate',
         'notifications.retry': 'Reîncearcă',
+        'notifications.markRead': 'Citite',
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Editează profilul',
@@ -2721,6 +2725,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.viewAll': 'Усі сповіщення',
         'notifications.previewError': 'Не вдалося завантажити сповіщення',
         'notifications.retry': 'Повторити',
+        'notifications.markRead': 'Прочитано',
 
         'profile.title': 'Профіль',
         'profile.editProfile': 'Редагувати профіль',
@@ -3318,6 +3323,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.viewAll': 'Alle Benachrichtigungen',
         'notifications.previewError': 'Benachrichtigungen konnten nicht geladen werden',
         'notifications.retry': 'Erneut versuchen',
+        'notifications.markRead': 'Gelesen',
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Profil bearbeiten',

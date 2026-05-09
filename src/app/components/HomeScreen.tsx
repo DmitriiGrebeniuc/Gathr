@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type UIEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent, type UIEvent } from 'react';
 import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
@@ -77,6 +77,7 @@ export function HomeScreen({
   const eventsRef = useRef<HomeEventItem[]>([]);
   const currentUserIdRef = useRef<string | null>(null);
   const initialLoaderShownAtRef = useRef<number | null>(null);
+  const homeTabSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const { language, translate } = useLanguage();
   const { effectiveTheme } = useTheme();
@@ -974,6 +975,51 @@ export function HomeScreen({
     setIsHeaderCompact((prev) => (prev === nextCompact ? prev : nextCompact));
   };
 
+  const canSwipeHomeTabs = !isCityPickerOpen && !isEventSearchOpen;
+
+  const handleHomeTabSwipeStart = (event: PointerEvent<HTMLDivElement>) => {
+    if (!canSwipeHomeTabs) {
+      homeTabSwipeStartRef.current = null;
+      return;
+    }
+
+    homeTabSwipeStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+  };
+
+  const handleHomeTabSwipeEnd = (event: PointerEvent<HTMLDivElement>) => {
+    const start = homeTabSwipeStartRef.current;
+    homeTabSwipeStartRef.current = null;
+
+    if (!start || !canSwipeHomeTabs) {
+      return;
+    }
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (absX < 70 || absX < absY * 1.35) {
+      return;
+    }
+
+    const activeIndex = homeTabs.findIndex((tab) => tab.key === activeTab);
+
+    if (activeIndex < 0) {
+      return;
+    }
+
+    const nextIndex =
+      deltaX < 0
+        ? (activeIndex + 1) % homeTabs.length
+        : (activeIndex - 1 + homeTabs.length) % homeTabs.length;
+
+    setActiveTab(homeTabs[nextIndex].key);
+  };
+
   useEffect(() => {
     const eventsChannel = supabase
       .channel('home-events')
@@ -1236,6 +1282,11 @@ export function HomeScreen({
           className="h-full overflow-y-auto px-6 py-4 space-y-3"
           style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
           onScroll={handleContentScroll}
+          onPointerDown={handleHomeTabSwipeStart}
+          onPointerUp={handleHomeTabSwipeEnd}
+          onPointerCancel={() => {
+            homeTabSwipeStartRef.current = null;
+          }}
         >
           <HomeInitialLoader phase={initialLoaderPhase} translate={translate} />
 

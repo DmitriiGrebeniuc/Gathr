@@ -13,7 +13,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react';
-import type { Dispatch, SetStateAction } from 'react';
+import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 import {
   ACTIVITY_TYPES,
   type ActivityType,
@@ -66,9 +66,33 @@ export function HomeFilters({
   setEventSearchQuery,
   translate,
 }: HomeFiltersProps) {
+  const activeTabButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    activeTabButtonRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [activeTab]);
+
   return (
     <>
-      <div className="border-b border-border px-4 py-2">
+      <div className="relative border-b border-border px-4 py-2">
+        <div
+          className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-8"
+          style={{
+            background:
+              'linear-gradient(90deg, var(--background) 0%, color-mix(in srgb, var(--background) 0%, transparent) 100%)',
+          }}
+        />
+        <div
+          className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-8"
+          style={{
+            background:
+              'linear-gradient(270deg, var(--background) 0%, color-mix(in srgb, var(--background) 0%, transparent) 100%)',
+          }}
+        />
         <div
           className="flex gap-2 overflow-x-auto no-scrollbar"
           style={{
@@ -84,6 +108,7 @@ export function HomeFilters({
             return (
               <motion.button
                 key={tab.key}
+                ref={isActive ? activeTabButtonRef : undefined}
                 type="button"
                 whileTap={{ scale: 0.96 }}
                 transition={tabTransition}

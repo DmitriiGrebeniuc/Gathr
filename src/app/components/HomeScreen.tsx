@@ -7,7 +7,7 @@ import {
   type TouchEvent,
   type UIEvent,
 } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
@@ -42,6 +42,7 @@ import type { CityFilterOption, HomeEventItem, HomeTab } from './home/types';
 const SERVER_BATCH_SIZE = 100;
 const LOCAL_BATCH_SIZE = 10;
 const HOME_LAUNCH_OVERLAY_DISMISSED_KEY = 'gathr-home-launch-overlay-dismissed';
+type HomeTabTransitionDirection = 'next' | 'prev';
 
 export function HomeScreen({
   onNavigate,
@@ -49,11 +50,14 @@ export function HomeScreen({
   onNavigate: (screen: string, data?: any) => void;
 }) {
   const tabTransition = {
-    duration: 0.28,
+    duration: 0.22,
     ease: [0.22, 1, 0.36, 1] as const,
   };
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [activeTab, setActiveTab] = useState<HomeTab>('discover');
+  const [tabContentDirection, setTabContentDirection] =
+    useState<HomeTabTransitionDirection>('next');
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [selectedActivityType, setSelectedActivityType] = useState<ActivityType | 'all'>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [isCityPickerOpen, setIsCityPickerOpen] = useState(false);
@@ -87,6 +91,7 @@ export function HomeScreen({
   const initialLoaderShownAtRef = useRef<number | null>(null);
   const homeTabSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
   const homeTabTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
   const { language, translate } = useLanguage();
   const { effectiveTheme } = useTheme();
@@ -98,6 +103,22 @@ export function HomeScreen({
   useEffect(() => {
     currentUserIdRef.current = currentUserId;
   }, [currentUserId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncPreference = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    syncPreference();
+    mediaQuery.addEventListener('change', syncPreference);
+
+    return () => {
+      mediaQuery.removeEventListener('change', syncPreference);
+    };
+  }, []);
 
   const getInitials = (name?: string | null) => {
     if (!name) return 'U';
@@ -986,6 +1007,45 @@ export function HomeScreen({
 
   const canSwipeHomeTabs = !isCityPickerOpen && !isEventSearchOpen;
 
+  const isInsideHomeHorizontalScroll = (target: EventTarget | null) => {
+    return target instanceof Element && Boolean(target.closest('[data-home-horizontal-scroll]'));
+  };
+
+  const switchHomeTab = (nextTab: HomeTab, direction: HomeTabTransitionDirection) => {
+    if (nextTab === activeTab) {
+      return;
+    }
+
+    setTabContentDirection(direction);
+    setActiveTab(nextTab);
+
+    const scrollContainer = contentScrollRef.current;
+    if (scrollContainer && scrollContainer.scrollTop > 160) {
+      scrollContainer.scrollTo({
+        top: 0,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      });
+    }
+  };
+
+  const getHomeTabDirection = (nextTab: HomeTab): HomeTabTransitionDirection => {
+    const currentIndex = homeTabs.findIndex((tab) => tab.key === activeTab);
+    const nextIndex = homeTabs.findIndex((tab) => tab.key === nextTab);
+
+    if (currentIndex < 0 || nextIndex < 0) {
+      return 'next';
+    }
+
+    const forwardDistance = (nextIndex - currentIndex + homeTabs.length) % homeTabs.length;
+    const backwardDistance = (currentIndex - nextIndex + homeTabs.length) % homeTabs.length;
+
+    return forwardDistance <= backwardDistance ? 'next' : 'prev';
+  };
+
+  const selectHomeTab = (nextTab: HomeTab) => {
+    switchHomeTab(nextTab, getHomeTabDirection(nextTab));
+  };
+
   const changeHomeTabByOffset = (offset: -1 | 1) => {
     const activeIndex = homeTabs.findIndex((tab) => tab.key === activeTab);
 
@@ -994,7 +1054,7 @@ export function HomeScreen({
     }
 
     const nextIndex = (activeIndex + offset + homeTabs.length) % homeTabs.length;
-    setActiveTab(homeTabs[nextIndex].key);
+    switchHomeTab(homeTabs[nextIndex].key, offset > 0 ? 'next' : 'prev');
   };
 
   const handleHomeTabSwipeDelta = (deltaX: number, deltaY: number) => {
@@ -1009,7 +1069,11 @@ export function HomeScreen({
   };
 
   const handleHomeTabSwipeStart = (event: PointerEvent<HTMLDivElement>) => {
-    if (!canSwipeHomeTabs || event.pointerType === 'touch') {
+    if (
+      !canSwipeHomeTabs ||
+      event.pointerType === 'touch' ||
+      isInsideHomeHorizontalScroll(event.target)
+    ) {
       homeTabSwipeStartRef.current = null;
       return;
     }
@@ -1032,7 +1096,7 @@ export function HomeScreen({
   };
 
   const handleHomeTabTouchStart = (event: TouchEvent<HTMLDivElement>) => {
-    if (!canSwipeHomeTabs) {
+    if (!canSwipeHomeTabs || isInsideHomeHorizontalScroll(event.target)) {
       homeTabTouchStartRef.current = null;
       return;
     }
@@ -1210,6 +1274,15 @@ export function HomeScreen({
     fetchEvents(true);
   }, [language]);
 
+  const tabContentOffset = prefersReducedMotion
+    ? 0
+    : tabContentDirection === 'next'
+      ? 16
+      : -16;
+  const tabContentTransition = prefersReducedMotion
+    ? { duration: 0.01 }
+    : { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const };
+
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -1306,7 +1379,7 @@ export function HomeScreen({
       <HomeFilters
         homeTabs={homeTabs}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        onSelectTab={selectHomeTab}
         tabTransition={tabTransition}
         selectedActivityType={selectedActivityType}
         setSelectedActivityType={setSelectedActivityType}
@@ -1322,6 +1395,7 @@ export function HomeScreen({
 
       <PullToRefresh onRefresh={handleRefresh}>
         <div
+          ref={contentScrollRef}
           className="h-full overflow-y-auto px-6 py-4 space-y-3"
           style={{ paddingBottom: 'calc(9rem + env(safe-area-inset-bottom, 0px))' }}
           onScroll={handleContentScroll}
@@ -1338,197 +1412,208 @@ export function HomeScreen({
         >
           <HomeInitialLoader phase={initialLoaderPhase} translate={translate} />
 
-          {shouldShowEmptyState && (
-            <HomeEmptyState
-              activeTab={activeTab}
-              selectedCity={selectedCity}
-              selectedActivityType={selectedActivityType}
-              hasActiveFilters={hasActiveFilters}
-              translate={translate}
-              onClearFilters={handleClearFilters}
-              onCreateEvent={handleCreateEvent}
-            />
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: tabContentOffset }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -tabContentOffset }}
+              transition={tabContentTransition}
+              className="space-y-3"
+            >
+              {shouldShowEmptyState && (
+                <HomeEmptyState
+                  activeTab={activeTab}
+                  selectedCity={selectedCity}
+                  selectedActivityType={selectedActivityType}
+                  hasActiveFilters={hasActiveFilters}
+                  translate={translate}
+                  onClearFilters={handleClearFilters}
+                  onCreateEvent={handleCreateEvent}
+                />
+              )}
 
-          {activeTab === 'discover' && (
-            <div className="space-y-6">
-              {primaryFeaturedEvent && (
-                <HomeFeedSection
-                  title={translate('home.featuredThisWeek')}
-                  subtitle={translate('home.featuredThisWeekSubtitle')}
-                >
-                  <div className="space-y-3">
+              {activeTab === 'discover' && (
+                <div className="space-y-6">
+                  {primaryFeaturedEvent && (
+                    <HomeFeedSection
+                      title={translate('home.featuredThisWeek')}
+                      subtitle={translate('home.featuredThisWeekSubtitle')}
+                    >
+                      <div className="space-y-3">
+                        <HomeEventCard
+                          key={`featured-${primaryFeaturedEvent.id}`}
+                          event={primaryFeaturedEvent}
+                          currentUserId={currentUserId}
+                          joinedEventIds={joinedEventIds}
+                          isAdmin={isAdmin}
+                          variant="featured"
+                          badgeLabel={translate('home.featuredBadge')}
+                          language={language}
+                          translate={translate}
+                          isPastEvent={isPastEvent}
+                          formatEventDate={formatEventDate}
+                          onOpen={openEventDetails}
+                        />
+                      </div>
+                    </HomeFeedSection>
+                  )}
+
+                  {(visibleUpcomingEvents.length > 0 || shouldShowLoadMore) && (
+                    <HomeFeedSection
+                      title={translate('home.upcomingEvents')}
+                      subtitle={translate('home.upcomingEventsSubtitle')}
+                    >
+                      <div className="space-y-3">
+                        {visibleUpcomingEvents.map((event) => (
+                          <HomeEventCard
+                            key={event.id}
+                            event={event}
+                            currentUserId={currentUserId}
+                            joinedEventIds={joinedEventIds}
+                            isAdmin={isAdmin}
+                            variant="compact"
+                            language={language}
+                            translate={translate}
+                            isPastEvent={isPastEvent}
+                            formatEventDate={formatEventDate}
+                            onOpen={openEventDetails}
+                          />
+                        ))}
+                      </div>
+                    </HomeFeedSection>
+                  )}
+
+                  {visibleUpcomingEvents.length === 0 && shouldShowDiscoverHistory && !loading && (
+                    <HomeDiscoverHistoryNudge
+                      translate={translate}
+                      onCreateEvent={handleCreateEvent}
+                    />
+                  )}
+                </div>
+              )}
+
+              {activeTab !== 'discover' && activeTab !== 'overview' && (
+                <div className="space-y-3">
+                  {visibleEvents.map((event) => (
                     <HomeEventCard
-                      key={`featured-${primaryFeaturedEvent.id}`}
-                      event={primaryFeaturedEvent}
+                      key={event.id}
+                      event={event}
                       currentUserId={currentUserId}
                       joinedEventIds={joinedEventIds}
                       isAdmin={isAdmin}
-                      variant="featured"
-                      badgeLabel={translate('home.featuredBadge')}
                       language={language}
                       translate={translate}
                       isPastEvent={isPastEvent}
                       formatEventDate={formatEventDate}
                       onOpen={openEventDetails}
                     />
-                  </div>
-                </HomeFeedSection>
-              )}
-
-              {(visibleUpcomingEvents.length > 0 || shouldShowLoadMore) && (
-                <HomeFeedSection
-                  title={translate('home.upcomingEvents')}
-                  subtitle={translate('home.upcomingEventsSubtitle')}
-                >
-                  <div className="space-y-3">
-                    {visibleUpcomingEvents.map((event) => (
-                      <HomeEventCard
-                        key={event.id}
-                        event={event}
-                        currentUserId={currentUserId}
-                        joinedEventIds={joinedEventIds}
-                        isAdmin={isAdmin}
-                        variant="compact"
-                        language={language}
-                        translate={translate}
-                        isPastEvent={isPastEvent}
-                        formatEventDate={formatEventDate}
-                        onOpen={openEventDetails}
-                      />
-                    ))}
-                  </div>
-                </HomeFeedSection>
-              )}
-
-              {visibleUpcomingEvents.length === 0 && shouldShowDiscoverHistory && !loading && (
-                <HomeDiscoverHistoryNudge
-                  translate={translate}
-                  onCreateEvent={handleCreateEvent}
-                />
-              )}
-            </div>
-          )}
-
-          {activeTab !== 'discover' && activeTab !== 'overview' && (
-            <div className="space-y-3">
-              {visibleEvents.map((event) => (
-                <HomeEventCard
-                  key={event.id}
-                  event={event}
-                  currentUserId={currentUserId}
-                  joinedEventIds={joinedEventIds}
-                  isAdmin={isAdmin}
-                  language={language}
-                  translate={translate}
-                  isPastEvent={isPastEvent}
-                  formatEventDate={formatEventDate}
-                  onOpen={openEventDetails}
-                />
-              ))}
-            </div>
-          )}
-
-          {shouldShowLoadMore && (
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-              className="w-full rounded-xl p-4 border border-border text-sm transition-all disabled:opacity-60"
-              style={{
-                backgroundColor: 'var(--card)',
-                color: 'var(--accent)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              }}
-            >
-              {loadingMore ? (
-                <div className="flex items-center justify-center gap-3">
-                  <LoadingLine width="4rem" height="0.75rem" />
-                  <LoadingLine width="3rem" height="0.75rem" />
+                  ))}
                 </div>
-              ) : (
-                translate('home.loadMore')
               )}
-            </motion.button>
-          )}
 
-          {activeTab === 'discover' && shouldShowDiscoverHistory && (
-            <div className="space-y-6">
-              {recentlyHappenedEvents.length > 0 && (
-                <HomeFeedSection
-                  title={translate('home.recentlyHappened')}
-                  subtitle={translate('home.recentlyHappenedSubtitle')}
+              {shouldShowLoadMore && (
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="w-full rounded-xl p-4 border border-border text-sm transition-all disabled:opacity-60"
+                  style={{
+                    backgroundColor: 'var(--card)',
+                    color: 'var(--accent)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
                 >
-                  <div className="space-y-3">
-                    {recentlyHappenedEvents.map((event) => (
-                      <HomeEventCard
-                        key={`recent-${event.id}`}
-                        event={event}
-                        currentUserId={currentUserId}
-                        joinedEventIds={joinedEventIds}
-                        isAdmin={isAdmin}
-                        variant="compact"
-                        badgeLabel={translate('home.completedBadge')}
-                        language={language}
-                        translate={translate}
-                        isPastEvent={isPastEvent}
-                        formatEventDate={formatEventDate}
-                        onOpen={openEventDetails}
-                      />
-                    ))}
-                  </div>
-                </HomeFeedSection>
+                  {loadingMore ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <LoadingLine width="4rem" height="0.75rem" />
+                      <LoadingLine width="3rem" height="0.75rem" />
+                    </div>
+                  ) : (
+                    translate('home.loadMore')
+                  )}
+                </motion.button>
               )}
 
-              {popularPastEvents.length > 0 && (
-                <HomeFeedSection
-                  title={translate('home.popularPastEvents')}
-                  subtitle={translate('home.popularPastEventsSubtitle')}
-                >
-                  <div className="space-y-3">
-                    {popularPastEvents.map((event) => (
-                      <HomeEventCard
-                        key={`popular-past-${event.id}`}
-                        event={event}
-                        currentUserId={currentUserId}
-                        joinedEventIds={joinedEventIds}
-                        isAdmin={isAdmin}
-                        variant="compact"
-                        badgeLabel={translate('home.completedBadge')}
-                        language={language}
-                        translate={translate}
-                        isPastEvent={isPastEvent}
-                        formatEventDate={formatEventDate}
-                        onOpen={openEventDetails}
-                      />
-                    ))}
-                  </div>
-                </HomeFeedSection>
+              {activeTab === 'discover' && shouldShowDiscoverHistory && (
+                <div className="space-y-6">
+                  {recentlyHappenedEvents.length > 0 && (
+                    <HomeFeedSection
+                      title={translate('home.recentlyHappened')}
+                      subtitle={translate('home.recentlyHappenedSubtitle')}
+                    >
+                      <div className="space-y-3">
+                        {recentlyHappenedEvents.map((event) => (
+                          <HomeEventCard
+                            key={`recent-${event.id}`}
+                            event={event}
+                            currentUserId={currentUserId}
+                            joinedEventIds={joinedEventIds}
+                            isAdmin={isAdmin}
+                            variant="compact"
+                            badgeLabel={translate('home.completedBadge')}
+                            language={language}
+                            translate={translate}
+                            isPastEvent={isPastEvent}
+                            formatEventDate={formatEventDate}
+                            onOpen={openEventDetails}
+                          />
+                        ))}
+                      </div>
+                    </HomeFeedSection>
+                  )}
+
+                  {popularPastEvents.length > 0 && (
+                    <HomeFeedSection
+                      title={translate('home.popularPastEvents')}
+                      subtitle={translate('home.popularPastEventsSubtitle')}
+                    >
+                      <div className="space-y-3">
+                        {popularPastEvents.map((event) => (
+                          <HomeEventCard
+                            key={`popular-past-${event.id}`}
+                            event={event}
+                            currentUserId={currentUserId}
+                            joinedEventIds={joinedEventIds}
+                            isAdmin={isAdmin}
+                            variant="compact"
+                            badgeLabel={translate('home.completedBadge')}
+                            language={language}
+                            translate={translate}
+                            isPastEvent={isPastEvent}
+                            formatEventDate={formatEventDate}
+                            onOpen={openEventDetails}
+                          />
+                        ))}
+                      </div>
+                    </HomeFeedSection>
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <HomeSocialProofSummary
-                eventsCount={socialProofSummary.eventsCount}
-                totalParticipants={socialProofSummary.totalParticipants}
-                citiesCount={socialProofSummary.citiesCount}
-                title={translate('home.citySummaryTitle')}
-                translate={translate}
-              />
+              {activeTab === 'overview' && (
+                <div className="space-y-6">
+                  <HomeSocialProofSummary
+                    eventsCount={socialProofSummary.eventsCount}
+                    totalParticipants={socialProofSummary.totalParticipants}
+                    citiesCount={socialProofSummary.citiesCount}
+                    title={translate('home.citySummaryTitle')}
+                    translate={translate}
+                  />
 
-              <HomeTrendingCreators creators={trendingCreators} translate={translate} />
+                  <HomeTrendingCreators creators={trendingCreators} translate={translate} />
 
-              <HomeCityPulse items={cityPulseItems} translate={translate} />
+                  <HomeCityPulse items={cityPulseItems} translate={translate} />
 
-              <HomeTemplateIdeas
-                ideas={templateIdeas}
-                translate={translate}
-                onSelectTemplate={handleCreateEvent}
-              />
-            </div>
-          )}
+                  <HomeTemplateIdeas
+                    ideas={templateIdeas}
+                    translate={translate}
+                    onSelectTemplate={handleCreateEvent}
+                  />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </PullToRefresh>
 

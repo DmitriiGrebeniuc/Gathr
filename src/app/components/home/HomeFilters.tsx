@@ -26,7 +26,7 @@ import type { HomeTab } from './types';
 type HomeFiltersProps = {
   homeTabs: Array<{ key: HomeTab; label: string }>;
   activeTab: HomeTab;
-  setActiveTab: Dispatch<SetStateAction<HomeTab>>;
+  onSelectTab: (tab: HomeTab) => void;
   tabTransition: {
     duration: number;
     ease: readonly [number, number, number, number];
@@ -57,7 +57,7 @@ const activityIconMap: Record<ActivityType, LucideIcon> = {
 export function HomeFilters({
   homeTabs,
   activeTab,
-  setActiveTab,
+  onSelectTab,
   tabTransition,
   selectedActivityType,
   setSelectedActivityType,
@@ -160,23 +160,37 @@ export function HomeFilters({
 
             return (
               <motion.button
-                key={`${tab.key}-${tab.offset}`}
+                key={tab.key}
+                layout
                 type="button"
                 whileTap={{ scale: 0.96 }}
                 transition={tabTransition}
-                onClick={() => setActiveTab(tab.key)}
-                className="relative shrink-0 rounded-full border px-4 py-2 text-sm transition-all"
+                animate={{
+                  opacity: isOuter ? 0.42 : 1,
+                  scale: isActive ? 1 : 0.92,
+                  y: isActive ? 0 : 1,
+                }}
+                onClick={() => onSelectTab(tab.key)}
+                className={`relative shrink-0 rounded-full border px-4 py-2 text-sm transition-colors ${
+                  isActive ? 'font-semibold' : 'font-normal'
+                }`}
                 style={{
                   backgroundColor: isActive ? 'var(--accent-soft)' : 'rgba(255, 255, 255, 0.03)',
                   borderColor: isActive ? 'var(--accent-border-strong)' : 'var(--border-subtle)',
                   color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
                   boxShadow: isActive ? 'var(--accent-outline-soft)' : 'none',
-                  opacity: isOuter ? 0.42 : 1,
-                  transform: isActive ? 'translateY(0) scale(1)' : 'translateY(1px) scale(0.92)',
                   width: isActive ? '7.8rem' : '6.15rem',
                 }}
               >
                 <span className="block truncate">{tab.label}</span>
+                {isActive && (
+                  <motion.span
+                    layoutId="home-carousel-active-indicator"
+                    className="absolute bottom-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                    transition={tabTransition}
+                  />
+                )}
               </motion.button>
             );
           })}

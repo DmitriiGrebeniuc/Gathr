@@ -99,7 +99,7 @@ export function HomeTemplateIdeas({
       title={translate('home.templateIdeasTitle')}
       subtitle={translate('home.templateIdeasSubtitle')}
     >
-      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar" data-home-horizontal-scroll>
         {ideas.map((idea) => {
           const activityMeta = getActivityTypeMeta(idea.activityType);
 
@@ -180,7 +180,7 @@ export function HomeTrendingCreators({ creators, translate }: HomeTrendingCreato
       title={translate('home.trendingCreatorsTitle')}
       subtitle={translate('home.trendingCreatorsSubtitle')}
     >
-      <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+      <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar" data-home-horizontal-scroll>
         {creators.map((creator) => (
           <div
             key={creator.id}

@@ -3,7 +3,7 @@
     "email": "gathr.seed.1@example.com",
     "password": "TestUser123!",
     "name": "Alex V",
-    "role": "organizer"
+    "role": "user"
   },
   {
     "email": "gathr.seed.2@example.com",
@@ -63,7 +63,7 @@
     "email": "gathr.seed.11@example.com",
     "password": "TestUser123!",
     "name": "Sofia Marin",
-    "role": "user"
+    "role": "organizer"
   },
   {
     "email": "gathr.seed.12@example.com",
@@ -75,7 +75,7 @@
     "email": "gathr.seed.13@example.com",
     "password": "TestUser123!",
     "name": "Anastasia K",
-    "role": "user"
+    "role": "organizer"
   },
   {
     "email": "gathr.seed.14@example.com",

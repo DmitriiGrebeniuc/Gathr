@@ -1,6 +1,6 @@
 import type { ActivityType } from '../../constants/activityTypes';
 
-export type HomeTab = 'discover' | 'my' | 'joined' | 'visited';
+export type HomeTab = 'discover' | 'joined' | 'my' | 'visited' | 'overview';
 
 export type HomeEventItem = {
   id: string;

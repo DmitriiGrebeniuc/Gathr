@@ -8,7 +8,7 @@ type HomeEventCardProps = {
   currentUserId: string | null;
   joinedEventIds: string[];
   isAdmin: boolean;
-  variant?: 'default' | 'featured' | 'muted';
+  variant?: 'default' | 'featured' | 'muted' | 'compact';
   badgeLabel?: string | null;
   language: LanguageCode;
   translate: (key: any) => string;
@@ -46,24 +46,34 @@ export function HomeEventCard({
     isRequestMode && !canViewClosedPreview
       ? translate('home.closedLocationHidden')
       : event.location || translate('details.locationNotSpecified');
+  const compact = variant === 'compact';
 
   return (
     <motion.div
       whileTap={{ scale: 0.985 }}
       onClick={() => onOpen(event)}
-      className="rounded-xl p-4 border border-border cursor-pointer transition-all active:opacity-90"
+      className={`rounded-xl border border-border cursor-pointer transition-all active:opacity-90 ${
+        compact ? 'p-3' : 'p-4'
+      }`}
       style={{
         backgroundColor: variant === 'featured' ? 'var(--accent-soft-muted)' : 'var(--card)',
-        borderColor: isRequestMode ? 'var(--accent-border-strong)' : 'var(--border)',
+        borderColor:
+          variant === 'muted' || compact
+            ? 'var(--border-subtle)'
+            : isRequestMode
+              ? 'var(--accent-border-strong)'
+              : 'var(--border)',
         boxShadow:
           variant === 'featured'
             ? '0 8px 22px rgba(212, 175, 55, 0.16)'
-            : '0 4px 12px rgba(0, 0, 0, 0.3)',
+            : compact
+              ? 'none'
+              : '0 4px 12px rgba(0, 0, 0, 0.3)',
         opacity: past || variant === 'muted' ? 0.72 : 1,
       }}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <h3>{event.title}</h3>
+        <h3 className={compact ? 'text-sm' : undefined}>{event.title}</h3>
 
         <div className="flex items-center gap-2">
           {isRequestMode && (
@@ -107,7 +117,7 @@ export function HomeEventCard({
         </div>
       </div>
 
-      <div className="mb-2">
+      <div className={compact ? 'mb-1.5' : 'mb-2'}>
         <span
           className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full border"
           style={{
@@ -121,9 +131,13 @@ export function HomeEventCard({
         </span>
       </div>
 
-      <p className="text-sm text-muted-foreground mb-2">{dateLabel}</p>
+      <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground mb-1.5`}>
+        {dateLabel}
+      </p>
 
-      <p className="text-sm text-muted-foreground mb-3">{locationLabel}</p>
+      <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground ${compact ? 'mb-2' : 'mb-3'}`}>
+        {locationLabel}
+      </p>
 
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-muted-foreground">

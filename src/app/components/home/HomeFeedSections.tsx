@@ -25,6 +25,7 @@ type HomeSocialProofSummaryProps = {
   eventsCount: number;
   totalParticipants: number;
   citiesCount: number;
+  title: string;
   translate: (key: any) => string;
 };
 
@@ -98,7 +99,7 @@ export function HomeTemplateIdeas({
       title={translate('home.templateIdeasTitle')}
       subtitle={translate('home.templateIdeasSubtitle')}
     >
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
         {ideas.map((idea) => {
           const activityMeta = getActivityTypeMeta(idea.activityType);
 
@@ -108,14 +109,14 @@ export function HomeTemplateIdeas({
               type="button"
               whileTap={{ scale: 0.97 }}
               onClick={() => onSelectTemplate(idea)}
-              className="min-w-[8.5rem] rounded-xl border px-3 py-3 text-left transition-all"
+              className="shrink-0 rounded-full border px-3 py-2 text-left text-xs transition-all"
               style={{
                 backgroundColor: 'var(--card)',
-                borderColor: 'var(--border)',
+                borderColor: 'var(--border-subtle)',
               }}
             >
-              <span className="block text-lg">{activityMeta.emoji}</span>
-              <span className="mt-1 block text-sm" style={{ color: 'var(--foreground-strong)' }}>
+              <span className="mr-1.5">{activityMeta.emoji}</span>
+              <span style={{ color: 'var(--foreground-strong)' }}>
                 {idea.label}
               </span>
             </motion.button>
@@ -179,18 +180,18 @@ export function HomeTrendingCreators({ creators, translate }: HomeTrendingCreato
       title={translate('home.trendingCreatorsTitle')}
       subtitle={translate('home.trendingCreatorsSubtitle')}
     >
-      <div className="grid gap-2">
+      <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
         {creators.map((creator) => (
           <div
             key={creator.id}
-            className="flex items-center gap-3 rounded-xl border p-3"
+            className="min-w-[7.5rem] rounded-xl border p-3 text-center"
             style={{
               backgroundColor: 'var(--card)',
-              borderColor: 'var(--border)',
+              borderColor: 'var(--border-subtle)',
             }}
           >
             <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm"
+              className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border text-sm"
               style={{
                 backgroundColor: 'var(--accent-soft-muted)',
                 borderColor: 'var(--accent-border-muted)',
@@ -200,27 +201,15 @@ export function HomeTrendingCreators({ creators, translate }: HomeTrendingCreato
               {creator.initials}
             </div>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="truncate text-sm" style={{ color: 'var(--foreground-strong)' }}>
-                  {creator.name}
-                </p>
-                <span
-                  className="shrink-0 rounded-full border px-2 py-0.5 text-[10px]"
-                  style={{
-                    borderColor: 'var(--accent-border-muted)',
-                    color: 'var(--accent)',
-                    backgroundColor: 'var(--accent-soft-muted)',
-                  }}
-                >
-                  {translate('home.activeHostBadge')}
-                </span>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {creator.eventCount} {translate('home.hostedEventsLabel')} ·{' '}
-                {creator.totalParticipants} {translate('home.socialProofParticipants')}
-              </p>
-            </div>
+            <p className="mt-2 truncate text-sm" style={{ color: 'var(--foreground-strong)' }}>
+              {creator.name}
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {creator.eventCount} {translate('home.hostedEventsLabel')}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              {creator.totalParticipants} {translate('home.socialProofParticipants')}
+            </p>
           </div>
         ))}
       </div>
@@ -241,8 +230,8 @@ export function HomeCityPulse({ items, translate }: HomeCityPulseProps) {
       <div
         className="rounded-xl border p-3"
         style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          borderColor: 'var(--border-subtle)',
         }}
       >
         <div className="space-y-2">
@@ -295,6 +284,7 @@ export function HomeSocialProofSummary({
   eventsCount,
   totalParticipants,
   citiesCount,
+  title,
   translate,
 }: HomeSocialProofSummaryProps) {
   if (eventsCount === 0) {
@@ -318,22 +308,28 @@ export function HomeSocialProofSummary({
 
   return (
     <div
-      className="grid grid-cols-3 gap-2 rounded-xl border p-3"
+      className="rounded-xl border p-4"
       style={{
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
+        background:
+          'linear-gradient(135deg, var(--card), rgba(212, 175, 55, 0.08))',
+        borderColor: 'var(--border-subtle)',
       }}
     >
-      {stats.map((stat) => (
-        <div key={stat.label} className="min-w-0 text-center">
-          <p className="text-base" style={{ color: 'var(--accent)' }}>
-            {stat.value}
-          </p>
-          <p className="mt-1 truncate text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            {stat.label}
-          </p>
-        </div>
-      ))}
+      <h2 className="text-base" style={{ color: 'var(--foreground-strong)' }}>
+        {title}
+      </h2>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {stats.map((stat) => (
+          <div key={stat.label} className="min-w-0">
+            <p className="text-base" style={{ color: 'var(--accent)' }}>
+              {stat.value}
+            </p>
+            <p className="mt-1 truncate text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { Home, Plus, User } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../../lib/supabase';
-import { fetchUnreadNotificationCountForUser } from '../lib/notificationReads';
+import { fetchMyProfileAccessSummary } from '../lib/publicData';
 
 export function BottomNav({
   activeScreen,
@@ -12,12 +13,12 @@ export function BottomNav({
   onNavigate: (screen: string) => void;
 }) {
   const { translate } = useLanguage();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [hasProPlan, setHasProPlan] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadUnreadCount = async () => {
+    const loadProfileAccess = async () => {
       const {
         data: { user },
         error,
@@ -25,88 +26,52 @@ export function BottomNav({
 
       if (error || !user) {
         if (!cancelled) {
-          setUnreadCount(0);
+          setHasProPlan(false);
         }
         return;
       }
 
-      const count = await fetchUnreadNotificationCountForUser(user.id);
+      const profileAccess = await fetchMyProfileAccessSummary();
 
       if (!cancelled) {
-        setUnreadCount(count);
+        setHasProPlan(
+          profileAccess?.plan === 'pro' || profileAccess?.has_unlimited_access === true
+        );
       }
     };
 
-    void loadUnreadCount();
-
-    const participantsChannel = supabase
-      .channel('bottom-nav-notifications-participants')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'participants',
-        },
-        () => {
-          void loadUnreadCount();
-        }
-      )
-      .subscribe();
-
-    const eventsChannel = supabase
-      .channel('bottom-nav-notifications-events')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'events',
-        },
-        () => {
-          void loadUnreadCount();
-        }
-      )
-      .subscribe();
-
-    const invitationsChannel = supabase
-      .channel('bottom-nav-notifications-invitations')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'event_invitations',
-        },
-        () => {
-          void loadUnreadCount();
-        }
-      )
-      .subscribe();
-
-    const joinRequestsChannel = supabase
-      .channel('bottom-nav-notifications-event-join-requests')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'event_join_requests',
-        },
-        () => {
-          void loadUnreadCount();
-        }
-      )
-      .subscribe();
+    void loadProfileAccess();
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(participantsChannel);
-      supabase.removeChannel(eventsChannel);
-      supabase.removeChannel(invitationsChannel);
-      supabase.removeChannel(joinRequestsChannel);
     };
   }, [activeScreen]);
+
+  const navItems = [
+    {
+      id: 'home',
+      label: translate('bottomNav.home'),
+      icon: Home,
+      isActive: activeScreen === 'home',
+      onClick: () => onNavigate('home'),
+    },
+    {
+      id: 'create',
+      label: translate('bottomNav.create'),
+      icon: Plus,
+      isActive: false,
+      onClick: () => onNavigate('create-event'),
+      isPrimary: true,
+    },
+    {
+      id: 'profile',
+      label: translate('bottomNav.profile'),
+      icon: User,
+      isActive: activeScreen === 'profile',
+      onClick: () => onNavigate('profile'),
+      showProBadge: hasProPlan,
+    },
+  ];
 
   return (
     <motion.div
@@ -114,90 +79,66 @@ export function BottomNav({
       animate={{ y: 0 }}
       exit={{ y: 100 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="flex w-full shrink-0 items-center justify-around border-t"
+      className="flex w-full shrink-0 items-end justify-around border-t"
       style={{
         borderColor: 'var(--border)',
         backgroundColor: 'var(--background)',
         backdropFilter: 'blur(10px)',
-        paddingTop: '0.75rem',
-        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+        paddingTop: '0.65rem',
+        paddingBottom: 'calc(0.7rem + env(safe-area-inset-bottom, 0px))',
       }}
     >
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => onNavigate('home')}
-        className="flex flex-col items-center gap-1 transition-colors relative"
-        style={{ color: activeScreen === 'home' ? 'var(--accent)' : 'var(--muted-foreground)' }}
-      >
-        {activeScreen === 'home' && (
-          <motion.div
-            layoutId="activeIndicator"
-            className="absolute -top-1 w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--accent)' }}
-          />
-        )}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          <polyline points="9 22 9 12 15 12 15 22" />
-        </svg>
-        <span className="text-xs">{translate('bottomNav.home')}</span>
-      </motion.button>
+      {navItems.map((item) => {
+        const Icon = item.icon;
 
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => onNavigate('notifications')}
-        className="flex flex-col items-center gap-1 transition-colors relative"
-        style={{ color: activeScreen === 'notifications' ? 'var(--accent)' : 'var(--muted-foreground)' }}
-      >
-        {activeScreen === 'notifications' && (
-          <motion.div
-            layoutId="activeIndicator"
-            className="absolute -top-1 w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--accent)' }}
-          />
-        )}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-        {activeScreen !== 'notifications' && unreadCount > 0 && (
-          <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.85, opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute -top-1 right-0 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full flex items-center justify-center text-[0.625rem] font-semibold"
+        return (
+          <motion.button
+            key={item.id}
+            whileTap={{ scale: item.isPrimary ? 0.92 : 0.9 }}
+            onClick={item.onClick}
+            className="relative flex min-w-0 flex-1 flex-col items-center gap-1 transition-colors"
             style={{
-              backgroundColor: 'var(--accent)',
-              color: 'var(--accent-foreground)',
-              boxShadow: '0 0 0 2px var(--background)',
+              color: item.isPrimary || item.isActive ? 'var(--accent)' : 'var(--muted-foreground)',
             }}
           >
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </motion.div>
-        )}
-        <span className="text-xs">{translate('bottomNav.notifications')}</span>
-      </motion.button>
+            {item.isActive && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="absolute -top-1 h-1 w-1 rounded-full"
+                style={{ backgroundColor: 'var(--accent)' }}
+              />
+            )}
 
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => onNavigate('profile')}
-        className="flex flex-col items-center gap-1 transition-colors relative"
-        style={{ color: activeScreen === 'profile' ? 'var(--accent)' : 'var(--muted-foreground)' }}
-      >
-        {activeScreen === 'profile' && (
-          <motion.div
-            layoutId="activeIndicator"
-            className="absolute -top-1 w-1 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--accent)' }}
-          />
-        )}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-        <span className="text-xs">{translate('bottomNav.profile')}</span>
-      </motion.button>
+            <span
+              className="relative flex items-center justify-center rounded-full"
+              style={{
+                width: item.isPrimary ? 40 : 28,
+                height: item.isPrimary ? 40 : 28,
+                backgroundColor: item.isPrimary ? 'var(--accent)' : 'transparent',
+                color: item.isPrimary ? 'var(--accent-foreground)' : 'currentColor',
+                boxShadow: item.isPrimary ? '0 8px 20px rgba(212, 175, 55, 0.24)' : 'none',
+              }}
+            >
+              <Icon size={item.isPrimary ? 22 : 23} strokeWidth={item.isPrimary ? 2.4 : 2} />
+
+              {item.showProBadge && (
+                <span
+                  className="absolute -right-2 -top-1 rounded-full border px-1.5 py-0.5 text-[8px] font-semibold uppercase leading-none tracking-[0.12em]"
+                  style={{
+                    backgroundColor: 'var(--accent)',
+                    borderColor: 'var(--background)',
+                    color: 'var(--accent-foreground)',
+                  }}
+                >
+                  {translate('home.proBadge')}
+                </span>
+              )}
+            </span>
+
+            <span className="max-w-full truncate text-[11px]">{item.label}</span>
+          </motion.button>
+        );
+      })}
     </motion.div>
   );
 }

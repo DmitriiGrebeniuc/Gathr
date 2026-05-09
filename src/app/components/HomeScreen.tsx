@@ -21,7 +21,6 @@ import {
   getEventTimestamp,
   HomeCityPulse,
   HomeDiscoverHistoryNudge,
-  HomeExploreByVibe,
   HomeFeedSection,
   HomeSocialProofSummary,
   HomeTemplateIdeas,
@@ -53,7 +52,6 @@ export function HomeScreen({
   const [citySearchQuery, setCitySearchQuery] = useState('');
   const [isEventSearchOpen, setIsEventSearchOpen] = useState(false);
   const [eventSearchQuery, setEventSearchQuery] = useState('');
-  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
   const [isLaunchOverlayVisible, setIsLaunchOverlayVisible] = useState(() => {
     if (typeof window === 'undefined') {
       return false;
@@ -64,11 +62,11 @@ export function HomeScreen({
   const [events, setEvents] = useState<HomeEventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [currentUserName, setCurrentUserName] = useState<string>('User');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [hasProPlan, setHasProPlan] = useState(false);
   const [openSupportTicketCount, setOpenSupportTicketCount] = useState(0);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>([]);
+  const [outgoingJoinRequestCount, setOutgoingJoinRequestCount] = useState(0);
   const [visibleCount, setVisibleCount] = useState(LOCAL_BATCH_SIZE);
   const [serverOffset, setServerOffset] = useState(0);
   const [hasMoreServerEvents, setHasMoreServerEvents] = useState(true);
@@ -76,13 +74,12 @@ export function HomeScreen({
   const [initialLoaderPhase, setInitialLoaderPhase] = useState<'hidden' | 'visible' | 'exiting'>(
     'hidden'
   );
-  const themePickerRef = useRef<HTMLDivElement | null>(null);
   const eventsRef = useRef<HomeEventItem[]>([]);
   const currentUserIdRef = useRef<string | null>(null);
   const initialLoaderShownAtRef = useRef<number | null>(null);
 
   const { language, translate } = useLanguage();
-  const { themeMode, setThemeMode, systemTheme, effectiveTheme } = useTheme();
+  const { effectiveTheme } = useTheme();
 
   useEffect(() => {
     eventsRef.current = events;
@@ -212,6 +209,32 @@ export function HomeScreen({
     }
   };
 
+  const refreshOutgoingJoinRequestCount = async (userId: string | null | undefined) => {
+    if (!userId) {
+      setOutgoingJoinRequestCount(0);
+      return;
+    }
+
+    try {
+      const { count, error } = await supabase
+        .from('event_join_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('requester_id', userId)
+        .eq('status', 'pending');
+
+      if (error) {
+        console.error('Failed to load outgoing join request count:', error);
+        setOutgoingJoinRequestCount(0);
+        return;
+      }
+
+      setOutgoingJoinRequestCount(count ?? 0);
+    } catch (error) {
+      console.error('Unexpected outgoing join request count error:', error);
+      setOutgoingJoinRequestCount(0);
+    }
+  };
+
   const fetchEvents = async (showLoader = true) => {
     if (showLoader) {
       setLoading(true);
@@ -232,12 +255,9 @@ export function HomeScreen({
 
       if (userId) {
         const profileData = await fetchMyProfileAccessSummary();
-        setCurrentUserName(profileData?.name || translate('common.user'));
         const nextIsAdmin = profileData?.role === 'admin';
-        const nextHasProPlan =
-          profileData?.plan === 'pro' || profileData?.has_unlimited_access === true;
         setIsAdmin(nextIsAdmin);
-        setHasProPlan(nextHasProPlan);
+        await refreshOutgoingJoinRequestCount(userId);
 
         if (nextIsAdmin) {
           await refreshOpenSupportTicketCount();
@@ -245,10 +265,9 @@ export function HomeScreen({
           setOpenSupportTicketCount(0);
         }
       } else {
-        setCurrentUserName(translate('common.user'));
         setIsAdmin(false);
-        setHasProPlan(false);
         setOpenSupportTicketCount(0);
+        setOutgoingJoinRequestCount(0);
       }
 
       const { data: eventsData, error: eventsError } = await supabase
@@ -472,6 +491,10 @@ export function HomeScreen({
     return filteredEventsByControls.filter((event) => {
       const past = isPastEvent(event);
 
+      if (activeTab === 'overview') {
+        return false;
+      }
+
       if (!currentUserId) {
         if (activeTab !== 'discover' || past) {
           return false;
@@ -548,36 +571,13 @@ export function HomeScreen({
     );
   }, [availableCities, selectedCity, translate]);
 
-  const themeOptions = useMemo(
-    () => [
-      {
-        value: 'system' as const,
-        label: translate('appearance.system'),
-        hint:
-          systemTheme === 'dark'
-            ? translate('appearance.currentSystemDark')
-            : translate('appearance.currentSystemLight'),
-      },
-      {
-        value: 'dark' as const,
-        label: translate('appearance.dark'),
-        hint: null,
-      },
-      {
-        value: 'light' as const,
-        label: translate('appearance.light'),
-        hint: null,
-      },
-    ],
-    [systemTheme, translate]
-  );
-
   const homeTabs = useMemo(
     () => [
       { key: 'discover' as const, label: translate('home.discover') },
       { key: 'joined' as const, label: translate('home.joined') },
       { key: 'my' as const, label: translate('home.myEvents') },
       { key: 'visited' as const, label: translate('home.visited') },
+      { key: 'overview' as const, label: translate('home.overview') },
     ],
     [translate]
   );
@@ -644,9 +644,11 @@ export function HomeScreen({
       .slice(0, 5);
   }, [activeTab, sortedEvents]);
 
+  const primaryFeaturedEvent = featuredEvents[0] ?? null;
+
   const featuredEventIds = useMemo(() => {
-    return new Set(featuredEvents.map((event) => event.id));
-  }, [featuredEvents]);
+    return new Set(primaryFeaturedEvent ? [primaryFeaturedEvent.id] : []);
+  }, [primaryFeaturedEvent]);
 
   const discoverUpcomingEvents = useMemo(() => {
     if (activeTab !== 'discover') {
@@ -672,11 +674,11 @@ export function HomeScreen({
     return filteredEventsByControls
       .filter((event) => isPastEvent(event))
       .sort((a, b) => getEventTimestamp(b) - getEventTimestamp(a))
-      .slice(0, 10);
+      .slice(0, 3);
   }, [activeTab, filteredEventsByControls]);
 
   const popularPastEvents = useMemo(() => {
-    if (activeTab !== 'discover') {
+    if (activeTab !== 'overview') {
       return [];
     }
 
@@ -695,7 +697,7 @@ export function HomeScreen({
   }, [activeTab, filteredEventsByControls, recentlyHappenedEvents]);
 
   const trendingCreators = useMemo(() => {
-    if (activeTab !== 'discover') {
+    if (activeTab !== 'overview') {
       return [];
     }
 
@@ -761,7 +763,7 @@ export function HomeScreen({
   }, [activeTab, filteredEventsByControls, translate]);
 
   const cityPulseItems = useMemo(() => {
-    if (activeTab !== 'discover') {
+    if (activeTab !== 'overview') {
       return [];
     }
 
@@ -836,7 +838,7 @@ export function HomeScreen({
       });
     }
 
-    return items.slice(0, 4);
+    return items.slice(0, 3);
   }, [activeTab, filteredEventsByControls, language, recentlyHappenedEvents, translate]);
 
   const templateIdeas = useMemo(
@@ -887,20 +889,42 @@ export function HomeScreen({
     };
   }, [filteredEventsByControls]);
 
+  const personalStatusSummary = useMemo(() => {
+    if (!currentUserId) {
+      return {
+        joinedCount: 0,
+        createdCount: 0,
+      };
+    }
+
+    return {
+      joinedCount: events.filter(
+        (event) =>
+          joinedEventIds.includes(event.id) &&
+          event.creator_id !== currentUserId &&
+          !isPastEvent(event)
+      ).length,
+      createdCount: events.filter((event) => event.creator_id === currentUserId).length,
+    };
+  }, [currentUserId, events, joinedEventIds]);
+
   const shouldShowInitialLoader = loading && events.length === 0;
   const shouldRenderAnimatedInitialLoader = initialLoaderPhase !== 'hidden';
   const shouldShowDiscoverHistory =
     activeTab === 'discover' &&
-    (recentlyHappenedEvents.length > 0 || popularPastEvents.length > 0);
-  const shouldShowEmptyState = !loading && sortedEvents.length === 0 && !shouldShowDiscoverHistory;
+    recentlyHappenedEvents.length > 0;
+  const shouldShowEmptyState =
+    !loading && activeTab !== 'overview' && sortedEvents.length === 0 && !shouldShowDiscoverHistory;
   const canShowLoadMore =
     !loading &&
+    activeTab !== 'overview' &&
     (activeTab === 'discover'
       ? visibleUpcomingEvents.length < discoverUpcomingEvents.length
       : visibleEvents.length < sortedEvents.length);
   const canLoadMoreFromServer =
     !loading &&
     !loadingMore &&
+    activeTab !== 'overview' &&
     hasMoreServerEvents &&
     sortedEvents.length >= visibleCount;
   const shouldShowLoadMore = canShowLoadMore || canLoadMoreFromServer;
@@ -1012,10 +1036,26 @@ export function HomeScreen({
       )
       .subscribe();
 
+    const joinRequestsChannel = supabase
+      .channel('home-outgoing-join-requests')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'event_join_requests',
+        },
+        async () => {
+          await refreshOutgoingJoinRequestCount(currentUserIdRef.current);
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(eventsChannel);
       supabase.removeChannel(participantsChannel);
       supabase.removeChannel(supportRequestsChannel);
+      supabase.removeChannel(joinRequestsChannel);
     };
   }, [isAdmin]);
 
@@ -1122,42 +1162,59 @@ export function HomeScreen({
     };
   }, [shouldShowInitialLoader, initialLoaderPhase]);
 
-  useEffect(() => {
-    if (!isThemePickerOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!themePickerRef.current?.contains(event.target as Node)) {
-        setIsThemePickerOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-    };
-  }, [isThemePickerOpen]);
-
   return (
     <div className="h-full flex flex-col bg-background">
       <HomeHeader
         isHeaderCompact={isHeaderCompact}
-        themePickerRef={themePickerRef}
-        isThemePickerOpen={isThemePickerOpen}
-        setIsThemePickerOpen={setIsThemePickerOpen}
-        themeOptions={themeOptions}
-        themeMode={themeMode}
-        setThemeMode={setThemeMode}
         isAdmin={isAdmin}
         openSupportTicketCount={openSupportTicketCount}
-        currentUserName={currentUserName}
-        hasProPlan={hasProPlan}
-        getInitials={getInitials}
+        unreadNotificationCount={unreadNotificationCount}
+        setUnreadNotificationCount={setUnreadNotificationCount}
+        selectedCity={selectedCity}
+        selectedCityLabel={selectedCityLabel}
+        isCityPickerOpen={isCityPickerOpen}
+        toggleCityPicker={toggleCityPicker}
+        citySearchQuery={citySearchQuery}
+        setCitySearchQuery={setCitySearchQuery}
+        filteredCityOptions={filteredCityOptions}
+        handleSelectCity={handleSelectCity}
         translate={translate}
         onNavigate={onNavigate}
       />
+
+      <div className="border-b border-border px-4 py-2">
+        <div
+          className="grid grid-cols-3 gap-1 rounded-2xl border px-2 py-2 text-center"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.025)',
+            borderColor: 'var(--border-subtle)',
+          }}
+        >
+          {[
+            {
+              label: translate('home.statusJoined'),
+              value: personalStatusSummary.joinedCount,
+            },
+            {
+              label: translate('home.statusCreated'),
+              value: personalStatusSummary.createdCount,
+            },
+            {
+              label: translate('home.statusRequests'),
+              value: outgoingJoinRequestCount,
+            },
+          ].map((item) => (
+            <div key={item.label} className="min-w-0 px-1">
+              <p className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
+                {currentUserId ? item.value : 0}
+              </p>
+              <p className="truncate text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                {item.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <HomeFilters
         homeTabs={homeTabs}
@@ -1167,14 +1224,6 @@ export function HomeScreen({
         selectedActivityType={selectedActivityType}
         setSelectedActivityType={setSelectedActivityType}
         language={language}
-        selectedCity={selectedCity}
-        selectedCityLabel={selectedCityLabel}
-        isCityPickerOpen={isCityPickerOpen}
-        toggleCityPicker={toggleCityPicker}
-        citySearchQuery={citySearchQuery}
-        setCitySearchQuery={setCitySearchQuery}
-        filteredCityOptions={filteredCityOptions}
-        handleSelectCity={handleSelectCity}
         isEventSearchOpen={isEventSearchOpen}
         toggleEventSearch={toggleEventSearch}
         eventSearchQuery={eventSearchQuery}
@@ -1204,35 +1253,26 @@ export function HomeScreen({
 
           {activeTab === 'discover' && (
             <div className="space-y-6">
-              <HomeExploreByVibe
-                selectedActivityType={selectedActivityType}
-                language={language}
-                translate={translate}
-                onSelectActivityType={setSelectedActivityType}
-              />
-
-              {featuredEvents.length > 0 && (
+              {primaryFeaturedEvent && (
                 <HomeFeedSection
                   title={translate('home.featuredThisWeek')}
                   subtitle={translate('home.featuredThisWeekSubtitle')}
                 >
                   <div className="space-y-3">
-                    {featuredEvents.map((event) => (
-                      <HomeEventCard
-                        key={`featured-${event.id}`}
-                        event={event}
-                        currentUserId={currentUserId}
-                        joinedEventIds={joinedEventIds}
-                        isAdmin={isAdmin}
-                        variant="featured"
-                        badgeLabel={translate('home.featuredBadge')}
-                        language={language}
-                        translate={translate}
-                        isPastEvent={isPastEvent}
-                        formatEventDate={formatEventDate}
-                        onOpen={openEventDetails}
-                      />
-                    ))}
+                    <HomeEventCard
+                      key={`featured-${primaryFeaturedEvent.id}`}
+                      event={primaryFeaturedEvent}
+                      currentUserId={currentUserId}
+                      joinedEventIds={joinedEventIds}
+                      isAdmin={isAdmin}
+                      variant="featured"
+                      badgeLabel={translate('home.featuredBadge')}
+                      language={language}
+                      translate={translate}
+                      isPastEvent={isPastEvent}
+                      formatEventDate={formatEventDate}
+                      onOpen={openEventDetails}
+                    />
                   </div>
                 </HomeFeedSection>
               )}
@@ -1250,6 +1290,7 @@ export function HomeScreen({
                         currentUserId={currentUserId}
                         joinedEventIds={joinedEventIds}
                         isAdmin={isAdmin}
+                        variant="compact"
                         language={language}
                         translate={translate}
                         isPastEvent={isPastEvent}
@@ -1270,7 +1311,7 @@ export function HomeScreen({
             </div>
           )}
 
-          {activeTab !== 'discover' && (
+          {activeTab !== 'discover' && activeTab !== 'overview' && (
             <div className="space-y-3">
               {visibleEvents.map((event) => (
                 <HomeEventCard
@@ -1327,7 +1368,7 @@ export function HomeScreen({
                         currentUserId={currentUserId}
                         joinedEventIds={joinedEventIds}
                         isAdmin={isAdmin}
-                        variant="muted"
+                        variant="compact"
                         badgeLabel={translate('home.completedBadge')}
                         language={language}
                         translate={translate}
@@ -1353,7 +1394,7 @@ export function HomeScreen({
                         currentUserId={currentUserId}
                         joinedEventIds={joinedEventIds}
                         isAdmin={isAdmin}
-                        variant="muted"
+                        variant="compact"
                         badgeLabel={translate('home.completedBadge')}
                         language={language}
                         translate={translate}
@@ -1368,8 +1409,16 @@ export function HomeScreen({
             </div>
           )}
 
-          {activeTab === 'discover' && (
+          {activeTab === 'overview' && (
             <div className="space-y-6">
+              <HomeSocialProofSummary
+                eventsCount={socialProofSummary.eventsCount}
+                totalParticipants={socialProofSummary.totalParticipants}
+                citiesCount={socialProofSummary.citiesCount}
+                title={translate('home.citySummaryTitle')}
+                translate={translate}
+              />
+
               <HomeTrendingCreators creators={trendingCreators} translate={translate} />
 
               <HomeCityPulse items={cityPulseItems} translate={translate} />
@@ -1379,32 +1428,10 @@ export function HomeScreen({
                 translate={translate}
                 onSelectTemplate={handleCreateEvent}
               />
-
-              <HomeSocialProofSummary
-                eventsCount={socialProofSummary.eventsCount}
-                totalParticipants={socialProofSummary.totalParticipants}
-                citiesCount={socialProofSummary.citiesCount}
-                translate={translate}
-              />
             </div>
           )}
         </div>
       </PullToRefresh>
-
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleCreateEvent}
-        className="absolute bottom-24 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
-        style={{
-          bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
-          backgroundColor: 'var(--accent)',
-          color: 'var(--accent-foreground)',
-          boxShadow: '0 8px 24px rgba(212, 175, 55, 0.4)',
-        }}
-      >
-        <span className="text-2xl">+</span>
-      </motion.button>
 
       {isLaunchOverlayVisible && (
         <HomeLaunchOverlay

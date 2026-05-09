@@ -24,6 +24,7 @@ type TranslationKey =
     | 'appError.description'
     | 'appError.backHome'
     | 'bottomNav.home'
+    | 'bottomNav.create'
     | 'bottomNav.notifications'
     | 'bottomNav.profile'
     | 'activity.sports'
@@ -384,6 +385,7 @@ type TranslationKey =
     | 'home.joined'
     | 'home.myEvents'
     | 'home.visited'
+    | 'home.overview'
     | 'home.all'
     | 'home.allCities'
     | 'home.proBadge'
@@ -414,6 +416,10 @@ type TranslationKey =
     | 'home.socialProofEvents'
     | 'home.socialProofParticipants'
     | 'home.socialProofCities'
+    | 'home.citySummaryTitle'
+    | 'home.statusJoined'
+    | 'home.statusCreated'
+    | 'home.statusRequests'
     | 'home.templateIdeasTitle'
     | 'home.templateIdeasSubtitle'
     | 'home.templateFootball'
@@ -660,6 +666,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'appError.backHome': 'Back to home',
 
         'bottomNav.home': 'Home',
+        'bottomNav.create': 'Create',
         'bottomNav.notifications': 'Notifications',
         'bottomNav.profile': 'Profile',
 
@@ -1017,6 +1024,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.joined': 'Joined',
         'home.myEvents': 'My Events',
         'home.visited': 'Visited',
+        'home.overview': 'Overview',
         'home.all': 'All',
         'home.allCities': 'All cities',
         'home.proBadge': 'Pro',
@@ -1047,6 +1055,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': 'events',
         'home.socialProofParticipants': 'joined',
         'home.socialProofCities': 'cities',
+        'home.citySummaryTitle': 'Today',
+        'home.statusJoined': 'Going',
+        'home.statusCreated': 'Created',
+        'home.statusRequests': 'Requests',
         'home.templateIdeasTitle': 'Start with an idea',
         'home.templateIdeasSubtitle': 'Pick a quick format and create your own plan.',
         'home.templateFootball': 'Football game',
@@ -1326,6 +1338,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'appError.backHome': 'На главную',
 
         'bottomNav.home': 'Главная',
+        'bottomNav.create': 'Создать',
         'bottomNav.notifications': 'Уведомления',
         'bottomNav.profile': 'Профиль',
 
@@ -1649,6 +1662,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.discover': 'События',
         'home.joined': 'Участвую',
         'home.myEvents': 'Созданные',
+        'home.overview': '\u041e\u0431\u0437\u043e\u0440',
         'home.all': 'Все',
         'home.allCities': 'Все города',
         'home.proBadge': 'Pro',
@@ -1677,6 +1691,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': '\u0441\u043e\u0431\u044b\u0442\u0438\u0439',
         'home.socialProofParticipants': '\u0443\u0447\u0430\u0441\u0442\u0438\u0439',
         'home.socialProofCities': '\u0433\u043e\u0440\u043e\u0434\u043e\u0432',
+        'home.citySummaryTitle': '\u0421\u0435\u0433\u043e\u0434\u043d\u044f',
+        'home.statusJoined': '\u0418\u0434\u0443',
+        'home.statusCreated': '\u0421\u043e\u0437\u0434\u0430\u043b',
+        'home.statusRequests': '\u0417\u0430\u044f\u0432\u043a\u0438',
         'home.templateIdeasTitle': '\u041d\u0430\u0447\u0430\u0442\u044c \u0441 \u0438\u0434\u0435\u0438',
         'home.templateIdeasSubtitle': '\u0412\u044b\u0431\u0435\u0440\u0438 \u043f\u0440\u043e\u0441\u0442\u043e\u0439 \u0444\u043e\u0440\u043c\u0430\u0442 \u0438 \u0441\u043e\u0437\u0434\u0430\u0439 \u0441\u0432\u043e\u044e \u0432\u0441\u0442\u0440\u0435\u0447\u0443.',
         'home.templateFootball': '\u0424\u0443\u0442\u0431\u043e\u043b',
@@ -1908,6 +1926,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'appError.backHome': 'Înapoi acasă',
 
         'bottomNav.home': 'Acasă',
+        'bottomNav.create': 'Creează',
         'bottomNav.notifications': 'Notificări',
         'bottomNav.profile': 'Profil',
 
@@ -2235,6 +2254,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.discover': 'Descoperă',
         'home.joined': 'Particip',
         'home.myEvents': 'Evenimentele mele',
+        'home.overview': 'Prezentare',
         'home.all': 'Toate',
         'home.allCities': 'Toate orașele',
         'home.proBadge': 'Pro',
@@ -2263,6 +2283,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': 'evenimente',
         'home.socialProofParticipants': 'participări',
         'home.socialProofCities': 'orașe',
+        'home.citySummaryTitle': 'Astăzi',
+        'home.statusJoined': 'Merg',
+        'home.statusCreated': 'Create',
+        'home.statusRequests': 'Cereri',
         'home.templateIdeasTitle': 'Începe cu o idee',
         'home.templateIdeasSubtitle': 'Alege un format rapid și creează propriul plan.',
         'home.templateFootball': 'Fotbal',
@@ -2496,6 +2520,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'appError.backHome': 'На головну',
 
         'bottomNav.home': 'Головна',
+        'bottomNav.create': 'Створити',
         'bottomNav.notifications': 'Сповіщення',
         'bottomNav.profile': 'Профіль',
 
@@ -2825,6 +2850,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.discover': 'Події',
         'home.joined': 'Беру участь',
         'home.myEvents': 'Мої події',
+        'home.overview': '\u041e\u0433\u043b\u044f\u0434',
         'home.all': 'Усі',
         'home.allCities': 'Усі міста',
         'home.proBadge': 'Pro',
@@ -2853,6 +2879,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': '\u043f\u043e\u0434\u0456\u0439',
         'home.socialProofParticipants': '\u0443\u0447\u0430\u0441\u0442\u0435\u0439',
         'home.socialProofCities': '\u043c\u0456\u0441\u0442',
+        'home.citySummaryTitle': '\u0421\u044c\u043e\u0433\u043e\u0434\u043d\u0456',
+        'home.statusJoined': '\u0406\u0434\u0443',
+        'home.statusCreated': '\u0421\u0442\u0432\u043e\u0440\u0438\u0432',
+        'home.statusRequests': '\u0417\u0430\u044f\u0432\u043a\u0438',
         'home.templateIdeasTitle': '\u041f\u043e\u0447\u0430\u0442\u0438 \u0437 \u0456\u0434\u0435\u0457',
         'home.templateIdeasSubtitle': '\u041e\u0431\u0435\u0440\u0438 \u043f\u0440\u043e\u0441\u0442\u0438\u0439 \u0444\u043e\u0440\u043c\u0430\u0442 \u0456 \u0441\u0442\u0432\u043e\u0440\u0438 \u0441\u0432\u043e\u044e \u0437\u0443\u0441\u0442\u0440\u0456\u0447.',
         'home.templateFootball': '\u0424\u0443\u0442\u0431\u043e\u043b',
@@ -3084,6 +3114,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'appError.backHome': 'Zur Startseite',
 
         'bottomNav.home': 'Start',
+        'bottomNav.create': 'Erstellen',
         'bottomNav.notifications': 'Benachrichtigungen',
         'bottomNav.profile': 'Profil',
 
@@ -3413,6 +3444,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.discover': 'Entdecken',
         'home.joined': 'Beigetreten',
         'home.myEvents': 'Meine Events',
+        'home.overview': 'Überblick',
         'home.all': 'Alle',
         'home.allCities': 'Alle Städte',
         'home.proBadge': 'Pro',
@@ -3441,6 +3473,10 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'home.socialProofEvents': 'Events',
         'home.socialProofParticipants': 'Teilnahmen',
         'home.socialProofCities': 'Städte',
+        'home.citySummaryTitle': 'Heute',
+        'home.statusJoined': 'Dabei',
+        'home.statusCreated': 'Erstellt',
+        'home.statusRequests': 'Anfragen',
         'home.templateIdeasTitle': 'Mit einer Idee starten',
         'home.templateIdeasSubtitle': 'Wähle ein schnelles Format und erstelle deinen Plan.',
         'home.templateFootball': 'Fußballspiel',

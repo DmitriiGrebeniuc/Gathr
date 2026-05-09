@@ -224,6 +224,9 @@ type TranslationKey =
     | 'notifications.inviteDeclined'
     | 'notifications.inviteActionFailed'
     | 'notifications.inviteActionUnexpectedError'
+    | 'notifications.viewAll'
+    | 'notifications.previewError'
+    | 'notifications.retry'
     | 'profile.title'
     | 'profile.editProfile'
     | 'profile.currentPlan'
@@ -853,6 +856,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.inviteDeclined': 'Invitation declined',
         'notifications.inviteActionFailed': 'Failed to process invitation',
         'notifications.inviteActionUnexpectedError': 'An error occurred while processing the invitation',
+        'notifications.viewAll': 'All notifications',
+        'notifications.previewError': 'Failed to load notifications',
+        'notifications.retry': 'Retry',
 
         'profile.title': 'Profile',
         'profile.editProfile': 'Edit Profile',
@@ -1524,6 +1530,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.inviteDeclined': 'Приглашение отклонено',
         'notifications.inviteActionFailed': 'Не удалось обработать приглашение',
         'notifications.inviteActionUnexpectedError': 'Произошла ошибка при обработке приглашения',
+        'notifications.viewAll': 'Все уведомления',
+        'notifications.previewError': 'Не удалось загрузить уведомления',
+        'notifications.retry': 'Повторить',
 
         'profile.title': 'Профиль',
         'profile.editProfile': 'Редактировать профиль',
@@ -2112,6 +2121,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.inviteDeclined': 'Invitația a fost refuzată',
         'notifications.inviteActionFailed': 'Invitația nu a putut fi procesată',
         'notifications.inviteActionUnexpectedError': 'A apărut o eroare la procesarea invitației',
+        'notifications.viewAll': 'Toate notificările',
+        'notifications.previewError': 'Notificările nu au putut fi încărcate',
+        'notifications.retry': 'Reîncearcă',
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Editează profilul',
@@ -2706,6 +2718,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.inviteDeclined': 'Запрошення відхилено',
         'notifications.inviteActionFailed': 'Не вдалося обробити запрошення',
         'notifications.inviteActionUnexpectedError': 'Сталася помилка під час обробки запрошення',
+        'notifications.viewAll': 'Усі сповіщення',
+        'notifications.previewError': 'Не вдалося завантажити сповіщення',
+        'notifications.retry': 'Повторити',
 
         'profile.title': 'Профіль',
         'profile.editProfile': 'Редагувати профіль',
@@ -3300,6 +3315,9 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'notifications.inviteDeclined': 'Einladung abgelehnt',
         'notifications.inviteActionFailed': 'Einladung konnte nicht verarbeitet werden',
         'notifications.inviteActionUnexpectedError': 'Beim Verarbeiten der Einladung ist ein Fehler aufgetreten',
+        'notifications.viewAll': 'Alle Benachrichtigungen',
+        'notifications.previewError': 'Benachrichtigungen konnten nicht geladen werden',
+        'notifications.retry': 'Erneut versuchen',
 
         'profile.title': 'Profil',
         'profile.editProfile': 'Profil bearbeiten',

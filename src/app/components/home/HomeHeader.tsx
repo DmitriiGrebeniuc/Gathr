@@ -1,8 +1,15 @@
-import { useEffect, type Dispatch, type SetStateAction } from 'react';
-import { motion } from 'motion/react';
-import { Bell, ChevronDown, LifeBuoy } from 'lucide-react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { Bell, CalendarClock, ChevronDown, Inbox, LifeBuoy, Mail, UserPlus, Users } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
-import { fetchUnreadNotificationCountForUser } from '../../lib/notificationReads';
+import {
+  fetchUnreadNotificationCountForUser,
+  markNotificationKeysSeen,
+} from '../../lib/notificationReads';
+import {
+  fetchNotificationPreviewItems,
+  type NotificationPreviewItem,
+} from '../../lib/notificationPreview';
 import { INPUT_LIMITS, limitText } from '../../constants/inputLimits';
 import type { CityFilterOption } from './types';
 
@@ -41,6 +48,35 @@ export function HomeHeader({
   translate,
   onNavigate,
 }: HomeHeaderProps) {
+  const notificationPopoverRef = useRef<HTMLDivElement | null>(null);
+  const notificationPopoverOpenRef = useRef(false);
+  const [isNotificationPopoverOpen, setIsNotificationPopoverOpen] = useState(false);
+  const [notificationPreviewItems, setNotificationPreviewItems] = useState<
+    NotificationPreviewItem[]
+  >([]);
+  const [notificationPreviewLoading, setNotificationPreviewLoading] = useState(false);
+  const [notificationPreviewError, setNotificationPreviewError] = useState<string | null>(null);
+
+  useEffect(() => {
+    notificationPopoverOpenRef.current = isNotificationPopoverOpen;
+  }, [isNotificationPopoverOpen]);
+
+  const loadNotificationPreview = async () => {
+    setNotificationPreviewLoading(true);
+    setNotificationPreviewError(null);
+
+    try {
+      const items = await fetchNotificationPreviewItems(translate, 7);
+      setNotificationPreviewItems(items);
+    } catch (error) {
+      console.error('Failed to load notification preview:', error);
+      setNotificationPreviewItems([]);
+      setNotificationPreviewError(translate('notifications.previewError'));
+    } finally {
+      setNotificationPreviewLoading(false);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
@@ -64,7 +100,15 @@ export function HomeHeader({
       }
     };
 
-    void loadUnreadCount();
+    const refreshNotificationState = async () => {
+      await loadUnreadCount();
+
+      if (notificationPopoverOpenRef.current) {
+        await loadNotificationPreview();
+      }
+    };
+
+    void refreshNotificationState();
 
     const participantsChannel = supabase
       .channel('home-header-notifications-participants')
@@ -76,7 +120,7 @@ export function HomeHeader({
           table: 'participants',
         },
         () => {
-          void loadUnreadCount();
+          void refreshNotificationState();
         }
       )
       .subscribe();
@@ -91,7 +135,7 @@ export function HomeHeader({
           table: 'events',
         },
         () => {
-          void loadUnreadCount();
+          void refreshNotificationState();
         }
       )
       .subscribe();
@@ -106,7 +150,7 @@ export function HomeHeader({
           table: 'event_invitations',
         },
         () => {
-          void loadUnreadCount();
+          void refreshNotificationState();
         }
       )
       .subscribe();
@@ -121,7 +165,7 @@ export function HomeHeader({
           table: 'event_join_requests',
         },
         () => {
-          void loadUnreadCount();
+          void refreshNotificationState();
         }
       )
       .subscribe();
@@ -134,6 +178,76 @@ export function HomeHeader({
       supabase.removeChannel(joinRequestsChannel);
     };
   }, [setUnreadNotificationCount]);
+
+  useEffect(() => {
+    if (!isNotificationPopoverOpen) {
+      return;
+    }
+
+    void loadNotificationPreview();
+  }, [isNotificationPopoverOpen]);
+
+  useEffect(() => {
+    if (!isNotificationPopoverOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!notificationPopoverRef.current?.contains(event.target as Node)) {
+        setIsNotificationPopoverOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsNotificationPopoverOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isNotificationPopoverOpen]);
+
+  const getNotificationIcon = (type: NotificationPreviewItem['type']) => {
+    if (type === 'upcoming') return CalendarClock;
+    if (type === 'join') return Users;
+    if (type === 'invite') return Mail;
+    return UserPlus;
+  };
+
+  const openNotificationTarget = async (notification: NotificationPreviewItem) => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (!error && user) {
+      await markNotificationKeysSeen(user.id, [notification.id]);
+      const nextUnreadCount = await fetchUnreadNotificationCountForUser(user.id);
+      setUnreadNotificationCount(nextUnreadCount);
+      setNotificationPreviewItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === notification.id
+            ? {
+                ...item,
+                isUnread: false,
+              }
+            : item
+        )
+      );
+    }
+
+    setIsNotificationPopoverOpen(false);
+    onNavigate(notification.type === 'request' ? 'event-join-requests' : 'event-details', {
+      ...notification.event,
+      backTarget: 'home',
+    });
+  };
 
   return (
     <motion.div
@@ -261,39 +375,221 @@ export function HomeHeader({
         </div>
 
         <div className="flex items-center justify-end gap-2">
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            animate={{
-              width: isHeaderCompact ? 36 : 38,
-              height: isHeaderCompact ? 36 : 38,
-            }}
-            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            onClick={() => onNavigate('notifications')}
-            className="relative flex shrink-0 items-center justify-center rounded-full border"
-            style={{
-              backgroundColor: unreadNotificationCount > 0 ? 'var(--accent-soft)' : 'var(--primary)',
-              borderColor:
-                unreadNotificationCount > 0 ? 'var(--accent-border-strong)' : 'var(--border)',
-              color:
-                unreadNotificationCount > 0 ? 'var(--accent)' : 'var(--foreground-strong)',
-            }}
-            title={translate('bottomNav.notifications')}
-            aria-label={translate('bottomNav.notifications')}
-          >
-            <Bell size={isHeaderCompact ? 16 : 18} strokeWidth={2} />
-            {unreadNotificationCount > 0 && (
-              <span
-                className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border px-1 text-[10px]"
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  borderColor: 'var(--background)',
-                  color: 'var(--accent-foreground)',
-                }}
-              >
-                {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-              </span>
-            )}
-          </motion.button>
+          <div ref={notificationPopoverRef} className="relative shrink-0">
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              animate={{
+                width: isHeaderCompact ? 36 : 38,
+                height: isHeaderCompact ? 36 : 38,
+              }}
+              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+              onClick={() => setIsNotificationPopoverOpen((prev) => !prev)}
+              className="relative flex shrink-0 items-center justify-center rounded-full border"
+              style={{
+                backgroundColor:
+                  isNotificationPopoverOpen || unreadNotificationCount > 0
+                    ? 'var(--accent-soft)'
+                    : 'var(--primary)',
+                borderColor:
+                  isNotificationPopoverOpen || unreadNotificationCount > 0
+                    ? 'var(--accent-border-strong)'
+                    : 'var(--border)',
+                color:
+                  isNotificationPopoverOpen || unreadNotificationCount > 0
+                    ? 'var(--accent)'
+                    : 'var(--foreground-strong)',
+              }}
+              title={translate('bottomNav.notifications')}
+              aria-label={translate('bottomNav.notifications')}
+              aria-expanded={isNotificationPopoverOpen}
+            >
+              <Bell size={isHeaderCompact ? 16 : 18} strokeWidth={2} />
+              {unreadNotificationCount > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border px-1 text-[10px]"
+                  style={{
+                    backgroundColor: 'var(--accent)',
+                    borderColor: 'var(--background)',
+                    color: 'var(--accent-foreground)',
+                  }}
+                >
+                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                </span>
+              )}
+            </motion.button>
+
+            <AnimatePresence>
+              {isNotificationPopoverOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute right-0 top-full z-30 mt-3 w-[min(21rem,calc(100vw-2rem))] rounded-2xl border p-3"
+                  style={{
+                    backgroundColor: 'var(--surface-overlay)',
+                    borderColor: 'var(--accent-border-muted)',
+                    boxShadow: '0 18px 42px rgba(0, 0, 0, 0.36)',
+                  }}
+                >
+                  <span
+                    className="absolute -top-1.5 right-4 h-3 w-3 rotate-45 border-l border-t"
+                    style={{
+                      backgroundColor: 'var(--surface-overlay)',
+                      borderColor: 'var(--accent-border-muted)',
+                    }}
+                  />
+
+                  <div className="relative flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--foreground-strong)' }}>
+                        {translate('notifications.title')}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {unreadNotificationCount > 0
+                          ? `${unreadNotificationCount} ${translate('bottomNav.notifications')}`
+                          : translate('notifications.emptyTitle')}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsNotificationPopoverOpen(false);
+                        onNavigate('notifications');
+                      }}
+                      className="shrink-0 rounded-full border px-3 py-1.5 text-xs transition-opacity hover:opacity-80"
+                      style={{
+                        borderColor: 'var(--accent-border-muted)',
+                        color: 'var(--accent)',
+                        backgroundColor: 'var(--accent-soft-muted)',
+                      }}
+                    >
+                      {translate('notifications.viewAll')}
+                    </button>
+                  </div>
+
+                  <div className="relative mt-3 max-h-[22rem] overflow-y-auto pr-1 no-scrollbar">
+                    {notificationPreviewLoading && (
+                      <div className="space-y-2">
+                        {[0, 1, 2].map((item) => (
+                          <div
+                            key={item}
+                            className="animate-pulse rounded-xl border p-3"
+                            style={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                              borderColor: 'var(--border-subtle)',
+                            }}
+                          >
+                            <div className="h-3 w-4/5 rounded bg-muted-foreground/20" />
+                            <div className="mt-2 h-2 w-1/3 rounded bg-muted-foreground/15" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {!notificationPreviewLoading && notificationPreviewError && (
+                      <div
+                        className="rounded-xl border p-3 text-sm text-muted-foreground"
+                        style={{ borderColor: 'var(--border-subtle)' }}
+                      >
+                        <p>{notificationPreviewError}</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void loadNotificationPreview();
+                          }}
+                          className="mt-3 rounded-full border px-3 py-1.5 text-xs transition-opacity hover:opacity-80"
+                          style={{
+                            borderColor: 'var(--accent-border-muted)',
+                            backgroundColor: 'var(--accent-soft-muted)',
+                            color: 'var(--accent)',
+                          }}
+                        >
+                          {translate('notifications.retry')}
+                        </button>
+                      </div>
+                    )}
+
+                    {!notificationPreviewLoading &&
+                      !notificationPreviewError &&
+                      notificationPreviewItems.length === 0 && (
+                        <div className="rounded-xl border p-4 text-center" style={{ borderColor: 'var(--border-subtle)' }}>
+                          <Inbox className="mx-auto text-muted-foreground" size={22} strokeWidth={1.8} />
+                          <p className="mt-2 text-sm" style={{ color: 'var(--foreground-strong)' }}>
+                            {translate('notifications.emptyTitle')}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {translate('notifications.emptyDescription')}
+                          </p>
+                        </div>
+                      )}
+
+                    {!notificationPreviewLoading &&
+                      !notificationPreviewError &&
+                      notificationPreviewItems.length > 0 && (
+                        <div className="space-y-2">
+                          {notificationPreviewItems.map((notification) => {
+                            const NotificationIcon = getNotificationIcon(notification.type);
+
+                            return (
+                              <button
+                                key={notification.id}
+                                type="button"
+                                onClick={() => {
+                                  void openNotificationTarget(notification);
+                                }}
+                                className="flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all active:opacity-75"
+                                style={{
+                                  backgroundColor: notification.isUnread
+                                    ? 'var(--accent-soft-muted)'
+                                    : 'rgba(255, 255, 255, 0.025)',
+                                  borderColor: notification.isUnread
+                                    ? 'var(--accent-border-muted)'
+                                    : 'var(--border-subtle)',
+                                }}
+                              >
+                                <span
+                                  className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border"
+                                  style={{
+                                    backgroundColor: notification.isUnread
+                                      ? 'var(--accent-soft)'
+                                      : 'var(--primary)',
+                                    borderColor: notification.isUnread
+                                      ? 'var(--accent-border-muted)'
+                                      : 'var(--border-subtle)',
+                                    color: notification.isUnread
+                                      ? 'var(--accent)'
+                                      : 'var(--muted-foreground)',
+                                  }}
+                                >
+                                  <NotificationIcon size={15} strokeWidth={2} />
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                  <span
+                                    className="block text-sm leading-snug"
+                                    style={{
+                                      color: notification.isUnread
+                                        ? 'var(--foreground-strong)'
+                                        : 'var(--muted-foreground)',
+                                      fontWeight: notification.isUnread ? 600 : 400,
+                                    }}
+                                  >
+                                    {notification.message}
+                                  </span>
+                                  <span className="mt-1 block text-[11px] text-muted-foreground">
+                                    {notification.time}
+                                  </span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {isAdmin && (
             <motion.button

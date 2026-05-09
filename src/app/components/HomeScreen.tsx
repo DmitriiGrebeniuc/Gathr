@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent, type UIEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+  type TouchEvent,
+  type UIEvent,
+} from 'react';
 import { motion } from 'motion/react';
 import { PullToRefresh } from './PullToRefresh';
 import { supabase } from '../../lib/supabase';
@@ -78,6 +86,7 @@ export function HomeScreen({
   const currentUserIdRef = useRef<string | null>(null);
   const initialLoaderShownAtRef = useRef<number | null>(null);
   const homeTabSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
+  const homeTabTouchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const { language, translate } = useLanguage();
   const { effectiveTheme } = useTheme();
@@ -977,8 +986,30 @@ export function HomeScreen({
 
   const canSwipeHomeTabs = !isCityPickerOpen && !isEventSearchOpen;
 
+  const changeHomeTabByOffset = (offset: -1 | 1) => {
+    const activeIndex = homeTabs.findIndex((tab) => tab.key === activeTab);
+
+    if (activeIndex < 0) {
+      return;
+    }
+
+    const nextIndex = (activeIndex + offset + homeTabs.length) % homeTabs.length;
+    setActiveTab(homeTabs[nextIndex].key);
+  };
+
+  const handleHomeTabSwipeDelta = (deltaX: number, deltaY: number) => {
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (!canSwipeHomeTabs || absX < 62 || absX < absY * 1.3) {
+      return;
+    }
+
+    changeHomeTabByOffset(deltaX < 0 ? 1 : -1);
+  };
+
   const handleHomeTabSwipeStart = (event: PointerEvent<HTMLDivElement>) => {
-    if (!canSwipeHomeTabs) {
+    if (!canSwipeHomeTabs || event.pointerType === 'touch') {
       homeTabSwipeStartRef.current = null;
       return;
     }
@@ -997,27 +1028,37 @@ export function HomeScreen({
       return;
     }
 
-    const deltaX = event.clientX - start.x;
-    const deltaY = event.clientY - start.y;
-    const absX = Math.abs(deltaX);
-    const absY = Math.abs(deltaY);
+    handleHomeTabSwipeDelta(event.clientX - start.x, event.clientY - start.y);
+  };
 
-    if (absX < 70 || absX < absY * 1.35) {
+  const handleHomeTabTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    if (!canSwipeHomeTabs) {
+      homeTabTouchStartRef.current = null;
       return;
     }
 
-    const activeIndex = homeTabs.findIndex((tab) => tab.key === activeTab);
+    const touch = event.touches[0];
 
-    if (activeIndex < 0) {
+    if (!touch) {
       return;
     }
 
-    const nextIndex =
-      deltaX < 0
-        ? (activeIndex + 1) % homeTabs.length
-        : (activeIndex - 1 + homeTabs.length) % homeTabs.length;
+    homeTabTouchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+    };
+  };
 
-    setActiveTab(homeTabs[nextIndex].key);
+  const handleHomeTabTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const start = homeTabTouchStartRef.current;
+    const touch = event.changedTouches[0];
+    homeTabTouchStartRef.current = null;
+
+    if (!start || !touch) {
+      return;
+    }
+
+    handleHomeTabSwipeDelta(touch.clientX - start.x, touch.clientY - start.y);
   };
 
   useEffect(() => {
@@ -1274,6 +1315,8 @@ export function HomeScreen({
         toggleEventSearch={toggleEventSearch}
         eventSearchQuery={eventSearchQuery}
         setEventSearchQuery={setEventSearchQuery}
+        onSwipePrevTab={() => changeHomeTabByOffset(-1)}
+        onSwipeNextTab={() => changeHomeTabByOffset(1)}
         translate={translate}
       />
 
@@ -1286,6 +1329,11 @@ export function HomeScreen({
           onPointerUp={handleHomeTabSwipeEnd}
           onPointerCancel={() => {
             homeTabSwipeStartRef.current = null;
+          }}
+          onTouchStart={handleHomeTabTouchStart}
+          onTouchEnd={handleHomeTabTouchEnd}
+          onTouchCancel={() => {
+            homeTabTouchStartRef.current = null;
           }}
         >
           <HomeInitialLoader phase={initialLoaderPhase} translate={translate} />

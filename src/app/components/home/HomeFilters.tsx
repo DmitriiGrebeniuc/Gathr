@@ -13,7 +13,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react';
-import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
+import { useMemo, useRef, type Dispatch, type SetStateAction, type TouchEvent } from 'react';
 import {
   ACTIVITY_TYPES,
   type ActivityType,
@@ -38,6 +38,8 @@ type HomeFiltersProps = {
   toggleEventSearch: () => void;
   eventSearchQuery: string;
   setEventSearchQuery: Dispatch<SetStateAction<string>>;
+  onSwipePrevTab: () => void;
+  onSwipeNextTab: () => void;
   translate: (key: any) => string;
 };
 
@@ -64,21 +66,73 @@ export function HomeFilters({
   toggleEventSearch,
   eventSearchQuery,
   setEventSearchQuery,
+  onSwipePrevTab,
+  onSwipeNextTab,
   translate,
 }: HomeFiltersProps) {
-  const activeTabButtonRef = useRef<HTMLButtonElement | null>(null);
+  const tabSwipeStartRef = useRef<{ x: number; y: number } | null>(null);
+  const activeTabIndex = homeTabs.findIndex((tab) => tab.key === activeTab);
+  const carouselTabs = useMemo(() => {
+    if (homeTabs.length === 0 || activeTabIndex < 0) {
+      return homeTabs;
+    }
 
-  useEffect(() => {
-    activeTabButtonRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-      inline: 'center',
+    return [-2, -1, 0, 1, 2].map((offset) => {
+      const nextIndex = (activeTabIndex + offset + homeTabs.length) % homeTabs.length;
+
+      return {
+        ...homeTabs[nextIndex],
+        offset,
+      };
     });
-  }, [activeTab]);
+  }, [activeTabIndex, homeTabs]);
+
+  const handleTabTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+
+    if (!touch) {
+      return;
+    }
+
+    tabSwipeStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+    };
+  };
+
+  const handleTabTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const start = tabSwipeStartRef.current;
+    const touch = event.changedTouches[0];
+    tabSwipeStartRef.current = null;
+
+    if (!start || !touch) {
+      return;
+    }
+
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (absX < 44 || absX < absY * 1.25) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      onSwipeNextTab();
+      return;
+    }
+
+    onSwipePrevTab();
+  };
 
   return (
     <>
-      <div className="relative border-b border-border px-4 py-2">
+      <div
+        className="relative border-b border-border px-4 py-2"
+        onTouchStart={handleTabTouchStart}
+        onTouchEnd={handleTabTouchEnd}
+      >
         <div
           className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-8"
           style={{
@@ -94,21 +148,19 @@ export function HomeFilters({
           }}
         />
         <div
-          className="flex gap-2 overflow-x-auto no-scrollbar"
+          className="flex items-center justify-center gap-2 overflow-hidden"
           style={{
-            WebkitOverflowScrolling: 'touch',
             overscrollBehaviorX: 'contain',
-            scrollPaddingLeft: '1rem',
-            scrollPaddingRight: '1rem',
+            touchAction: 'pan-y',
           }}
         >
-          {homeTabs.map((tab) => {
+          {carouselTabs.map((tab) => {
             const isActive = activeTab === tab.key;
+            const isOuter = Math.abs(tab.offset) === 2;
 
             return (
               <motion.button
-                key={tab.key}
-                ref={isActive ? activeTabButtonRef : undefined}
+                key={`${tab.key}-${tab.offset}`}
                 type="button"
                 whileTap={{ scale: 0.96 }}
                 transition={tabTransition}
@@ -119,10 +171,12 @@ export function HomeFilters({
                   borderColor: isActive ? 'var(--accent-border-strong)' : 'var(--border-subtle)',
                   color: isActive ? 'var(--accent)' : 'var(--muted-foreground)',
                   boxShadow: isActive ? 'var(--accent-outline-soft)' : 'none',
-                  transform: isActive ? 'translateY(0)' : 'translateY(1px) scale(0.96)',
+                  opacity: isOuter ? 0.42 : 1,
+                  transform: isActive ? 'translateY(0) scale(1)' : 'translateY(1px) scale(0.92)',
+                  width: isActive ? '7.8rem' : '6.15rem',
                 }}
               >
-                {tab.label}
+                <span className="block truncate">{tab.label}</span>
               </motion.button>
             );
           })}

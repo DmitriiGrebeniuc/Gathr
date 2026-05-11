@@ -3,12 +3,14 @@ import type { CSSProperties } from 'react';
 type LoadingLineProps = {
   width?: string;
   height?: string;
+  rounded?: string;
   className?: string;
 };
 
 export function LoadingLine({
   width = '100%',
   height = '0.875rem',
+  rounded,
   className = '',
 }: LoadingLineProps) {
   return (
@@ -20,6 +22,7 @@ export function LoadingLine({
         background:
           'linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.04) 100%)',
         backgroundSize: '200% 100%',
+        borderRadius: rounded,
       }}
     />
   );

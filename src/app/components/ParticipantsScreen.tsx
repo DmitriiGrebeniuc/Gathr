@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { SwipeableScreen } from './SwipeableScreen';
 import { supabase } from '../../lib/supabase';
 import { useLanguage } from '../context/LanguageContext';
+import { feedback } from '../lib/feedback';
 import { LoadingAvatarStrip, LoadingCard } from './LoadingState';
 import {
   fetchMyProfileAccessSummary,
@@ -11,6 +12,7 @@ import {
   fetchPublicProfileNameMap,
 } from '../lib/publicData';
 import { useSupabaseRealtimeChannel } from '../lib/useSupabaseRealtimeChannel';
+import { ReportDialog } from './reporting/ReportDialog';
 
 type ParticipantItem = {
   user_id: string;
@@ -32,8 +34,9 @@ export function ParticipantsScreen({
   const [isCreator, setIsCreator] = useState(false);
   const [accessRestricted, setAccessRestricted] = useState(false);
   const [rowsResolved, setRowsResolved] = useState(false);
+  const [reportTarget, setReportTarget] = useState<ParticipantItem | null>(null);
 
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
 
   const parentBackTarget = event?.backTarget || 'home';
 
@@ -139,6 +142,19 @@ export function ParticipantsScreen({
       )
       .subscribe();
   }, [event?.id, event?.creator_id, event?.canViewParticipantIdentities]);
+
+  const handleOpenReportUser = (participant: ParticipantItem) => {
+    if (!currentUserId) {
+      feedback.warning(language === 'ru' ? 'Войдите, чтобы отправить жалобу' : 'Sign in to submit a report');
+      return;
+    }
+
+    if (participant.user_id === currentUserId) {
+      return;
+    }
+
+    setReportTarget(participant);
+  };
 
   return (
     <SwipeableScreen
@@ -314,14 +330,40 @@ export function ParticipantsScreen({
                       )}
                     </div>
 
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p>{name}</p>
                     </div>
+
+                    {!isCurrentUser && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenReportUser(participant)}
+                        className="shrink-0 rounded-lg border px-2.5 py-1.5 text-xs text-muted-foreground"
+                        style={{
+                          borderColor: 'var(--border)',
+                          backgroundColor: 'var(--background)',
+                        }}
+                      >
+                        {language === 'ru' ? 'Пожаловаться' : 'Report'}
+                      </button>
+                    )}
                   </motion.div>
                 );
               })}
           </div>
         </div>
+
+        <ReportDialog
+          targetType="user"
+          targetId={reportTarget?.user_id ?? ''}
+          targetTitle={reportTarget?.publicName}
+          open={!!reportTarget}
+          onOpenChange={(open) => {
+            if (!open) {
+              setReportTarget(null);
+            }
+          }}
+        />
       </div>
     </SwipeableScreen>
   );

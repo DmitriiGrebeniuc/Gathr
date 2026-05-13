@@ -24,6 +24,7 @@ import { EventDetailsFooterActions } from './event-details/EventDetailsFooterAct
 import { EventDetailsOverview } from './event-details/EventDetailsOverview';
 import { EventDetailsParticipantsPreview } from './event-details/EventDetailsParticipantsPreview';
 import { JoinRequestComposer } from './event-details/JoinRequestComposer';
+import { ReportDialog } from './reporting/ReportDialog';
 
 export function EventDetailsScreen({
   onNavigate,
@@ -36,7 +37,7 @@ export function EventDetailsScreen({
   ) => void;
   event?: any;
 }) {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
 
   const defaultEvent = useMemo(
     () => ({
@@ -72,6 +73,7 @@ export function EventDetailsScreen({
   const [contactMethods, setContactMethods] = useState<EventContactMethods | null>(null);
   const [myJoinRequest, setMyJoinRequest] = useState<EventJoinRequest | null>(null);
   const [showJoinRequestComposer, setShowJoinRequestComposer] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
   const [joinRequestMessage, setJoinRequestMessage] = useState('');
   const [submittingJoinRequest, setSubmittingJoinRequest] = useState(false);
   const [pendingJoinRequestsCount, setPendingJoinRequestsCount] = useState(0);
@@ -851,6 +853,24 @@ export function EventDetailsScreen({
     );
   };
 
+  const handleOpenReportDialog = () => {
+    if (!currentUserId) {
+      feedback.warning(translate('details.loginRequired'));
+      return;
+    }
+
+    if (!eventData.id) {
+      feedback.error(translate('details.eventNotResolved'));
+      return;
+    }
+
+    if (isCreator) {
+      return;
+    }
+
+    setShowReportDialog(true);
+  };
+
   const renderJoinRequestStatus = () => {
     if (!myJoinRequest) {
       return null;
@@ -943,6 +963,18 @@ export function EventDetailsScreen({
 
             {renderJoinRequestStatus()}
 
+            {!isCreator && (
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  onClick={handleOpenReportDialog}
+                  className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+                >
+                  {language === 'ru' ? 'Пожаловаться' : 'Report'}
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
 
@@ -980,6 +1012,14 @@ export function EventDetailsScreen({
             onClose={() => setShowJoinRequestComposer(false)}
           />
         )}
+
+        <ReportDialog
+          targetType="event"
+          targetId={eventData.id}
+          targetTitle={eventData.title}
+          open={showReportDialog}
+          onOpenChange={setShowReportDialog}
+        />
       </div>
     </SwipeableScreen>
   );

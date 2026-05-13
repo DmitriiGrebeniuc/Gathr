@@ -179,9 +179,9 @@ export async function getAdminEventParticipants(
 ): Promise<AdminEventParticipantRow[]> {
   const { data, error } = await supabase
     .from('participants')
-    .select('id, user_id, joined_at, status')
+    .select('id, user_id, created_at')
     .eq('event_id', eventId)
-    .order('joined_at', { ascending: false });
+    .order('created_at', { ascending: false });
 
   if (error) {
     void logSupabaseError(error, { area: 'admin', operation: 'get_event_participants' });
@@ -191,18 +191,17 @@ export async function getAdminEventParticipants(
   const rows = ((data as Array<{
     id?: string;
     user_id?: string | null;
-    joined_at?: string | null;
-    status?: string | null;
+    created_at?: string | null;
   }> | null) ?? []);
   const userIds = rows.map((row) => row.user_id).filter(Boolean) as string[];
   const nameMap = await getProfileNameMap(userIds);
 
   return rows.map((row) => ({
-    id: row.id ?? `${row.user_id ?? 'participant'}-${row.joined_at ?? ''}`,
+    id: row.id ?? `${row.user_id ?? 'participant'}-${row.created_at ?? ''}`,
     user_id: row.user_id ?? null,
     name: row.user_id ? nameMap[row.user_id] ?? null : null,
-    status: row.status ?? null,
-    joined_at: row.joined_at ?? null,
+    status: null,
+    joined_at: row.created_at ?? null,
   }));
 }
 

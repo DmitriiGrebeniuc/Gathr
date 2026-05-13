@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase';
+import { logSupabaseError } from '../diagnostics';
 import type {
   AdminReportFilters,
   AdminReportResolution,
@@ -32,6 +33,7 @@ export async function getAdminReports(filters: AdminReportFilters): Promise<Admi
   const { data, error } = await query;
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'get_admin_reports' });
     throw error;
   }
 
@@ -96,6 +98,7 @@ export async function updateAdminReportStatus(
   const { error } = await supabase.from('reports').update(updatePayload).eq('id', reportId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'update_report_status' });
     throw error;
   }
 
@@ -120,6 +123,7 @@ export async function markReportReviewing(reportId: string) {
   const { error } = await supabase.from('reports').update(payload).eq('id', reportId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'mark_report_reviewing' });
     throw error;
   }
 
@@ -162,6 +166,7 @@ export async function markReportDuplicate(reportId: string, duplicateOf: string)
   const { error } = await supabase.from('reports').update(payload).eq('id', reportId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'mark_report_duplicate' });
     throw error;
   }
 
@@ -180,6 +185,7 @@ export async function updateAdminReportNote(reportId: string, adminNote: string)
     .eq('id', reportId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'update_report_note' });
     throw error;
   }
 
@@ -268,6 +274,7 @@ async function closeReport(
   const { error } = await supabase.from('reports').update(payload).eq('id', reportId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'close_report' });
     throw error;
   }
 

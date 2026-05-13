@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { AdminDashboard } from './admin/AdminDashboard';
 import { AdminEvents } from './admin/AdminEvents';
 import { AdminGrowth } from './admin/AdminGrowth';
+import { AdminHealth } from './admin/AdminHealth';
 import { AdminLayout } from './admin/AdminLayout';
 import { AdminModeration } from './admin/AdminModeration';
 import { AdminSupportRequests } from './admin/AdminSupportRequests';
@@ -159,6 +160,7 @@ export function AdminScreen({
       )}
       {activeTab === 'growth' && <AdminGrowth />}
       {activeTab === 'moderation' && <AdminModeration onNavigate={onNavigate} />}
+      {activeTab === 'health' && <AdminHealth />}
     </AdminLayout>
   );
 }
@@ -193,7 +195,8 @@ function mapInitialPage(page?: LegacyAdminPage | AdminTab): AdminTab {
     page === 'users' ||
     page === 'support' ||
     page === 'growth' ||
-    page === 'moderation'
+    page === 'moderation' ||
+    page === 'health'
   ) {
     return page;
   }

@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase';
+import { logSupabaseError } from '../diagnostics';
 import { fetchAccessibleEventPrivateDetailsMap, fetchParticipantCounts } from '../publicData';
 import type {
   AdminEventParticipantRow,
@@ -45,6 +46,7 @@ export async function getAdminEvents(): Promise<AdminEventRow[]> {
     : fullResult;
 
   if (fallbackResult.error) {
+    void logSupabaseError(fallbackResult.error, { area: 'admin', operation: 'get_admin_events' });
     throw fallbackResult.error;
   }
 
@@ -96,6 +98,7 @@ export async function updateAdminEventVisibilityOrStatus(
   const { error } = await supabase.from('events').update(updates).eq('id', eventId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'update_event_visibility_or_status' });
     throw error;
   }
 
@@ -111,6 +114,7 @@ export async function deleteAdminEvent(eventId: string) {
   const { error } = await supabase.from('events').delete().eq('id', eventId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'delete_event' });
     throw error;
   }
 
@@ -153,6 +157,7 @@ async function updateAdminEventModeration(
   const { error } = await supabase.from('events').update(payload).eq('id', eventId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'update_event_moderation' });
     throw error;
   }
 
@@ -179,6 +184,7 @@ export async function getAdminEventParticipants(
     .order('joined_at', { ascending: false });
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'get_event_participants' });
     throw error;
   }
 

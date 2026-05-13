@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabase';
 import type { AdminAttentionItem, AdminStats } from '../../types/admin';
 import { getAdminEvents } from './adminEvents';
+import { getAdminHealthSummary } from './adminHealth';
 import { getAdminSupportRequests } from './adminSupport';
 import { getAdminUsers } from './adminUsers';
 
@@ -24,6 +25,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     proUsers,
     pendingReports,
     reviewingReports,
+    healthSummary,
   ] = await Promise.allSettled([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('events').select('id', { count: 'exact', head: true }),
@@ -39,7 +41,9 @@ export async function getAdminStats(): Promise<AdminStats> {
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'pro'),
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'reviewing'),
+    getAdminHealthSummary(),
   ]);
+  const resolvedHealth = healthSummary.status === 'fulfilled' ? healthSummary.value : null;
 
   return {
     totalUsers: countOrNull(totalUsers),
@@ -50,6 +54,9 @@ export async function getAdminStats(): Promise<AdminStats> {
     proUsers: countOrNull(proUsers),
     pendingReports: countOrNull(pendingReports),
     reviewingReports: countOrNull(reviewingReports),
+    errorsLast24h: resolvedHealth?.errorsLast24h ?? null,
+    warningsLast24h: resolvedHealth?.warningsLast24h ?? null,
+    authIssuesLast24h: resolvedHealth?.authIssuesLast24h ?? null,
   };
 }
 
@@ -88,8 +95,16 @@ export async function getAdminNeedsAttention(): Promise<AdminAttentionItem[]> {
     event.moderation_status === 'hidden' || event.moderation_status === 'removed'
   ).length;
   const bannedUsersWithReason = users.filter((user) => user.is_banned && user.ban_reason).length;
+  const healthSummary = await getAdminHealthSummary().catch(() => null);
 
   return [
+    {
+      id: 'health-errors',
+      label: 'App errors in the last 24h',
+      description: 'Recent production diagnostics with error level.',
+      count: healthSummary?.errorsLast24h ?? null,
+      targetTab: 'health',
+    },
     {
       id: 'pending-reports',
       label: 'Pending reports',

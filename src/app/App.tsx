@@ -33,6 +33,7 @@ import {
   hasAcceptedCurrentLegal,
   syncProfileFromAuthUser,
 } from './auth/currentUserProfile';
+import { logAuthIssue, logTelegramAuthIssue } from './lib/diagnostics';
 import { AppErrorBoundary } from './components/app/AppErrorBoundary';
 import { AppFrame, AppLoadingFrame } from './components/app/AppFrame';
 import { AppScreenRenderer } from './components/app/AppScreenRenderer';
@@ -213,6 +214,7 @@ export default function App() {
 
     if (error) {
       console.error('Failed to sign out blocked user:', error);
+      void logAuthIssue('Failed to sign out blocked user', { error });
     }
 
     feedback.error(translate('auth.accountBlocked'));
@@ -273,10 +275,12 @@ export default function App() {
 
       if (error) {
         console.error('Google OAuth sign-in failed:', error);
+        void logAuthIssue('Google OAuth sign-in failed', { error });
         feedback.error(error.message || translate('login.googleFailed'));
       }
     } catch (error) {
       console.error('Unexpected Google OAuth sign-in error:', error);
+      void logAuthIssue('Unexpected Google OAuth sign-in error', { error });
       feedback.error(translate('login.googleFailed'));
     }
   };
@@ -304,6 +308,7 @@ export default function App() {
         skipNextSignedInNavigationRef.current = false;
         setTelegramMiniAppAuthFailed(true);
         console.error('Telegram Mini App manual auth retry failed:', error);
+        void logTelegramAuthIssue('Telegram Mini App manual auth retry failed', { error });
         feedback.error(translate('login.telegramFailed'));
         return;
       }
@@ -326,10 +331,12 @@ export default function App() {
 
       if (error) {
         console.error('Telegram OAuth sign-in failed:', error);
+        void logTelegramAuthIssue('Telegram OAuth sign-in failed', { error });
         feedback.error(error.message || translate('login.telegramFailed'));
       }
     } catch (error) {
       console.error('Unexpected Telegram OAuth sign-in error:', error);
+      void logTelegramAuthIssue('Unexpected Telegram OAuth sign-in error', { error });
       feedback.error(translate('login.telegramFailed'));
     }
   };
@@ -343,6 +350,7 @@ export default function App() {
 
       if (error || !user) {
         console.error('Failed to get user after legal consent:', error);
+        void logAuthIssue('Failed to get user after legal consent', { error });
         resetNavigation('welcome', null, 'back');
         return;
       }
@@ -350,6 +358,7 @@ export default function App() {
       await applySignedInNavigation(user);
     } catch (error) {
       console.error('Unexpected legal consent completion error:', error);
+      void logAuthIssue('Unexpected legal consent completion error', { error });
       feedback.error(translate('legal.consentSaveFailed'));
     }
   };
@@ -365,6 +374,7 @@ export default function App() {
 
     if (error) {
       console.error('Failed to sign out from legal consent screen:', error);
+      void logAuthIssue('Failed to sign out from legal consent screen', { error });
       feedback.error(translate('profile.logoutFailed'));
     }
   };
@@ -500,6 +510,7 @@ export default function App() {
           });
 
           if (sessionError) {
+            void logAuthIssue('Recovery session setup failed', { error: sessionError });
             console.error('РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІРєРё recovery session:', sessionError);
             resetNavigation('welcome', null, 'back');
             setAuthChecked(true);
@@ -528,6 +539,7 @@ export default function App() {
         }
 
         if (activeError) {
+          void logAuthIssue('Session fetch failed', { error: activeError });
           console.error('РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СЃРµСЃСЃРёРё:', activeError);
           resetNavigation('welcome', null, 'back');
         } else if (activeSession?.user) {
@@ -538,6 +550,7 @@ export default function App() {
           resetNavigation('welcome', null, 'back');
         }
       } catch (error) {
+        void logAuthIssue('Unexpected session check error', { error });
         console.error('Unexpected session check error:', error);
         resetNavigation('welcome', null, 'back');
       } finally {

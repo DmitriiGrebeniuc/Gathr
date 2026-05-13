@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase';
 import type { AdminUserPlan, AdminUserRow } from '../../types/admin';
+import { logSupabaseError } from '../diagnostics';
 import { tryLogAdminAction } from './adminAudit';
 
 type AdminUserRaw = Partial<AdminUserRow> & {
@@ -42,6 +43,7 @@ export async function getAdminUsers(): Promise<AdminUserRow[]> {
     .order('created_at', { ascending: false });
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'get_admin_users' });
     throw error;
   }
 
@@ -81,6 +83,7 @@ export async function banAdminUser(userId: string, reason?: string) {
   const { error } = await supabase.from('profiles').update(payload).eq('id', userId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'ban_user' });
     throw error;
   }
 
@@ -102,6 +105,7 @@ export async function unbanAdminUser(userId: string) {
   const { error } = await supabase.from('profiles').update(payload).eq('id', userId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'unban_user' });
     throw error;
   }
 
@@ -120,6 +124,7 @@ export async function updateAdminUserPlan(userId: string, plan: Extract<AdminUse
     .eq('id', userId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'update_user_plan' });
     throw error;
   }
 
@@ -141,6 +146,7 @@ export async function updateAdminUserUnlimitedAccess(
     .eq('id', userId);
 
   if (error) {
+    void logSupabaseError(error, { area: 'admin', operation: 'update_user_unlimited_access' });
     throw error;
   }
 

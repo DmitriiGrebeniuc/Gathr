@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { logDiagnostic } from './diagnostics';
 
 export type ReportTargetType = 'user' | 'event';
 
@@ -54,6 +55,17 @@ export async function createReport(input: CreateReportInput) {
   });
 
   if (error) {
+    void logDiagnostic({
+      level: 'warning',
+      source: 'reporting',
+      eventName: 'create_report_failed',
+      message: error.message,
+      metadata: {
+        target_type: targetType,
+        target_id: targetId,
+        reason,
+      },
+    });
     throw error;
   }
 

@@ -16,6 +16,9 @@ const initialStats: AdminStats = {
   proUsers: null,
   pendingReports: null,
   reviewingReports: null,
+  errorsLast24h: null,
+  warningsLast24h: null,
+  authIssuesLast24h: null,
 };
 
 export function AdminDashboard({
@@ -101,6 +104,9 @@ export function AdminDashboard({
             <AdminStatCard label="Pro users" value={stats.proUsers} />
             <AdminStatCard label="Pending reports" value={stats.pendingReports} />
             <AdminStatCard label="Reviewing reports" value={stats.reviewingReports} />
+            <AdminStatCard label="Errors 24h" value={stats.errorsLast24h} />
+            <AdminStatCard label="Warnings 24h" value={stats.warningsLast24h} />
+            <AdminStatCard label="Auth issues 24h" value={stats.authIssuesLast24h} />
           </div>
 
           <div className="space-y-3 pt-2">

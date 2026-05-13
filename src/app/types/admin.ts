@@ -1,4 +1,11 @@
-export type AdminTab = 'dashboard' | 'users' | 'events' | 'support' | 'growth' | 'moderation';
+export type AdminTab =
+  | 'dashboard'
+  | 'users'
+  | 'events'
+  | 'support'
+  | 'growth'
+  | 'moderation'
+  | 'health';
 
 export type LegacyAdminPage = 'overview' | 'events' | 'users' | 'participants' | 'support';
 
@@ -14,6 +21,9 @@ export type AdminStats = {
   proUsers: number | null;
   pendingReports: number | null;
   reviewingReports: number | null;
+  errorsLast24h: number | null;
+  warningsLast24h: number | null;
+  authIssuesLast24h: number | null;
 };
 
 export type AdminUserRole = 'user' | 'admin' | string;
@@ -30,7 +40,8 @@ export type AdminAttentionTarget =
   | 'pending-reports'
   | 'reviewing-reports'
   | 'moderated-events'
-  | 'banned-users-with-reason';
+  | 'banned-users-with-reason'
+  | 'health-errors';
 
 export type AdminAttentionItem = {
   id: AdminAttentionTarget;
@@ -213,4 +224,38 @@ export type AdminAuditFilters = {
   action: string;
   targetType: 'all' | AdminAuditTargetType;
   adminId: string;
+};
+
+export type AdminDiagnosticLevel = 'debug' | 'info' | 'warning' | 'error';
+export type AdminDiagnosticLevelFilter = 'all' | AdminDiagnosticLevel;
+
+export type AdminDiagnosticRow = {
+  id: string;
+  user_id: string | null;
+  level: AdminDiagnosticLevel;
+  source: string;
+  event_name: string;
+  message: string | null;
+  metadata: unknown | null;
+  url: string | null;
+  user_agent: string | null;
+  app_version: string | null;
+  created_at: string | null;
+};
+
+export type AdminDiagnosticsFilters = {
+  level: AdminDiagnosticLevelFilter;
+  source: string;
+  search: string;
+  since: string;
+  userId: string;
+};
+
+export type AdminHealthSummary = {
+  errorsLast24h: number;
+  warningsLast24h: number;
+  authIssuesLast24h: number;
+  telegramAuthIssuesLast24h: number;
+  uniqueAffectedUsersLast24h: number;
+  sourceBreakdown: Array<{ source: string; count: number }>;
 };

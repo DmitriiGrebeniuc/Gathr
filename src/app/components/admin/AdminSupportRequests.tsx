@@ -82,8 +82,7 @@ export function AdminSupportRequests({
       );
   }, [filters, requests]);
 
-  const selectedRequest =
-    requests.find((request) => request.id === selectedRequestId) ?? filteredRequests[0] ?? null;
+  const selectedRequest = requests.find((request) => request.id === selectedRequestId) ?? null;
 
   useEffect(() => {
     setAdminNoteDraft(selectedRequest?.admin_note ?? '');
@@ -197,7 +196,7 @@ export function AdminSupportRequests({
           {filteredRequests.map((request) => (
             <article
               key={request.id}
-              onClick={() => setSelectedRequestId(request.id)}
+              onClick={() => setSelectedRequestId((current) => (current === request.id ? null : request.id))}
               className="rounded-2xl border p-4"
               style={{
                 ...panelStyle,
@@ -223,77 +222,87 @@ export function AdminSupportRequests({
               <p className="mt-3 text-xs text-muted-foreground">
                 Submitted: {formatDate(request.created_at)}
               </p>
+
+              {selectedRequestId === request.id && (
+                <div
+                  className="mt-4 rounded-2xl border p-4"
+                  style={{
+                    borderColor: 'var(--border-subtle)',
+                    backgroundColor: 'var(--background)',
+                  }}
+                >
+                  <h3 className="font-medium">Request card</h3>
+                  <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
+                    <Meta label="ID" value={request.id} />
+                    <Meta label="User" value={request.user_name || request.user_id || '-'} />
+                    <Meta label="Subject" value={request.subject || '-'} />
+                    <Meta label="Created" value={formatDate(request.created_at)} />
+                    <Meta label="Status" value={statusLabel(request.status)} />
+                  </dl>
+                  <p className="mt-4 whitespace-pre-wrap text-sm text-muted-foreground">
+                    {request.message || 'No message'}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {(['new', 'in_progress', 'resolved'] as AdminSupportStatus[]).map((status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleStatusChange(request.id, status);
+                        }}
+                        disabled={request.status === status || mutatingRequestId === request.id}
+                        className="rounded-xl border px-3 py-2 text-xs transition-opacity disabled:opacity-50"
+                        style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
+                      >
+                        {statusLabel(status)}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onOpenUser(null);
+                      }}
+                      className="rounded-xl border px-3 py-2 text-xs"
+                      style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
+                    >
+                      Open user
+                    </button>
+                  </div>
+
+                  <div className="mt-4" onClick={(event) => event.stopPropagation()}>
+                    <label className="text-xs text-muted-foreground">Admin note</label>
+                    {request.can_edit_admin_note ? (
+                      <>
+                        <textarea
+                          value={adminNoteDraft}
+                          onChange={(event) => setAdminNoteDraft(event.target.value)}
+                          className="mt-2 min-h-24 w-full rounded-xl border bg-transparent p-3 text-sm"
+                          style={{ borderColor: 'var(--border-subtle)' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveNote(request)}
+                          disabled={mutatingRequestId === request.id}
+                          className="mt-2 rounded-xl border px-4 py-2 text-sm disabled:opacity-50"
+                          style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
+                        >
+                          Save note
+                        </button>
+                      </>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Read-only: admin_note is not exposed by the current support_requests shape. TODO:
+                        enable this when the column is available through RLS.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </article>
           ))}
-        </div>
-      )}
-
-      {!loading && !error && selectedRequest && (
-        <div className="rounded-2xl border p-4" style={panelStyle}>
-          <h3 className="font-medium">Request card</h3>
-          <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
-            <Meta label="ID" value={selectedRequest.id} />
-            <Meta label="User" value={selectedRequest.user_name || selectedRequest.user_id || '-'} />
-            <Meta label="Subject" value={selectedRequest.subject || '-'} />
-            <Meta label="Created" value={formatDate(selectedRequest.created_at)} />
-            <Meta label="Status" value={statusLabel(selectedRequest.status)} />
-          </dl>
-          <p className="mt-4 whitespace-pre-wrap text-sm text-muted-foreground">
-            {selectedRequest.message || 'No message'}
-          </p>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {(['new', 'in_progress', 'resolved'] as AdminSupportStatus[]).map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => handleStatusChange(selectedRequest.id, status)}
-                disabled={
-                  selectedRequest.status === status || mutatingRequestId === selectedRequest.id
-                }
-                className="rounded-xl border px-3 py-2 text-xs transition-opacity disabled:opacity-50"
-                style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
-              >
-                {statusLabel(status)}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => onOpenUser(null)}
-              className="rounded-xl border px-3 py-2 text-xs"
-              style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
-            >
-              Open user
-            </button>
-          </div>
-
-          <div className="mt-4">
-            <label className="text-xs text-muted-foreground">Admin note</label>
-            {selectedRequest.can_edit_admin_note ? (
-              <>
-                <textarea
-                  value={adminNoteDraft}
-                  onChange={(event) => setAdminNoteDraft(event.target.value)}
-                  className="mt-2 min-h-24 w-full rounded-xl border bg-transparent p-3 text-sm"
-                  style={{ borderColor: 'var(--border-subtle)' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSaveNote(selectedRequest)}
-                  disabled={mutatingRequestId === selectedRequest.id}
-                  className="mt-2 rounded-xl border px-4 py-2 text-sm disabled:opacity-50"
-                  style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
-                >
-                  Save note
-                </button>
-              </>
-            ) : (
-              <p className="mt-2 text-sm text-muted-foreground">
-                Read-only: admin_note is not exposed by the current support_requests shape. TODO:
-                enable this when the column is available through RLS.
-              </p>
-            )}
-          </div>
         </div>
       )}
     </section>

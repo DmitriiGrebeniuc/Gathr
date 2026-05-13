@@ -150,8 +150,7 @@ export function AdminEvents({
     visibilityFilter,
   ]);
 
-  const selectedEvent =
-    events.find((event) => event.id === selectedEventId) ?? filteredEvents[0] ?? null;
+  const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
 
   useEffect(() => {
     let cancelled = false;
@@ -364,7 +363,7 @@ export function AdminEvents({
           {filteredEvents.map((event) => (
             <article
               key={event.id}
-              onClick={() => setSelectedEventId(event.id)}
+              onClick={() => setSelectedEventId((current) => (current === event.id ? null : event.id))}
               className="rounded-2xl border p-4"
               style={{
                 ...panelStyle,
@@ -394,127 +393,152 @@ export function AdminEvents({
                   value={event.participants_count === null ? '-' : String(event.participants_count)}
                 />
               </dl>
+
+              {selectedEventId === event.id && (
+                <div
+                  className="mt-4 rounded-2xl border p-4"
+                  style={{
+                    borderColor: 'var(--border-subtle)',
+                    backgroundColor: 'var(--background)',
+                  }}
+                >
+                  <h3 className="font-medium">Event details</h3>
+                  <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
+                    <Meta label="ID" value={event.id} />
+                    <Meta label="Title" value={event.title} />
+                    <Meta label="Description" value={event.description || '-'} />
+                    <Meta label="City" value={event.city || '-'} />
+                    <Meta label="Location" value={event.location || '-'} />
+                    <Meta label="Latitude" value={event.location_lat?.toString() || '-'} />
+                    <Meta label="Longitude" value={event.location_lng?.toString() || '-'} />
+                    <Meta label="Date" value={formatDate(event.date_time)} />
+                    <Meta label="Creator" value={event.creator_id || '-'} />
+                    <Meta label="Activity" value={event.activity_type || '-'} />
+                    <Meta label="Join mode" value={event.join_mode || 'open'} />
+                    <Meta label="Visibility" value={event.visibility || 'public'} />
+                    <Meta label="Status" value={event.status || '-'} />
+                    <Meta label="Moderation status" value={event.moderation_status || 'active'} />
+                    <Meta label="Moderation reason" value={event.moderation_reason || '-'} />
+                    <Meta label="Moderated at" value={formatDate(event.moderated_at)} />
+                    <Meta label="Moderated by" value={event.moderated_by || '-'} />
+                    <Meta label="Created" value={formatDate(event.created_at)} />
+                    <Meta label="Participants count" value={event.participants_count?.toString() || '-'} />
+                  </dl>
+
+                  <div className="mt-4 grid gap-2">
+                    <button
+                      type="button"
+                      onClick={(clickEvent) => {
+                        clickEvent.stopPropagation();
+                        onNavigate(
+                          'event-details',
+                          { eventId: event.id, backTarget: 'admin', adminPage: 'events' },
+                          'forward'
+                        );
+                      }}
+                      className="rounded-xl border px-4 py-3 text-sm"
+                      style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
+                    >
+                      Open event
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(clickEvent) => {
+                        clickEvent.stopPropagation();
+                        handleToggleVisibility(event);
+                      }}
+                      disabled={mutatingEventId === event.id}
+                      className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
+                      style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
+                    >
+                      {event.visibility === 'private' ? 'Set public' : 'Set private'}
+                    </button>
+                    {event.creator_id && (
+                      <button
+                        type="button"
+                        onClick={(clickEvent) => {
+                          clickEvent.stopPropagation();
+                          onOpenUsers(null);
+                        }}
+                        className="rounded-xl border px-4 py-3 text-sm"
+                        style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
+                      >
+                        Go to creator in Users
+                      </button>
+                    )}
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={(clickEvent) => {
+                          clickEvent.stopPropagation();
+                          handleModerationAction(event, 'hide');
+                        }}
+                        disabled={mutatingEventId === event.id}
+                        className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
+                        style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
+                      >
+                        Hide
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(clickEvent) => {
+                          clickEvent.stopPropagation();
+                          handleModerationAction(event, 'remove');
+                        }}
+                        disabled={mutatingEventId === event.id}
+                        className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
+                        style={{ borderColor: 'var(--destructive-border)', backgroundColor: 'var(--destructive-soft)', color: 'var(--destructive-strong)' }}
+                      >
+                        Remove
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(clickEvent) => {
+                          clickEvent.stopPropagation();
+                          handleModerationAction(event, 'restore');
+                        }}
+                        disabled={mutatingEventId === event.id}
+                        className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
+                        style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
+                      >
+                        Restore
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(clickEvent) => {
+                        clickEvent.stopPropagation();
+                        handleDeleteEvent(event);
+                      }}
+                      disabled={mutatingEventId === event.id}
+                      className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
+                      style={{ borderColor: 'var(--destructive-border)', backgroundColor: 'var(--destructive-soft)', color: 'var(--destructive-strong)' }}
+                    >
+                      Delete event
+                    </button>
+                  </div>
+
+                  <div className="mt-5">
+                    <h4 className="font-medium">Participants</h4>
+                    {participants.length === 0 ? (
+                      <p className="mt-2 text-sm text-muted-foreground">No participants are visible.</p>
+                    ) : (
+                      <div className="mt-3 space-y-2">
+                        {participants.map((participant) => (
+                          <div key={participant.id} className="rounded-xl border p-3 text-sm" style={badgeStyle}>
+                            <p>{participant.name || participant.user_id || 'Unknown user'}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {participant.status || 'approved'} / {formatDate(participant.joined_at)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </article>
           ))}
-        </div>
-      )}
-
-      {!loading && !error && selectedEvent && (
-        <div className="rounded-2xl border p-4" style={panelStyle}>
-          <h3 className="font-medium">Event details</h3>
-          <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
-            <Meta label="ID" value={selectedEvent.id} />
-            <Meta label="Title" value={selectedEvent.title} />
-            <Meta label="Description" value={selectedEvent.description || '-'} />
-            <Meta label="City" value={selectedEvent.city || '-'} />
-            <Meta label="Location" value={selectedEvent.location || '-'} />
-            <Meta label="Latitude" value={selectedEvent.location_lat?.toString() || '-'} />
-            <Meta label="Longitude" value={selectedEvent.location_lng?.toString() || '-'} />
-            <Meta label="Date" value={formatDate(selectedEvent.date_time)} />
-            <Meta label="Creator" value={selectedEvent.creator_id || '-'} />
-            <Meta label="Activity" value={selectedEvent.activity_type || '-'} />
-            <Meta label="Join mode" value={selectedEvent.join_mode || 'open'} />
-            <Meta label="Visibility" value={selectedEvent.visibility || 'public'} />
-            <Meta label="Status" value={selectedEvent.status || '-'} />
-            <Meta label="Moderation status" value={selectedEvent.moderation_status || 'active'} />
-            <Meta label="Moderation reason" value={selectedEvent.moderation_reason || '-'} />
-            <Meta label="Moderated at" value={formatDate(selectedEvent.moderated_at)} />
-            <Meta label="Moderated by" value={selectedEvent.moderated_by || '-'} />
-            <Meta label="Created" value={formatDate(selectedEvent.created_at)} />
-            <Meta label="Participants count" value={selectedEvent.participants_count?.toString() || '-'} />
-          </dl>
-
-          <div className="mt-4 grid gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                onNavigate(
-                  'event-details',
-                  { eventId: selectedEvent.id, backTarget: 'admin', adminPage: 'events' },
-                  'forward'
-                )
-              }
-              className="rounded-xl border px-4 py-3 text-sm"
-              style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
-            >
-              Open event
-            </button>
-            <button
-              type="button"
-              onClick={() => handleToggleVisibility(selectedEvent)}
-              disabled={mutatingEventId === selectedEvent.id}
-              className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
-              style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
-            >
-              {selectedEvent.visibility === 'private' ? 'Set public' : 'Set private'}
-            </button>
-            {selectedEvent.creator_id && (
-              <button
-                type="button"
-                onClick={() => onOpenUsers(null)}
-                className="rounded-xl border px-4 py-3 text-sm"
-                style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
-              >
-                Go to creator in Users
-              </button>
-            )}
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleModerationAction(selectedEvent, 'hide')}
-                disabled={mutatingEventId === selectedEvent.id}
-                className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
-                style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
-              >
-                Hide
-              </button>
-              <button
-                type="button"
-                onClick={() => handleModerationAction(selectedEvent, 'remove')}
-                disabled={mutatingEventId === selectedEvent.id}
-                className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
-                style={{ borderColor: 'var(--destructive-border)', backgroundColor: 'var(--destructive-soft)', color: 'var(--destructive-strong)' }}
-              >
-                Remove
-              </button>
-              <button
-                type="button"
-                onClick={() => handleModerationAction(selectedEvent, 'restore')}
-                disabled={mutatingEventId === selectedEvent.id}
-                className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
-                style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
-              >
-                Restore
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleDeleteEvent(selectedEvent)}
-              disabled={mutatingEventId === selectedEvent.id}
-              className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
-              style={{ borderColor: 'var(--destructive-border)', backgroundColor: 'var(--destructive-soft)', color: 'var(--destructive-strong)' }}
-            >
-              Delete event
-            </button>
-          </div>
-
-          <div className="mt-5">
-            <h4 className="font-medium">Participants</h4>
-            {participants.length === 0 ? (
-              <p className="mt-2 text-sm text-muted-foreground">No participants are visible.</p>
-            ) : (
-              <div className="mt-3 space-y-2">
-                {participants.map((participant) => (
-                  <div key={participant.id} className="rounded-xl border p-3 text-sm" style={badgeStyle}>
-                    <p>{participant.name || participant.user_id || 'Unknown user'}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {participant.status || 'approved'} / {formatDate(participant.joined_at)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       )}
     </section>

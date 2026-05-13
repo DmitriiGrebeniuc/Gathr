@@ -96,8 +96,7 @@ export function AdminUsers({
       });
   }, [planFilter, roleFilter, search, sortMode, statusFilter, users]);
 
-  const selectedUser =
-    users.find((user) => user.id === selectedUserId) ?? filteredUsers[0] ?? null;
+  const selectedUser = users.find((user) => user.id === selectedUserId) ?? null;
 
   const handleToggleBan = async (user: AdminUserRow) => {
     if (user.id === currentAdminId) {
@@ -276,7 +275,7 @@ export function AdminUsers({
           {filteredUsers.map((user) => (
             <article
               key={user.id}
-              onClick={() => setSelectedUserId(user.id)}
+              onClick={() => setSelectedUserId((current) => (current === user.id ? null : user.id))}
               className="rounded-2xl border p-4"
               style={{
                 ...panelStyle,
@@ -331,66 +330,78 @@ export function AdminUsers({
                     ? 'Unban user'
                     : 'Ban user'}
               </button>
-            </article>
-          ))}
-        </div>
-      )}
 
-      {!loading && !error && selectedUser && (
-        <div className="rounded-2xl border p-4" style={panelStyle}>
-          <h3 className="font-medium">User details</h3>
-          <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
-            <Meta label="ID" value={selectedUser.id} />
-            <Meta label="Name" value={selectedUser.name || '-'} />
-            <Meta label="Email" value={selectedUser.email || '-'} />
-            <Meta label="Role" value={selectedUser.role || 'user'} />
-            <Meta label="Plan" value={selectedUser.plan || 'free'} />
-            <Meta label="Unlimited access" value={selectedUser.has_unlimited_access ? 'Yes' : 'No'} />
-            <Meta label="Banned" value={selectedUser.is_banned ? 'Yes' : 'No'} />
-            <Meta label="Ban reason" value={selectedUser.ban_reason || '-'} />
-            <Meta label="Banned at" value={formatDate(selectedUser.banned_at)} />
-            <Meta label="Banned by" value={selectedUser.banned_by || '-'} />
-            <Meta label="Created" value={formatDate(selectedUser.created_at)} />
-            <Meta label="Updated" value={formatDate(selectedUser.updated_at)} />
-            <Meta label="Legal version" value={selectedUser.accepted_legal_version || '-'} />
-            <Meta label="Terms accepted" value={formatDate(selectedUser.accepted_terms_at)} />
-            <Meta label="Privacy accepted" value={formatDate(selectedUser.accepted_privacy_at)} />
-          </dl>
-
-          <div className="mt-4 grid gap-2">
-            <div className="grid grid-cols-2 gap-2">
-              {(['free', 'pro'] as Array<Extract<AdminUserPlan, 'free' | 'pro'>>).map((plan) => (
-                <button
-                  key={plan}
-                  type="button"
-                  onClick={() => handlePlanChange(selectedUser, plan)}
-                  disabled={mutatingUserId === selectedUser.id || selectedUser.plan === plan}
-                  className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
+              {selectedUserId === user.id && (
+                <div
+                  className="mt-4 rounded-2xl border p-4"
                   style={{
                     borderColor: 'var(--border-subtle)',
-                    backgroundColor: 'var(--surface-strong)',
+                    backgroundColor: 'var(--background)',
                   }}
                 >
-                  Set {plan}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => handleUnlimitedChange(selectedUser)}
-              disabled={mutatingUserId === selectedUser.id}
-              className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
-              style={{
-                borderColor: 'var(--accent-border)',
-                backgroundColor: 'var(--accent-soft)',
-                color: 'var(--accent)',
-              }}
-            >
-              {selectedUser.has_unlimited_access
-                ? 'Disable unlimited access'
-                : 'Enable unlimited access'}
-            </button>
-          </div>
+                  <h3 className="font-medium">User details</h3>
+                  <dl className="mt-4 grid grid-cols-1 gap-3 text-sm">
+                    <Meta label="ID" value={user.id} />
+                    <Meta label="Name" value={user.name || '-'} />
+                    <Meta label="Email" value={user.email || '-'} />
+                    <Meta label="Role" value={user.role || 'user'} />
+                    <Meta label="Plan" value={user.plan || 'free'} />
+                    <Meta label="Unlimited access" value={user.has_unlimited_access ? 'Yes' : 'No'} />
+                    <Meta label="Banned" value={user.is_banned ? 'Yes' : 'No'} />
+                    <Meta label="Ban reason" value={user.ban_reason || '-'} />
+                    <Meta label="Banned at" value={formatDate(user.banned_at)} />
+                    <Meta label="Banned by" value={user.banned_by || '-'} />
+                    <Meta label="Created" value={formatDate(user.created_at)} />
+                    <Meta label="Updated" value={formatDate(user.updated_at)} />
+                    <Meta label="Legal version" value={user.accepted_legal_version || '-'} />
+                    <Meta label="Terms accepted" value={formatDate(user.accepted_terms_at)} />
+                    <Meta label="Privacy accepted" value={formatDate(user.accepted_privacy_at)} />
+                  </dl>
+
+                  <div className="mt-4 grid gap-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {(['free', 'pro'] as Array<Extract<AdminUserPlan, 'free' | 'pro'>>).map((plan) => (
+                        <button
+                          key={plan}
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handlePlanChange(user, plan);
+                          }}
+                          disabled={mutatingUserId === user.id || user.plan === plan}
+                          className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
+                          style={{
+                            borderColor: 'var(--border-subtle)',
+                            backgroundColor: 'var(--surface-strong)',
+                          }}
+                        >
+                          Set {plan}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleUnlimitedChange(user);
+                      }}
+                      disabled={mutatingUserId === user.id}
+                      className="rounded-xl border px-4 py-3 text-sm disabled:opacity-50"
+                      style={{
+                        borderColor: 'var(--accent-border)',
+                        backgroundColor: 'var(--accent-soft)',
+                        color: 'var(--accent)',
+                      }}
+                    >
+                      {user.has_unlimited_access
+                        ? 'Disable unlimited access'
+                        : 'Enable unlimited access'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </article>
+          ))}
         </div>
       )}
     </section>

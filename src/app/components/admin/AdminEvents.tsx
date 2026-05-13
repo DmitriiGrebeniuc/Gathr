@@ -16,6 +16,7 @@ import type {
 } from '../../types/admin';
 import { feedback } from '../../lib/feedback';
 import { LoadingCard } from '../LoadingState';
+import { AdminActionDialog } from './AdminActionDialog';
 import { AdminEmptyState } from './AdminEmptyState';
 import { AdminSectionHeader } from './AdminSectionHeader';
 
@@ -46,6 +47,10 @@ export function AdminEvents({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [mutatingEventId, setMutatingEventId] = useState<string | null>(null);
+  const [pendingModerationAction, setPendingModerationAction] = useState<{
+    event: AdminEventRow;
+    action: 'hide' | 'remove';
+  } | null>(null);
 
   const loadEvents = async () => {
     setLoading(true);
@@ -243,12 +248,8 @@ export function AdminEvents({
     event: AdminEventRow,
     action: 'hide' | 'remove' | 'restore'
   ) => {
-    const reason =
-      action === 'restore'
-        ? undefined
-        : window.prompt('Moderation reason (optional)', event.moderation_reason ?? '')?.trim();
-
-    if (action !== 'restore' && typeof reason === 'undefined') {
+    if (action !== 'restore') {
+      setPendingModerationAction({ event, action });
       return;
     }
 
@@ -273,15 +274,41 @@ export function AdminEvents({
 
     try {
       if (action === 'hide') {
-        await hideAdminEvent(event.id, reason);
+        await hideAdminEvent(event.id);
       } else if (action === 'remove') {
-        await removeAdminEvent(event.id, reason);
+        await removeAdminEvent(event.id);
       } else {
         await restoreAdminEvent(event.id);
       }
 
       await loadEvents();
       feedback.success('Event moderation updated.');
+    } catch (mutationError) {
+      console.error('Failed to update event moderation:', mutationError);
+      feedback.error('Could not update event moderation. RLS may block this action.');
+    } finally {
+      setMutatingEventId(null);
+    }
+  };
+
+  const handleConfirmModeration = async (reason: string) => {
+    if (!pendingModerationAction) {
+      return;
+    }
+
+    const { event, action } = pendingModerationAction;
+    setMutatingEventId(event.id);
+
+    try {
+      if (action === 'hide') {
+        await hideAdminEvent(event.id, reason);
+      } else {
+        await removeAdminEvent(event.id, reason);
+      }
+
+      await loadEvents();
+      feedback.success('Event moderation updated.');
+      setPendingModerationAction(null);
     } catch (mutationError) {
       console.error('Failed to update event moderation:', mutationError);
       feedback.error('Could not update event moderation. RLS may block this action.');
@@ -541,6 +568,28 @@ export function AdminEvents({
           ))}
         </div>
       )}
+
+      <AdminActionDialog
+        open={!!pendingModerationAction}
+        title={
+          pendingModerationAction?.action === 'remove'
+            ? 'Mark event removed?'
+            : 'Hide event?'
+        }
+        description="This moderation action is tracked in the audit log."
+        confirmLabel={pendingModerationAction?.action === 'remove' ? 'Remove event' : 'Hide event'}
+        reasonLabel="Moderation reason"
+        placeholder="Why is this event being moderated?"
+        defaultReason={pendingModerationAction?.event.moderation_reason ?? ''}
+        destructive={pendingModerationAction?.action === 'remove'}
+        loading={!!pendingModerationAction && mutatingEventId === pendingModerationAction.event.id}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingModerationAction(null);
+          }
+        }}
+        onConfirm={handleConfirmModeration}
+      />
     </section>
   );
 }

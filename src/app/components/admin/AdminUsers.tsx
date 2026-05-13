@@ -10,6 +10,7 @@ import {
 import type { AdminAttentionTarget, AdminUserPlan, AdminUserRow } from '../../types/admin';
 import { feedback } from '../../lib/feedback';
 import { LoadingCard } from '../LoadingState';
+import { AdminActionDialog } from './AdminActionDialog';
 import { AdminEmptyState } from './AdminEmptyState';
 import { AdminSectionHeader } from './AdminSectionHeader';
 
@@ -35,6 +36,7 @@ export function AdminUsers({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [mutatingUserId, setMutatingUserId] = useState<string | null>(null);
+  const [pendingBanUser, setPendingBanUser] = useState<AdminUserRow | null>(null);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -105,11 +107,8 @@ export function AdminUsers({
     }
 
     const nextBanState = !user.is_banned;
-    const reason = nextBanState
-      ? window.prompt('Ban reason (visible only to admins)', user.ban_reason ?? '')?.trim()
-      : undefined;
-
-    if (nextBanState && typeof reason === 'undefined') {
+    if (nextBanState) {
+      setPendingBanUser(user);
       return;
     }
 
@@ -129,28 +128,56 @@ export function AdminUsers({
     setMutatingUserId(user.id);
 
     try {
-      if (nextBanState) {
-        await banAdminUser(user.id, reason);
-      } else {
-        await unbanAdminUser(user.id);
-      }
+      await unbanAdminUser(user.id);
       setUsers((current) =>
         current.map((item) =>
           item.id === user.id
             ? {
                 ...item,
-                is_banned: nextBanState,
-                ban_reason: nextBanState ? reason || null : null,
-                banned_at: nextBanState ? new Date().toISOString() : null,
-                banned_by: nextBanState ? currentAdminId : null,
+                is_banned: false,
+                ban_reason: null,
+                banned_at: null,
+                banned_by: null,
               }
             : item
         )
       );
-      feedback.success(nextBanState ? 'User banned.' : 'User unbanned.');
+      feedback.success('User unbanned.');
     } catch (mutationError) {
       console.error('Failed to update ban status:', mutationError);
       feedback.error('Could not update user ban status. RLS may block this action.');
+    } finally {
+      setMutatingUserId(null);
+    }
+  };
+
+  const handleConfirmBan = async (reason: string) => {
+    if (!pendingBanUser) {
+      return;
+    }
+
+    setMutatingUserId(pendingBanUser.id);
+
+    try {
+      await banAdminUser(pendingBanUser.id, reason);
+      setUsers((current) =>
+        current.map((item) =>
+          item.id === pendingBanUser.id
+            ? {
+                ...item,
+                is_banned: true,
+                ban_reason: reason || null,
+                banned_at: new Date().toISOString(),
+                banned_by: currentAdminId,
+              }
+            : item
+        )
+      );
+      feedback.success('User banned.');
+      setPendingBanUser(null);
+    } catch (mutationError) {
+      console.error('Failed to ban user:', mutationError);
+      feedback.error('Could not ban user. RLS may block this action.');
     } finally {
       setMutatingUserId(null);
     }
@@ -404,6 +431,24 @@ export function AdminUsers({
           ))}
         </div>
       )}
+
+      <AdminActionDialog
+        open={!!pendingBanUser}
+        title="Ban user?"
+        description="This user will lose access until an admin unbans them. The reason is visible only to admins."
+        confirmLabel="Ban user"
+        reasonLabel="Ban reason"
+        placeholder="Spam, abuse, unsafe behavior..."
+        defaultReason={pendingBanUser?.ban_reason ?? ''}
+        destructive
+        loading={!!pendingBanUser && mutatingUserId === pendingBanUser.id}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingBanUser(null);
+          }
+        }}
+        onConfirm={handleConfirmBan}
+      />
     </section>
   );
 }

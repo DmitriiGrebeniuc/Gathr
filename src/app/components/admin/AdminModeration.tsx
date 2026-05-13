@@ -18,6 +18,7 @@ import type {
   AdminReportStatus,
 } from '../../types/admin';
 import { LoadingCard } from '../LoadingState';
+import { AdminActionDialog } from './AdminActionDialog';
 import { AdminEmptyState } from './AdminEmptyState';
 import { AdminSectionHeader } from './AdminSectionHeader';
 
@@ -41,6 +42,10 @@ export function AdminModeration({
   const [loading, setLoading] = useState(true);
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingTargetAction, setPendingTargetAction] = useState<{
+    report: AdminReportRow;
+    action: 'hide_event' | 'remove_event' | 'ban_user';
+  } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -140,28 +145,15 @@ export function AdminModeration({
     report: AdminReportRow,
     action: 'hide_event' | 'remove_event' | 'ban_user'
   ) => {
-    const reason = window.prompt('Moderation reason (optional)', report.reason)?.trim();
+    setPendingTargetAction({ report, action });
+  };
 
-    if (typeof reason === 'undefined') {
+  const confirmTargetAction = async (reason: string) => {
+    if (!pendingTargetAction) {
       return;
     }
 
-    const confirmed = await feedback.confirm({
-      title:
-        action === 'ban_user'
-          ? 'Ban reported user?'
-          : action === 'hide_event'
-            ? 'Hide reported event?'
-            : 'Mark reported event removed?',
-      description: 'This action will be tracked in the audit log.',
-      confirmLabel: 'Confirm',
-      cancelLabel: 'Cancel',
-      variant: action === 'remove_event' || action === 'ban_user' ? 'destructive' : 'default',
-    });
-
-    if (!confirmed) {
-      return;
-    }
+    const { report, action } = pendingTargetAction;
 
     setMutating(true);
 
@@ -176,6 +168,7 @@ export function AdminModeration({
 
       await resolveReport(report.id, 'action_taken', noteDraft || 'Action taken from report.');
       feedback.success('Moderation action applied.');
+      setPendingTargetAction(null);
       await load();
     } catch (mutationError) {
       console.error('Failed to apply moderation action:', mutationError);
@@ -418,8 +411,41 @@ export function AdminModeration({
           </div>
         )}
       </div>
+
+      <AdminActionDialog
+        open={!!pendingTargetAction}
+        title={getTargetActionTitle(pendingTargetAction?.action)}
+        description="This action will be tracked in the audit log and the report will be resolved as action taken."
+        confirmLabel="Apply action"
+        reasonLabel="Moderation reason"
+        placeholder="Why is this action needed?"
+        defaultReason={pendingTargetAction?.report.reason ?? ''}
+        destructive={
+          pendingTargetAction?.action === 'remove_event' ||
+          pendingTargetAction?.action === 'ban_user'
+        }
+        loading={mutating}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingTargetAction(null);
+          }
+        }}
+        onConfirm={confirmTargetAction}
+      />
     </section>
   );
+}
+
+function getTargetActionTitle(action?: 'hide_event' | 'remove_event' | 'ban_user') {
+  if (action === 'ban_user') {
+    return 'Ban reported user?';
+  }
+
+  if (action === 'remove_event') {
+    return 'Mark reported event removed?';
+  }
+
+  return 'Hide reported event?';
 }
 
 function ActionButton({

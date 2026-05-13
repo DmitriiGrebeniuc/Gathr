@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase';
 import type { AdminSupportRequestRow, AdminSupportStatus } from '../../types/admin';
+import { tryLogAdminAction } from './adminAudit';
 
 type AdminSupportRaw = {
   id?: string;
@@ -53,6 +54,13 @@ export async function updateSupportRequestStatus(
   if (error) {
     throw error;
   }
+
+  await tryLogAdminAction({
+    action: 'support.status_update',
+    targetType: 'support_request',
+    targetId: requestId,
+    newValue: { status },
+  });
 }
 
 export async function updateAdminSupportRequestStatus(
@@ -71,6 +79,13 @@ export async function updateAdminSupportRequestNote(requestId: string, adminNote
   if (error) {
     throw error;
   }
+
+  await tryLogAdminAction({
+    action: 'support.note_update',
+    targetType: 'support_request',
+    targetId: requestId,
+    newValue: { admin_note: adminNote },
+  });
 }
 
 function normalizeSupportRows(

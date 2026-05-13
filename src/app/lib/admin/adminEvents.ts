@@ -5,6 +5,7 @@ import type {
   AdminEventRow,
   AdminGrowthSnapshot,
 } from '../../types/admin';
+import { tryLogAdminAction } from './adminAudit';
 import { getAdminUsers } from './adminUsers';
 
 type AdminEventRaw = {
@@ -89,6 +90,13 @@ export async function updateAdminEventVisibilityOrStatus(
   if (error) {
     throw error;
   }
+
+  await tryLogAdminAction({
+    action: 'event.visibility_update',
+    targetType: 'event',
+    targetId: eventId,
+    newValue: updates,
+  });
 }
 
 export async function deleteAdminEvent(eventId: string) {
@@ -97,6 +105,12 @@ export async function deleteAdminEvent(eventId: string) {
   if (error) {
     throw error;
   }
+
+  await tryLogAdminAction({
+    action: 'event.delete',
+    targetType: 'event',
+    targetId: eventId,
+  });
 }
 
 export async function getAdminEventParticipants(

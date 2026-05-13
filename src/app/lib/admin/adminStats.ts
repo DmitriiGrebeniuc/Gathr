@@ -22,6 +22,8 @@ export async function getAdminStats(): Promise<AdminStats> {
     supportRequests,
     bannedUsers,
     proUsers,
+    pendingReports,
+    reviewingReports,
   ] = await Promise.allSettled([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('events').select('id', { count: 'exact', head: true }),
@@ -35,6 +37,8 @@ export async function getAdminStats(): Promise<AdminStats> {
       .select('id', { count: 'exact', head: true })
       .eq('is_banned', true),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'pro'),
+    supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'reviewing'),
   ]);
 
   return {
@@ -44,11 +48,13 @@ export async function getAdminStats(): Promise<AdminStats> {
     supportRequests: countOrNull(supportRequests),
     bannedUsers: countOrNull(bannedUsers),
     proUsers: countOrNull(proUsers),
+    pendingReports: countOrNull(pendingReports),
+    reviewingReports: countOrNull(reviewingReports),
   };
 }
 
 export async function getAdminNeedsAttention(): Promise<AdminAttentionItem[]> {
-  const [usersResult, eventsResult, supportResult, pendingJoinRequestsResult] =
+  const [usersResult, eventsResult, supportResult, pendingJoinRequestsResult, pendingReportsResult] =
     await Promise.allSettled([
       getAdminUsers(),
       getAdminEvents(),
@@ -57,6 +63,7 @@ export async function getAdminNeedsAttention(): Promise<AdminAttentionItem[]> {
         .from('event_join_requests')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'pending'),
+      supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     ]);
 
   const users = usersResult.status === 'fulfilled' ? usersResult.value : [];
@@ -68,8 +75,19 @@ export async function getAdminNeedsAttention(): Promise<AdminAttentionItem[]> {
     pendingJoinRequestsResult.status === 'fulfilled' && !pendingJoinRequestsResult.value.error
       ? pendingJoinRequestsResult.value.count ?? 0
       : null;
+  const pendingReports =
+    pendingReportsResult.status === 'fulfilled' && !pendingReportsResult.value.error
+      ? pendingReportsResult.value.count ?? 0
+      : null;
 
   return [
+    {
+      id: 'pending-reports',
+      label: 'Pending reports',
+      description: 'User reports waiting for moderation review.',
+      count: pendingReports,
+      targetTab: 'moderation',
+    },
     {
       id: 'support-new',
       label: 'New support requests',

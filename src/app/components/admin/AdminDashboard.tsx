@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { getRecentAdminAuditLog } from '../../lib/admin/adminAudit';
 import { getAdminNeedsAttention, getAdminStats } from '../../lib/admin/adminStats';
-import type { AdminAttentionItem, AdminStats } from '../../types/admin';
+import type { AdminAttentionItem, AdminAuditLogRow, AdminStats } from '../../types/admin';
 import { LoadingCard } from '../LoadingState';
 import { AdminEmptyState } from './AdminEmptyState';
 import { AdminSectionHeader } from './AdminSectionHeader';
@@ -13,6 +14,8 @@ const initialStats: AdminStats = {
   supportRequests: null,
   bannedUsers: null,
   proUsers: null,
+  pendingReports: null,
+  reviewingReports: null,
 };
 
 export function AdminDashboard({
@@ -22,6 +25,7 @@ export function AdminDashboard({
 }) {
   const [stats, setStats] = useState<AdminStats>(initialStats);
   const [attention, setAttention] = useState<AdminAttentionItem[]>([]);
+  const [recentAudit, setRecentAudit] = useState<AdminAuditLogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -33,14 +37,16 @@ export function AdminDashboard({
       setError(false);
 
       try {
-        const [nextStats, nextAttention] = await Promise.all([
+        const [nextStats, nextAttention, nextAudit] = await Promise.all([
           getAdminStats(),
           getAdminNeedsAttention(),
+          getRecentAdminAuditLog(5).catch(() => []),
         ]);
 
         if (!cancelled) {
           setStats(nextStats);
           setAttention(nextAttention);
+          setRecentAudit(nextAudit);
         }
       } catch (loadError) {
         console.error('Failed to load admin stats:', loadError);
@@ -93,6 +99,8 @@ export function AdminDashboard({
             <AdminStatCard label="Support requests" value={stats.supportRequests} />
             <AdminStatCard label="Banned users" value={stats.bannedUsers} />
             <AdminStatCard label="Pro users" value={stats.proUsers} />
+            <AdminStatCard label="Pending reports" value={stats.pendingReports} />
+            <AdminStatCard label="Reviewing reports" value={stats.reviewingReports} />
           </div>
 
           <div className="space-y-3 pt-2">
@@ -124,6 +132,36 @@ export function AdminDashboard({
               </div>
             ))}
           </div>
+
+          <div className="space-y-3 pt-2">
+            <AdminSectionHeader
+              title="Recent admin actions"
+              description="Latest tracked changes made from admin tools."
+            />
+            {recentAudit.length === 0 ? (
+              <AdminEmptyState
+                title="No audit actions yet"
+                description="Actions will appear here after the audit migration is applied."
+              />
+            ) : (
+              recentAudit.map((item) => (
+                <div key={item.id} className="rounded-2xl border p-4" style={panelStyle}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium">{item.action}</p>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">
+                        {item.target_type}
+                        {item.target_id ? ` · ${item.target_id}` : ''}
+                      </p>
+                    </div>
+                    <p className="shrink-0 text-xs text-muted-foreground">
+                      {formatDate(item.created_at)}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </>
       )}
     </section>
@@ -134,3 +172,11 @@ const panelStyle = {
   borderColor: 'var(--border)',
   backgroundColor: 'var(--card)',
 } as const;
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return 'No date';
+  }
+
+  return new Date(value).toLocaleDateString();
+}

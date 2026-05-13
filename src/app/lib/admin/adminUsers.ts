@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase';
 import type { AdminUserPlan, AdminUserRow } from '../../types/admin';
+import { tryLogAdminAction } from './adminAudit';
 
 type AdminUserRaw = Partial<AdminUserRow> & {
   user_name?: string | null;
@@ -60,6 +61,13 @@ export async function updateAdminUserBanStatus(userId: string, isBanned: boolean
   if (error) {
     throw error;
   }
+
+  await tryLogAdminAction({
+    action: isBanned ? 'user.ban' : 'user.unban',
+    targetType: 'user',
+    targetId: userId,
+    newValue: { is_banned: isBanned },
+  });
 }
 
 export async function updateAdminUserPlan(userId: string, plan: Extract<AdminUserPlan, 'free' | 'pro'>) {
@@ -71,6 +79,13 @@ export async function updateAdminUserPlan(userId: string, plan: Extract<AdminUse
   if (error) {
     throw error;
   }
+
+  await tryLogAdminAction({
+    action: 'user.plan_update',
+    targetType: 'user',
+    targetId: userId,
+    newValue: { plan },
+  });
 }
 
 export async function updateAdminUserUnlimitedAccess(
@@ -85,6 +100,13 @@ export async function updateAdminUserUnlimitedAccess(
   if (error) {
     throw error;
   }
+
+  await tryLogAdminAction({
+    action: 'user.unlimited_update',
+    targetType: 'user',
+    targetId: userId,
+    newValue: { has_unlimited_access: hasUnlimitedAccess },
+  });
 }
 
 function sortUsersByCreatedAt(a: AdminUserRow, b: AdminUserRow) {

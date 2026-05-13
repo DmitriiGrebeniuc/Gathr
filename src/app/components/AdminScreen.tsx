@@ -6,6 +6,7 @@ import { AdminDashboard } from './admin/AdminDashboard';
 import { AdminEvents } from './admin/AdminEvents';
 import { AdminGrowth } from './admin/AdminGrowth';
 import { AdminLayout } from './admin/AdminLayout';
+import { AdminModeration } from './admin/AdminModeration';
 import { AdminSupportRequests } from './admin/AdminSupportRequests';
 import { AdminUsers } from './admin/AdminUsers';
 import type {
@@ -157,6 +158,7 @@ export function AdminScreen({
         />
       )}
       {activeTab === 'growth' && <AdminGrowth />}
+      {activeTab === 'moderation' && <AdminModeration />}
     </AdminLayout>
   );
 }
@@ -186,7 +188,13 @@ function AdminShell({
 }
 
 function mapInitialPage(page?: LegacyAdminPage | AdminTab): AdminTab {
-  if (page === 'events' || page === 'users' || page === 'support' || page === 'growth') {
+  if (
+    page === 'events' ||
+    page === 'users' ||
+    page === 'support' ||
+    page === 'growth' ||
+    page === 'moderation'
+  ) {
     return page;
   }
 

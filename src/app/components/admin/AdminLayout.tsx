@@ -8,6 +8,7 @@ const tabs: Array<{ key: AdminTab; label: string }> = [
   { key: 'events', label: 'Events' },
   { key: 'support', label: 'Support' },
   { key: 'growth', label: 'Growth' },
+  { key: 'moderation', label: 'Moderation' },
 ];
 
 export function AdminLayout({

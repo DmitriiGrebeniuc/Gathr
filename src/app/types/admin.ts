@@ -1,4 +1,4 @@
-export type AdminTab = 'dashboard' | 'users' | 'events' | 'support' | 'growth';
+export type AdminTab = 'dashboard' | 'users' | 'events' | 'support' | 'growth' | 'moderation';
 
 export type LegacyAdminPage = 'overview' | 'events' | 'users' | 'participants' | 'support';
 
@@ -12,6 +12,8 @@ export type AdminStats = {
   supportRequests: number | null;
   bannedUsers: number | null;
   proUsers: number | null;
+  pendingReports: number | null;
+  reviewingReports: number | null;
 };
 
 export type AdminUserRole = 'user' | 'admin' | string;
@@ -24,7 +26,8 @@ export type AdminAttentionTarget =
   | 'events-without-location'
   | 'users-without-name'
   | 'banned-users'
-  | 'pending-join-requests';
+  | 'pending-join-requests'
+  | 'pending-reports';
 
 export type AdminAttentionItem = {
   id: AdminAttentionTarget;
@@ -131,3 +134,60 @@ export type AdminGrowthMetrics = {
 };
 
 export type AdminGrowthSnapshot = AdminGrowthMetrics;
+
+export type AdminReportStatus = 'pending' | 'reviewing' | 'resolved' | 'rejected';
+export type AdminReportStatusFilter = 'all' | AdminReportStatus;
+export type AdminReportTargetType = 'user' | 'event';
+export type AdminReportTargetTypeFilter = 'all' | AdminReportTargetType;
+
+export type AdminReportRow = {
+  id: string;
+  reporter_id: string;
+  target_type: AdminReportTargetType;
+  target_id: string;
+  reason: string;
+  details: string | null;
+  status: AdminReportStatus;
+  admin_note: string | null;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  created_at: string | null;
+};
+
+export type AdminReportFilters = {
+  status: AdminReportStatusFilter;
+  targetType: AdminReportTargetTypeFilter;
+  search: string;
+};
+
+export type AdminAuditTargetType = 'user' | 'event' | 'support_request' | 'report' | 'system';
+
+export type AdminAuditAction =
+  | 'user.ban'
+  | 'user.unban'
+  | 'user.plan_update'
+  | 'user.unlimited_update'
+  | 'event.visibility_update'
+  | 'event.delete'
+  | 'support.status_update'
+  | 'support.note_update'
+  | 'report.status_update'
+  | 'report.note_update'
+  | string;
+
+export type AdminAuditLogRow = {
+  id: string;
+  admin_id: string;
+  action: AdminAuditAction;
+  target_type: AdminAuditTargetType;
+  target_id: string | null;
+  old_value: unknown | null;
+  new_value: unknown | null;
+  created_at: string | null;
+};
+
+export type AdminAuditFilters = {
+  action: string;
+  targetType: 'all' | AdminAuditTargetType;
+  adminId: string;
+};

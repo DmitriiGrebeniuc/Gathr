@@ -46,17 +46,12 @@ export async function createReport(input: CreateReportInput) {
     throw new Error('Authentication is required to submit a report');
   }
 
-  const { data, error } = await supabase
-    .from('reports')
-    .insert({
-      reporter_id: user.id,
-      target_type: targetType,
-      target_id: targetId,
-      reason,
-      details,
-    })
-    .select('id')
-    .single();
+  const { data, error } = await supabase.rpc('create_report', {
+    p_target_type: targetType,
+    p_target_id: targetId,
+    p_reason: reason,
+    p_details: details,
+  });
 
   if (error) {
     throw error;

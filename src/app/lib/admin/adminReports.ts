@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabase';
 import type {
   AdminReportFilters,
+  AdminReportResolution,
   AdminReportRow,
   AdminReportStatus,
   AdminReportTargetType,
@@ -16,7 +17,7 @@ export async function getAdminReports(filters: AdminReportFilters): Promise<Admi
   let query = supabase
     .from('reports')
     .select(
-      'id, reporter_id, target_type, target_id, reason, details, status, admin_note, resolved_at, resolved_by, created_at'
+      'id, reporter_id, target_type, target_id, reason, details, status, admin_note, reviewed_at, reviewed_by, resolved_at, resolved_by, resolution, duplicate_of, created_at'
     )
     .order('created_at', { ascending: false });
 
@@ -62,6 +63,18 @@ export async function updateAdminReportStatus(
   status: AdminReportStatus,
   adminNote?: string
 ) {
+  if (status === 'reviewing') {
+    return markReportReviewing(reportId);
+  }
+
+  if (status === 'resolved') {
+    return resolveReport(reportId, 'action_taken', adminNote);
+  }
+
+  if (status === 'rejected') {
+    return rejectReport(reportId, 'no_violation', adminNote);
+  }
+
   const updatePayload: Record<string, string | null> = { status };
 
   if (typeof adminNote === 'string') {
@@ -91,6 +104,72 @@ export async function updateAdminReportStatus(
     targetType: 'report',
     targetId: reportId,
     newValue: updatePayload,
+  });
+}
+
+export async function markReportReviewing(reportId: string) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const payload = {
+    status: 'reviewing',
+    reviewed_at: new Date().toISOString(),
+    reviewed_by: user?.id ?? null,
+  };
+
+  const { error } = await supabase.from('reports').update(payload).eq('id', reportId);
+
+  if (error) {
+    throw error;
+  }
+
+  await tryLogAdminAction({
+    action: 'report.reviewing',
+    targetType: 'report',
+    targetId: reportId,
+    newValue: payload,
+  });
+}
+
+export async function resolveReport(
+  reportId: string,
+  resolution: AdminReportResolution,
+  adminNote?: string
+) {
+  return closeReport(reportId, 'resolved', resolution, adminNote, 'report.resolve');
+}
+
+export async function rejectReport(
+  reportId: string,
+  resolution: Exclude<AdminReportResolution, 'action_taken'>,
+  adminNote?: string
+) {
+  return closeReport(reportId, 'rejected', resolution, adminNote, 'report.reject');
+}
+
+export async function updateReportNote(reportId: string, adminNote: string) {
+  return updateAdminReportNote(reportId, adminNote);
+}
+
+export async function markReportDuplicate(reportId: string, duplicateOf: string) {
+  const payload = {
+    status: 'rejected',
+    resolution: 'duplicate',
+    duplicate_of: duplicateOf,
+    resolved_at: new Date().toISOString(),
+    resolved_by: await getCurrentUserId(),
+  };
+  const { error } = await supabase.from('reports').update(payload).eq('id', reportId);
+
+  if (error) {
+    throw error;
+  }
+
+  await tryLogAdminAction({
+    action: 'report.duplicate',
+    targetType: 'report',
+    targetId: reportId,
+    newValue: payload,
   });
 }
 
@@ -157,11 +236,68 @@ function normalizeReportRows(rows: AdminReportRaw[]): AdminReportRow[] {
       details: row.details ?? null,
       status: normalizeStatus(row.status),
       admin_note: row.admin_note ?? null,
+      reviewed_at: row.reviewed_at ?? null,
+      reviewed_by: row.reviewed_by ?? null,
       resolved_at: row.resolved_at ?? null,
       resolved_by: row.resolved_by ?? null,
+      resolution: normalizeResolution(row.resolution),
+      duplicate_of: row.duplicate_of ?? null,
       created_at: row.created_at ?? null,
     }))
     .filter((report) => report.id && report.reporter_id && report.target_id);
+}
+
+async function closeReport(
+  reportId: string,
+  status: 'resolved' | 'rejected',
+  resolution: AdminReportResolution,
+  adminNote: string | undefined,
+  action: 'report.resolve' | 'report.reject'
+) {
+  const payload: Record<string, string | null> = {
+    status,
+    resolution,
+    resolved_at: new Date().toISOString(),
+    resolved_by: await getCurrentUserId(),
+  };
+
+  if (typeof adminNote === 'string') {
+    payload.admin_note = adminNote;
+  }
+
+  const { error } = await supabase.from('reports').update(payload).eq('id', reportId);
+
+  if (error) {
+    throw error;
+  }
+
+  await tryLogAdminAction({
+    action,
+    targetType: 'report',
+    targetId: reportId,
+    newValue: payload,
+  });
+}
+
+async function getCurrentUserId() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return user?.id ?? null;
+}
+
+function normalizeResolution(value: unknown): AdminReportResolution | null {
+  if (
+    value === 'action_taken' ||
+    value === 'no_violation' ||
+    value === 'duplicate' ||
+    value === 'insufficient_info'
+  ) {
+    return value;
+  }
+
+  return null;
 }
 
 function normalizeStatus(value: string | null | undefined): AdminReportStatus {

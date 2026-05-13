@@ -27,7 +27,10 @@ export type AdminAttentionTarget =
   | 'users-without-name'
   | 'banned-users'
   | 'pending-join-requests'
-  | 'pending-reports';
+  | 'pending-reports'
+  | 'reviewing-reports'
+  | 'moderated-events'
+  | 'banned-users-with-reason';
 
 export type AdminAttentionItem = {
   id: AdminAttentionTarget;
@@ -74,6 +77,9 @@ export type AdminUserRow = {
   accepted_legal_version: string | null;
   accepted_terms_at: string | null;
   accepted_privacy_at: string | null;
+  ban_reason: string | null;
+  banned_at: string | null;
+  banned_by: string | null;
 };
 
 export type AdminUserDetails = AdminUserRow;
@@ -93,6 +99,10 @@ export type AdminEventRow = {
   join_mode: 'open' | 'request' | string | null;
   visibility: 'public' | 'private' | string | null;
   status: string | null;
+  moderation_status: 'active' | 'hidden' | 'removed' | string | null;
+  moderation_reason: string | null;
+  moderated_at: string | null;
+  moderated_by: string | null;
   participants_count: number | null;
 };
 
@@ -136,6 +146,11 @@ export type AdminGrowthMetrics = {
 export type AdminGrowthSnapshot = AdminGrowthMetrics;
 
 export type AdminReportStatus = 'pending' | 'reviewing' | 'resolved' | 'rejected';
+export type AdminReportResolution =
+  | 'action_taken'
+  | 'no_violation'
+  | 'duplicate'
+  | 'insufficient_info';
 export type AdminReportStatusFilter = 'all' | AdminReportStatus;
 export type AdminReportTargetType = 'user' | 'event';
 export type AdminReportTargetTypeFilter = 'all' | AdminReportTargetType;
@@ -149,8 +164,12 @@ export type AdminReportRow = {
   details: string | null;
   status: AdminReportStatus;
   admin_note: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   resolved_at: string | null;
   resolved_by: string | null;
+  resolution: AdminReportResolution | null;
+  duplicate_of: string | null;
   created_at: string | null;
 };
 
@@ -172,7 +191,11 @@ export type AdminAuditAction =
   | 'support.status_update'
   | 'support.note_update'
   | 'report.status_update'
+  | 'report.reviewing'
+  | 'report.resolve'
+  | 'report.reject'
   | 'report.note_update'
+  | 'report.duplicate'
   | string;
 
 export type AdminAuditLogRow = {

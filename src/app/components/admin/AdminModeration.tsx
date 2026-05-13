@@ -3,12 +3,17 @@ import { feedback } from '../../lib/feedback';
 import { getRecentAdminAuditLog } from '../../lib/admin/adminAudit';
 import {
   getAdminReports,
-  updateAdminReportNote,
-  updateAdminReportStatus,
+  markReportReviewing,
+  rejectReport,
+  resolveReport,
+  updateReportNote,
 } from '../../lib/admin/adminReports';
+import { hideAdminEvent, removeAdminEvent } from '../../lib/admin/adminEvents';
+import { banAdminUser } from '../../lib/admin/adminUsers';
 import type {
   AdminAuditLogRow,
   AdminReportFilters,
+  AdminReportResolution,
   AdminReportRow,
   AdminReportStatus,
 } from '../../types/admin';
@@ -22,12 +27,17 @@ const initialFilters: AdminReportFilters = {
   search: '',
 };
 
-export function AdminModeration() {
+export function AdminModeration({
+  onNavigate,
+}: {
+  onNavigate: (screen: string, data?: unknown, direction?: 'forward' | 'back' | 'up' | 'down') => void;
+}) {
   const [filters, setFilters] = useState<AdminReportFilters>(initialFilters);
   const [reports, setReports] = useState<AdminReportRow[]>([]);
   const [audit, setAudit] = useState<AdminAuditLogRow[]>([]);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
+  const [resolution, setResolution] = useState<AdminReportResolution>('action_taken');
   const [loading, setLoading] = useState(true);
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,9 +75,13 @@ export function AdminModeration() {
   const openReport = (report: AdminReportRow) => {
     setSelectedReportId(report.id);
     setNoteDraft(report.admin_note ?? '');
+    setResolution(report.resolution ?? 'action_taken');
   };
 
   const changeStatus = async (report: AdminReportRow, status: AdminReportStatus) => {
+    const nextResolution =
+      status === 'rejected' && resolution === 'action_taken' ? 'no_violation' : resolution;
+
     if (status === 'resolved' || status === 'rejected') {
       const confirmed = await feedback.confirm({
         title: status === 'resolved' ? 'Resolve report?' : 'Reject report?',
@@ -85,7 +99,13 @@ export function AdminModeration() {
     setMutating(true);
 
     try {
-      await updateAdminReportStatus(report.id, status, noteDraft);
+      if (status === 'reviewing') {
+        await markReportReviewing(report.id);
+      } else if (status === 'resolved') {
+        await resolveReport(report.id, nextResolution, noteDraft);
+      } else if (status === 'rejected') {
+        await rejectReport(report.id, nextResolution as Exclude<AdminReportResolution, 'action_taken'>, noteDraft);
+      }
       feedback.success('Report updated');
       await load();
     } catch (mutationError) {
@@ -100,12 +120,66 @@ export function AdminModeration() {
     setMutating(true);
 
     try {
-      await updateAdminReportNote(report.id, noteDraft);
+      await updateReportNote(report.id, noteDraft);
       feedback.success('Admin note saved');
       await load();
     } catch (mutationError) {
       console.error('Failed to save report note:', mutationError);
       feedback.error('Could not save admin note');
+    } finally {
+      setMutating(false);
+    }
+  };
+
+  const copyTargetId = async (report: AdminReportRow) => {
+    await navigator.clipboard?.writeText(report.target_id);
+    feedback.success('Target id copied.');
+  };
+
+  const moderateReportTarget = async (
+    report: AdminReportRow,
+    action: 'hide_event' | 'remove_event' | 'ban_user'
+  ) => {
+    const reason = window.prompt('Moderation reason (optional)', report.reason)?.trim();
+
+    if (typeof reason === 'undefined') {
+      return;
+    }
+
+    const confirmed = await feedback.confirm({
+      title:
+        action === 'ban_user'
+          ? 'Ban reported user?'
+          : action === 'hide_event'
+            ? 'Hide reported event?'
+            : 'Mark reported event removed?',
+      description: 'This action will be tracked in the audit log.',
+      confirmLabel: 'Confirm',
+      cancelLabel: 'Cancel',
+      variant: action === 'remove_event' || action === 'ban_user' ? 'destructive' : 'default',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    setMutating(true);
+
+    try {
+      if (action === 'hide_event') {
+        await hideAdminEvent(report.target_id, reason);
+      } else if (action === 'remove_event') {
+        await removeAdminEvent(report.target_id, reason);
+      } else {
+        await banAdminUser(report.target_id, reason);
+      }
+
+      await resolveReport(report.id, 'action_taken', noteDraft || 'Action taken from report.');
+      feedback.success('Moderation action applied.');
+      await load();
+    } catch (mutationError) {
+      console.error('Failed to apply moderation action:', mutationError);
+      feedback.error('Could not apply moderation action.');
     } finally {
       setMutating(false);
     }
@@ -205,8 +279,11 @@ export function AdminModeration() {
                   <div className="mt-3 grid gap-1 text-xs text-muted-foreground">
                     <span>Reporter: {report.reporter_id}</span>
                     <span>Created: {formatDateTime(report.created_at)}</span>
+                    <span>Reviewed: {formatDateTime(report.reviewed_at)}</span>
+                    <span>Reviewed by: {report.reviewed_by ?? '-'}</span>
                     <span>Resolved: {formatDateTime(report.resolved_at)}</span>
                     <span>Resolved by: {report.resolved_by ?? '-'}</span>
+                    <span>Resolution: {report.resolution ?? '-'}</span>
                   </div>
                 </button>
 
@@ -219,6 +296,16 @@ export function AdminModeration() {
                       rows={3}
                       className="w-full resize-none rounded-xl border bg-background px-3 py-2 text-sm outline-none"
                     />
+                    <select
+                      value={resolution}
+                      onChange={(event) => setResolution(event.target.value as AdminReportResolution)}
+                      className="w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none"
+                    >
+                      <option value="action_taken">Action taken</option>
+                      <option value="no_violation">No violation</option>
+                      <option value="duplicate">Duplicate</option>
+                      <option value="insufficient_info">Insufficient info</option>
+                    </select>
                     <div className="grid gap-2 sm:grid-cols-4">
                       <ActionButton
                         disabled={mutating}
@@ -237,6 +324,55 @@ export function AdminModeration() {
                         onClick={() => changeStatus(report, 'rejected')}
                       />
                       <ActionButton disabled={mutating} label="Save note" onClick={() => saveNote(report)} />
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {report.target_type === 'event' ? (
+                        <>
+                          <ActionButton
+                            disabled={mutating}
+                            label="Hide event"
+                            onClick={() => moderateReportTarget(report, 'hide_event')}
+                          />
+                          <ActionButton
+                            disabled={mutating}
+                            destructive
+                            label="Remove event"
+                            onClick={() => moderateReportTarget(report, 'remove_event')}
+                          />
+                          <ActionButton
+                            disabled={mutating}
+                            label="Open event"
+                            onClick={() =>
+                              onNavigate(
+                                'event-details',
+                                { eventId: report.target_id, backTarget: 'admin', adminPage: 'moderation' },
+                                'forward'
+                              )
+                            }
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <ActionButton
+                            disabled={mutating}
+                            destructive
+                            label="Ban user"
+                            onClick={() => moderateReportTarget(report, 'ban_user')}
+                          />
+                          <ActionButton
+                            disabled={mutating}
+                            label="Copy user id"
+                            onClick={() => copyTargetId(report)}
+                          />
+                        </>
+                      )}
+                      {report.target_type === 'event' && (
+                        <ActionButton
+                          disabled={mutating}
+                          label="Copy event id"
+                          onClick={() => copyTargetId(report)}
+                        />
+                      )}
                     </div>
                   </div>
                 )}

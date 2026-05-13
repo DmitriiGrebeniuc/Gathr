@@ -79,6 +79,15 @@ export async function getAdminNeedsAttention(): Promise<AdminAttentionItem[]> {
     pendingReportsResult.status === 'fulfilled' && !pendingReportsResult.value.error
       ? pendingReportsResult.value.count ?? 0
       : null;
+  const reviewingReportsResult = await supabase
+    .from('reports')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'reviewing');
+  const reviewingReports = reviewingReportsResult.error ? null : reviewingReportsResult.count ?? 0;
+  const moderatedEvents = events.filter((event) =>
+    event.moderation_status === 'hidden' || event.moderation_status === 'removed'
+  ).length;
+  const bannedUsersWithReason = users.filter((user) => user.is_banned && user.ban_reason).length;
 
   return [
     {
@@ -87,6 +96,27 @@ export async function getAdminNeedsAttention(): Promise<AdminAttentionItem[]> {
       description: 'User reports waiting for moderation review.',
       count: pendingReports,
       targetTab: 'moderation',
+    },
+    {
+      id: 'reviewing-reports',
+      label: 'Reports in review',
+      description: 'Reports already picked up but not resolved yet.',
+      count: reviewingReports,
+      targetTab: 'moderation',
+    },
+    {
+      id: 'moderated-events',
+      label: 'Hidden or removed events',
+      description: 'Events currently affected by moderation.',
+      count: moderatedEvents,
+      targetTab: 'events',
+    },
+    {
+      id: 'banned-users-with-reason',
+      label: 'Banned users with reason',
+      description: 'Blocked users that have moderation context attached.',
+      count: bannedUsersWithReason,
+      targetTab: 'users',
     },
     {
       id: 'support-new',

@@ -158,7 +158,7 @@ export function AdminScreen({
         />
       )}
       {activeTab === 'growth' && <AdminGrowth />}
-      {activeTab === 'moderation' && <AdminModeration />}
+      {activeTab === 'moderation' && <AdminModeration onNavigate={onNavigate} />}
     </AdminLayout>
   );
 }

@@ -23,13 +23,17 @@ type AdminEventRaw = {
   join_mode?: string | null;
   visibility?: string | null;
   status?: string | null;
+  moderation_status?: string | null;
+  moderation_reason?: string | null;
+  moderated_at?: string | null;
+  moderated_by?: string | null;
 };
 
 export async function getAdminEvents(): Promise<AdminEventRow[]> {
   const fullResult = await supabase
     .from('events')
     .select(
-      'id, title, description, city, location, location_lat, location_lng, date_time, created_at, creator_id, activity_type, join_mode, visibility, status'
+      'id, title, description, city, location, location_lat, location_lng, date_time, created_at, creator_id, activity_type, join_mode, visibility, status, moderation_status, moderation_reason, moderated_at, moderated_by'
     )
     .order('created_at', { ascending: false });
 
@@ -76,6 +80,10 @@ export async function getAdminEvents(): Promise<AdminEventRow[]> {
       join_mode: event.join_mode ?? null,
       visibility: event.visibility ?? null,
       status: event.status ?? null,
+      moderation_status: event.moderation_status ?? 'active',
+      moderation_reason: event.moderation_reason ?? null,
+      moderated_at: event.moderated_at ?? null,
+      moderated_by: event.moderated_by ?? null,
       participants_count: participantCountsMap[eventId] ?? null,
     };
   });
@@ -110,6 +118,54 @@ export async function deleteAdminEvent(eventId: string) {
     action: 'event.delete',
     targetType: 'event',
     targetId: eventId,
+  });
+}
+
+export async function hideAdminEvent(eventId: string, reason?: string) {
+  return updateAdminEventModeration(eventId, 'hidden', reason);
+}
+
+export async function removeAdminEvent(eventId: string, reason?: string) {
+  return updateAdminEventModeration(eventId, 'removed', reason);
+}
+
+export async function restoreAdminEvent(eventId: string) {
+  return updateAdminEventModeration(eventId, 'active', null);
+}
+
+async function updateAdminEventModeration(
+  eventId: string,
+  moderationStatus: 'active' | 'hidden' | 'removed',
+  reason?: string | null
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const payload = {
+    moderation_status: moderationStatus,
+    moderation_reason: moderationStatus === 'active' ? null : reason?.trim() || null,
+    moderated_at: moderationStatus === 'active' ? null : new Date().toISOString(),
+    moderated_by: moderationStatus === 'active' ? null : user?.id ?? null,
+    ...(moderationStatus === 'hidden' ? { visibility: 'private' } : {}),
+    ...(moderationStatus === 'removed' ? { status: 'removed', visibility: 'private' } : {}),
+  };
+
+  const { error } = await supabase.from('events').update(payload).eq('id', eventId);
+
+  if (error) {
+    throw error;
+  }
+
+  await tryLogAdminAction({
+    action:
+      moderationStatus === 'active'
+        ? 'event.restore'
+        : moderationStatus === 'hidden'
+          ? 'event.hide'
+          : 'event.remove',
+    targetType: 'event',
+    targetId: eventId,
+    newValue: payload,
   });
 }
 

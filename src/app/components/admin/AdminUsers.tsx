@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   getAdminUsers,
+  banAdminUser,
+  unbanAdminUser,
   updateAdminUserPlan,
   updateAdminUserUnlimitedAccess,
-  updateUserBanStatus,
 } from '../../lib/admin/adminUsers';
 import type { AdminAttentionTarget, AdminUserPlan, AdminUserRow } from '../../types/admin';
 import { feedback } from '../../lib/feedback';
@@ -55,7 +56,7 @@ export function AdminUsers({
   }, []);
 
   useEffect(() => {
-    if (attentionFilter === 'banned-users') {
+    if (attentionFilter === 'banned-users' || attentionFilter === 'banned-users-with-reason') {
       setStatusFilter('banned');
     }
 
@@ -105,6 +106,14 @@ export function AdminUsers({
     }
 
     const nextBanState = !user.is_banned;
+    const reason = nextBanState
+      ? window.prompt('Ban reason (visible only to admins)', user.ban_reason ?? '')?.trim()
+      : undefined;
+
+    if (nextBanState && typeof reason === 'undefined') {
+      return;
+    }
+
     const confirmed = await feedback.confirm({
       title: nextBanState ? 'Ban user?' : 'Unban user?',
       description: nextBanState
@@ -121,10 +130,22 @@ export function AdminUsers({
     setMutatingUserId(user.id);
 
     try {
-      await updateUserBanStatus(user.id, nextBanState);
+      if (nextBanState) {
+        await banAdminUser(user.id, reason);
+      } else {
+        await unbanAdminUser(user.id);
+      }
       setUsers((current) =>
         current.map((item) =>
-          item.id === user.id ? { ...item, is_banned: nextBanState } : item
+          item.id === user.id
+            ? {
+                ...item,
+                is_banned: nextBanState,
+                ban_reason: nextBanState ? reason || null : null,
+                banned_at: nextBanState ? new Date().toISOString() : null,
+                banned_by: nextBanState ? currentAdminId : null,
+              }
+            : item
         )
       );
       feedback.success(nextBanState ? 'User banned.' : 'User unbanned.');
@@ -326,6 +347,9 @@ export function AdminUsers({
             <Meta label="Plan" value={selectedUser.plan || 'free'} />
             <Meta label="Unlimited access" value={selectedUser.has_unlimited_access ? 'Yes' : 'No'} />
             <Meta label="Banned" value={selectedUser.is_banned ? 'Yes' : 'No'} />
+            <Meta label="Ban reason" value={selectedUser.ban_reason || '-'} />
+            <Meta label="Banned at" value={formatDate(selectedUser.banned_at)} />
+            <Meta label="Banned by" value={selectedUser.banned_by || '-'} />
             <Meta label="Created" value={formatDate(selectedUser.created_at)} />
             <Meta label="Updated" value={formatDate(selectedUser.updated_at)} />
             <Meta label="Legal version" value={selectedUser.accepted_legal_version || '-'} />

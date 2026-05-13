@@ -4,6 +4,9 @@ import {
   deleteAdminEvent,
   getAdminEventParticipants,
   getAdminEvents,
+  hideAdminEvent,
+  removeAdminEvent,
+  restoreAdminEvent,
   updateAdminEventVisibilityOrStatus,
 } from '../../lib/admin/adminEvents';
 import type {
@@ -76,6 +79,9 @@ export function AdminEvents({
       setTimeFilter('upcoming');
       setSearch('__without_location__');
     }
+    if (attentionFilter === 'moderated-events') {
+      setSearch('__moderated__');
+    }
   }, [attentionFilter]);
 
   const cities = useMemo(
@@ -93,6 +99,7 @@ export function AdminEvents({
     const withoutParticipants = normalizedSearch === '__without_participants__';
     const withoutCity = normalizedSearch === '__without_city__';
     const withoutLocation = normalizedSearch === '__without_location__';
+    const moderated = normalizedSearch === '__moderated__';
 
     return events
       .filter((event) => {
@@ -101,13 +108,15 @@ export function AdminEvents({
           withoutParticipants ||
           withoutCity ||
           withoutLocation ||
+          moderated ||
           [event.title, event.description, event.city].some((value) =>
             (value ?? '').toLowerCase().includes(normalizedSearch)
           );
         const matchesSpecial =
           (!withoutParticipants || event.participants_count === 0) &&
           (!withoutCity || !event.city) &&
-          (!withoutLocation || !event.location);
+          (!withoutLocation || !event.location) &&
+          (!moderated || event.moderation_status === 'hidden' || event.moderation_status === 'removed');
         const matchesTime =
           timeFilter === 'all' ||
           (timeFilter === 'past' ? isPast(event.date_time) : !isPast(event.date_time));
@@ -231,6 +240,57 @@ export function AdminEvents({
     }
   };
 
+  const handleModerationAction = async (
+    event: AdminEventRow,
+    action: 'hide' | 'remove' | 'restore'
+  ) => {
+    const reason =
+      action === 'restore'
+        ? undefined
+        : window.prompt('Moderation reason (optional)', event.moderation_reason ?? '')?.trim();
+
+    if (action !== 'restore' && typeof reason === 'undefined') {
+      return;
+    }
+
+    const confirmed = await feedback.confirm({
+      title:
+        action === 'hide'
+          ? 'Hide event?'
+          : action === 'remove'
+            ? 'Mark event removed?'
+            : 'Restore event?',
+      description: 'This action is tracked in the admin audit log.',
+      confirmLabel: action === 'restore' ? 'Restore' : 'Confirm',
+      cancelLabel: 'Cancel',
+      variant: action === 'remove' ? 'destructive' : 'default',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    setMutatingEventId(event.id);
+
+    try {
+      if (action === 'hide') {
+        await hideAdminEvent(event.id, reason);
+      } else if (action === 'remove') {
+        await removeAdminEvent(event.id, reason);
+      } else {
+        await restoreAdminEvent(event.id);
+      }
+
+      await loadEvents();
+      feedback.success('Event moderation updated.');
+    } catch (mutationError) {
+      console.error('Failed to update event moderation:', mutationError);
+      feedback.error('Could not update event moderation. RLS may block this action.');
+    } finally {
+      setMutatingEventId(null);
+    }
+  };
+
   return (
     <section className="space-y-4">
       <AdminSectionHeader
@@ -327,6 +387,7 @@ export function AdminEvents({
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <Meta label="Date" value={formatDate(event.date_time)} />
                 <Meta label="Status" value={event.status || '-'} />
+                <Meta label="Moderation" value={event.moderation_status || 'active'} />
                 <Meta label="Visibility" value={event.visibility || 'public'} />
                 <Meta
                   label="Participants"
@@ -355,6 +416,10 @@ export function AdminEvents({
             <Meta label="Join mode" value={selectedEvent.join_mode || 'open'} />
             <Meta label="Visibility" value={selectedEvent.visibility || 'public'} />
             <Meta label="Status" value={selectedEvent.status || '-'} />
+            <Meta label="Moderation status" value={selectedEvent.moderation_status || 'active'} />
+            <Meta label="Moderation reason" value={selectedEvent.moderation_reason || '-'} />
+            <Meta label="Moderated at" value={formatDate(selectedEvent.moderated_at)} />
+            <Meta label="Moderated by" value={selectedEvent.moderated_by || '-'} />
             <Meta label="Created" value={formatDate(selectedEvent.created_at)} />
             <Meta label="Participants count" value={selectedEvent.participants_count?.toString() || '-'} />
           </dl>
@@ -393,6 +458,35 @@ export function AdminEvents({
                 Go to creator in Users
               </button>
             )}
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleModerationAction(selectedEvent, 'hide')}
+                disabled={mutatingEventId === selectedEvent.id}
+                className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
+                style={{ borderColor: 'var(--accent-border)', backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
+              >
+                Hide
+              </button>
+              <button
+                type="button"
+                onClick={() => handleModerationAction(selectedEvent, 'remove')}
+                disabled={mutatingEventId === selectedEvent.id}
+                className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
+                style={{ borderColor: 'var(--destructive-border)', backgroundColor: 'var(--destructive-soft)', color: 'var(--destructive-strong)' }}
+              >
+                Remove
+              </button>
+              <button
+                type="button"
+                onClick={() => handleModerationAction(selectedEvent, 'restore')}
+                disabled={mutatingEventId === selectedEvent.id}
+                className="rounded-xl border px-3 py-3 text-sm disabled:opacity-50"
+                style={{ borderColor: 'var(--border-subtle)', backgroundColor: 'var(--surface-strong)' }}
+              >
+                Restore
+              </button>
+            </div>
             <button
               type="button"
               onClick={() => handleDeleteEvent(selectedEvent)}

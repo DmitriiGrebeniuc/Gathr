@@ -19,6 +19,9 @@ const normalizeUser = (row: AdminUserRaw): AdminUserRow => ({
   accepted_legal_version: row.accepted_legal_version ?? null,
   accepted_terms_at: row.accepted_terms_at ?? null,
   accepted_privacy_at: row.accepted_privacy_at ?? null,
+  ban_reason: row.ban_reason ?? null,
+  banned_at: row.banned_at ?? null,
+  banned_by: row.banned_by ?? null,
 });
 
 export async function getAdminUsers(): Promise<AdminUserRow[]> {
@@ -34,7 +37,7 @@ export async function getAdminUsers(): Promise<AdminUserRow[]> {
   const { data, error } = await supabase
     .from('profiles')
     .select(
-      'id, name, email, role, plan, has_unlimited_access, is_banned, created_at, updated_at, accepted_legal_version, accepted_terms_at, accepted_privacy_at'
+      'id, name, email, role, plan, has_unlimited_access, is_banned, created_at, updated_at, accepted_legal_version, accepted_terms_at, accepted_privacy_at, ban_reason, banned_at, banned_by'
     )
     .order('created_at', { ascending: false });
 
@@ -52,21 +55,61 @@ export async function updateUserBanStatus(userId: string, isBanned: boolean) {
   return updateAdminUserBanStatus(userId, isBanned);
 }
 
-export async function updateAdminUserBanStatus(userId: string, isBanned: boolean) {
-  const { error } = await supabase.rpc('admin_set_user_ban_state', {
-    target_user_id: userId,
-    new_is_banned: isBanned,
-  });
+export async function updateAdminUserBanStatus(
+  userId: string,
+  isBanned: boolean,
+  reason?: string
+) {
+  if (isBanned) {
+    return banAdminUser(userId, reason);
+  }
+
+  return unbanAdminUser(userId);
+}
+
+export async function banAdminUser(userId: string, reason?: string) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const payload = {
+    is_banned: true,
+    ban_reason: reason?.trim() || null,
+    banned_at: new Date().toISOString(),
+    banned_by: user?.id ?? null,
+  };
+
+  const { error } = await supabase.from('profiles').update(payload).eq('id', userId);
 
   if (error) {
     throw error;
   }
 
   await tryLogAdminAction({
-    action: isBanned ? 'user.ban' : 'user.unban',
+    action: 'user.ban',
     targetType: 'user',
     targetId: userId,
-    newValue: { is_banned: isBanned },
+    newValue: payload,
+  });
+}
+
+export async function unbanAdminUser(userId: string) {
+  const payload = {
+    is_banned: false,
+    ban_reason: null,
+    banned_at: null,
+    banned_by: null,
+  };
+  const { error } = await supabase.from('profiles').update(payload).eq('id', userId);
+
+  if (error) {
+    throw error;
+  }
+
+  await tryLogAdminAction({
+    action: 'user.unban',
+    targetType: 'user',
+    targetId: userId,
+    newValue: payload,
   });
 }
 

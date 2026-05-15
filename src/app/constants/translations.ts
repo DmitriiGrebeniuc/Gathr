@@ -240,6 +240,7 @@ type TranslationKey =
     | 'profile.appearance'
     | 'profile.privacySecurity'
     | 'profile.helpSupport'
+    | 'profile.contactsSupport'
     | 'profile.adminMode'
     | 'profile.logout'
     | 'profile.loggingOut'
@@ -251,6 +252,17 @@ type TranslationKey =
     | 'profile.addEmailButton'
     | 'profile.logoutFailed'
     | 'profile.logoutUnexpectedError'
+    | 'contactSupport.title'
+    | 'contactSupport.description'
+    | 'contactSupport.contactsTitle'
+    | 'contactSupport.decimatrixTitle'
+    | 'contactSupport.decimatrixDescription'
+    | 'contactSupport.decimatrixButton'
+    | 'contactSupport.supportTitle'
+    | 'contactSupport.supportDescription'
+    | 'contactSupport.paypalButton'
+    | 'contactSupport.miaTitle'
+    | 'contactSupport.miaDescription'
     | 'language.title'
     | 'language.selectedLanguage'
     | 'language.back'
@@ -874,6 +886,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.appearance': 'Appearance',
         'profile.privacySecurity': 'Privacy & Security',
         'profile.helpSupport': 'Help & Support',
+        'profile.contactsSupport': 'Contacts and support',
         'profile.adminMode': 'Admin Mode',
         'profile.logout': 'Log Out',
         'profile.loggingOut': 'Logging out...',
@@ -886,6 +899,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.addEmailButton': 'Add email now',
         'profile.logoutFailed': 'Could not log out',
         'profile.logoutUnexpectedError': 'An error occurred while logging out',
+        'contactSupport.title': 'Contacts and support',
+        'contactSupport.description':
+            'Gathr is an independent project. If you want to share feedback, discuss collaboration or support development, here are the useful links.',
+        'contactSupport.contactsTitle': 'Contacts',
+        'contactSupport.decimatrixTitle': 'DeciMatrix',
+        'contactSupport.decimatrixDescription':
+            'Another project of mine - a decision-making tool based on criteria, weights and AI analysis.',
+        'contactSupport.decimatrixButton': 'Open DeciMatrix',
+        'contactSupport.supportTitle': 'Support development',
+        'contactSupport.supportDescription':
+            'Your support helps cover hosting, domains, development tools, AI requests, testing and new features.',
+        'contactSupport.paypalButton': 'Support via PayPal',
+        'contactSupport.miaTitle': 'MIA QR',
+        'contactSupport.miaDescription':
+            'For support from Moldova, scan the QR code in your banking app.',
 
         'language.title': 'Language',
         'language.selectedLanguage': 'Selected language',
@@ -1548,6 +1576,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.language': 'Язык',
         'profile.privacySecurity': 'Конфиденциальность и безопасность',
         'profile.helpSupport': 'Помощь и поддержка',
+        'profile.contactsSupport': 'Контакты и поддержка',
         'profile.adminMode': 'Режим администратора',
         'profile.logout': 'Выйти',
         'profile.loggingOut': 'Выход...',
@@ -1560,6 +1589,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.addEmailButton': 'Добавить email',
         'profile.logoutFailed': 'Не удалось выйти из аккаунта',
         'profile.logoutUnexpectedError': 'Произошла ошибка при выходе',
+        'contactSupport.title': 'Контакты и поддержка',
+        'contactSupport.description':
+            'Gathr развивается как независимый проект. Если хочешь дать обратную связь, обсудить сотрудничество или поддержать разработку, здесь есть все полезные ссылки.',
+        'contactSupport.contactsTitle': 'Контакты',
+        'contactSupport.decimatrixTitle': 'DeciMatrix',
+        'contactSupport.decimatrixDescription':
+            'Еще один мой проект - инструмент для принятия решений через критерии, веса и AI-разбор.',
+        'contactSupport.decimatrixButton': 'Открыть DeciMatrix',
+        'contactSupport.supportTitle': 'Поддержать разработку',
+        'contactSupport.supportDescription':
+            'Поддержка помогает оплачивать хостинг, домены, инструменты разработки, AI-запросы, тестирование и новые функции.',
+        'contactSupport.paypalButton': 'Поддержать через PayPal',
+        'contactSupport.miaTitle': 'MIA QR',
+        'contactSupport.miaDescription':
+            'Для поддержки из Молдовы можно отсканировать QR-код в банковском приложении.',
 
         'language.title': 'Язык',
         'language.selectedLanguage': 'Выбранный язык',
@@ -2140,6 +2184,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.language': 'Limbă',
         'profile.privacySecurity': 'Confidențialitate și securitate',
         'profile.helpSupport': 'Ajutor și suport',
+        'profile.contactsSupport': 'Contacte și susținere',
         'profile.adminMode': 'Mod administrator',
         'profile.logout': 'Deconectare',
         'profile.loggingOut': 'Se închide sesiunea...',
@@ -2152,6 +2197,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.addEmailButton': 'Adaugă email',
         'profile.logoutFailed': 'Nu te-ai putut deconecta',
         'profile.logoutUnexpectedError': 'A apărut o eroare la deconectare',
+        'contactSupport.title': 'Contacte și susținere',
+        'contactSupport.description':
+            'Gathr este un proiect independent. Dacă vrei să trimiți feedback, să discuți o colaborare sau să susții dezvoltarea, aici sunt linkurile utile.',
+        'contactSupport.contactsTitle': 'Contacte',
+        'contactSupport.decimatrixTitle': 'DeciMatrix',
+        'contactSupport.decimatrixDescription':
+            'Un alt proiect al meu - un instrument pentru luarea deciziilor pe baza criteriilor, ponderilor și analizei AI.',
+        'contactSupport.decimatrixButton': 'Deschide DeciMatrix',
+        'contactSupport.supportTitle': 'Susține dezvoltarea',
+        'contactSupport.supportDescription':
+            'Susținerea ajută la acoperirea costurilor pentru hosting, domenii, instrumente de dezvoltare, solicitări AI, testare și funcții noi.',
+        'contactSupport.paypalButton': 'Susține prin PayPal',
+        'contactSupport.miaTitle': 'MIA QR',
+        'contactSupport.miaDescription':
+            'Pentru susținere din Moldova, scanează codul QR în aplicația bancară.',
 
         'language.title': 'Limbă',
         'language.selectedLanguage': 'Limba selectată',
@@ -2738,6 +2798,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.language': 'Мова',
         'profile.privacySecurity': 'Конфіденційність і безпека',
         'profile.helpSupport': 'Допомога та підтримка',
+        'profile.contactsSupport': 'Контакти та підтримка',
         'profile.adminMode': 'Режим адміністратора',
         'profile.logout': 'Вийти',
         'profile.loggingOut': 'Вихід...',
@@ -2750,6 +2811,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.addEmailButton': 'Додати email',
         'profile.logoutFailed': 'Не вдалося вийти з облікового запису',
         'profile.logoutUnexpectedError': 'Сталася помилка під час виходу',
+        'contactSupport.title': 'Контакти та підтримка',
+        'contactSupport.description':
+            'Gathr розвивається як незалежний проєкт. Якщо хочеш залишити відгук, обговорити співпрацю або підтримати розробку, тут є всі корисні посилання.',
+        'contactSupport.contactsTitle': 'Контакти',
+        'contactSupport.decimatrixTitle': 'DeciMatrix',
+        'contactSupport.decimatrixDescription':
+            'Ще один мій проєкт - інструмент для прийняття рішень через критерії, ваги та AI-аналіз.',
+        'contactSupport.decimatrixButton': 'Відкрити DeciMatrix',
+        'contactSupport.supportTitle': 'Підтримати розробку',
+        'contactSupport.supportDescription':
+            'Підтримка допомагає оплачувати хостинг, домени, інструменти розробки, AI-запити, тестування та нові функції.',
+        'contactSupport.paypalButton': 'Підтримати через PayPal',
+        'contactSupport.miaTitle': 'MIA QR',
+        'contactSupport.miaDescription':
+            'Для підтримки з Молдови відскануй QR-код у банківському застосунку.',
 
         'language.title': 'Мова',
         'language.selectedLanguage': 'Обрана мова',
@@ -3336,6 +3412,7 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.language': 'Sprache',
         'profile.privacySecurity': 'Datenschutz und Sicherheit',
         'profile.helpSupport': 'Hilfe und Support',
+        'profile.contactsSupport': 'Kontakte und Support',
         'profile.adminMode': 'Admin-Modus',
         'profile.logout': 'Abmelden',
         'profile.loggingOut': 'Abmeldung...',
@@ -3348,6 +3425,21 @@ const translations: Record<LanguageCode, Partial<Record<TranslationKey, string>>
         'profile.addEmailButton': 'E-Mail hinzufügen',
         'profile.logoutFailed': 'Abmeldung fehlgeschlagen',
         'profile.logoutUnexpectedError': 'Beim Abmelden ist ein Fehler aufgetreten',
+        'contactSupport.title': 'Kontakte und Support',
+        'contactSupport.description':
+            'Gathr ist ein unabhängiges Projekt. Wenn du Feedback geben, eine Zusammenarbeit besprechen oder die Entwicklung unterstützen möchtest, findest du hier alle nützlichen Links.',
+        'contactSupport.contactsTitle': 'Kontakte',
+        'contactSupport.decimatrixTitle': 'DeciMatrix',
+        'contactSupport.decimatrixDescription':
+            'Ein weiteres Projekt von mir - ein Tool für Entscheidungen mit Kriterien, Gewichtungen und KI-Analyse.',
+        'contactSupport.decimatrixButton': 'DeciMatrix öffnen',
+        'contactSupport.supportTitle': 'Entwicklung unterstützen',
+        'contactSupport.supportDescription':
+            'Deine Unterstützung hilft bei Hosting, Domains, Entwicklungstools, KI-Anfragen, Tests und neuen Funktionen.',
+        'contactSupport.paypalButton': 'Über PayPal unterstützen',
+        'contactSupport.miaTitle': 'MIA QR',
+        'contactSupport.miaDescription':
+            'Für Unterstützung aus Moldau kannst du den QR-Code in deiner Banking-App scannen.',
 
         'language.title': 'Sprache',
         'language.selectedLanguage': 'Ausgewählte Sprache',
